@@ -7,7 +7,7 @@ import ProductCard from '@/components/ProductCard'
 
 export default function CategoryPage() {
   const params = useParams()
-  const category = params?.category || ''
+  const category = Array.isArray(params?.category) ? params.category[0] : (params?.category || '')
   
   const [products, setProducts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
