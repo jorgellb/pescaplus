@@ -1,6 +1,3 @@
-import { ChatNVIDIA } from '@langchain/core/chat_models'
-import { HumanMessage, AIMessage, SystemMessage } from '@langchain/core/messages'
-
 const NVIDIA_API_KEY = process.env.NVIDIA_API_KEY
 
 export interface FishingAdvice {
@@ -16,72 +13,64 @@ export interface ProductRecommendation {
   whyRecommended: string
 }
 
-export async function getFishingAdvice(typeFishing: string, question?: string): Promise<FishingAdvice> {
-  if (!NVIDIA_API_KEY) {
-    throw new Error('NVIDIA_API_KEY not configured')
-  }
-
-  const chatModel = new ChatNVIDIA({
-    model: 'minimaxai/minimax-m3',
-    temperature: 0.7,
-    max_tokens: 1024,
-  })
-
-  const systemPrompt = `Eres un experto en pesca con amplia experiencia en diferentes tipos de pesca. Tu tarea es dar consejos de pesca y recomendar productos de AliExpress.
-
-Tipos de pesca que cubres:
-- Spinning: pesca con señuelos artificiales, cañas ligeras, carretes de 2000-4000
-- Fly fishing: pesca con mosca, cañas específicas, carretes especializados
-- Carp fishing: pesca de carpas, equipo pesado, carnadas especiales
-- Sea fishing: pesca en mar, equipo resistente a la sal
-- Baitcasting: pesca con carrete de lanzadera, técnica precisa
-
-Para cada tipo de pesca, proporciona:
-1. Consejos prácticos sobre técnica, equipo y ubicación
-2. Recomendaciones de productos específicos que se pueden encontrar en AliExpress
-3. Tips adicionales para principiantes y avanzados
-
-Sé específico y práctico en tus recomendaciones.`
-
-  const userPrompt = question 
-    ? `Tipo de pesca: ${typeFishing}\nPregunta: ${question}\n\nDame consejos y recomendaciones de productos de AliExpress.`
-    : `Dame consejos generales y recomendaciones de productos de AliExpress para pesca tipo: ${typeFishing}`
-
-  const messages = [
-    new SystemMessage(systemPrompt),
-    new HumanMessage(userPrompt),
-  ]
-
-  const response = await chatModel.invoke(messages)
-  
-  const content = response.content as string
-  
-  return {
-    advice: content,
-    recommendations: [],
-    tips: [],
-  }
-}
-
 export async function chatWithFishingExpert(messages: Array<{role: string, content: string}>): Promise<string> {
   if (!NVIDIA_API_KEY) {
     throw new Error('NVIDIA_API_KEY not configured')
   }
 
-  const chatModel = new ChatNVIDIA({
-    model: 'minimaxai/minimax-m3',
-    temperature: 0.7,
-    max_tokens: 1024,
+  const systemPrompt = `Eres un experto en pesca llamado PescaPlus. Ayudas a los pescadores con consejos, técnicas y recomendaciones de equipo. Cuando recomiendes productos, menciona que están disponibles en AliExpress.
+
+Tipos de pesca:
+- Spinning: uso de señuelos artificiales, cañas ligeras
+- Fly fishing: pesca con mosca artificial
+- Carp fishing: pesca de carpas con equipo especializado
+- Sea fishing: pesca en ambiente marino
+- Baitcasting: técnica precisa con carrete especial
+
+Sé amigable, práctico y específico en tus respuestas.`
+
+  const formattedMessages = [
+    { role: 'system', content: systemPrompt },
+    ...messages
+  ]
+
+  const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${NVIDIA_API_KEY}`,
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'minimaxai/minimax-m3',
+      messages: formattedMessages,
+      max_tokens: 1024,
+      temperature: 0.7,
+      top_p: 0.95,
+    }),
   })
 
-  const formattedMessages = messages.map(msg => {
-    if (msg.role === 'system') return new SystemMessage(msg.content)
-    if (msg.role === 'user') return new HumanMessage(msg.content)
-    if (msg.role === 'assistant') return new AIMessage(msg.content)
-    return new HumanMessage(msg.content)
-  })
+  if (!response.ok) {
+    const error = await response.text()
+    throw new Error(`NVIDIA API error: ${error}`)
+  }
 
-  const response = await chatModel.invoke(formattedMessages)
-  
-  return response.content as string
+  const data = await response.json()
+  return data.choices?.[0]?.message?.content || 'No se pudo generar una respuesta'
+}
+
+export async function getFishingAdvice(typeFishing: string, question?: string): Promise<FishingAdvice> {
+  const userPrompt = question 
+    ? `Tipo de pesca: ${typeFishing}\nPregunta: ${question}\n\nDame consejos y recomendaciones de productos de AliExpress.`
+    : `Dame consejos generales y recomendaciones de productos de AliExpress para pesca tipo: ${typeFishing}`
+
+  const response = await chatWithFishingExpert([
+    { role: 'user', content: userPrompt }
+  ])
+
+  return {
+    advice: response,
+    recommendations: [],
+    tips: [],
+  }
 }
