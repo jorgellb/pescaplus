@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  aliexpressId String  @unique
+  title       String
+  description String
+  imageUrl    String
+  price       Float
+  currency    String   @default("EUR")
+  affiliateUrl String
+  category    String
+  typeFishing String   // spinning, flyfishing, carp, etc.
+  rating      Float    @default(0)
+  reviews     Int      @default(0)
+  inStock     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([typeFishing])
+  @@index([category])
+}
+
+model FishingAdvice {
+  id          String   @id @default(cuid())
+  typeFishing String
+  title       String
+  content     String
+  tags        String[]
+  relatedProducts String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([typeFishing])
+}
+
+model ChatSession {
+  id        String   @id @default(cuid())
+  userId    String
+  messages  Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
