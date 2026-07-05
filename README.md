@@ -2,9 +2,17 @@
 
 Tienda de afiliados de pesca con integración de AliExpress y asistente IA de NVIDIA.
 
+> **Funciona sin configuración.** El catálogo de productos vive en `lib/catalog.ts`
+> y es la fuente de la verdad: puedes ejecutar `npm run dev` y navegar toda la web
+> (catálogo, categorías, fichas de producto y el asistente IA) sin base de datos ni
+> claves de API. La base de datos (Neon/Prisma) y las APIs de AliExpress y NVIDIA son
+> **mejoras opcionales** que se activan solas cuando defines sus variables de entorno,
+> y cualquier fallo degrada de forma transparente al catálogo local y al asistente
+> experto offline.
+
 ## Tecnologías
 
-- **Next.js 15** - Framework React
+- **Next.js 16** - Framework React
 - **TypeScript** - Tipado estático
 - **Prisma** - ORM para base de datos
 - **Neon PostgreSQL** - Base de datos serverless
@@ -37,13 +45,15 @@ Copia `.env.example` a `.env` y completa las variables:
 cp .env.example .env
 ```
 
-Variables necesarias:
+Variables (todas **opcionales** — la app funciona sin ellas):
 
-- `DATABASE_URL`: URL de conexión a Neon PostgreSQL
-- `ALIEXPRESS_APP_KEY`: Clave de aplicación de AliExpress
-- `ALIEXPRESS_APP_SECRET`: Secreto de aplicación de AliExpress
-- `ALIEXPRESS_APP_TOKEN`: Token de aplicación de AliExpress
-- `NVIDIA_API_KEY`: Clave de API de NVIDIA
+- `DATABASE_URL`: URL de Neon PostgreSQL. Si está, el panel persiste en la DB; si no, usa un store en memoria.
+- `ALIEXPRESS_APP_KEY` / `ALIEXPRESS_APP_SECRET` / `ALIEXPRESS_APP_TOKEN`: credenciales de afiliado.
+- `ALIEXPRESS_TRACKING_ID`: tracking id de afiliado (por defecto `pescaplus`).
+- `NVIDIA_API_KEY`: clave de NVIDIA para el asistente y la generación de fichas con IA.
+- `NVIDIA_MODEL` / `NVIDIA_BASE_URL`: modelo y endpoint (opcional; hay valores por defecto).
+- `ADMIN_PASSWORD`: contraseña del **panel de administración** (`/admin`). Sin ella, se usa
+  `pescaplus-admin` en desarrollo (con aviso). **Defínela antes de desplegar.**
 
 ### 4. Configurar AliExpress API
 
@@ -102,11 +112,14 @@ pescaplus/
 ├── components/
 │   ├── Navbar.tsx
 │   ├── ProductCard.tsx
+│   ├── ProductImage.tsx   # imagen con fallback ante 404
 │   └── Layout.tsx
 ├── lib/
-│   ├── prisma.ts
-│   ├── aliexpress.ts
-│   └── nvidia-ai.ts
+│   ├── fishing.ts         # fuente única de modalidades
+│   ├── catalog.ts         # catálogo local (fuente de la verdad)
+│   ├── prisma.ts          # DB opcional
+│   ├── aliexpress.ts      # API opcional (firmada)
+│   └── nvidia-ai.ts       # IA con fallback offline
 ├── prisma/
 │   └── schema.prisma
 ├── types/
@@ -116,14 +129,33 @@ pescaplus/
 
 ## Características
 
-- ✅ Catálogo de productos de pesca de AliExpress
-- ✅ Categorías por tipo de pesca (spinning, fly fishing, carp, sea, baitcasting)
-- ✅ Asistente IA para consejos de pesca
-- ✅ Recomendaciones de productos basadas en tipo de pesca
-- ✅ Sistema de afiliados con AliExpress
-- ✅ Diseño responsive con Tailwind CSS
-- ✅ Base de datos PostgreSQL con Prisma
-- ✅ Preparado para despliegue en Vercel
+- ✅ Catálogo curado local (`lib/catalog.ts`) — la app arranca sin servicios externos
+- ✅ Modalidades centralizadas en `lib/fishing.ts` (una sola fuente de labels/iconos/keywords)
+- ✅ Categorías por tipo de pesca con búsqueda sin acentos y ordenación (precio/valoración)
+- ✅ Asistente IA con experto offline de alta calidad como fallback
+- ✅ Integración AliExpress opcional con **firma TOP correcta** (HMAC-SHA256)
+- ✅ Validación de entradas con Zod en las rutas API
+- ✅ Render de chat seguro (HTML escapado, sin XSS) e imágenes con fallback
+- ✅ Recomendaciones de productos relacionados por modalidad
+- ✅ Diseño responsive con Tailwind CSS y persistencia del chat en el navegador
+- ✅ **Panel de administración** (`/admin`) con login, CRUD de productos y generación con IA
+- ✅ Base de datos PostgreSQL con Prisma (opcional) y despliegue en Vercel
+
+## Panel de administración (`/admin`)
+
+Backend intuitivo protegido por contraseña (`ADMIN_PASSWORD`) para gestionar la tienda:
+
+- **Productos**: dashboard con métricas (total, modalidades, valoración y precio medios) y una
+  tabla para **crear, editar y eliminar** productos.
+- **Creación manual**: formulario completo (título, modalidad, precio, moneda, valoración,
+  reseñas, imagen, enlace de afiliado, descripción, stock) con vista previa de imagen.
+- **Creación con IA** ✨: describe el producto en una frase y la IA (NVIDIA, con *fallback*
+  offline) rellena toda la ficha; luego la revisas y ajustas antes de guardar.
+- **Configuración**: estado de las integraciones (DB, AliExpress, NVIDIA, contraseña), valores
+  por defecto (moneda, modalidad, nº por página) y mantenimiento del catálogo (exportar a JSON,
+  restablecer al catálogo original).
+- **Persistencia**: usa la base de datos cuando `DATABASE_URL` está configurada; si no, un store
+  en memoria (ideal para demos; se reinicia con el servidor).
 
 ## Scripts disponibles
 
