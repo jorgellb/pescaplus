@@ -1,3 +1,10 @@
+import type { FishingTypeId } from '@/lib/fishing'
+
+/**
+ * Canonical product shape used across the UI and API responses. It intentionally
+ * omits DB-only bookkeeping (createdAt/updatedAt) so the same type describes both
+ * static catalog entries and rows fetched from Postgres.
+ */
 export interface Product {
   id: string
   aliexpressId: string
@@ -8,23 +15,10 @@ export interface Product {
   currency: string
   affiliateUrl: string
   category: string
-  typeFishing: string
+  typeFishing: FishingTypeId | string
   rating: number
   reviews: number
   inStock: boolean
-  createdAt: Date
-  updatedAt: Date
-}
-
-export interface FishingAdvice {
-  id: string
-  typeFishing: string
-  title: string
-  content: string
-  tags: string[]
-  relatedProducts: string[]
-  createdAt: Date
-  updatedAt: Date
 }
 
 export interface ChatMessage {
@@ -32,10 +26,21 @@ export interface ChatMessage {
   content: string
 }
 
-export interface ChatSession {
-  id: string
-  userId: string
-  messages: ChatMessage[]
-  createdAt: Date
-  updatedAt: Date
+export interface ChatApiResponse {
+  success: boolean
+  response?: string
+  error?: string
+}
+
+export interface ProductsApiResponse {
+  success: boolean
+  products?: Product[]
+  source?: 'catalog' | 'aliexpress' | 'database'
+  error?: string
+}
+
+export interface ProductApiResponse {
+  success: boolean
+  product?: Product
+  error?: string
 }

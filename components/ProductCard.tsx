@@ -1,16 +1,12 @@
 import Link from 'next/link'
+import type { Product } from '@/types'
+import { fishingLabel } from '@/lib/fishing'
+import ProductImage from './ProductImage'
 
-interface ProductCardProps {
-  id: string
-  title: string
-  imageUrl: string
-  price: number
-  currency: string
-  affiliateUrl: string
-  rating: number
-  reviews: number
-  typeFishing: string
-}
+type ProductCardProps = Pick<
+  Product,
+  'id' | 'title' | 'imageUrl' | 'price' | 'currency' | 'affiliateUrl' | 'rating' | 'reviews' | 'typeFishing'
+>
 
 export default function ProductCard({
   id,
@@ -21,42 +17,57 @@ export default function ProductCard({
   affiliateUrl,
   rating,
   reviews,
-  typeFishing
+  typeFishing,
 }: ProductCardProps) {
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
-      <Link href={`/products/${id}`}>
-        <img
-          src={imageUrl}
-          alt={title}
-          className="w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
-        />
-      </Link>
-      <div className="p-4">
-        <span className="text-xs font-semibold text-blue-600 uppercase">
-          {typeFishing}
-        </span>
+    <div className="group relative rounded-xl overflow-hidden bg-slate-900/40 border border-white/5 hover:border-cyan-500/30 shadow-lg hover:shadow-cyan-500/5 hover:-translate-y-1 transition-all duration-300 flex flex-col h-full backdrop-blur-md">
+      {/* Product Image */}
+      <div className="relative aspect-[4/3] overflow-hidden bg-slate-950">
         <Link href={`/products/${id}`}>
-          <h3 className="mt-1 text-lg font-semibold text-gray-900 hover:text-blue-600 transition line-clamp-2">
+          <ProductImage
+            src={imageUrl}
+            alt={title}
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+        </Link>
+        <span className="absolute top-3 left-3 z-10 bg-slate-950/80 backdrop-blur-md text-[10px] font-bold text-cyan-400 px-2.5 py-1 rounded-full border border-cyan-500/20 uppercase tracking-wider">
+          {fishingLabel(typeFishing)}
+        </span>
+      </div>
+
+      {/* Product Details */}
+      <div className="p-5 flex flex-col flex-1">
+        <Link href={`/products/${id}`} className="block flex-1">
+          <h3 className="text-base font-bold text-slate-100 hover:text-cyan-400 line-clamp-2 transition-colors duration-200 leading-snug">
             {title}
           </h3>
         </Link>
-        <div className="mt-2 flex items-center">
-          <span className="text-yellow-500">★</span>
-          <span className="ml-1 text-sm text-gray-600">{rating.toFixed(1)}</span>
-          <span className="ml-2 text-sm text-gray-500">({reviews} reseñas)</span>
+
+        {/* Rating and Reviews */}
+        <div className="mt-3 flex items-center gap-1">
+          <span className="text-amber-400 text-sm">★</span>
+          <span className="text-sm font-semibold text-slate-200">{rating.toFixed(1)}</span>
+          <span className="text-xs text-slate-400">({reviews.toLocaleString('es-ES')} reseñas)</span>
         </div>
-        <div className="mt-3 flex items-center justify-between">
-          <span className="text-2xl font-bold text-gray-900">
-            {price} {currency}
-          </span>
+
+        {/* Price and Action */}
+        <div className="mt-5 flex items-center justify-between pt-4 border-t border-white/5">
+          <div className="flex flex-col">
+            <span className="text-[10px] text-slate-400 uppercase tracking-widest">Precio</span>
+            <span className="text-xl font-extrabold text-cyan-300">
+              {price.toFixed(2)} <span className="text-xs font-semibold text-slate-400">{currency}</span>
+            </span>
+          </div>
+
           <a
             href={affiliateUrl}
             target="_blank"
-            rel="noopener noreferrer"
-            className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition"
+            rel="noopener noreferrer sponsored"
+            className="relative inline-flex items-center justify-center p-0.5 overflow-hidden text-xs font-bold text-white rounded-lg group/btn bg-gradient-to-br from-green-400 to-emerald-600 focus:ring-4 focus:outline-none focus:ring-green-800/50 transition-all shadow-md shadow-green-500/10 hover:shadow-green-500/20 hover:scale-[1.03] active:scale-[0.97]"
           >
-            Ver en AliExpress
+            <span className="relative px-3 py-2 transition-all ease-in duration-75 bg-slate-900 rounded-md group-hover/btn:bg-transparent">
+              Ver en AliExpress
+            </span>
           </a>
         </div>
       </div>

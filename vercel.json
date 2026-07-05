@@ -1,7 +1,7 @@
 {
   "build": {
     "env": {
-      "DATABASE_URL": "postgresql://user:password@host.neon.tech/dbname?sslmode=require",
+      "DATABASE_URL": "${DATABASE_URL}",
       "ALIEXPRESS_APP_KEY": "${ALIEXPRESS_APP_KEY}",
       "ALIEXPRESS_APP_SECRET": "${ALIEXPRESS_APP_SECRET}",
       "ALIEXPRESS_APP_TOKEN": "${ALIEXPRESS_APP_TOKEN}",
