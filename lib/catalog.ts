@@ -9,7 +9,10 @@ import type { Product } from '@/types'
  * Each entry has a stable, human-readable `id` (used in /products/[id] URLs) so
  * links survive restarts and don't depend on database-generated identifiers.
  */
-export const CATALOG: readonly Product[] = [
+type CatalogSeed = Omit<Product, 'images' | 'videoUrl' | 'seoDescription' | 'aiOptimized'> &
+  Partial<Pick<Product, 'images' | 'videoUrl' | 'seoDescription' | 'aiOptimized'>>
+
+const CATALOG_SEED: CatalogSeed[] = [
   {
     id: 'spinning-reel-kastking-sharky-iii',
     aliexpressId: 'mock_spinning_reel_1',
@@ -299,6 +302,19 @@ export const CATALOG: readonly Product[] = [
     inStock: true,
   },
 ]
+
+/** Fill media/SEO defaults so catalog seeds satisfy the full Product shape. */
+export function withProductDefaults(p: CatalogSeed): Product {
+  return {
+    ...p,
+    images: p.images?.length ? p.images : [p.imageUrl].filter(Boolean),
+    videoUrl: p.videoUrl ?? '',
+    seoDescription: p.seoDescription || p.description.slice(0, 160),
+    aiOptimized: p.aiOptimized ?? false,
+  }
+}
+
+export const CATALOG: readonly Product[] = CATALOG_SEED.map(withProductDefaults)
 
 function normalizeText(value: string): string {
   return value

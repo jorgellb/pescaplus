@@ -315,3 +315,116 @@ Responde ÚNICAMENTE con un objeto JSON válido, sin texto adicional, con esta f
     return offlineProductDraft(prompt, typeFishing, currency)
   }
 }
+
+// ---------------------------------------------------------------------------
+// AI SEO rewriting (used by the AliExpress importer)
+// ---------------------------------------------------------------------------
+
+export interface SeoListing {
+  /** SEO product name (original copy, not the AliExpress title). */
+  title: string
+  /** Rich marketing description (2-4 sentences). */
+  description: string
+  /** Meta description (~155 chars). */
+  seoDescription: string
+  generatedBy: 'nvidia' | 'offline'
+}
+
+/** Strip AliExpress promo noise from a raw title so we never reuse their copy verbatim. */
+function cleanTitle(raw: string): string {
+  return raw
+    .replace(/[|•·‖]+.*$/g, ' ')
+    .replace(/\b(hot|sale|new|free shipping|envío gratis|oferta|promoci[oó]n|20\d\d|dropship\w*)\b/gi, ' ')
+    .replace(/[!¡]+/g, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+}
+
+function offlineSeoListing(
+  originalTitle: string,
+  typeFishing: string,
+  price?: number,
+  currency = 'EUR',
+): SeoListing {
+  const label = fishingLabel(typeFishing)
+  const type = getFishingType(typeFishing)
+  const core = cleanTitle(originalTitle) || `Equipo de ${label}`
+  const short = core.length > 48 ? core.slice(0, 48).replace(/\s\S*$/, '') : core
+  const title = `${short} · ${label}`.slice(0, 70)
+  const description =
+    `${short} ideal para la pesca al ${label.toLowerCase()}. ${type?.tagline ?? ''} ` +
+    `Elegido por su relación calidad-precio y las valoraciones de pescadores reales, ` +
+    `es una opción fiable para mejorar tus jornadas. Envío internacional disponible.`.replace(/\s{2,}/g, ' ').trim()
+  const seoDescription =
+    `${short} para ${label}. Comprar al mejor precio${
+      price ? ` desde ${price.toFixed(2)} ${currency}` : ''
+    } con envío rápido. Consejos y guía de compra en PescaPlus.`.slice(0, 160)
+  return { title, description, seoDescription, generatedBy: 'offline' }
+}
+
+/**
+ * Rewrite an AliExpress product into original, SEO-optimized Spanish copy.
+ * Never reuses the marketplace text verbatim. Uses NVIDIA when configured,
+ * otherwise a deterministic offline rewrite. Never throws.
+ */
+export async function generateSeoListing(input: {
+  originalTitle: string
+  typeFishing: string
+  price?: number
+  currency?: string
+}): Promise<SeoListing> {
+  const { originalTitle, typeFishing, price, currency = 'EUR' } = input
+  if (!isApiConfigured()) {
+    return offlineSeoListing(originalTitle, typeFishing, price, currency)
+  }
+
+  const instruction = `Eres un copywriter SEO para una tienda de pesca. A partir de este producto de AliExpress, redacta una ficha ORIGINAL en español (no copies el texto de AliExpress).
+Título original (solo como referencia): "${cleanTitle(originalTitle)}"
+Modalidad: ${fishingLabel(typeFishing)} (${typeFishing}). Precio aprox: ${price ?? '—'} ${currency}.
+Devuelve SOLO JSON válido:
+{"title": string (máx 70 caracteres, atractivo, incluye la modalidad y palabras clave de pesca),
+ "description": string (3-4 frases, beneficios y usos, tono experto y persuasivo),
+ "seoDescription": string (meta description de 140-160 caracteres con llamada a la acción)}`
+
+  try {
+    const response = await fetch(`${NVIDIA_BASE_URL}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${NVIDIA_API_KEY}`,
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: NVIDIA_MODEL,
+        messages: [
+          { role: 'system', content: 'Redactas fichas de producto SEO en español y respondes solo con JSON válido.' },
+          { role: 'user', content: instruction },
+        ],
+        max_tokens: 700,
+        temperature: 0.7,
+        top_p: 0.9,
+      }),
+    })
+
+    if (!response.ok) {
+      console.error(`NVIDIA SEO error ${response.status}`)
+      return offlineSeoListing(originalTitle, typeFishing, price, currency)
+    }
+
+    const data = await response.json()
+    const parsed = extractJson(data.choices?.[0]?.message?.content ?? '')
+    const fallback = offlineSeoListing(originalTitle, typeFishing, price, currency)
+    if (!parsed) return fallback
+
+    const str = (v: unknown, f: string) => (typeof v === 'string' && v.trim() ? v.trim() : f)
+    return {
+      title: str(parsed.title, fallback.title).slice(0, 90),
+      description: str(parsed.description, fallback.description).slice(0, 1200),
+      seoDescription: str(parsed.seoDescription, fallback.seoDescription).slice(0, 165),
+      generatedBy: 'nvidia',
+    }
+  } catch (error) {
+    console.error('Error generating SEO listing:', error)
+    return offlineSeoListing(originalTitle, typeFishing, price, currency)
+  }
+}

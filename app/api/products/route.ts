@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import type { Product, ProductsApiResponse } from '@/types'
-import { listProducts, createProduct } from '@/lib/products-store'
-import { fishingKeyword, isFishingTypeId } from '@/lib/fishing'
-import { isAliExpressConfigured, searchAliExpressProducts } from '@/lib/aliexpress'
+import { listProducts, createProduct, activeBackend } from '@/lib/products-store'
+import { isFishingTypeId } from '@/lib/fishing'
 import { isRequestAuthenticated } from '@/lib/admin-auth'
 import { getSettings } from '@/lib/settings-store'
 
 /**
- * Product listing. Reads from the mutable store (so admin edits show up here),
- * always available thanks to the in-memory fallback. When AliExpress credentials
- * are present, live results replace the store list as a best-effort enhancement.
+ * Public storefront listing. Reads from the curated store (catalog + products
+ * imported/optimized by the AI agent). AliExpress is NOT queried here — it is an
+ * import source used only in the admin backend, so the storefront always shows
+ * our own SEO-optimized fichas rather than raw marketplace results.
  */
 export async function GET(request: NextRequest): Promise<NextResponse<ProductsApiResponse>> {
   try {
@@ -19,17 +19,12 @@ export async function GET(request: NextRequest): Promise<NextResponse<ProductsAp
     const search = searchParams.get('search')?.trim() || undefined
     const scopedType = typeParam && isFishingTypeId(typeParam) ? typeParam : undefined
 
-    let products: Product[] = await listProducts({ search, typeFishing: scopedType ?? typeParam })
-    let source: ProductsApiResponse['source'] = 'catalog'
-
-    if (isAliExpressConfigured()) {
-      const keyword = search ?? fishingKeyword(typeParam ?? '')
-      const live = await searchAliExpressProducts(keyword, typeParam ?? 'general')
-      if (live.length > 0) {
-        products = live
-        source = 'aliexpress'
-      }
-    }
+    const products: Product[] = await listProducts({
+      search,
+      typeFishing: scopedType ?? typeParam,
+    })
+    const source: ProductsApiResponse['source'] =
+      activeBackend() === 'database' ? 'database' : 'catalog'
 
     return NextResponse.json({ success: true, products, source })
   } catch (error) {
@@ -42,12 +37,15 @@ export async function GET(request: NextRequest): Promise<NextResponse<ProductsAp
 }
 
 const productInputSchema = z.object({
-  title: z.string().min(2).max(140),
-  description: z.string().min(0).max(1200),
-  imageUrl: z.string().max(500).optional().default(''),
+  title: z.string().min(2).max(200),
+  description: z.string().min(0).max(2000),
+  seoDescription: z.string().max(200).optional(),
+  imageUrl: z.string().max(1200).optional().default(''),
+  images: z.array(z.string().max(1200)).max(12).optional(),
+  videoUrl: z.string().max(1200).optional(),
   price: z.number().min(0).max(100000),
   currency: z.string().max(8).optional(),
-  affiliateUrl: z.string().max(500).optional().default(''),
+  affiliateUrl: z.string().max(2200).optional().default(''),
   category: z.string().max(60).optional(),
   typeFishing: z.string().min(1).max(40),
   rating: z.number().min(0).max(5).optional(),

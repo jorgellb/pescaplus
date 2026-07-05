@@ -1,18 +1,23 @@
 import Link from 'next/link'
 import Layout from '@/components/Layout'
 import { FISHING_TYPES } from '@/lib/fishing'
+import HeroArt from '@/components/graphics/HeroArt'
+import OceanWaves from '@/components/graphics/OceanWaves'
 
 export default function Home() {
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-32 md:py-40 bg-gradient-to-b from-cyan-950/20 via-slate-950 to-[#060b13]">
+      <section className="relative overflow-hidden py-32 md:py-44 bg-gradient-to-b from-cyan-950/30 via-slate-950 to-[#060b13]">
         {/* Background glow blobs */}
         <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-cyan-600/5 rounded-full blur-[120px] -z-10 animate-pulse-slow" />
         <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-teal-500/5 rounded-full blur-[100px] -z-10 animate-pulse-slow" style={{ animationDelay: '2s' }} />
-        
+
         {/* Grid pattern overlay */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(255,255,255,0))] -z-10" />
+
+        {/* Animated underwater scene */}
+        <HeroArt />
 
         <div className="max-w-7xl mx-auto px-4 text-center space-y-8">
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 tracking-wide uppercase">
@@ -42,6 +47,9 @@ export default function Home() {
             </Link>
           </div>
         </div>
+
+        {/* Wave divider */}
+        <OceanWaves className="absolute bottom-0 left-0 w-full h-20 md:h-28" />
       </section>
 
       {/* Categories Section */}

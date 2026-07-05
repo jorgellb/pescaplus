@@ -19,8 +19,11 @@ type FormState = {
   rating: string
   reviews: string
   imageUrl: string
+  images: string
+  videoUrl: string
   affiliateUrl: string
   description: string
+  seoDescription: string
   inStock: boolean
 }
 
@@ -33,8 +36,11 @@ function toForm(p: Product | null): FormState {
     rating: p ? String(p.rating) : '4.6',
     reviews: p ? String(p.reviews) : '0',
     imageUrl: p?.imageUrl ?? '',
+    images: (p?.images ?? []).join('\n'),
+    videoUrl: p?.videoUrl ?? '',
     affiliateUrl: p?.affiliateUrl ?? 'https://www.aliexpress.com',
     description: p?.description ?? '',
+    seoDescription: p?.seoDescription ?? '',
     inStock: p?.inStock ?? true,
   }
 }
@@ -110,10 +116,17 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
     }
 
     setSaving(true)
+    const images = form.images
+      .split(/[\n,]/)
+      .map((s) => s.trim())
+      .filter(Boolean)
     const payload = {
       title: form.title.trim(),
       description: form.description.trim(),
-      imageUrl: form.imageUrl.trim(),
+      seoDescription: form.seoDescription.trim(),
+      imageUrl: form.imageUrl.trim() || images[0] || '',
+      images,
+      videoUrl: form.videoUrl.trim(),
       price,
       currency: form.currency.trim() || 'EUR',
       affiliateUrl: form.affiliateUrl.trim(),
@@ -282,14 +295,33 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
             </div>
           </div>
 
-          {/* URLs */}
+          {/* URLs & media */}
           <div className="grid grid-cols-1 gap-3">
             <div className="space-y-1">
-              <label className={labelCls}>URL de imagen</label>
+              <label className={labelCls}>Imagen principal (URL)</label>
               <input
                 value={form.imageUrl}
                 onChange={(e) => set('imageUrl', e.target.value)}
                 placeholder="https://…"
+                className={field}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className={labelCls}>Galería de imágenes (una URL por línea)</label>
+              <textarea
+                value={form.images}
+                onChange={(e) => set('images', e.target.value)}
+                rows={3}
+                placeholder={'https://…jpg\nhttps://…jpg'}
+                className={`${field} resize-y font-mono text-xs`}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className={labelCls}>Vídeo del producto (URL mp4, opcional)</label>
+              <input
+                value={form.videoUrl}
+                onChange={(e) => set('videoUrl', e.target.value)}
+                placeholder="https://…mp4"
                 className={field}
               />
             </div>
@@ -310,6 +342,18 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
                 rows={4}
                 className={`${field} resize-y`}
               />
+            </div>
+            <div className="space-y-1">
+              <label className={labelCls}>Meta descripción SEO (~155 caracteres)</label>
+              <textarea
+                value={form.seoDescription}
+                onChange={(e) => set('seoDescription', e.target.value)}
+                rows={2}
+                maxLength={165}
+                placeholder="Se genera con IA al importar; edítala aquí…"
+                className={`${field} resize-y`}
+              />
+              <p className="text-[10px] text-slate-500 text-right">{form.seoDescription.length}/160</p>
             </div>
           </div>
 

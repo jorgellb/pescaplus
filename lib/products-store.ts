@@ -19,6 +19,8 @@ export type ProductInput = {
   title: string
   description: string
   imageUrl: string
+  images?: string[]
+  videoUrl?: string
   price: number
   currency?: string
   affiliateUrl: string
@@ -27,6 +29,8 @@ export type ProductInput = {
   rating?: number
   reviews?: number
   inStock?: boolean
+  seoDescription?: string
+  aiOptimized?: boolean
   aliexpressId?: string
 }
 
@@ -69,12 +73,21 @@ function uniqueId(base: string, exists: (id: string) => boolean): string {
 }
 
 function applyInput(input: ProductInput, id: string): Product {
+  const imageUrl = input.imageUrl.trim()
+  const images = (input.images ?? [])
+    .map((s) => s.trim())
+    .filter(Boolean)
+  // Ensure the primary image is first and images are unique.
+  const gallery = Array.from(new Set([imageUrl, ...images].filter(Boolean)))
+  const description = input.description.trim()
   return {
     id,
     aliexpressId: input.aliexpressId?.trim() || id,
     title: input.title.trim(),
-    description: input.description.trim(),
-    imageUrl: input.imageUrl.trim(),
+    description,
+    imageUrl,
+    images: gallery,
+    videoUrl: input.videoUrl?.trim() || '',
     price: Number(input.price) || 0,
     currency: input.currency?.trim() || 'EUR',
     affiliateUrl: input.affiliateUrl.trim(),
@@ -83,6 +96,8 @@ function applyInput(input: ProductInput, id: string): Product {
     rating: input.rating ?? 0,
     reviews: input.reviews ?? 0,
     inStock: input.inStock ?? true,
+    seoDescription: input.seoDescription?.trim() || description.slice(0, 160),
+    aiOptimized: input.aiOptimized ?? false,
   }
 }
 
@@ -117,6 +132,8 @@ function toProduct(row: any): Product {
     title: row.title,
     description: row.description,
     imageUrl: row.imageUrl,
+    images: row.images?.length ? row.images : [row.imageUrl].filter(Boolean),
+    videoUrl: row.videoUrl ?? '',
     price: row.price,
     currency: row.currency,
     affiliateUrl: row.affiliateUrl,
@@ -125,6 +142,8 @@ function toProduct(row: any): Product {
     rating: row.rating,
     reviews: row.reviews,
     inStock: row.inStock,
+    seoDescription: row.seoDescription || row.description?.slice(0, 160) || '',
+    aiOptimized: row.aiOptimized ?? false,
   }
 }
 
