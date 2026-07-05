@@ -9,7 +9,7 @@ type Message = { role: 'user' | 'assistant'; content: string }
 
 const STORAGE_KEY = 'pescaplus-chat-v1'
 
-const ADVICE_TYPES = FISHING_TYPES.filter((t) => t.id !== 'accessories')
+const ADVICE_TYPES = FISHING_TYPES.filter((t) => t.id !== 'accesorios')
 
 const suggestedQuestions = [
   '¿Qué equipo necesito para empezar en spinning?',

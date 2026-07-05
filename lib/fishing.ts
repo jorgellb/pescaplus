@@ -8,12 +8,13 @@
  */
 
 export const FISHING_TYPE_IDS = [
+  'canas',
+  'carretes',
+  'senuelos',
   'spinning',
-  'flyfishing',
-  'carp',
-  'sea',
-  'baitcasting',
-  'accessories',
+  'carpfishing',
+  'mar',
+  'accesorios',
 ] as const
 
 export type FishingTypeId = (typeof FISHING_TYPE_IDS)[number]
@@ -38,69 +39,80 @@ export interface FishingType {
 
 export const FISHING_TYPES: readonly FishingType[] = [
   {
-    id: 'spinning',
-    name: 'Spinning',
+    id: 'canas',
+    name: 'Cañas',
     icon: '🎣',
     description:
-      'Pesca deportiva dinámica usando señuelos artificiales. Cañas sensibles y recogidas activas.',
-    tagline: 'Cañas ligeras, carretes veloces y señuelos artificiales activos.',
+      'Cañas de carbono para spinning, surfcasting, carpa y todas las modalidades.',
+    tagline: 'Cañas de carbono ligeras, telescópicas y de tramos para cada técnica.',
     color: 'from-blue-500/20 to-cyan-500/20',
-    keyword: 'spinning fishing rod reel',
+    keyword: 'fishing rod carbon',
     featured: true,
   },
   {
-    id: 'flyfishing',
-    name: 'Fly Fishing',
-    icon: '🪰',
+    id: 'carretes',
+    name: 'Carretes',
+    icon: '🌀',
     description:
-      'Pesca con mosca artificial. Todo sobre el arte del lanzado y derivas naturales.',
-    tagline: 'El arte de la pesca a látigo: moscas, líneas pesadas y ninfas.',
+      'Carretes frontales, de baitcasting y de surfcasting con freno potente.',
+    tagline: 'Carretes frontales, baitcasting y de surfcasting anticorrosión.',
+    color: 'from-cyan-500/20 to-teal-500/20',
+    keyword: 'fishing reel spinning',
+    featured: true,
+  },
+  {
+    id: 'senuelos',
+    name: 'Señuelos',
+    icon: '🐠',
+    description:
+      'Vinilos, minnows, cucharillas y kits de cebos artificiales para depredadores.',
+    tagline: 'Vinilos, minnows, cucharillas y cebos artificiales.',
     color: 'from-emerald-500/20 to-teal-500/20',
-    keyword: 'fly fishing rod reel set',
+    keyword: 'fishing lure bait set',
     featured: true,
   },
   {
-    id: 'carp',
-    name: 'Carp Fishing',
-    icon: '🐟',
-    description:
-      'Pesca de grandes carpas con boiles, montajes hair rig y sistemas de alarma.',
-    tagline: 'Material pesado, alarmas electrónicas y montajes de fondear.',
-    color: 'from-amber-500/20 to-orange-500/20',
-    keyword: 'carp fishing gear accessories',
-    featured: true,
-  },
-  {
-    id: 'sea',
-    name: 'Sea Fishing',
-    icon: '🌊',
-    description:
-      'Surfcasting, rockfishing o pesca desde embarcación. Equipos resistentes a la salinidad.',
-    tagline: 'Aparejos reforzados anticorrosión para surfcasting y pesca costera.',
-    color: 'from-indigo-500/20 to-blue-500/20',
-    keyword: 'sea fishing rod reel',
-    featured: true,
-  },
-  {
-    id: 'baitcasting',
-    name: 'Baitcasting',
+    id: 'spinning',
+    name: 'Spinning',
     icon: '🎯',
     description:
-      'Técnica de precisión para lances quirúrgicos con carrete de tambor giratorio.',
-    tagline: 'Carretes de bobina giratoria para lanzamientos rápidos y precisos.',
+      'Equipos de lanzado de señuelos: combos de caña y carrete ligeros y sensibles.',
+    tagline: 'Cañas y carretes ligeros para el lanzado de señuelos artificiales.',
     color: 'from-violet-500/20 to-purple-500/20',
-    keyword: 'baitcasting reel fishing',
-    featured: false,
+    keyword: 'spinning fishing rod reel combo',
+    featured: true,
   },
   {
-    id: 'accessories',
+    id: 'carpfishing',
+    name: 'Carpfishing',
+    icon: '🐟',
+    description:
+      'Pesca de grandes carpas: alarmas, cañas potentes, montajes hair rig y cebado.',
+    tagline: 'Alarmas, cañas de carpa, montajes y sistemas de cebado.',
+    color: 'from-amber-500/20 to-orange-500/20',
+    keyword: 'carp fishing gear',
+    featured: true,
+  },
+  {
+    id: 'mar',
+    name: 'Mar',
+    icon: '🌊',
+    description:
+      'Surfcasting y pesca costera con equipos reforzados resistentes a la salinidad.',
+    tagline: 'Aparejos anticorrosión para surfcasting y pesca costera.',
+    color: 'from-indigo-500/20 to-blue-500/20',
+    keyword: 'sea fishing surfcasting saltwater',
+    featured: true,
+  },
+  {
+    id: 'accesorios',
     name: 'Accesorios',
     icon: '🧰',
     description:
-      'Alicates, básculas, mochilas y complementos tácticos para cualquier modalidad.',
-    tagline: 'Alicates de corte, básculas de precisión, bolsas y complementos tácticos.',
+      'Alicates, básculas, cajas, mochilas y complementos tácticos para cualquier salida.',
+    tagline: 'Alicates, básculas de precisión, cajas, mochilas y complementos.',
     color: 'from-slate-500/20 to-cyan-500/20',
-    keyword: 'fishing accessories tackle',
+    keyword: 'fishing accessories tackle tools',
     featured: false,
   },
 ]
