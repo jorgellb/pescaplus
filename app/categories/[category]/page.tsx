@@ -6,6 +6,7 @@ import Layout from '@/components/Layout'
 import ProductCard from '@/components/ProductCard'
 import type { Product } from '@/types'
 import { getFishingType } from '@/lib/fishing'
+import CategoryIcon from '@/components/graphics/CategoryIcon'
 
 type SortKey = 'relevance' | 'price-asc' | 'price-desc' | 'rating'
 
@@ -88,14 +89,21 @@ export default function CategoryPage() {
       <section className="relative overflow-hidden py-16 bg-gradient-to-r from-slate-900 via-[#0B1528] to-slate-900 border-b border-white/5">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,rgba(14,116,144,0.1),rgba(255,255,255,0))]" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-3">
-          <span className="text-xs font-bold uppercase tracking-widest text-cyan-400">
-            {fishingType ? `${fishingType.icon} Categoría` : 'Categoría'}
-          </span>
-          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-none">
-            {categoryName}
-          </h1>
-          <p className="text-slate-400 text-sm md:text-base max-w-xl">{categoryDescription}</p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="flex items-center gap-4">
+            {fishingType && (
+              <span className="inline-flex flex-shrink-0 text-cyan-400 p-3 rounded-2xl bg-cyan-500/5 border border-cyan-500/15">
+                <CategoryIcon id={fishingType.id} className="w-9 h-9" strokeWidth={1.4} />
+              </span>
+            )}
+            <div className="space-y-1">
+              <span className="text-xs font-bold uppercase tracking-widest text-cyan-400">Categoría</span>
+              <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-none">
+                {categoryName}
+              </h1>
+            </div>
+          </div>
+          <p className="text-slate-400 text-sm md:text-base max-w-xl mt-4">{categoryDescription}</p>
         </div>
       </section>
 

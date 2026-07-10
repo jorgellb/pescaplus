@@ -3,6 +3,7 @@ import Layout from '@/components/Layout'
 import { FISHING_TYPES } from '@/lib/fishing'
 import HeroArt from '@/components/graphics/HeroArt'
 import OceanWaves from '@/components/graphics/OceanWaves'
+import CategoryIcon from '@/components/graphics/CategoryIcon'
 
 export default function Home() {
   return (
@@ -74,8 +75,8 @@ export default function Home() {
               <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${type.color} rounded-full blur-2xl -z-10 group-hover:opacity-150 transition-opacity`} />
               
               <div>
-                <span className="inline-block text-4xl p-3 bg-slate-950/80 rounded-xl mb-6 shadow-inner border border-white/5">
-                  {type.icon}
+                <span className="inline-flex text-cyan-400 p-3.5 bg-slate-950/80 rounded-xl mb-6 shadow-inner border border-white/5 group-hover:text-cyan-300 group-hover:border-cyan-500/20 transition-colors">
+                  <CategoryIcon id={type.id} className="w-8 h-8" strokeWidth={1.4} />
                 </span>
                 <h3 className="text-xl font-bold text-slate-100 group-hover:text-cyan-400 transition-colors duration-200 mb-3">
                   {type.name}

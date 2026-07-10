@@ -18,19 +18,31 @@ const TRACKING_ID = process.env.ALIEXPRESS_TRACKING_ID ?? 'pescaplus'
 const GATEWAY = process.env.ALIEXPRESS_GATEWAY ?? 'https://api-sg.aliexpress.com/sync'
 const NVIDIA_API_KEY = process.env.NVIDIA_API_KEY
 const NVIDIA_BASE_URL = process.env.NVIDIA_BASE_URL ?? 'https://integrate.api.nvidia.com/v1'
-const NVIDIA_MODEL = process.env.NVIDIA_MODEL ?? 'meta/llama-3.3-70b-instruct'
+const DEFAULT_MODELS = [
+  'nvidia/nemotron-3-super-120b-a12b',
+  'nvidia/llama-3.3-nemotron-super-49b-v1.5',
+  'nvidia/nemotron-3-nano-30b-a3b',
+  'nvidia/nvidia-nemotron-nano-9b-v2',
+  'nvidia/nemotron-mini-4b-instruct',
+  'nvidia/llama-3.1-nemotron-nano-8b-v1',
+]
+const NVIDIA_MODELS = (process.env.NVIDIA_MODELS?.split(',').map((s) => s.trim()).filter(Boolean)) || DEFAULT_MODELS
 const nvidiaOn = NVIDIA_API_KEY && NVIDIA_API_KEY !== 'your_nvidia_api_key'
 
 const PER_CATEGORY = Number(process.env.GEN_PER_CATEGORY ?? 6)
 
 const CATEGORIES = [
-  { id: 'canas', label: 'Cañas', keyword: 'fishing rod carbon' },
-  { id: 'carretes', label: 'Carretes', keyword: 'spinning reel' },
+  { id: 'anzuelos', label: 'Anzuelos', keyword: 'fishing hooks' },
+  { id: 'lineas', label: 'Líneas de pesca', keyword: 'braided fishing line' },
   { id: 'senuelos', label: 'Señuelos', keyword: 'fishing lure bait set' },
-  { id: 'spinning', label: 'Spinning', keyword: 'spinning combo rod reel' },
-  { id: 'carpfishing', label: 'Carpfishing', keyword: 'carp fishing gear' },
-  { id: 'mar', label: 'Mar', keyword: 'sea fishing rod reel' },
-  { id: 'accesorios', label: 'Accesorios', keyword: 'fishing accessories tackle box' },
+  { id: 'canas', label: 'Cañas de pesca', keyword: 'fishing rod carbon' },
+  { id: 'carretes', label: 'Carretes de pesca', keyword: 'spinning reel' },
+  { id: 'electronica', label: 'Electrónica', keyword: 'fish finder sonar' },
+  { id: 'embarcaciones', label: 'Embarcaciones', keyword: 'fishing float tube boat' },
+  { id: 'minuteria', label: 'Minutería', keyword: 'fishing swivels snaps' },
+  { id: 'plomos', label: 'Plomos', keyword: 'fishing sinker weights' },
+  { id: 'herramientas', label: 'Herramientas', keyword: 'fishing pliers tool' },
+  { id: 'equipo', label: 'Equipo de pesca', keyword: 'fishing tackle bag' },
 ]
 
 // --- AliExpress ---
@@ -87,6 +99,32 @@ function extractJson(text) {
   if (s === -1 || e <= s) return null
   try { return JSON.parse(c.slice(s, e + 1)) } catch { return null }
 }
+let rrIndex = 0
+async function nvidiaJson(instruction) {
+  // Round-robin the starting model so no single endpoint gets rate-limited.
+  const start = rrIndex++ % NVIDIA_MODELS.length
+  const chain = NVIDIA_MODELS.map((_, i) => NVIDIA_MODELS[(start + i) % NVIDIA_MODELS.length])
+  for (const model of chain) {
+    const ctrl = new AbortController()
+    const t = setTimeout(() => ctrl.abort(), 12000)
+    try {
+      const res = await fetch(`${NVIDIA_BASE_URL}/chat/completions`, {
+        method: 'POST', signal: ctrl.signal,
+        headers: { Authorization: `Bearer ${NVIDIA_API_KEY}`, Accept: 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model, messages: [
+          { role: 'system', content: 'Redactas fichas SEO en español y respondes solo con JSON válido.' },
+          { role: 'user', content: instruction },
+        ], max_tokens: 700, temperature: 0.7, top_p: 0.9 }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        const p = extractJson(data.choices?.[0]?.message?.content)
+        if (p) return p
+      }
+    } catch { /* try next model */ } finally { clearTimeout(t) }
+  }
+  return null
+}
 async function seoFor(title, label, catId, price, currency) {
   const fallback = offlineSeo(title, label, price, currency)
   if (!nvidiaOn) return fallback
@@ -94,32 +132,14 @@ async function seoFor(title, label, catId, price, currency) {
 Título original (referencia): "${cleanTitle(title)}"
 Categoría: ${label} (${catId}). Precio aprox: ${price} ${currency}.
 Responde SOLO con JSON: {"title": string (máx 70 chars, atractivo, con palabras clave de pesca), "description": string (3-4 frases, beneficios y usos), "seoDescription": string (140-160 chars con llamada a la acción)}`
-  try {
-    const ctrl = AbortController ? new AbortController() : null
-    const t = ctrl ? setTimeout(() => ctrl.abort(), 30000) : null
-    const res = await fetch(`${NVIDIA_BASE_URL}/chat/completions`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${NVIDIA_API_KEY}`, Accept: 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: NVIDIA_MODEL, messages: [
-        { role: 'system', content: 'Redactas fichas SEO en español y respondes solo con JSON válido.' },
-        { role: 'user', content: instruction },
-      ], max_tokens: 700, temperature: 0.7, top_p: 0.9 }),
-      signal: ctrl?.signal,
-    })
-    if (t) clearTimeout(t)
-    if (!res.ok) return fallback
-    const data = await res.json()
-    const p = extractJson(data.choices?.[0]?.message?.content)
-    if (!p) return fallback
-    const str = (v, f) => (typeof v === 'string' && v.trim() ? v.trim() : f)
-    return {
-      title: str(p.title, fallback.title).slice(0, 90),
-      description: str(p.description, fallback.description).slice(0, 1200),
-      seoDescription: str(p.seoDescription, fallback.seoDescription).slice(0, 165),
-      aiOptimized: true,
-    }
-  } catch {
-    return fallback
+  const p = await nvidiaJson(instruction)
+  if (!p) return fallback
+  const str = (v, f) => (typeof v === 'string' && v.trim() ? v.trim() : f)
+  return {
+    title: str(p.title, fallback.title).slice(0, 90),
+    description: str(p.description, fallback.description).slice(0, 1200),
+    seoDescription: str(p.seoDescription, fallback.seoDescription).slice(0, 165),
+    aiOptimized: true,
   }
 }
 
@@ -149,7 +169,7 @@ async function main() {
     const cand = raw.filter((p) => {
       const price = Number(p.target_sale_price ?? 0)
       const id = String(p.product_id ?? '')
-      return p.product_main_image_url && (p.promotion_link || p.product_detail_url) && price >= 2 && price <= 500 && id
+      return p.product_main_image_url && (p.promotion_link || p.product_detail_url) && price >= 1.5 && price <= 1500 && id
     })
     // Prefer products not used in another category; backfill so none stays empty.
     const fresh = cand.filter((p) => !usedAli.has(String(p.product_id)))
@@ -157,7 +177,7 @@ async function main() {
     valid.forEach((p) => usedAli.add(String(p.product_id)))
     process.stdout.write(`${valid.length} productos, generando SEO… `)
 
-    const built = await pool(valid, 4, async (p) => {
+    const built = await pool(valid, 3, async (p) => {
       const price = Number(p.target_sale_price ?? 0)
       const currency = p.target_sale_price_currency ?? 'EUR'
       const seo = await seoFor(p.product_title, cat.label, cat.id, price, currency)

@@ -4,8 +4,72 @@ import { fishingLabel, getFishingType } from '@/lib/fishing'
 
 const NVIDIA_API_KEY = process.env.NVIDIA_API_KEY
 const NVIDIA_BASE_URL = process.env.NVIDIA_BASE_URL ?? 'https://integrate.api.nvidia.com/v1'
-// Overridable so the deployed model can change without touching code.
-const NVIDIA_MODEL = process.env.NVIDIA_MODEL ?? 'meta/llama-3.3-70b-instruct'
+
+/**
+ * Ordered model fallback chain. Requests try each model in turn until one
+ * answers, so a single rate-limited/unavailable model never breaks the feature.
+ * Override with the NVIDIA_MODELS env var (comma-separated) or a single
+ * NVIDIA_MODEL. Defaults to NVIDIA's Nemotron family (validated to respond fast).
+ */
+const DEFAULT_NVIDIA_MODELS = [
+  'nvidia/nemotron-3-super-120b-a12b',
+  'nvidia/llama-3.3-nemotron-super-49b-v1.5',
+  'nvidia/nemotron-3-nano-30b-a3b',
+  'nvidia/nvidia-nemotron-nano-9b-v2',
+  'nvidia/nemotron-mini-4b-instruct',
+  'nvidia/llama-3.1-nemotron-nano-8b-v1',
+]
+const NVIDIA_MODELS: string[] = (() => {
+  const fromList = process.env.NVIDIA_MODELS?.split(',').map((s) => s.trim()).filter(Boolean)
+  if (fromList?.length) return fromList
+  if (process.env.NVIDIA_MODEL) return [process.env.NVIDIA_MODEL, ...DEFAULT_NVIDIA_MODELS]
+  return DEFAULT_NVIDIA_MODELS
+})()
+
+interface NvidiaOptions {
+  maxTokens?: number
+  temperature?: number
+  topP?: number
+  timeoutMs?: number
+}
+
+/**
+ * Call the NVIDIA chat API, trying each model in the fallback chain until one
+ * returns content. Returns null only if every model fails.
+ */
+async function callNvidia(
+  messages: ChatMessage[],
+  { maxTokens = 1024, temperature = 0.7, topP = 0.95, timeoutMs = 20000 }: NvidiaOptions = {},
+): Promise<string | null> {
+  for (const model of NVIDIA_MODELS) {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), timeoutMs)
+    try {
+      const response = await fetch(`${NVIDIA_BASE_URL}/chat/completions`, {
+        method: 'POST',
+        signal: controller.signal,
+        headers: {
+          Authorization: `Bearer ${NVIDIA_API_KEY}`,
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ model, messages, max_tokens: maxTokens, temperature, top_p: topP }),
+      })
+      if (!response.ok) {
+        console.warn(`NVIDIA model ${model} -> HTTP ${response.status}, trying next`)
+        continue
+      }
+      const data = await response.json()
+      const content: string | undefined = data.choices?.[0]?.message?.content
+      if (content?.trim()) return content.trim()
+    } catch (error) {
+      console.warn(`NVIDIA model ${model} failed (${(error as Error).message}), trying next`)
+    } finally {
+      clearTimeout(timer)
+    }
+  }
+  return null
+}
 
 const SYSTEM_PROMPT = `Eres PescaPlus, un guía de pesca profesional que asesora a pescadores en español.
 Ayudas con técnicas, montajes, nudos, elección de señuelos y recomendaciones de equipo.
@@ -139,35 +203,8 @@ export async function chatWithFishingExpert(messages: ChatMessage[]): Promise<st
     ? messages
     : [{ role: 'system' as const, content: SYSTEM_PROMPT }, ...messages]
 
-  try {
-    const response = await fetch(`${NVIDIA_BASE_URL}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${NVIDIA_API_KEY}`,
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: NVIDIA_MODEL,
-        messages: formattedMessages,
-        max_tokens: 1024,
-        temperature: 0.7,
-        top_p: 0.95,
-      }),
-    })
-
-    if (!response.ok) {
-      console.error(`NVIDIA API error ${response.status}: ${await response.text()}`)
-      return getLocalExpertResponse(messages)
-    }
-
-    const data = await response.json()
-    const content: string | undefined = data.choices?.[0]?.message?.content
-    return content?.trim() || getLocalExpertResponse(messages)
-  } catch (error) {
-    console.error('Error calling NVIDIA chat API:', error)
-    return getLocalExpertResponse(messages)
-  }
+  const content = await callNvidia(formattedMessages, { maxTokens: 1024 })
+  return content || getLocalExpertResponse(messages)
 }
 
 // ---------------------------------------------------------------------------
@@ -280,40 +317,16 @@ Idea del usuario: "${prompt}".
 Responde ÚNICAMENTE con un objeto JSON válido, sin texto adicional, con esta forma exacta:
 {"title": string, "description": string (2-4 frases en español), "price": number (EUR), "currency": "${currency}", "category": "fishing", "typeFishing": "${typeFishing}", "rating": number (4.0-5.0), "reviews": number entero, "affiliateUrl": string, "imageUrl": string (deja "" si no tienes una fiable)}`
 
-  try {
-    const response = await fetch(`${NVIDIA_BASE_URL}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${NVIDIA_API_KEY}`,
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: NVIDIA_MODEL,
-        messages: [
-          { role: 'system', content: 'Eres un generador de fichas de producto que responde solo con JSON válido.' },
-          { role: 'user', content: instruction },
-        ],
-        max_tokens: 700,
-        temperature: 0.8,
-        top_p: 0.95,
-      }),
-    })
-
-    if (!response.ok) {
-      console.error(`NVIDIA product draft error ${response.status}`)
-      return offlineProductDraft(prompt, typeFishing, currency)
-    }
-
-    const data = await response.json()
-    const content: string = data.choices?.[0]?.message?.content ?? ''
-    const parsed = extractJson(content)
-    if (!parsed) return offlineProductDraft(prompt, typeFishing, currency)
-    return coerceDraft(parsed, prompt, typeFishing, currency)
-  } catch (error) {
-    console.error('Error generating product draft:', error)
-    return offlineProductDraft(prompt, typeFishing, currency)
-  }
+  const content = await callNvidia(
+    [
+      { role: 'system', content: 'Eres un generador de fichas de producto que responde solo con JSON válido.' },
+      { role: 'user', content: instruction },
+    ],
+    { maxTokens: 700, temperature: 0.8 },
+  )
+  const parsed = content ? extractJson(content) : null
+  if (!parsed) return offlineProductDraft(prompt, typeFishing, currency)
+  return coerceDraft(parsed, prompt, typeFishing, currency)
 }
 
 // ---------------------------------------------------------------------------
@@ -386,45 +399,22 @@ Devuelve SOLO JSON válido:
  "description": string (3-4 frases, beneficios y usos, tono experto y persuasivo),
  "seoDescription": string (meta description de 140-160 caracteres con llamada a la acción)}`
 
-  try {
-    const response = await fetch(`${NVIDIA_BASE_URL}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${NVIDIA_API_KEY}`,
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: NVIDIA_MODEL,
-        messages: [
-          { role: 'system', content: 'Redactas fichas de producto SEO en español y respondes solo con JSON válido.' },
-          { role: 'user', content: instruction },
-        ],
-        max_tokens: 700,
-        temperature: 0.7,
-        top_p: 0.9,
-      }),
-    })
+  const content = await callNvidia(
+    [
+      { role: 'system', content: 'Redactas fichas de producto SEO en español y respondes solo con JSON válido.' },
+      { role: 'user', content: instruction },
+    ],
+    { maxTokens: 700, temperature: 0.7, topP: 0.9 },
+  )
+  const fallback = offlineSeoListing(originalTitle, typeFishing, price, currency)
+  const parsed = content ? extractJson(content) : null
+  if (!parsed) return fallback
 
-    if (!response.ok) {
-      console.error(`NVIDIA SEO error ${response.status}`)
-      return offlineSeoListing(originalTitle, typeFishing, price, currency)
-    }
-
-    const data = await response.json()
-    const parsed = extractJson(data.choices?.[0]?.message?.content ?? '')
-    const fallback = offlineSeoListing(originalTitle, typeFishing, price, currency)
-    if (!parsed) return fallback
-
-    const str = (v: unknown, f: string) => (typeof v === 'string' && v.trim() ? v.trim() : f)
-    return {
-      title: str(parsed.title, fallback.title).slice(0, 90),
-      description: str(parsed.description, fallback.description).slice(0, 1200),
-      seoDescription: str(parsed.seoDescription, fallback.seoDescription).slice(0, 165),
-      generatedBy: 'nvidia',
-    }
-  } catch (error) {
-    console.error('Error generating SEO listing:', error)
-    return offlineSeoListing(originalTitle, typeFishing, price, currency)
+  const str = (v: unknown, f: string) => (typeof v === 'string' && v.trim() ? v.trim() : f)
+  return {
+    title: str(parsed.title, fallback.title).slice(0, 90),
+    description: str(parsed.description, fallback.description).slice(0, 1200),
+    seoDescription: str(parsed.seoDescription, fallback.seoDescription).slice(0, 165),
+    generatedBy: 'nvidia',
   }
 }
