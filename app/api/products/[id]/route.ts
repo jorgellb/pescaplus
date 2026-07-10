@@ -33,10 +33,12 @@ export async function GET(
 
 const productPatchSchema = z.object({
   title: z.string().min(2).max(200).optional(),
-  description: z.string().max(2000).optional(),
+  description: z.string().max(4000).optional(),
+  seoTitle: z.string().max(120).optional(),
   seoDescription: z.string().max(200).optional(),
   imageUrl: z.string().max(1200).optional(),
   images: z.array(z.string().max(1200)).max(12).optional(),
+  imageAlts: z.array(z.string().max(300)).max(12).optional(),
   videoUrl: z.string().max(1200).optional(),
   price: z.number().min(0).max(100000).optional(),
   currency: z.string().max(8).optional(),

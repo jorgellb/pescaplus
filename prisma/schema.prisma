@@ -14,6 +14,7 @@ model Product {
   description String
   imageUrl    String
   images      String[] @default([])
+  imageAlts   String[] @default([])
   videoUrl    String   @default("")
   price       Float
   currency    String   @default("EUR")
@@ -23,6 +24,7 @@ model Product {
   rating      Float    @default(0)
   reviews     Int      @default(0)
   inStock     Boolean  @default(true)
+  seoTitle    String   @default("")
   seoDescription String @default("")
   aiOptimized Boolean  @default(false)
   createdAt   DateTime @default(now())

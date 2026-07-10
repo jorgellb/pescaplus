@@ -5,6 +5,7 @@ import ProductImage from './ProductImage'
 
 interface ProductGalleryProps {
   images: string[]
+  alts?: string[]
   videoUrl?: string
   title: string
 }
@@ -13,8 +14,9 @@ interface ProductGalleryProps {
  * Interactive media gallery: a large main view (image or video) plus a
  * thumbnail strip. Video, when present, is offered as the first thumbnail.
  */
-export default function ProductGallery({ images, videoUrl, title }: ProductGalleryProps) {
+export default function ProductGallery({ images, alts, videoUrl, title }: ProductGalleryProps) {
   const gallery = images.filter(Boolean)
+  const altFor = (idx: number) => alts?.[idx]?.trim() || title
   const hasVideo = Boolean(videoUrl)
   // 'video' selects the clip; a number selects gallery[index].
   const [selected, setSelected] = useState<number | 'video'>(hasVideo ? 'video' : 0)
@@ -36,7 +38,7 @@ export default function ProductGallery({ images, videoUrl, title }: ProductGalle
         ) : (
           <ProductImage
             src={gallery[selected as number] ?? gallery[0] ?? ''}
-            alt={title}
+            alt={altFor(typeof selected === 'number' ? selected : 0)}
             priority
             className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
@@ -65,9 +67,9 @@ export default function ProductGallery({ images, videoUrl, title }: ProductGalle
               className={`relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
                 selected === idx ? 'border-sky-500' : 'border-slate-200 hover:border-slate-300'
               }`}
-              aria-label={`Imagen ${idx + 1}`}
+              aria-label={altFor(idx)}
             >
-              <ProductImage src={img} alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <ProductImage src={img} alt={altFor(idx)} className="absolute inset-0 w-full h-full object-cover" />
             </button>
           ))}
         </div>

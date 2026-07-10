@@ -5,6 +5,7 @@ import ProductImage from '@/components/ProductImage'
 import ProductGallery from '@/components/ProductGallery'
 import { fishingLabel } from '@/lib/fishing'
 import { resolveProduct, relatedProducts } from '@/lib/product-service'
+import { renderDescription } from '@/lib/markdown'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -14,7 +15,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   if (!product) return { title: 'Aparejo no encontrado' }
   const description = product.seoDescription || product.description.slice(0, 160)
   return {
-    title: product.title,
+    title: product.seoTitle || product.title,
     description,
     alternates: { canonical: `/products/${product.id}` },
     openGraph: {
@@ -91,7 +92,12 @@ export default async function ProductPage({ params }: Params) {
         {/* Product panel */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 p-5 md:p-8 rounded-2xl bg-white border border-slate-200 shadow-sm mb-16">
           <div className="lg:col-span-5">
-            <ProductGallery images={product.images} videoUrl={product.videoUrl} title={product.title} />
+            <ProductGallery
+              images={product.images}
+              alts={product.imageAlts}
+              videoUrl={product.videoUrl}
+              title={product.title}
+            />
           </div>
 
           <div className="lg:col-span-7 flex flex-col">
@@ -128,7 +134,10 @@ export default async function ProductPage({ params }: Params) {
 
               <div className="space-y-2 pt-2">
                 <h2 className="text-xs font-bold uppercase tracking-wide text-slate-400">Descripción</h2>
-                <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">{product.description}</p>
+                <div
+                  className="text-sm text-slate-600 leading-relaxed [&_strong]:text-slate-800 [&_ul]:text-slate-600"
+                  dangerouslySetInnerHTML={{ __html: renderDescription(product.description) }}
+                />
               </div>
             </div>
 

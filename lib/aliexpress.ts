@@ -122,6 +122,7 @@ function normalize(raw: RawAliProduct, typeFishing: string): Product {
     description: title,
     imageUrl: raw.product_main_image_url ?? '',
     images: aliImages(raw),
+    imageAlts: [],
     videoUrl: aliVideo(raw),
     price: Number(raw.target_sale_price ?? 0),
     currency: raw.target_sale_price_currency ?? 'EUR',
@@ -132,6 +133,7 @@ function normalize(raw: RawAliProduct, typeFishing: string): Product {
     rating: Number.isFinite(rate) ? Math.min(rate / 20, 5) : 0,
     reviews: raw.lastest_volume ?? 0,
     inStock: true,
+    seoTitle: '',
     seoDescription: title.slice(0, 160),
     aiOptimized: false,
   }

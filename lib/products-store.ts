@@ -18,8 +18,9 @@ import { CATALOG, slugify, filterProducts, type ProductFilter } from '@/lib/cata
 export type ProductInput = {
   title: string
   description: string
-  imageUrl: string
+  imageUrl?: string
   images?: string[]
+  imageAlts?: string[]
   videoUrl?: string
   price: number
   currency?: string
@@ -29,6 +30,7 @@ export type ProductInput = {
   rating?: number
   reviews?: number
   inStock?: boolean
+  seoTitle?: string
   seoDescription?: string
   aiOptimized?: boolean
   aliexpressId?: string
@@ -73,20 +75,33 @@ function uniqueId(base: string, exists: (id: string) => boolean): string {
 }
 
 function applyInput(input: ProductInput, id: string): Product {
-  const imageUrl = input.imageUrl.trim()
-  const images = (input.images ?? [])
-    .map((s) => s.trim())
-    .filter(Boolean)
-  // Ensure the primary image is first and images are unique.
-  const gallery = Array.from(new Set([imageUrl, ...images].filter(Boolean)))
+  // Build (image, alt) pairs, keep the primary first, drop empties and duplicates
+  // while keeping alt text aligned with its image.
+  const rawImages = [...(input.images ?? [])]
+  const primary = input.imageUrl?.trim()
+  if (primary && !rawImages.map((s) => s.trim()).includes(primary)) rawImages.unshift(primary)
+
+  const seen = new Set<string>()
+  const gallery: string[] = []
+  const alts: string[] = []
+  rawImages.forEach((img, i) => {
+    const url = (img ?? '').trim()
+    if (!url || seen.has(url)) return
+    seen.add(url)
+    gallery.push(url)
+    alts.push((input.imageAlts?.[i] ?? '').trim())
+  })
+
   const description = input.description.trim()
+  const title = input.title.trim()
   return {
     id,
     aliexpressId: input.aliexpressId?.trim() || id,
-    title: input.title.trim(),
+    title,
     description,
-    imageUrl,
+    imageUrl: gallery[0] ?? '',
     images: gallery,
+    imageAlts: alts,
     videoUrl: input.videoUrl?.trim() || '',
     price: Number(input.price) || 0,
     currency: input.currency?.trim() || 'EUR',
@@ -96,6 +111,7 @@ function applyInput(input: ProductInput, id: string): Product {
     rating: input.rating ?? 0,
     reviews: input.reviews ?? 0,
     inStock: input.inStock ?? true,
+    seoTitle: input.seoTitle?.trim() || '',
     seoDescription: input.seoDescription?.trim() || description.slice(0, 160),
     aiOptimized: input.aiOptimized ?? false,
   }
@@ -133,6 +149,7 @@ function toProduct(row: any): Product {
     description: row.description,
     imageUrl: row.imageUrl,
     images: row.images?.length ? row.images : [row.imageUrl].filter(Boolean),
+    imageAlts: row.imageAlts ?? [],
     videoUrl: row.videoUrl ?? '',
     price: row.price,
     currency: row.currency,
@@ -142,6 +159,7 @@ function toProduct(row: any): Product {
     rating: row.rating,
     reviews: row.reviews,
     inStock: row.inStock,
+    seoTitle: row.seoTitle ?? '',
     seoDescription: row.seoDescription || row.description?.slice(0, 160) || '',
     aiOptimized: row.aiOptimized ?? false,
   }

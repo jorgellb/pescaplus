@@ -38,10 +38,12 @@ export async function GET(request: NextRequest): Promise<NextResponse<ProductsAp
 
 const productInputSchema = z.object({
   title: z.string().min(2).max(200),
-  description: z.string().min(0).max(2000),
+  description: z.string().min(0).max(4000),
+  seoTitle: z.string().max(120).optional(),
   seoDescription: z.string().max(200).optional(),
   imageUrl: z.string().max(1200).optional().default(''),
   images: z.array(z.string().max(1200)).max(12).optional(),
+  imageAlts: z.array(z.string().max(300)).max(12).optional(),
   videoUrl: z.string().max(1200).optional(),
   price: z.number().min(0).max(100000),
   currency: z.string().max(8).optional(),

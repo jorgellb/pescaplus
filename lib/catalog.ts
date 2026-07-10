@@ -7,15 +7,18 @@ import { CATALOG_SEED } from '@/lib/catalog-data'
  * This keeps generated data separate from the query helpers below.
  */
 
-export type CatalogSeed = Omit<Product, 'images' | 'videoUrl' | 'seoDescription' | 'aiOptimized'> &
-  Partial<Pick<Product, 'images' | 'videoUrl' | 'seoDescription' | 'aiOptimized'>>
+type SeedOptional = 'images' | 'imageAlts' | 'videoUrl' | 'seoTitle' | 'seoDescription' | 'aiOptimized'
+export type CatalogSeed = Omit<Product, SeedOptional> & Partial<Pick<Product, SeedOptional>>
 
 /** Fill media/SEO defaults so catalog seeds satisfy the full Product shape. */
 export function withProductDefaults(p: CatalogSeed): Product {
+  const images = p.images?.length ? p.images : [p.imageUrl].filter(Boolean)
   return {
     ...p,
-    images: p.images?.length ? p.images : [p.imageUrl].filter(Boolean),
+    images,
+    imageAlts: p.imageAlts?.length ? p.imageAlts : [],
     videoUrl: p.videoUrl ?? '',
+    seoTitle: p.seoTitle ?? '',
     seoDescription: p.seoDescription || p.description.slice(0, 160),
     aiOptimized: p.aiOptimized ?? false,
   }
