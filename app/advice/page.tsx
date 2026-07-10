@@ -3,12 +3,12 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import Layout from '@/components/Layout'
 import { FISHING_TYPES } from '@/lib/fishing'
+import CategoryIcon from '@/components/graphics/CategoryIcon'
 import type { ChatMessage } from '@/types'
 
 type Message = { role: 'user' | 'assistant'; content: string }
 
 const STORAGE_KEY = 'pescaplus-chat-v1'
-
 const ADVICE_TOPIC_IDS = ['canas', 'carretes', 'senuelos', 'anzuelos', 'lineas']
 const ADVICE_TYPES = FISHING_TYPES.filter((t) => ADVICE_TOPIC_IDS.includes(t.id))
 
@@ -19,8 +19,6 @@ const suggestedQuestions = [
   '¿Cómo preparar mi bajo de línea para pesca en mar?',
 ]
 
-/** Escape HTML so model/mock output can never inject markup, then render a
- * minimal, safe subset (**bold**) as our own <strong> tags. */
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, '&amp;')
@@ -30,10 +28,7 @@ function escapeHtml(value: string): string {
 }
 
 function toSafeHtml(line: string): string {
-  return escapeHtml(line).replace(
-    /\*\*(.+?)\*\*/g,
-    '<strong class="text-cyan-300 font-semibold">$1</strong>',
-  )
+  return escapeHtml(line).replace(/\*\*(.+?)\*\*/g, '<strong class="text-sky-700 font-semibold">$1</strong>')
 }
 
 export default function AdvicePage() {
@@ -43,7 +38,6 @@ export default function AdvicePage() {
   const [selectedType, setSelectedType] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  // Restore any previous conversation from this browser.
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
@@ -55,12 +49,11 @@ export default function AdvicePage() {
     }
   }, [])
 
-  // Persist the conversation so a refresh doesn't lose it.
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(messages))
     } catch {
-      /* storage may be unavailable (private mode) */
+      /* storage may be unavailable */
     }
   }, [messages])
 
@@ -74,7 +67,6 @@ export default function AdvicePage() {
 
   const executeSendMessage = async (textToSend: string) => {
     if (!textToSend.trim() || loading) return
-
     const userMessage: Message = { role: 'user', content: textToSend }
     const history = [...messages, userMessage]
     setMessages(history)
@@ -89,26 +81,21 @@ export default function AdvicePage() {
           typeFishing: selectedType || undefined,
         }),
       })
-
       const data = await response.json()
-
       setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
           content: data.success
             ? data.response
-            : 'Lo siento, hubo un problema al conectar con el asistente. Por favor intenta de nuevo.',
+            : 'Lo siento, hubo un problema al conectar con el asistente. Inténtalo de nuevo.',
         },
       ])
     } catch (error) {
       console.error('Error in chat request:', error)
       setMessages((prev) => [
         ...prev,
-        {
-          role: 'assistant',
-          content: 'Lo siento, ocurrió un error de red. Asegúrate de tener conexión y prueba otra vez.',
-        },
+        { role: 'assistant', content: 'Lo siento, ocurrió un error de red. Prueba otra vez.' },
       ])
     } finally {
       setLoading(false)
@@ -134,13 +121,10 @@ export default function AdvicePage() {
     setSelectedType(typeFishing)
     setMessages([])
     setLoading(true)
-
     try {
       const response = await fetch(`/api/chat?typeFishing=${typeFishing}`)
       const data = await response.json()
-      if (data.success) {
-        setMessages([{ role: 'assistant', content: data.response }])
-      }
+      if (data.success) setMessages([{ role: 'assistant', content: data.response }])
     } catch (error) {
       console.error('Error fetching initial advice:', error)
     } finally {
@@ -162,8 +146,8 @@ export default function AdvicePage() {
           key={idx}
           className={
             isBullet
-              ? 'pl-4 py-0.5 text-slate-300 text-sm leading-relaxed'
-              : 'min-h-[1rem] py-1 text-slate-200 text-sm md:text-[14.5px] leading-relaxed'
+              ? 'pl-4 py-0.5 text-slate-600 text-sm leading-relaxed'
+              : 'min-h-[1rem] py-1 text-slate-700 text-sm md:text-[14.5px] leading-relaxed'
           }
           dangerouslySetInnerHTML={{ __html: toSafeHtml(line) }}
         />
@@ -172,134 +156,97 @@ export default function AdvicePage() {
 
   return (
     <Layout>
-      {/* Banner Page */}
-      <section className="relative overflow-hidden py-12 bg-gradient-to-r from-slate-900 via-[#0B1528] to-slate-900 border-b border-white/5">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,rgba(14,116,144,0.12),rgba(255,255,255,0))]" />
-
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 relative z-10 space-y-2">
-          <span className="text-xs font-bold uppercase tracking-widest text-cyan-400">
-            Consultas con Inteligencia Artificial
-          </span>
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white leading-none">
-            Asistente IA de PescaPlus
+      {/* Banner */}
+      <section className="bg-white border-b border-slate-200">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 space-y-2">
+          <span className="text-xs font-bold uppercase tracking-widest text-sky-600">Asistente con IA</span>
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900">
+            Consejos de pesca al instante
           </h1>
-          <p className="text-slate-400 text-sm max-w-xl">
-            Pregunta dudas sobre técnicas de lance, elección de nudos, señuelos recomendados o
-            configuraciones de bajo de línea.
+          <p className="text-slate-500 text-sm max-w-xl">
+            Pregunta sobre técnicas, nudos, señuelos recomendados o configuraciones de bajo de línea.
           </p>
         </div>
       </section>
 
-      {/* Chat Dashboard container */}
       <section className="max-w-4xl mx-auto px-4 py-8 sm:px-6">
-        {/* Modality Filter Box */}
+        {/* Modality filter */}
         <div className="mb-6 space-y-3">
-          <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
-            Modalidad específica a asesorar:
-          </p>
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Elige una modalidad:</p>
           <div className="flex flex-wrap gap-2.5">
             {ADVICE_TYPES.map((type) => (
               <button
                 key={type.id}
                 onClick={() => getInitialAdvice(type.id)}
                 disabled={loading}
-                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 border cursor-pointer active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed ${
+                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed ${
                   selectedType === type.id
-                    ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30 shadow-md shadow-cyan-500/5'
-                    : 'bg-slate-900/40 text-slate-400 border-white/5 hover:border-white/10 hover:text-slate-300'
+                    ? 'bg-sky-50 text-sky-700 border-sky-200'
+                    : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:text-slate-900'
                 }`}
               >
-                <span>{type.icon}</span> {type.name}
+                <CategoryIcon id={type.id} className="w-4 h-4" strokeWidth={1.7} /> {type.name}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Chat window panel */}
-        <div className="rounded-2xl border border-white/5 bg-slate-900/20 backdrop-blur-md overflow-hidden flex flex-col h-[520px] shadow-2xl shadow-black/40">
-          {/* Header with clear action */}
+        {/* Chat panel */}
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden flex flex-col h-[520px]">
           {messages.length > 0 && (
-            <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/5 bg-slate-950/40">
-              <span className="text-xs font-semibold text-slate-400">Conversación en curso</span>
-              <button
-                onClick={clearConversation}
-                className="text-xs font-semibold text-slate-400 hover:text-cyan-400 transition-colors"
-              >
+            <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100 bg-slate-50">
+              <span className="text-xs font-semibold text-slate-500">Conversación en curso</span>
+              <button onClick={clearConversation} className="text-xs font-semibold text-slate-500 hover:text-sky-600 transition-colors">
                 Limpiar chat
               </button>
             </div>
           )}
 
-          {/* Messages list */}
-          <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 bg-slate-50/60">
             {messages.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-center space-y-4 max-w-sm mx-auto my-auto">
-                <span className="text-6xl p-4 bg-cyan-500/5 rounded-full border border-cyan-500/10 animate-bounce">
-                  🤖
-                </span>
+              <div className="h-full flex flex-col items-center justify-center text-center gap-4 max-w-sm mx-auto">
+                <span className="text-5xl w-20 h-20 flex items-center justify-center bg-sky-50 rounded-full border border-sky-100">🤖</span>
                 <div className="space-y-1">
-                  <h3 className="text-base font-bold text-slate-200">Asistente Virtual Activo</h3>
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    Selecciona un tipo de pesca arriba para recibir un informe inicial completo, o
-                    envíame una pregunta directa a continuación.
+                  <h3 className="text-base font-bold text-slate-800">Asistente virtual activo</h3>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    Elige una modalidad para un informe inicial, o escribe tu pregunta abajo.
                   </p>
                 </div>
               </div>
             ) : (
-              <div className="space-y-6">
+              <div className="space-y-5">
                 {messages.map((message, index) => (
-                  <div
-                    key={index}
-                    className={`flex items-start gap-3.5 ${
-                      message.role === 'user' ? 'justify-end' : 'justify-start'
-                    }`}
-                  >
+                  <div key={index} className={`flex items-start gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     {message.role === 'assistant' && (
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 border border-white/5 flex items-center justify-center text-sm shadow">
-                        🤖
-                      </div>
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-sky-100 flex items-center justify-center text-sm">🤖</div>
                     )}
-
                     <div
-                      className={`max-w-[85%] md:max-w-[75%] rounded-2xl p-4 shadow-lg ${
+                      className={`max-w-[85%] md:max-w-[75%] rounded-2xl p-4 ${
                         message.role === 'user'
-                          ? 'bg-gradient-to-r from-cyan-600 to-teal-600 text-white rounded-tr-none'
-                          : 'bg-slate-900/60 border border-white/5 rounded-tl-none space-y-1'
+                          ? 'bg-sky-600 text-white rounded-tr-sm shadow-sm'
+                          : 'bg-white border border-slate-200 rounded-tl-sm shadow-sm'
                       }`}
                     >
                       {message.role === 'user' ? (
-                        <p className="text-sm font-medium leading-relaxed whitespace-pre-wrap">
-                          {message.content}
-                        </p>
+                        <p className="text-sm font-medium leading-relaxed whitespace-pre-wrap">{message.content}</p>
                       ) : (
                         <div className="space-y-0.5">{renderMessageContent(message.content)}</div>
                       )}
                     </div>
-
                     {message.role === 'user' && (
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-cyan-600 flex items-center justify-center text-sm shadow font-extrabold text-slate-950">
-                        👤
-                      </div>
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-sky-600 flex items-center justify-center text-sm text-white">👤</div>
                     )}
                   </div>
                 ))}
 
                 {loading && (
-                  <div className="flex items-start gap-3.5 justify-start">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 border border-white/5 flex items-center justify-center text-sm">
-                      🤖
-                    </div>
-                    <div className="bg-slate-900/60 border border-white/5 rounded-2xl rounded-tl-none p-4 shadow-lg">
-                      <div className="flex items-center gap-1.5 py-1">
-                        <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce" />
-                        <div
-                          className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce"
-                          style={{ animationDelay: '0.2s' }}
-                        />
-                        <div
-                          className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce"
-                          style={{ animationDelay: '0.4s' }}
-                        />
+                  <div className="flex items-start gap-3 justify-start">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-sky-100 flex items-center justify-center text-sm">🤖</div>
+                    <div className="bg-white border border-slate-200 rounded-2xl rounded-tl-sm p-4 shadow-sm">
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-1.5 h-1.5 bg-sky-400 rounded-full animate-bounce" />
+                        <div className="w-1.5 h-1.5 bg-sky-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                        <div className="w-1.5 h-1.5 bg-sky-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }} />
                       </div>
                     </div>
                   </div>
@@ -309,44 +256,41 @@ export default function AdvicePage() {
             )}
           </div>
 
-          {/* Form message input */}
-          <div className="p-4 border-t border-white/5 bg-slate-950/40">
+          <div className="p-4 border-t border-slate-100 bg-white">
             <div className="flex gap-2">
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Escribe tu consulta sobre aparejos o técnicas..."
-                className="flex-1 px-4 py-3.5 bg-slate-900 border border-white/10 rounded-xl text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/10 text-sm transition-all"
+                placeholder="Escribe tu consulta..."
+                className="flex-1 px-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-700 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 text-sm transition-all"
                 disabled={loading}
               />
               <button
                 onClick={sendMessage}
                 disabled={loading || !input.trim()}
-                className="bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 text-slate-950 px-6 rounded-xl font-extrabold text-sm shadow-md shadow-cyan-500/10 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-1"
+                className="bg-sky-600 hover:bg-sky-700 text-white px-6 rounded-xl font-bold text-sm shadow-sm active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1"
               >
-                <span>Enviar</span> 🚀
+                Enviar 🚀
               </button>
             </div>
           </div>
         </div>
 
-        {/* Suggestion cards row */}
+        {/* Suggestions */}
         <div className="mt-8 space-y-3">
-          <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
-            Consultas Frecuentes Directas:
-          </p>
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Consultas frecuentes:</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {suggestedQuestions.map((q, idx) => (
               <button
                 key={idx}
                 onClick={() => executeSendMessage(q)}
                 disabled={loading}
-                className="p-3.5 rounded-xl bg-slate-900/30 border border-white/5 hover:border-cyan-500/25 hover:bg-slate-900/50 hover:shadow-md hover:shadow-cyan-500/5 text-xs text-slate-300 font-semibold cursor-pointer transition-all active:scale-[0.98] leading-relaxed flex justify-between items-center gap-2 text-left disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-3.5 rounded-xl bg-white border border-slate-200 hover:border-sky-300 hover:shadow-sm text-xs text-slate-600 font-semibold cursor-pointer transition-all active:scale-[0.98] flex justify-between items-center gap-2 text-left disabled:opacity-50"
               >
                 <span>{q}</span>
-                <span className="text-cyan-400 text-base">➔</span>
+                <span className="text-sky-500 text-base">➔</span>
               </button>
             ))}
           </div>

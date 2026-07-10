@@ -12,7 +12,6 @@ export default function Navbar() {
   const pathname = usePathname()
   const catRef = useRef<HTMLDivElement>(null)
 
-  // Close the categories dropdown on outside click.
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
       if (catRef.current && !catRef.current.contains(e.target as Node)) setCatOpen(false)
@@ -23,28 +22,28 @@ export default function Navbar() {
 
   const isActive = (href: string) => pathname === href
 
+  const navLink = (active: boolean) =>
+    `px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+      active ? 'text-sky-700 bg-sky-50' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+    }`
+
   return (
-    <nav className="sticky top-0 z-50 w-full glass-panel border-b border-white/5 backdrop-blur-lg bg-slate-950/60 shadow-lg shadow-black/20">
+    <nav className="sticky top-0 z-50 w-full glass-panel border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link href="/" className="flex items-center gap-2 group">
+            <Link href="/" className="flex items-center gap-2">
               <span className="text-2xl">🎣</span>
-              <span className="text-2xl font-black tracking-tight bg-gradient-to-r from-cyan-400 via-teal-300 to-amber-300 bg-clip-text text-transparent group-hover:opacity-90 transition-opacity">
-                PescaPlus
+              <span className="text-2xl font-extrabold tracking-tight text-slate-900">
+                Pesca<span className="text-sky-600">Plus</span>
               </span>
             </Link>
 
-            <div className="hidden md:flex ml-10 items-center gap-1.5">
-              {/* Categories dropdown */}
+            <div className="hidden md:flex ml-8 items-center gap-1">
               <div className="relative" ref={catRef}>
                 <button
                   onClick={() => setCatOpen((v) => !v)}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                    pathname.startsWith('/categories')
-                      ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'
-                      : 'text-slate-300 hover:text-white hover:bg-white/5 border border-transparent'
-                  }`}
+                  className={`flex items-center gap-1.5 ${navLink(pathname.startsWith('/categories'))}`}
                   aria-expanded={catOpen}
                 >
                   Categorías
@@ -54,7 +53,7 @@ export default function Navbar() {
                 </button>
 
                 {catOpen && (
-                  <div className="absolute left-0 mt-2 w-[30rem] p-2 grid grid-cols-2 gap-1 rounded-2xl border border-white/10 bg-slate-950/95 backdrop-blur-xl shadow-2xl shadow-black/50">
+                  <div className="absolute left-0 mt-2 w-[30rem] p-2 grid grid-cols-2 gap-1 rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10">
                     {FISHING_TYPES.map((type) => (
                       <Link
                         key={type.id}
@@ -62,12 +61,12 @@ export default function Navbar() {
                         onClick={() => setCatOpen(false)}
                         className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${
                           isActive(`/categories/${type.id}`)
-                            ? 'bg-cyan-500/10 text-cyan-300'
-                            : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                            ? 'bg-sky-50 text-sky-700'
+                            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                         }`}
                       >
-                        <span className="text-cyan-400 flex-shrink-0">
-                          <CategoryIcon id={type.id} className="w-5 h-5" strokeWidth={1.5} />
+                        <span className="text-sky-600 flex-shrink-0">
+                          <CategoryIcon id={type.id} className="w-5 h-5" strokeWidth={1.6} />
                         </span>
                         <span className="text-sm font-medium truncate">{type.name}</span>
                       </Link>
@@ -76,14 +75,7 @@ export default function Navbar() {
                 )}
               </div>
 
-              <Link
-                href="/advice"
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                  isActive('/advice')
-                    ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'
-                    : 'text-slate-300 hover:text-white hover:bg-white/5 border border-transparent'
-                }`}
-              >
+              <Link href="/advice" className={navLink(isActive('/advice'))}>
                 Consejos IA
               </Link>
             </div>
@@ -92,22 +84,17 @@ export default function Navbar() {
           <div className="hidden md:flex items-center">
             <Link
               href="/advice"
-              className="relative overflow-hidden group bg-gradient-to-r from-cyan-500 to-teal-500 text-slate-950 px-5 py-2 rounded-lg font-bold text-sm tracking-wide shadow-md shadow-cyan-500/20 hover:shadow-cyan-400/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+              className="inline-flex items-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white px-5 py-2 rounded-lg font-semibold text-sm shadow-sm shadow-sky-600/20 hover:shadow-md hover:shadow-sky-600/25 active:scale-[0.98] transition-all"
             >
-              <span className="relative z-10 flex items-center gap-1.5">
-                <span>🤖</span> Asistente IA
-              </span>
-              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-200"></div>
+              <span>🤖</span> Asistente IA
             </Link>
           </div>
 
-          {/* Mobile menu button */}
           <div className="flex items-center md:hidden">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               type="button"
-              className="inline-flex items-center justify-center p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 focus:outline-none transition-colors"
-              aria-controls="mobile-menu"
+              className="inline-flex items-center justify-center p-2 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
               aria-expanded={mobileMenuOpen}
             >
               <span className="sr-only">Abrir menú</span>
@@ -126,9 +113,9 @@ export default function Navbar() {
       </div>
 
       {/* Mobile menu */}
-      <div className={`md:hidden ${mobileMenuOpen ? 'block' : 'hidden'} border-t border-white/5 bg-slate-950/95 backdrop-blur-xl max-h-[70vh] overflow-y-auto`} id="mobile-menu">
-        <div className="px-2 pt-3 pb-3 sm:px-3">
-          <p className="px-3 pb-1 text-[11px] font-bold uppercase tracking-widest text-slate-500">Categorías</p>
+      <div className={`md:hidden ${mobileMenuOpen ? 'block' : 'hidden'} border-t border-slate-200 bg-white max-h-[70vh] overflow-y-auto`}>
+        <div className="px-3 pt-3 pb-3">
+          <p className="px-2 pb-1.5 text-[11px] font-bold uppercase tracking-widest text-slate-400">Categorías</p>
           <div className="grid grid-cols-2 gap-1">
             {FISHING_TYPES.map((type) => (
               <Link
@@ -137,22 +124,22 @@ export default function Navbar() {
                 onClick={() => setMobileMenuOpen(false)}
                 className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                   isActive(`/categories/${type.id}`)
-                    ? 'bg-cyan-500/10 text-cyan-300'
-                    : 'text-slate-300 hover:text-white hover:bg-white/5'
+                    ? 'bg-sky-50 text-sky-700'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                 }`}
               >
-                <span className="text-cyan-400 flex-shrink-0">
-                  <CategoryIcon id={type.id} className="w-5 h-5" strokeWidth={1.5} />
+                <span className="text-sky-600 flex-shrink-0">
+                  <CategoryIcon id={type.id} className="w-5 h-5" strokeWidth={1.6} />
                 </span>
                 <span className="truncate">{type.name}</span>
               </Link>
             ))}
           </div>
-          <div className="pt-4 pb-1 px-1">
+          <div className="pt-4 pb-1">
             <Link
               href="/advice"
               onClick={() => setMobileMenuOpen(false)}
-              className="w-full text-center flex justify-center items-center gap-2 bg-gradient-to-r from-cyan-500 to-teal-500 text-slate-950 px-4 py-2.5 rounded-lg font-bold text-sm"
+              className="w-full text-center flex justify-center items-center gap-2 bg-sky-600 text-white px-4 py-2.5 rounded-lg font-semibold text-sm"
             >
               <span>🤖</span> Asistente IA
             </Link>

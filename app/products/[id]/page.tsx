@@ -11,9 +11,7 @@ type Params = { params: Promise<{ id: string }> }
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { id } = await params
   const product = await resolveProduct(id)
-  if (!product) {
-    return { title: 'Aparejo no encontrado' }
-  }
+  if (!product) return { title: 'Aparejo no encontrado' }
   const description = product.seoDescription || product.description.slice(0, 160)
   return {
     title: product.title,
@@ -38,13 +36,13 @@ export default async function ProductPage({ params }: Params) {
       <Layout>
         <div className="max-w-7xl mx-auto px-4 py-24 text-center space-y-6">
           <span className="text-5xl inline-block">🪝</span>
-          <h1 className="text-2xl font-bold text-white">Aparejo no encontrado</h1>
-          <p className="text-slate-400 text-sm max-w-sm mx-auto">
+          <h1 className="text-2xl font-bold text-slate-900">Aparejo no encontrado</h1>
+          <p className="text-slate-500 text-sm max-w-sm mx-auto">
             El producto solicitado no existe o ha sido retirado del catálogo.
           </p>
           <Link
             href="/"
-            className="inline-block bg-slate-800 hover:bg-slate-700 border border-white/5 text-slate-200 px-6 py-3 rounded-xl text-sm font-semibold transition-all"
+            className="inline-block bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-3 rounded-xl text-sm font-semibold transition-all"
           >
             Volver al inicio
           </Link>
@@ -67,105 +65,84 @@ export default async function ProductPage({ params }: Params) {
       '@type': 'Offer',
       price: product.price.toFixed(2),
       priceCurrency: product.currency,
-      availability: product.inStock
-        ? 'https://schema.org/InStock'
-        : 'https://schema.org/OutOfStock',
+      availability: product.inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
       url: product.affiliateUrl,
     },
     ...(product.reviews > 0 && product.rating > 0
-      ? {
-          aggregateRating: {
-            '@type': 'AggregateRating',
-            ratingValue: product.rating.toFixed(1),
-            reviewCount: product.reviews,
-          },
-        }
+      ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: product.rating.toFixed(1), reviewCount: product.reviews } }
       : {}),
   }
 
   return (
     <Layout>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <div className="max-w-7xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
         {/* Breadcrumbs */}
-        <nav className="flex items-center gap-2 text-xs font-semibold text-slate-400 mb-8 uppercase tracking-wider">
-          <Link href="/" className="hover:text-cyan-400 transition-colors">Inicio</Link>
+        <nav className="flex items-center gap-2 text-xs font-medium text-slate-400 mb-6">
+          <Link href="/" className="hover:text-sky-600 transition-colors">Inicio</Link>
           <span>/</span>
-          <Link href={`/categories/${product.typeFishing}`} className="hover:text-cyan-400 transition-colors">
+          <Link href={`/categories/${product.typeFishing}`} className="hover:text-sky-600 transition-colors">
             {modalityLabel}
           </Link>
           <span>/</span>
-          <span className="text-slate-300 truncate max-w-[200px]">{product.title}</span>
+          <span className="text-slate-600 truncate max-w-[200px]">{product.title}</span>
         </nav>
 
         {/* Product panel */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 p-6 md:p-8 rounded-2xl bg-slate-900/30 border border-white/5 backdrop-blur-md mb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 p-5 md:p-8 rounded-2xl bg-white border border-slate-200 shadow-sm mb-16">
           <div className="lg:col-span-5">
             <ProductGallery images={product.images} videoUrl={product.videoUrl} title={product.title} />
           </div>
 
-          <div className="lg:col-span-7 flex flex-col justify-between py-2">
-            <div className="space-y-6">
+          <div className="lg:col-span-7 flex flex-col">
+            <div className="space-y-5">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-xs font-extrabold px-3 py-1.5 rounded-full uppercase tracking-wider">
+                <span className="inline-flex bg-sky-50 text-sky-700 border border-sky-100 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wide">
                   {modalityLabel}
                 </span>
                 {product.aiOptimized && (
-                  <span className="inline-flex bg-violet-500/10 text-violet-300 border border-violet-500/20 text-xs font-bold px-3 py-1.5 rounded-full">
+                  <span className="inline-flex bg-violet-50 text-violet-600 border border-violet-100 text-xs font-bold px-3 py-1.5 rounded-full">
                     ✨ Ficha optimizada con IA
                   </span>
                 )}
               </div>
 
-              <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
+              <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
                 {product.title}
               </h1>
 
               <div className="flex items-center gap-2">
-                <div className="flex text-amber-400 text-base" aria-hidden>
+                <div className="flex text-amber-400" aria-hidden>
                   {Array.from({ length: 5 }).map((_, idx) => (
-                    <span key={idx} className={idx < Math.round(product.rating) ? 'text-amber-400' : 'text-slate-600'}>
-                      ★
-                    </span>
+                    <span key={idx} className={idx < Math.round(product.rating) ? 'text-amber-400' : 'text-slate-300'}>★</span>
                   ))}
                 </div>
-                <span className="text-sm font-semibold text-slate-200 ml-1">{product.rating.toFixed(1)}</span>
-                <span className="text-xs text-slate-400">
-                  ({product.reviews.toLocaleString('es-ES')} valoraciones de compradores)
-                </span>
+                <span className="text-sm font-semibold text-slate-700">{product.rating.toFixed(1)}</span>
+                <span className="text-xs text-slate-400">· {product.reviews.toLocaleString('es-ES')} vendidos</span>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-950/40 border border-white/5 inline-block">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">
-                  Precio Recomendado en AliExpress
-                </span>
-                <span className="text-3xl md:text-4xl font-black text-cyan-300">
-                  {product.price.toFixed(2)} <span className="text-lg font-bold text-slate-400">{product.currency}</span>
-                </span>
+              <div className="flex items-baseline gap-2">
+                <span className="text-4xl font-extrabold text-slate-900">{product.price.toFixed(2)}</span>
+                <span className="text-lg font-bold text-slate-400">{product.currency}</span>
               </div>
 
-              <div className="space-y-2">
-                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-300">Descripción del Producto</h2>
-                <p className="text-sm text-slate-400 leading-relaxed max-w-2xl whitespace-pre-line">
-                  {product.description}
-                </p>
+              <div className="space-y-2 pt-2">
+                <h2 className="text-xs font-bold uppercase tracking-wide text-slate-400">Descripción</h2>
+                <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">{product.description}</p>
               </div>
             </div>
 
-            <div className="mt-8 pt-6 border-t border-white/5 space-y-4">
+            <div className="mt-auto pt-6 space-y-3">
               <a
                 href={product.affiliateUrl}
                 target="_blank"
                 rel="noopener noreferrer sponsored"
-                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-slate-950 px-8 py-4 rounded-xl font-black text-lg tracking-wide shadow-lg shadow-green-500/10 hover:shadow-green-500/20 active:scale-[0.99] transition-all"
+                className="w-full flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg shadow-emerald-500/20 active:scale-[0.99] transition-all"
               >
                 Comprar en AliExpress 🛒
               </a>
-              <p className="text-center text-xs text-slate-500 leading-relaxed max-w-md mx-auto">
-                Al hacer clic serás redirigido a la tienda oficial de AliExpress para procesar el pago de forma segura.
+              <p className="text-center text-xs text-slate-400 max-w-md mx-auto">
+                Serás redirigido a la tienda oficial de AliExpress para pagar de forma segura.
               </p>
             </div>
           </div>
@@ -173,34 +150,25 @@ export default async function ProductPage({ params }: Params) {
 
         {/* Related */}
         {related.length > 0 && (
-          <div className="space-y-8">
-            <div className="border-l-4 border-cyan-400 pl-3">
-              <h2 className="text-2xl font-extrabold text-white tracking-tight">Productos Relacionados</h2>
-              <p className="text-slate-400 text-xs mt-1">
-                Otros aparejos recomendados para la modalidad de {modalityLabel}.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="space-y-6">
+            <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Productos Relacionados</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {related.map((rp) => (
                 <Link
                   key={rp.id}
                   href={`/products/${rp.id}`}
-                  className="group rounded-xl overflow-hidden bg-slate-900/30 border border-white/5 hover:border-cyan-500/25 shadow-md hover:shadow-cyan-500/5 hover:-translate-y-1 transition-all duration-300 flex flex-col h-full"
+                  className="group rounded-2xl overflow-hidden bg-white border border-slate-200 hover:border-sky-300 hover:shadow-lg hover:shadow-slate-900/5 hover:-translate-y-1 transition-all duration-300 flex flex-col h-full"
                 >
-                  <div className="relative aspect-[4/3] bg-slate-950 overflow-hidden">
+                  <div className="relative aspect-square bg-slate-50 overflow-hidden">
                     <ProductImage src={rp.imageUrl} alt={rp.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   </div>
-                  <div className="p-4 flex flex-col justify-between flex-1 space-y-3">
-                    <h3 className="font-bold text-slate-200 group-hover:text-cyan-400 line-clamp-2 transition-colors duration-200 text-sm leading-snug">
+                  <div className="p-4 flex flex-col justify-between flex-1 gap-2">
+                    <h3 className="font-semibold text-slate-800 group-hover:text-sky-600 line-clamp-2 transition-colors text-sm leading-snug">
                       {rp.title}
                     </h3>
-                    <div className="flex justify-between items-center pt-2 border-t border-white/5">
-                      <span className="text-[10px] text-slate-400 uppercase tracking-wider">Precio</span>
-                      <span className="font-extrabold text-cyan-300 text-base">
-                        {rp.price.toFixed(2)} <span className="text-xs font-semibold text-slate-400">{rp.currency}</span>
-                      </span>
-                    </div>
+                    <span className="text-lg font-extrabold text-slate-900">
+                      {rp.price.toFixed(2)} <span className="text-xs font-semibold text-slate-400">{rp.currency}</span>
+                    </span>
                   </div>
                 </Link>
               ))}

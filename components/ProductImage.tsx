@@ -24,9 +24,9 @@ export default function ProductImage({ src, alt, className, priority }: ProductI
       <div
         role="img"
         aria-label={alt}
-        className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-800 to-slate-950 text-5xl select-none"
+        className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 text-5xl select-none"
       >
-        <span className="opacity-40">🎣</span>
+        <span className="opacity-30">🎣</span>
       </div>
     )
   }

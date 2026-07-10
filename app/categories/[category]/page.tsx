@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useParams } from 'next/navigation'
+import Link from 'next/link'
 import Layout from '@/components/Layout'
 import ProductCard from '@/components/ProductCard'
 import type { Product } from '@/types'
@@ -19,9 +20,7 @@ const SORT_OPTIONS: { key: SortKey; label: string }[] = [
 
 export default function CategoryPage() {
   const params = useParams()
-  const category = Array.isArray(params?.category)
-    ? params.category[0]
-    : params?.category || ''
+  const category = Array.isArray(params?.category) ? params.category[0] : params?.category || ''
 
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
@@ -30,8 +29,7 @@ export default function CategoryPage() {
 
   const fishingType = getFishingType(category)
   const categoryName = fishingType?.name ?? category
-  const categoryDescription =
-    fishingType?.tagline ?? 'Los mejores aparejos para tus salidas de pesca.'
+  const categoryDescription = fishingType?.tagline ?? 'Los mejores aparejos para tus salidas de pesca.'
 
   const fetchProducts = useCallback(
     async (search?: string) => {
@@ -64,7 +62,6 @@ export default function CategoryPage() {
   }
 
   useEffect(() => {
-    // Legitimate external sync: (re)fetch the products API when the category changes.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchProducts()
   }, [fetchProducts])
@@ -83,118 +80,98 @@ export default function CategoryPage() {
     }
   }, [products, sort])
 
+  const inputCls =
+    'w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-700 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 text-sm transition-all'
+
   return (
     <Layout>
-      {/* Category Banner */}
-      <section className="relative overflow-hidden py-16 bg-gradient-to-r from-slate-900 via-[#0B1528] to-slate-900 border-b border-white/5">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,rgba(14,116,144,0.1),rgba(255,255,255,0))]" />
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      {/* Banner */}
+      <section className="bg-white border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <nav className="text-xs text-slate-400 mb-4">
+            <Link href="/" className="hover:text-sky-600">Inicio</Link> <span className="mx-1">/</span>{' '}
+            <span className="text-slate-600 font-medium">{categoryName}</span>
+          </nav>
           <div className="flex items-center gap-4">
             {fishingType && (
-              <span className="inline-flex flex-shrink-0 text-cyan-400 p-3 rounded-2xl bg-cyan-500/5 border border-cyan-500/15">
-                <CategoryIcon id={fishingType.id} className="w-9 h-9" strokeWidth={1.4} />
+              <span className={`inline-flex flex-shrink-0 text-slate-700 p-3.5 rounded-2xl bg-gradient-to-br ${fishingType.color} ring-1 ring-slate-900/5`}>
+                <CategoryIcon id={fishingType.id} className="w-9 h-9" strokeWidth={1.5} />
               </span>
             )}
-            <div className="space-y-1">
-              <span className="text-xs font-bold uppercase tracking-widest text-cyan-400">Categoría</span>
-              <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-none">
-                {categoryName}
-              </h1>
+            <div>
+              <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900">{categoryName}</h1>
+              <p className="text-slate-500 text-sm md:text-base mt-1 max-w-xl">{categoryDescription}</p>
             </div>
           </div>
-          <p className="text-slate-400 text-sm md:text-base max-w-xl mt-4">{categoryDescription}</p>
         </div>
       </section>
 
-      {/* Main Content Area */}
-      <section className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
-        {/* Search & Actions Toolbar */}
-        <div className="mb-8 p-4 rounded-2xl bg-slate-900/20 border border-white/5 backdrop-blur-md">
-          <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3">
+      <section className="max-w-7xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
+        {/* Toolbar */}
+        <div className="mb-8 flex flex-col sm:flex-row gap-3">
+          <form onSubmit={handleSearch} className="flex gap-2 flex-1">
             <div className="relative flex-1">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400 text-base">
-                🔍
-              </span>
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">🔍</span>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Buscar carretes, cañas, señuelos..."
-                className="w-full pl-10 pr-4 py-3 bg-slate-950/80 border border-white/10 rounded-xl text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/10 text-sm transition-all"
+                placeholder="Buscar en esta categoría..."
+                className={`${inputCls} pl-10`}
               />
             </div>
-
-            <div className="flex gap-2">
-              <button
-                type="submit"
-                className="flex-1 sm:flex-none bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 text-slate-950 px-6 py-3 rounded-xl font-bold text-sm shadow-md shadow-cyan-500/10 active:scale-[0.98] transition-all cursor-pointer"
-              >
-                Buscar
-              </button>
-
-              <button
-                type="button"
-                onClick={resetFilters}
-                className="bg-slate-800/80 hover:bg-slate-800 border border-white/5 hover:border-white/10 text-slate-300 hover:text-white px-5 py-3 rounded-xl font-bold text-sm active:scale-[0.98] transition-all cursor-pointer"
-              >
-                Ver todos
-              </button>
-            </div>
+            <button
+              type="submit"
+              className="bg-sky-600 hover:bg-sky-700 text-white px-5 py-2.5 rounded-xl font-semibold text-sm shadow-sm active:scale-[0.98] transition-all"
+            >
+              Buscar
+            </button>
           </form>
+
+          <label className="flex items-center gap-2 text-xs text-slate-500 sm:justify-end">
+            <span className="font-semibold uppercase tracking-wide whitespace-nowrap">Ordenar</span>
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value as SortKey)}
+              className="bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-slate-700 text-sm focus:outline-none focus:border-sky-500 cursor-pointer"
+            >
+              {SORT_OPTIONS.map((option) => (
+                <option key={option.key} value={option.key}>{option.label}</option>
+              ))}
+            </select>
+          </label>
         </div>
 
-        {/* Result summary + sorting */}
         {!loading && products.length > 0 && (
-          <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <p className="text-sm text-slate-400">
-              <span className="font-bold text-slate-200">{products.length}</span>{' '}
-              {products.length === 1 ? 'producto encontrado' : 'productos encontrados'}
-            </p>
-            <label className="flex items-center gap-2 text-xs text-slate-400">
-              <span className="uppercase tracking-widest font-bold">Ordenar</span>
-              <select
-                value={sort}
-                onChange={(e) => setSort(e.target.value as SortKey)}
-                className="bg-slate-950/80 border border-white/10 rounded-lg px-3 py-2 text-slate-200 text-sm focus:outline-none focus:border-cyan-500/50 cursor-pointer"
-              >
-                {SORT_OPTIONS.map((option) => (
-                  <option key={option.key} value={option.key}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
+          <p className="text-sm text-slate-500 mb-6">
+            <span className="font-bold text-slate-800">{products.length}</span>{' '}
+            {products.length === 1 ? 'producto' : 'productos'}
+          </p>
         )}
 
-        {/* Product Grid / States */}
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-24 space-y-4">
-            <div className="relative w-16 h-16">
-              <div className="absolute inset-0 rounded-full border-4 border-cyan-500/20 border-t-cyan-400 animate-spin" />
-            </div>
-            <p className="text-slate-400 font-medium text-sm">Cargando aparejos seleccionados...</p>
+          <div className="flex flex-col items-center justify-center py-24 gap-4">
+            <div className="w-12 h-12 rounded-full border-4 border-slate-200 border-t-sky-500 animate-spin" />
+            <p className="text-slate-400 text-sm">Cargando productos...</p>
           </div>
         ) : sortedProducts.length === 0 ? (
-          <div className="text-center py-20 p-8 rounded-2xl bg-slate-900/10 border border-white/5 max-w-lg mx-auto space-y-6">
+          <div className="text-center py-20 rounded-2xl bg-white border border-slate-200 max-w-lg mx-auto px-8 space-y-5">
             <span className="inline-block text-5xl">⚓</span>
             <div className="space-y-2">
-              <h3 className="text-lg font-bold text-slate-200">No hay productos disponibles</h3>
-              <p className="text-sm text-slate-400 leading-relaxed max-w-sm mx-auto">
-                No encontramos productos que coincidan con la búsqueda. Intenta usar otras palabras
-                clave o restablecer el filtro.
+              <h3 className="text-lg font-bold text-slate-800">No hay productos</h3>
+              <p className="text-sm text-slate-500 max-w-sm mx-auto">
+                No encontramos resultados. Prueba con otras palabras clave o restablece el filtro.
               </p>
             </div>
             <button
               onClick={resetFilters}
-              className="bg-slate-800 hover:bg-slate-700 text-slate-200 px-5 py-2.5 rounded-xl font-semibold text-xs border border-white/5 transition-all"
+              className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all"
             >
-              Restablecer Filtros
+              Ver todos
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
             {sortedProducts.map((product) => (
               <ProductCard key={product.id} {...product} />
             ))}

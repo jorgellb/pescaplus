@@ -16,12 +16,12 @@ export default function OceanWaves({ className, flip }: OceanWavesProps) {
       <svg viewBox="0 0 1350 140" preserveAspectRatio="none" className="w-full h-full">
         <defs>
           <linearGradient id="waveA" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#0891b2" stopOpacity="0.25" />
-            <stop offset="100%" stopColor="#0e7490" stopOpacity="0.05" />
+            <stop offset="0%" stopColor="#bae6fd" stopOpacity="0.9" />
+            <stop offset="100%" stopColor="#e0f2fe" stopOpacity="0.5" />
           </linearGradient>
           <linearGradient id="waveB" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#14b8a6" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="#0891b2" stopOpacity="0.08" />
+            <stop offset="0%" stopColor="#7dd3fc" stopOpacity="0.55" />
+            <stop offset="100%" stopColor="#bae6fd" stopOpacity="0.3" />
           </linearGradient>
         </defs>
         <g className="animate-wave-scroll" style={{ animationDuration: '22s' }}>

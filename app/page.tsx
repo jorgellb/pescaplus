@@ -1,141 +1,126 @@
 import Link from 'next/link'
 import Layout from '@/components/Layout'
 import { FISHING_TYPES } from '@/lib/fishing'
-import HeroArt from '@/components/graphics/HeroArt'
-import OceanWaves from '@/components/graphics/OceanWaves'
 import CategoryIcon from '@/components/graphics/CategoryIcon'
+import OceanWaves from '@/components/graphics/OceanWaves'
 
 export default function Home() {
   return (
     <Layout>
-      {/* Hero Section */}
-      <section className="relative overflow-hidden py-32 md:py-44 bg-gradient-to-b from-cyan-950/30 via-slate-950 to-[#060b13]">
-        {/* Background glow blobs */}
-        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-cyan-600/5 rounded-full blur-[120px] -z-10 animate-pulse-slow" />
-        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-teal-500/5 rounded-full blur-[100px] -z-10 animate-pulse-slow" style={{ animationDelay: '2s' }} />
+      {/* Hero */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-sky-50 via-white to-[#f6f8fb]">
+        <div className="absolute top-0 right-0 w-[38rem] h-[38rem] bg-sky-200/30 rounded-full blur-[120px] -z-0" />
+        <div className="absolute -top-10 left-1/4 w-80 h-80 bg-teal-200/25 rounded-full blur-[100px] -z-0" />
 
-        {/* Grid pattern overlay */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(255,255,255,0))] -z-10" />
-
-        {/* Animated underwater scene */}
-        <HeroArt />
-
-        <div className="max-w-7xl mx-auto px-4 text-center space-y-8">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 tracking-wide uppercase">
-            ⚡ Tu asistente de pesca inteligente
+        <div className="relative max-w-5xl mx-auto px-4 text-center pt-24 pb-32 md:pt-32 md:pb-40">
+          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white text-sky-700 border border-sky-100 shadow-sm">
+            ⚡ Tu asistente de pesca con inteligencia artificial
           </span>
-          
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight max-w-4xl mx-auto leading-[1.1] bg-gradient-to-r from-white via-slate-200 to-cyan-300 bg-clip-text text-transparent">
-            Domina el Arte de la Pesca con Inteligencia Artificial
+
+          <h1 className="mt-6 text-4xl md:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.08] max-w-4xl mx-auto">
+            Todo tu equipo de pesca,{' '}
+            <span className="text-sky-600">seleccionado con IA</span>
           </h1>
-          
-          <p className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            Obtén consejos instantáneos de expertos y descubre cañas, carretes y aparejos de AliExpress analizados especialmente para ti.
+
+          <p className="mt-6 text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
+            Cañas, carretes, señuelos y aparejos de AliExpress con fichas optimizadas y consejos de
+            un experto virtual para cada modalidad.
           </p>
-          
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-4">
+
+          <div className="mt-9 flex flex-col sm:flex-row justify-center items-center gap-3">
             <Link
-              href="/advice"
-              className="w-full sm:w-auto bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 text-slate-950 font-extrabold px-8 py-4 rounded-xl shadow-lg shadow-cyan-500/15 hover:shadow-cyan-400/25 active:scale-[0.98] transition-all tracking-wide text-base"
+              href="/categories/canas"
+              className="w-full sm:w-auto bg-sky-600 hover:bg-sky-700 text-white font-bold px-8 py-3.5 rounded-xl shadow-lg shadow-sky-600/20 hover:shadow-sky-600/30 active:scale-[0.98] transition-all"
             >
-              Consultar Asistente IA 🤖
+              Explorar catálogo
             </Link>
             <Link
-              href="/categories/spinning"
-              className="w-full sm:w-auto bg-slate-900/80 hover:bg-slate-900 border border-white/10 hover:border-cyan-500/30 text-slate-200 hover:text-white font-bold px-8 py-4 rounded-xl active:scale-[0.98] transition-all text-base"
+              href="/advice"
+              className="w-full sm:w-auto bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 font-bold px-8 py-3.5 rounded-xl shadow-sm active:scale-[0.98] transition-all"
             >
-              Explorar Aparejos
+              Consultar Asistente IA 🤖
             </Link>
           </div>
         </div>
 
-        {/* Wave divider */}
-        <OceanWaves className="absolute bottom-0 left-0 w-full h-20 md:h-28" />
+        <OceanWaves className="block w-full h-16 md:h-24" />
       </section>
 
-      {/* Categories Section */}
-      <section className="max-w-7xl mx-auto px-4 py-24 sm:px-6 lg:px-8">
-        <div className="text-center space-y-4 mb-16">
-          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
-            Equípate por Modalidad
+      {/* Categories */}
+      <section className="max-w-7xl mx-auto px-4 py-20 sm:px-6 lg:px-8">
+        <div className="text-center space-y-3 mb-14">
+          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900">
+            Compra por categoría
           </h2>
-          <p className="text-slate-400 max-w-lg mx-auto text-sm md:text-base">
-            Selecciona tu estilo de pesca para ver los mejores productos y recomendaciones.
+          <p className="text-slate-500 max-w-lg mx-auto">
+            Encuentra rápido lo que buscas entre nuestras {FISHING_TYPES.length} categorías de pesca.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
           {FISHING_TYPES.map((type) => (
             <Link
               key={type.id}
               href={`/categories/${type.id}`}
-              className="group relative rounded-2xl p-6 bg-slate-900/40 border border-white/5 hover:border-cyan-500/30 hover:shadow-lg hover:shadow-cyan-500/5 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden"
+              className="group relative rounded-2xl p-5 md:p-6 bg-white border border-slate-200 hover:border-sky-300 hover:shadow-lg hover:shadow-sky-600/5 hover:-translate-y-1 transition-all duration-300 flex flex-col"
             >
-              {/* Internal glow matching category color */}
-              <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${type.color} rounded-full blur-2xl -z-10 group-hover:opacity-150 transition-opacity`} />
-              
-              <div>
-                <span className="inline-flex text-cyan-400 p-3.5 bg-slate-950/80 rounded-xl mb-6 shadow-inner border border-white/5 group-hover:text-cyan-300 group-hover:border-cyan-500/20 transition-colors">
-                  <CategoryIcon id={type.id} className="w-8 h-8" strokeWidth={1.4} />
-                </span>
-                <h3 className="text-xl font-bold text-slate-100 group-hover:text-cyan-400 transition-colors duration-200 mb-3">
-                  {type.name}
-                </h3>
-                <p className="text-slate-400 text-sm leading-relaxed mb-6">
-                  {type.description}
-                </p>
-              </div>
-              
-              <div className="flex items-center gap-1.5 text-xs font-bold text-cyan-400 uppercase tracking-widest pt-2">
-                Ver Equipamiento <span className="group-hover:translate-x-1 transition-transform">→</span>
-              </div>
+              <span className={`inline-flex text-slate-700 p-3 rounded-xl mb-4 bg-gradient-to-br ${type.color} ring-1 ring-slate-900/5`}>
+                <CategoryIcon id={type.id} className="w-7 h-7" strokeWidth={1.5} />
+              </span>
+              <h3 className="text-base md:text-lg font-bold text-slate-900 group-hover:text-sky-600 transition-colors mb-1.5">
+                {type.name}
+              </h3>
+              <p className="text-slate-500 text-sm leading-relaxed line-clamp-2 flex-1">
+                {type.description}
+              </p>
+              <span className="flex items-center gap-1 text-xs font-bold text-sky-600 uppercase tracking-wide mt-4">
+                Ver productos
+                <span className="group-hover:translate-x-1 transition-transform">→</span>
+              </span>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* Value Prop Section */}
-      <section className="border-t border-white/5 bg-slate-950/40 backdrop-blur-sm py-24">
+      {/* Value props */}
+      <section className="bg-white border-y border-slate-200 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center space-y-4 mb-20">
-            <h2 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
-              ¿Por qué elegir PescaPlus?
-            </h2>
-            <p className="text-slate-400 max-w-lg mx-auto text-sm">
-              Diseñamos la herramienta que todo pescador necesita antes de comprar su próximo aparejo.
+          <div className="text-center space-y-3 mb-14">
+            <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">¿Por qué PescaPlus?</h2>
+            <p className="text-slate-500 max-w-lg mx-auto">
+              La herramienta que todo pescador necesita antes de comprar su próximo aparejo.
             </p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div className="space-y-4 text-center md:text-left flex flex-col items-center md:items-start">
-              <span className="text-4xl p-4 bg-cyan-500/10 text-cyan-400 rounded-2xl border border-cyan-500/20 mb-2">
-                🤖
-              </span>
-              <h3 className="text-xl font-bold text-slate-100">Asistente IA Experto</h3>
-              <p className="text-slate-400 text-sm leading-relaxed text-center md:text-left">
-                Nuestro motor de IA simula las opiniones de un guía de pesca profesional para sugerirte aparejos perfectos según tu modalidad.
-              </p>
-            </div>
-            
-            <div className="space-y-4 text-center md:text-left flex flex-col items-center md:items-start">
-              <span className="text-4xl p-4 bg-teal-500/10 text-teal-400 rounded-2xl border border-teal-500/20 mb-2">
-                🎯
-              </span>
-              <h3 className="text-xl font-bold text-slate-100">Filtrado de AliExpress</h3>
-              <p className="text-slate-400 text-sm leading-relaxed text-center md:text-left">
-                Evitamos productos engañosos. Filtramos las mejores cañas y carretes basándonos en puntuaciones y valoraciones de compradores reales.
-              </p>
-            </div>
-            
-            <div className="space-y-4 text-center md:text-left flex flex-col items-center md:items-start">
-              <span className="text-4xl p-4 bg-amber-500/10 text-amber-400 rounded-2xl border border-amber-500/20 mb-2">
-                🔗
-              </span>
-              <h3 className="text-xl font-bold text-slate-100">Redirección Segura</h3>
-              <p className="text-slate-400 text-sm leading-relaxed text-center md:text-left">
-                Generamos enlaces directos de afiliación verificados de AliExpress para que realices tus transacciones de manera rápida y segura.
-              </p>
-            </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                icon: '🤖',
+                tint: 'bg-sky-50 text-sky-600',
+                title: 'Fichas optimizadas con IA',
+                text: 'Cada producto tiene título y descripción redactados por IA, claros y honestos, sin la típica jerga confusa de los marketplaces.',
+              },
+              {
+                icon: '🎯',
+                tint: 'bg-emerald-50 text-emerald-600',
+                title: 'Selección de AliExpress',
+                text: 'Filtramos las mejores cañas, carretes y aparejos según ventas y valoraciones de compradores reales.',
+              },
+              {
+                icon: '🔗',
+                tint: 'bg-amber-50 text-amber-600',
+                title: 'Compra segura',
+                text: 'Te redirigimos con enlaces oficiales de AliExpress para que compres de forma rápida y protegida.',
+              },
+            ].map((f) => (
+              <div key={f.title} className="text-center md:text-left space-y-3">
+                <span className={`inline-flex text-2xl w-14 h-14 items-center justify-center rounded-2xl ${f.tint}`}>
+                  {f.icon}
+                </span>
+                <h3 className="text-lg font-bold text-slate-900">{f.title}</h3>
+                <p className="text-slate-500 text-sm leading-relaxed">{f.text}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>

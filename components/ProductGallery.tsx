@@ -22,7 +22,7 @@ export default function ProductGallery({ images, videoUrl, title }: ProductGalle
   return (
     <div className="space-y-3">
       {/* Main viewer */}
-      <div className="relative overflow-hidden rounded-2xl bg-slate-950 aspect-square border border-white/5 group">
+      <div className="relative overflow-hidden rounded-2xl bg-slate-50 aspect-square border border-slate-200 group">
         {selected === 'video' && videoUrl ? (
           <video
             src={videoUrl}
@@ -50,7 +50,7 @@ export default function ProductGallery({ images, videoUrl, title }: ProductGalle
             <button
               onClick={() => setSelected('video')}
               className={`relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
-                selected === 'video' ? 'border-cyan-400' : 'border-white/10 hover:border-white/30'
+                selected === 'video' ? 'border-sky-500' : 'border-slate-200 hover:border-slate-300'
               }`}
               aria-label="Ver vídeo"
             >
@@ -63,7 +63,7 @@ export default function ProductGallery({ images, videoUrl, title }: ProductGalle
               key={img + idx}
               onClick={() => setSelected(idx)}
               className={`relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
-                selected === idx ? 'border-cyan-400' : 'border-white/10 hover:border-white/30'
+                selected === idx ? 'border-sky-500' : 'border-slate-200 hover:border-slate-300'
               }`}
               aria-label={`Imagen ${idx + 1}`}
             >
