@@ -117,6 +117,11 @@ const OVERRIDES = [
   ['Aplicadores de pesca de dientes', 'herramientas', 'otras'],
   ['Anzuelos de Pesca Corrosión Resistente', 'anzuelos', 'simples'],
   ['Anzuelos de pesca 100 unidades', 'anzuelos', 'simples'],
+  // Corrections for the category-reinforcement import (mislabelled by search):
+  ['Swimbait Multiarticular', 'senuelos', 'duros'],
+  ['Cuchara Giratoria Triple Anzuelo', 'senuelos', 'cucharillas'],
+  ['Soporte de caña de pesca para embarcaciones', 'equipo', 'accesorios'],
+  ['Soporte Inflable para', 'equipo', 'accesorios'],
 ]
 
 const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
