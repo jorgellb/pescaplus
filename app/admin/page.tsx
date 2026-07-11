@@ -77,14 +77,14 @@ export default function AdminProductsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">Productos</h1>
-          <p className="text-sm text-slate-400 mt-1">
+          <h1 className="text-2xl font-extrabold text-ink tracking-tight">Productos</h1>
+          <p className="text-sm text-ink/60 mt-1">
             Crea, edita y elimina productos manualmente o con ayuda de la IA.
           </p>
         </div>
         <button
           onClick={() => setCreating(true)}
-          className="inline-flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 text-slate-950 font-extrabold text-sm px-5 py-2.5 rounded-xl shadow-md shadow-cyan-500/10 active:scale-[0.98] transition-all"
+          className="inline-flex items-center gap-2 bg-ink text-paper hover:bg-accent font-extrabold text-sm px-5 py-2.5 rounded-xl shadow-md  active:scale-[0.98] transition-all"
         >
           <span className="text-base leading-none">＋</span> Nuevo producto
         </button>
@@ -99,7 +99,7 @@ export default function AdminProductsPage() {
       </div>
 
       {backend && (
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-ink/50">
           Almacenamiento activo:{' '}
           <span className={backend === 'database' ? 'text-emerald-400 font-semibold' : 'text-amber-400 font-semibold'}>
             {backend === 'database' ? 'Base de datos (persistente)' : 'En memoria (demo, se reinicia con el servidor)'}
@@ -112,21 +112,21 @@ export default function AdminProductsPage() {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Filtrar por título…"
-        className="w-full sm:max-w-xs px-4 py-2.5 bg-slate-950/80 border border-white/10 rounded-xl text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500/50 text-sm transition-all"
+        className="w-full sm:max-w-xs px-4 py-2.5 bg-paper border border-ink/15 rounded-xl text-ink placeholder-ink/40 focus:outline-none focus:border-accent text-sm transition-all"
       />
 
       {/* Table */}
       {loading ? (
-        <div className="py-24 text-center text-slate-400 text-sm">Cargando productos…</div>
+        <div className="py-24 text-center text-ink/60 text-sm">Cargando productos…</div>
       ) : filtered.length === 0 ? (
-        <div className="py-20 text-center text-slate-400 text-sm border border-white/5 rounded-2xl bg-slate-900/20">
+        <div className="py-20 text-center text-ink/60 text-sm border border-ink/15 rounded-2xl bg-white">
           No hay productos que coincidan.
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-white/5 bg-slate-900/20">
+        <div className="overflow-x-auto rounded-2xl border border-ink/15 bg-white">
           <table className="w-full text-sm min-w-[640px]">
             <thead>
-              <tr className="text-left text-[11px] uppercase tracking-widest text-slate-500 border-b border-white/5">
+              <tr className="text-left text-[11px] uppercase tracking-widest text-ink/50 border-b border-ink/15">
                 <th className="px-4 py-3 font-bold">Producto</th>
                 <th className="px-4 py-3 font-bold">Modalidad</th>
                 <th className="px-4 py-3 font-bold">Precio</th>
@@ -136,35 +136,35 @@ export default function AdminProductsPage() {
             </thead>
             <tbody>
               {filtered.map((p) => (
-                <tr key={p.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
+                <tr key={p.id} className="border-b border-ink/15 last:border-0 hover:bg-white/[0.02]">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="relative w-11 h-11 rounded-lg overflow-hidden bg-slate-950 border border-white/5 flex-shrink-0">
+                      <div className="relative w-11 h-11 rounded-lg overflow-hidden bg-paper border border-ink/15 flex-shrink-0">
                         <ProductImage src={p.imageUrl} alt={p.title} className="absolute inset-0 w-full h-full object-cover" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-semibold text-slate-200 truncate max-w-[280px]">{p.title}</p>
-                        <p className="text-[11px] text-slate-500">{p.inStock ? 'En stock' : 'Sin stock'}</p>
+                        <p className="font-semibold text-ink truncate max-w-[280px]">{p.title}</p>
+                        <p className="text-[11px] text-ink/50">{p.inStock ? 'En stock' : 'Sin stock'}</p>
                       </div>
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="text-xs font-semibold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded-full">
+                    <span className="text-xs font-semibold text-accent bg-accent/10 border border-accent/40 px-2 py-0.5 rounded-full">
                       {fishingLabel(p.typeFishing)}
                     </span>
                   </td>
-                  <td className="px-4 py-3 font-bold text-cyan-300">
-                    {p.price.toFixed(2)} <span className="text-xs text-slate-400 font-medium">{p.currency}</span>
+                  <td className="px-4 py-3 font-bold text-accent">
+                    {p.price.toFixed(2)} <span className="text-xs text-ink/60 font-medium">{p.currency}</span>
                   </td>
-                  <td className="px-4 py-3 text-slate-300">
+                  <td className="px-4 py-3 text-ink/80">
                     <span className="text-amber-400">★</span> {p.rating.toFixed(1)}{' '}
-                    <span className="text-xs text-slate-500">({p.reviews})</span>
+                    <span className="text-xs text-ink/50">({p.reviews})</span>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => setEditing(p)}
-                        className="text-xs font-semibold text-slate-300 hover:text-cyan-400 bg-slate-800/60 hover:bg-slate-800 border border-white/5 px-3 py-1.5 rounded-lg transition-all"
+                        className="text-xs font-semibold text-ink/80 hover:text-accent bg-ink/5 hover:bg-ink/10 border border-ink/15 px-3 py-1.5 rounded-lg transition-all"
                       >
                         Editar
                       </button>
@@ -192,11 +192,11 @@ export default function AdminProductsPage() {
 
 function StatCard({ label, value, icon }: { label: string; value: string; icon: string }) {
   return (
-    <div className="rounded-2xl border border-white/5 bg-slate-900/30 p-4 flex items-center gap-3">
-      <span className="text-2xl p-2.5 bg-slate-950/60 rounded-xl border border-white/5">{icon}</span>
+    <div className="rounded-2xl border border-ink/15 bg-white p-4 flex items-center gap-3">
+      <span className="text-2xl p-2.5 bg-paper rounded-xl border border-ink/15">{icon}</span>
       <div>
-        <p className="text-xl font-extrabold text-slate-100 leading-none">{value}</p>
-        <p className="text-[11px] uppercase tracking-widest text-slate-500 mt-1">{label}</p>
+        <p className="text-xl font-extrabold text-ink leading-none">{value}</p>
+        <p className="text-[11px] uppercase tracking-widest text-ink/50 mt-1">{label}</p>
       </div>
     </div>
   )

@@ -25,15 +25,15 @@ export default function AdminChrome({
   }
 
   return (
-    <div className="min-h-screen bg-[#060b13] text-slate-100 flex flex-col selection:bg-cyan-500 selection:text-slate-900">
+    <div className="min-h-screen bg-paper text-ink flex flex-col selection:bg-accent selection:text-paper">
       {/* Top bar */}
-      <header className="sticky top-0 z-40 border-b border-white/5 bg-slate-950/70 backdrop-blur-lg">
+      <header className="sticky top-0 z-40 border-b-2 border-ink bg-paper">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-6">
             <Link href="/admin" className="flex items-center gap-2">
               <span className="text-2xl">🎣</span>
-              <span className="font-black tracking-tight text-slate-100">
-                PescaPlus <span className="text-cyan-400">Admin</span>
+              <span className="font-black tracking-tight text-ink">
+                PescaPlus <span className="text-accent">Admin</span>
               </span>
             </Link>
             <nav className="hidden sm:flex items-center gap-1">
@@ -45,8 +45,8 @@ export default function AdminChrome({
                     href={item.href}
                     className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                       active
-                        ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'
-                        : 'text-slate-300 hover:text-white hover:bg-white/5 border border-transparent'
+                        ? 'bg-accent/10 text-accent border border-accent/40'
+                        : 'text-ink/80 hover:text-ink hover:bg-white/5 border border-transparent'
                     }`}
                   >
                     <span className="mr-1.5">{item.icon}</span>
@@ -61,13 +61,13 @@ export default function AdminChrome({
             <Link
               href="/"
               target="_blank"
-              className="hidden sm:inline-flex text-xs font-semibold text-slate-400 hover:text-cyan-400 px-3 py-2 transition-colors"
+              className="hidden sm:inline-flex text-xs font-semibold text-ink/60 hover:text-accent px-3 py-2 transition-colors"
             >
               Ver tienda ↗
             </Link>
             <button
               onClick={logout}
-              className="text-xs font-bold text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-800 border border-white/5 px-4 py-2 rounded-lg transition-all"
+              className="text-xs font-bold text-ink/80 hover:text-ink bg-ink/5 hover:bg-ink/10 border border-ink/15 px-4 py-2 rounded-lg transition-all"
             >
               Salir
             </button>
@@ -84,8 +84,8 @@ export default function AdminChrome({
                 href={item.href}
                 className={`flex-1 text-center px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                   active
-                    ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'
-                    : 'text-slate-300 hover:bg-white/5 border border-transparent'
+                    ? 'bg-accent/10 text-accent border border-accent/40'
+                    : 'text-ink/80 hover:bg-white/5 border border-transparent'
                 }`}
               >
                 <span className="mr-1.5">{item.icon}</span>

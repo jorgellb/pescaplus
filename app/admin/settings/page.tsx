@@ -19,8 +19,8 @@ interface Settings {
 }
 
 const field =
-  'w-full px-3 py-2.5 bg-slate-950/80 border border-white/10 rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/10 text-sm transition-all'
-const labelCls = 'text-[11px] font-bold uppercase tracking-widest text-slate-400'
+  'w-full px-3 py-2.5 bg-paper border border-ink/15 rounded-lg text-ink placeholder-ink/40 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 text-sm transition-all'
+const labelCls = 'text-[11px] font-bold uppercase tracking-widest text-ink/60'
 
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<Settings | null>(null)
@@ -106,7 +106,7 @@ export default function AdminSettingsPage() {
   }
 
   if (!settings || !integrations) {
-    return <div className="py-24 text-center text-slate-400 text-sm">Cargando configuración…</div>
+    return <div className="py-24 text-center text-ink/60 text-sm">Cargando configuración…</div>
   }
 
   const set = <K extends keyof Settings>(key: K, value: Settings[K]) =>
@@ -115,13 +115,13 @@ export default function AdminSettingsPage() {
   return (
     <div className="space-y-8 max-w-3xl">
       <div>
-        <h1 className="text-2xl font-extrabold text-white tracking-tight">Configuración</h1>
-        <p className="text-sm text-slate-400 mt-1">Integraciones, valores por defecto y mantenimiento del catálogo.</p>
+        <h1 className="text-2xl font-extrabold text-ink tracking-tight">Configuración</h1>
+        <p className="text-sm text-ink/60 mt-1">Integraciones, valores por defecto y mantenimiento del catálogo.</p>
       </div>
 
       {/* Integrations */}
       <section className="space-y-3">
-        <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400">Estado de integraciones</h2>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-ink/60">Estado de integraciones</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <IntegrationRow
             title="Base de datos"
@@ -151,8 +151,8 @@ export default function AdminSettingsPage() {
       </section>
 
       {/* Editable settings */}
-      <section className="space-y-4 p-5 rounded-2xl border border-white/5 bg-slate-900/30">
-        <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400">Valores por defecto</h2>
+      <section className="space-y-4 p-5 rounded-2xl border border-ink/15 bg-white">
+        <h2 className="text-xs font-bold uppercase tracking-widest text-ink/60">Valores por defecto</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1">
             <label className={labelCls}>Nombre de la tienda</label>
@@ -189,36 +189,36 @@ export default function AdminSettingsPage() {
             type="checkbox"
             checked={settings.aiAssistantEnabled}
             onChange={(e) => set('aiAssistantEnabled', e.target.checked)}
-            className="accent-cyan-500"
+            className="accent-[#1b39ff]"
           />
-          <span className="text-sm text-slate-300">Habilitar asistente IA en la tienda</span>
+          <span className="text-sm text-ink/80">Habilitar asistente IA en la tienda</span>
         </label>
 
         <div className="flex items-center gap-3 pt-2">
           <button
             onClick={saveSettings}
             disabled={saving}
-            className="bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 text-slate-950 font-extrabold text-sm px-5 py-2.5 rounded-xl shadow-md shadow-cyan-500/10 active:scale-[0.98] transition-all disabled:opacity-40"
+            className="bg-ink text-paper hover:bg-accent font-extrabold text-sm px-5 py-2.5 rounded-xl shadow-md  active:scale-[0.98] transition-all disabled:opacity-40"
           >
             {saving ? 'Guardando…' : 'Guardar ajustes'}
           </button>
-          {note && <span className="text-xs text-slate-400">{note}</span>}
+          {note && <span className="text-xs text-ink/60">{note}</span>}
         </div>
       </section>
 
       {/* Catalog maintenance */}
-      <section className="space-y-4 p-5 rounded-2xl border border-white/5 bg-slate-900/30">
-        <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400">Mantenimiento del catálogo</h2>
+      <section className="space-y-4 p-5 rounded-2xl border border-ink/15 bg-white">
+        <h2 className="text-xs font-bold uppercase tracking-widest text-ink/60">Mantenimiento del catálogo</h2>
         <div className="flex flex-wrap gap-3">
           <button
             onClick={refreshPrices}
-            className="text-sm font-semibold text-emerald-300 bg-emerald-500/5 hover:bg-emerald-500/10 border border-emerald-500/20 px-4 py-2.5 rounded-xl transition-all"
+            className="text-sm font-semibold text-emerald-300 bg-ink/5 hover:bg-ink/10 border border-emerald-500/20 px-4 py-2.5 rounded-xl transition-all"
           >
             ♻️ Refrescar precios y enlaces (AliExpress)
           </button>
           <button
             onClick={exportCatalog}
-            className="text-sm font-semibold text-slate-200 bg-slate-800/60 hover:bg-slate-800 border border-white/5 px-4 py-2.5 rounded-xl transition-all"
+            className="text-sm font-semibold text-ink bg-ink/5 hover:bg-ink/10 border border-ink/15 px-4 py-2.5 rounded-xl transition-all"
           >
             ⬇️ Exportar catálogo (JSON)
           </button>
@@ -236,11 +236,11 @@ export default function AdminSettingsPage() {
 
 function IntegrationRow({ title, ok, detail }: { title: string; ok: boolean; detail: string }) {
   return (
-    <div className="flex items-start gap-3 p-3.5 rounded-xl border border-white/5 bg-slate-950/40">
-      <span className={`mt-0.5 w-2.5 h-2.5 rounded-full flex-shrink-0 ${ok ? 'bg-emerald-400' : 'bg-slate-600'}`} />
+    <div className="flex items-start gap-3 p-3.5 rounded-xl border border-ink/15 bg-paper">
+      <span className={`mt-0.5 w-2.5 h-2.5 rounded-full flex-shrink-0 ${ok ? 'bg-emerald-500' : 'bg-ink/30'}`} />
       <div className="min-w-0">
-        <p className="text-sm font-semibold text-slate-200">{title}</p>
-        <p className="text-xs text-slate-500">{detail}</p>
+        <p className="text-sm font-semibold text-ink">{title}</p>
+        <p className="text-xs text-ink/50">{detail}</p>
       </div>
     </div>
   )
