@@ -1,10 +1,17 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Product } from '@/types'
-import { FISHING_TYPES } from '@/lib/fishing'
+import { FISHING_TYPES, SUBCATEGORIES, type Subcategory } from '@/lib/fishing'
 import { renderDescription } from '@/lib/markdown'
 import ProductImage from '@/components/ProductImage'
+
+type TaxCategory = { id: string; name: string; subcategories: Subcategory[] }
+const DEFAULT_TAX: TaxCategory[] = FISHING_TYPES.map((t) => ({
+  id: t.id,
+  name: t.name,
+  subcategories: SUBCATEGORIES[t.id] ?? [],
+}))
 
 interface ProductEditorProps {
   initial: Product | null
@@ -16,6 +23,8 @@ type ImageRow = { url: string; alt: string }
 type FormState = {
   title: string
   typeFishing: string
+  categories: string[]
+  subcategory: string
   price: string
   currency: string
   rating: string
@@ -31,9 +40,12 @@ type FormState = {
 
 function toForm(p: Product | null): FormState {
   const images: ImageRow[] = (p?.images ?? []).map((url, i) => ({ url, alt: p?.imageAlts?.[i] ?? '' }))
+  const primary = p?.typeFishing ?? FISHING_TYPES[0].id
   return {
     title: p?.title ?? '',
-    typeFishing: p?.typeFishing ?? FISHING_TYPES[0].id,
+    typeFishing: primary,
+    categories: p?.categories?.length ? [...new Set([primary, ...p.categories])] : [primary],
+    subcategory: p?.subcategory ?? '',
     price: p ? String(p.price) : '',
     currency: p?.currency ?? 'EUR',
     rating: p ? String(p.rating) : '4.6',
@@ -65,6 +77,36 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((f) => ({ ...f, [key]: value }))
+
+  // --- taxonomy (categories + subcategories, with admin overrides) ---
+  const [tax, setTax] = useState<TaxCategory[]>(DEFAULT_TAX)
+  useEffect(() => {
+    fetch('/api/admin/taxonomy')
+      .then((r) => r.json())
+      .then((d) => { if (d.success && Array.isArray(d.taxonomy) && d.taxonomy.length) setTax(d.taxonomy) })
+      .catch(() => {})
+  }, [])
+
+  const primarySubs = tax.find((c) => c.id === form.typeFishing)?.subcategories ?? []
+
+  const toggleCategory = (id: string) =>
+    setForm((f) => {
+      const has = f.categories.includes(id)
+      let categories = has ? f.categories.filter((c) => c !== id) : [...f.categories, id]
+      if (categories.length === 0) categories = [id] // never leave it empty
+      // If the primary was removed, promote the first remaining category.
+      const typeFishing = categories.includes(f.typeFishing) ? f.typeFishing : categories[0]
+      const subcategory = typeFishing === f.typeFishing ? f.subcategory : ''
+      return { ...f, categories, typeFishing, subcategory }
+    })
+
+  const setPrimary = (id: string) =>
+    setForm((f) => ({
+      ...f,
+      typeFishing: id,
+      categories: f.categories.includes(id) ? f.categories : [...f.categories, id],
+      subcategory: '',
+    }))
 
   // --- image manager ---
   const setImage = (i: number, patch: Partial<ImageRow>) =>
@@ -126,6 +168,7 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
           price: d.price != null ? String(d.price) : f.price,
           currency: d.currency ?? f.currency,
           typeFishing: d.typeFishing ?? f.typeFishing,
+          categories: [...new Set([d.typeFishing ?? f.typeFishing, ...f.categories])],
           rating: d.rating != null ? String(d.rating) : f.rating,
           reviews: d.reviews != null ? String(d.reviews) : f.reviews,
           affiliateUrl: d.affiliateUrl || f.affiliateUrl,
@@ -166,6 +209,8 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
       affiliateUrl: form.affiliateUrl.trim(),
       category: 'fishing',
       typeFishing: form.typeFishing,
+      categories: [...new Set([form.typeFishing, ...form.categories])],
+      subcategory: form.subcategory,
       rating: parseFloat(form.rating) || 0,
       reviews: parseInt(form.reviews, 10) || 0,
       inStock: form.inStock,
@@ -245,21 +290,57 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className={labelCls}>Categoría</label>
-                  <select value={form.typeFishing} onChange={(e) => set('typeFishing', e.target.value)} className={field}>
-                    {FISHING_TYPES.map((t) => (
+                  <label className={labelCls}>Categoría principal</label>
+                  <select value={form.typeFishing} onChange={(e) => setPrimary(e.target.value)} className={field}>
+                    {tax.map((t) => (
                       <option key={t.id} value={t.id}>{t.name}</option>
                     ))}
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <label className={labelCls}>Stock</label>
-                  <label className="flex items-center gap-2 h-[42px] px-3 bg-white border border-ink/25 rounded-lg cursor-pointer">
-                    <input type="checkbox" checked={form.inStock} onChange={(e) => set('inStock', e.target.checked)} className="accent-[#1b39ff]" />
-                    <span className="text-sm text-ink/50">Disponible</span>
-                  </label>
+                  <label className={labelCls}>Subcategoría</label>
+                  <select value={form.subcategory} onChange={(e) => set('subcategory', e.target.value)} className={field}>
+                    <option value="">— Sin subcategoría —</option>
+                    {primarySubs.map((s) => (
+                      <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Categories (multi) + stock */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="sm:col-span-2 space-y-1.5">
+              <label className={labelCls}>Categorías (marca una o varias · ★ = principal)</label>
+              <div className="flex flex-wrap gap-1.5">
+                {tax.map((t) => {
+                  const on = form.categories.includes(t.id)
+                  const isPrimary = form.typeFishing === t.id
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => toggleCategory(t.id)}
+                      className={`px-2.5 py-1.5 text-[11px] font-bold rounded-lg border transition-colors ${
+                        on ? 'bg-ink text-white border-ink' : 'bg-white text-ink/60 border-ink/20 hover:border-ink/40'
+                      }`}
+                      title={on ? 'Quitar de esta categoría' : 'Añadir a esta categoría'}
+                    >
+                      {isPrimary && '★ '}{t.name}
+                    </button>
+                  )
+                })}
+              </div>
+              <p className="text-[10px] text-ink/50">El producto aparecerá en todas las categorías marcadas. La principal define su URL y migas de pan.</p>
+            </div>
+            <div className="space-y-1">
+              <label className={labelCls}>Stock</label>
+              <label className="flex items-center gap-2 h-[42px] px-3 bg-white border border-ink/25 rounded-lg cursor-pointer">
+                <input type="checkbox" checked={form.inStock} onChange={(e) => set('inStock', e.target.checked)} className="accent-[#1b39ff]" />
+                <span className="text-sm text-ink/50">Disponible</span>
+              </label>
             </div>
           </div>
 

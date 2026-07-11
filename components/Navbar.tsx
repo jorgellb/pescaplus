@@ -9,6 +9,7 @@ import CategoryIcon from '@/components/graphics/CategoryIcon'
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [catOpen, setCatOpen] = useState(false)
+  const [names, setNames] = useState<Record<string, string>>({})
   const pathname = usePathname()
   const catRef = useRef<HTMLDivElement>(null)
 
@@ -19,6 +20,20 @@ export default function Navbar() {
     document.addEventListener('mousedown', onClick)
     return () => document.removeEventListener('mousedown', onClick)
   }, [])
+
+  // Reflect admin category renames in the nav.
+  useEffect(() => {
+    fetch('/api/taxonomy')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success && Array.isArray(d.taxonomy)) {
+          setNames(Object.fromEntries(d.taxonomy.map((c: { id: string; name: string }) => [c.id, c.name])))
+        }
+      })
+      .catch(() => {})
+  }, [])
+
+  const catName = (id: string, fallback: string) => names[id] ?? fallback
 
   const isActive = (href: string) => pathname === href
   const navLink = (active: boolean) =>
@@ -65,7 +80,7 @@ export default function Navbar() {
                         }`}
                       >
                         <CategoryIcon id={type.id} className="w-5 h-5 flex-shrink-0" strokeWidth={1.8} />
-                        <span className="text-sm font-bold uppercase tracking-tight truncate">{type.name}</span>
+                        <span className="text-sm font-bold uppercase tracking-tight truncate">{catName(type.id, type.name)}</span>
                       </Link>
                     ))}
                   </div>
@@ -140,7 +155,7 @@ export default function Navbar() {
                 }`}
               >
                 <CategoryIcon id={type.id} className="w-5 h-5 flex-shrink-0" strokeWidth={1.8} />
-                <span className="truncate">{type.name}</span>
+                <span className="truncate">{catName(type.id, type.name)}</span>
               </Link>
             ))}
           </div>

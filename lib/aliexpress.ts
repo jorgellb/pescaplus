@@ -130,6 +130,7 @@ function normalize(raw: RawAliProduct, typeFishing: string): Product {
     affiliateUrl: raw.promotion_link || raw.product_detail_url || '',
     category: raw.first_level_category_name ?? 'fishing',
     typeFishing,
+    categories: [typeFishing],
     subcategory: '',
     rating: Number.isFinite(rate) ? Math.min(rate / 20, 5) : 0,
     reviews: raw.lastest_volume ?? 0,

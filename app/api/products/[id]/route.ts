@@ -46,6 +46,8 @@ const productPatchSchema = z.object({
   affiliateUrl: z.string().max(2200).optional(),
   category: z.string().max(60).optional(),
   typeFishing: z.string().min(1).max(40).optional(),
+  categories: z.array(z.string().max(40)).max(11).optional(),
+  subcategory: z.string().max(40).optional(),
   rating: z.number().min(0).max(5).optional(),
   reviews: z.number().int().min(0).optional(),
   inStock: z.boolean().optional(),
@@ -72,7 +74,9 @@ export async function PATCH(
       return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 })
     }
     revalidatePath(`/products/${id}`)
-    revalidatePath(`/categories/${product.typeFishing}`)
+    for (const cat of product.categories?.length ? product.categories : [product.typeFishing]) {
+      revalidatePath(`/categories/${cat}`)
+    }
     return NextResponse.json({ success: true, product })
   } catch (error) {
     console.error('Error updating product:', error)

@@ -20,7 +20,8 @@ model Product {
   currency    String   @default("EUR")
   affiliateUrl String
   category    String
-  typeFishing String   // spinning, flyfishing, carp, etc.
+  typeFishing String   // primary category (spinning, flyfishing, carp, etc.)
+  categories  String[] @default([]) // all main categories (includes typeFishing)
   subcategory String   @default("") // gear/technique within typeFishing (see SUBCATEGORIES)
   rating      Float    @default(0)
   reviews     Int      @default(0)
@@ -66,6 +67,11 @@ model Guide {
   @@index([published])
 }
 
+model Setting {
+  key       String   @id
+  value     String   // JSON blob (e.g. taxonomy overrides)
+  updatedAt DateTime @updatedAt
+}
 model ProductClick {
   id           String   @id @default(cuid())
   productId    String

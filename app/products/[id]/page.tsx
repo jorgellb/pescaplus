@@ -3,7 +3,7 @@ import Link from 'next/link'
 import Layout from '@/components/Layout'
 import ProductCard from '@/components/ProductCard'
 import ProductGallery from '@/components/ProductGallery'
-import { fishingLabel } from '@/lib/fishing'
+import { getTaxonomy, categoryName } from '@/lib/taxonomy-store'
 import { resolveProduct, relatedProducts } from '@/lib/product-service'
 import { renderDescription } from '@/lib/markdown'
 import { CATALOG } from '@/lib/catalog'
@@ -56,7 +56,7 @@ export default async function ProductPage({ params }: Params) {
   }
 
   const related = await relatedProducts(product)
-  const modalityLabel = fishingLabel(product.typeFishing)
+  const modalityLabel = categoryName(await getTaxonomy(), product.typeFishing)
 
   const breadcrumbLd = breadcrumbJsonLd([
     { name: 'Inicio', url: SITE_URL },

@@ -4,6 +4,7 @@ import CategoryIcon from '@/components/graphics/CategoryIcon'
 import CategoryBrowser from './CategoryBrowser'
 import { FISHING_TYPES, getFishingType } from '@/lib/fishing'
 import { getTrendingRanked } from '@/lib/trending'
+import { getTaxonomy, categoryName, subcategoriesOf } from '@/lib/taxonomy-store'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
 
 type Params = { params: Promise<{ category: string }> }
@@ -18,13 +19,14 @@ export function generateStaticParams() {
 export default async function CategoryPage({ params }: Params) {
   const { category } = await params
   const fishingType = getFishingType(category)
-  const categoryName = fishingType?.name ?? category
+  const [products, taxonomy] = await Promise.all([getTrendingRanked(category), getTaxonomy()])
+  const catName = categoryName(taxonomy, category)
+  const subcategories = subcategoriesOf(taxonomy, category)
   const categoryDescription = fishingType?.tagline ?? 'Los mejores aparejos para tus salidas de pesca.'
-  const products = await getTrendingRanked(category)
 
   const breadcrumbLd = breadcrumbJsonLd([
     { name: 'Inicio', url: SITE_URL },
-    { name: categoryName },
+    { name: catName },
   ])
 
   return (
@@ -34,7 +36,7 @@ export default async function CategoryPage({ params }: Params) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-5">
             <Link href="/" className="hover:text-accent">Inicio</Link> <span className="mx-1">/</span>{' '}
-            <span className="text-ink">{categoryName}</span>
+            <span className="text-ink">{catName}</span>
           </nav>
           <div className="flex items-center gap-5">
             {fishingType && (
@@ -43,7 +45,7 @@ export default async function CategoryPage({ params }: Params) {
               </span>
             )}
             <div>
-              <h1 className="font-display uppercase text-5xl md:text-6xl leading-none text-ink">{categoryName}</h1>
+              <h1 className="font-display uppercase text-5xl md:text-6xl leading-none text-ink">{catName}</h1>
               <p className="text-ink/60 text-sm md:text-base mt-2 max-w-xl">{categoryDescription}</p>
             </div>
           </div>
@@ -51,7 +53,7 @@ export default async function CategoryPage({ params }: Params) {
       </section>
 
       <section className="max-w-7xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
-        <CategoryBrowser category={category} initialProducts={products} />
+        <CategoryBrowser category={category} initialProducts={products} subcategories={subcategories} />
       </section>
     </Layout>
   )

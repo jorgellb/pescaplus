@@ -21,8 +21,11 @@ export interface Product {
   currency: string
   affiliateUrl: string
   category: string
+  /** Primary category id (canonical URL / breadcrumb). Always present in `categories`. */
   typeFishing: FishingTypeId | string
-  /** Subcategory id within the main category (see SUBCATEGORIES); '' if unset. */
+  /** All main categories this product belongs to (includes the primary `typeFishing`). */
+  categories: string[]
+  /** Subcategory id within the primary category (see SUBCATEGORIES); '' if unset. */
   subcategory: string
   rating: number
   reviews: number

@@ -8,6 +8,7 @@ import type { Metadata } from 'next'
 import { FISHING_TYPES } from '@/lib/fishing'
 import { listProducts } from '@/lib/products-store'
 import { getTrendingProducts } from '@/lib/trending'
+import { getTaxonomy, categoryName } from '@/lib/taxonomy-store'
 
 export const metadata: Metadata = {
   alternates: { canonical: '/' },
@@ -16,7 +17,7 @@ export const metadata: Metadata = {
 export const revalidate = 3600
 
 export default async function Home() {
-  const [all, featured] = await Promise.all([listProducts(), getTrendingProducts(8)])
+  const [all, featured, taxonomy] = await Promise.all([listProducts(), getTrendingProducts(8), getTaxonomy()])
   const withImg = all.filter((p) => p.imageUrl)
   const heroA = withImg[0]
   const heroB = withImg[1]
@@ -103,7 +104,7 @@ export default async function Home() {
                 <CategoryIcon id={type.id} className="w-8 h-8 text-ink group-hover:text-accent transition-colors" strokeWidth={1.6} />
               </div>
               <h3 className="font-display uppercase text-xl md:text-2xl leading-none text-ink group-hover:text-paper transition-colors mt-6">
-                {type.name}
+                {categoryName(taxonomy, type.id)}
               </h3>
             </Link>
           ))}

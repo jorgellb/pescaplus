@@ -8,7 +8,7 @@ import { decodeEntities } from '@/lib/text'
  * This keeps generated data separate from the query helpers below.
  */
 
-type SeedOptional = 'images' | 'imageAlts' | 'videoUrl' | 'seoTitle' | 'seoDescription' | 'aiOptimized' | 'subcategory'
+type SeedOptional = 'images' | 'imageAlts' | 'videoUrl' | 'seoTitle' | 'seoDescription' | 'aiOptimized' | 'subcategory' | 'categories'
 export type CatalogSeed = Omit<Product, SeedOptional> & Partial<Pick<Product, SeedOptional>>
 
 /** Fill media/SEO defaults so catalog seeds satisfy the full Product shape. */
@@ -19,6 +19,7 @@ export function withProductDefaults(p: CatalogSeed): Product {
     title: decodeEntities(p.title),
     description: decodeEntities(p.description),
     subcategory: p.subcategory ?? '',
+    categories: p.categories?.length ? p.categories : [p.typeFishing],
     images,
     imageAlts: (p.imageAlts?.length ? p.imageAlts : []).map(decodeEntities),
     videoUrl: p.videoUrl ?? '',
@@ -58,7 +59,10 @@ export interface ProductFilter {
 export function filterProducts(products: Product[], filter: ProductFilter = {}): Product[] {
   let result = products
   if (filter.typeFishing) {
-    result = result.filter((p) => p.typeFishing === filter.typeFishing)
+    // A product shows in a category if it's the primary OR one of its extra categories.
+    result = result.filter(
+      (p) => p.typeFishing === filter.typeFishing || p.categories?.includes(filter.typeFishing!),
+    )
   }
 
   const terms = filter.search ? normalizeText(filter.search).split(/\s+/).filter(Boolean) : []

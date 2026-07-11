@@ -2,8 +2,8 @@
 
 import { useState, useMemo } from 'react'
 import type { Product } from '@/types'
+import type { Subcategory } from '@/lib/fishing'
 import ProductCard from '@/components/ProductCard'
-import { getSubcategories } from '@/lib/fishing'
 
 type SortKey = 'relevance' | 'price-asc' | 'price-desc' | 'rating'
 
@@ -20,9 +20,11 @@ const inputCls =
 export default function CategoryBrowser({
   category,
   initialProducts,
+  subcategories,
 }: {
   category: string
   initialProducts: Product[]
+  subcategories: Subcategory[]
 }) {
   const [products, setProducts] = useState<Product[]>(initialProducts)
   const [loading, setLoading] = useState(false)
@@ -34,10 +36,10 @@ export default function CategoryBrowser({
   const subFilters = useMemo(() => {
     const counts = new Map<string, number>()
     for (const p of initialProducts) if (p.subcategory) counts.set(p.subcategory, (counts.get(p.subcategory) ?? 0) + 1)
-    return getSubcategories(category)
+    return subcategories
       .filter((s) => counts.has(s.id))
       .map((s) => ({ ...s, count: counts.get(s.id) ?? 0 }))
-  }, [initialProducts, category])
+  }, [initialProducts, subcategories])
 
   const search = async (e: React.FormEvent) => {
     e.preventDefault()

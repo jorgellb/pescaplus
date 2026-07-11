@@ -28,6 +28,7 @@ export type ProductInput = {
   affiliateUrl: string
   category?: string
   typeFishing: string
+  categories?: string[]
   subcategory?: string
   rating?: number
   reviews?: number
@@ -110,6 +111,8 @@ function applyInput(input: ProductInput, id: string): Product {
     affiliateUrl: input.affiliateUrl.trim(),
     category: input.category?.trim() || 'fishing',
     typeFishing: input.typeFishing,
+    // Ensure the primary category is always part of the categories set (deduped).
+    categories: [...new Set([input.typeFishing, ...(input.categories ?? [])].filter(Boolean))],
     subcategory: input.subcategory?.trim() || '',
     rating: input.rating ?? 0,
     reviews: input.reviews ?? 0,
@@ -159,6 +162,7 @@ function toProduct(row: any): Product {
     affiliateUrl: row.affiliateUrl,
     category: row.category,
     typeFishing: row.typeFishing,
+    categories: row.categories?.length ? row.categories : [row.typeFishing],
     subcategory: row.subcategory ?? '',
     rating: row.rating,
     reviews: row.reviews,
