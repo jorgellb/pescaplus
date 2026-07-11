@@ -18,11 +18,11 @@ const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "PescaPlus · Tienda de Afiliados de Pesca con IA",
+    default: "PescaPlus · Tienda especializada de pesca",
     template: "%s · PescaPlus",
   },
   description:
-    "Descubre cañas, carretes y aparejos de pesca seleccionados de AliExpress, con fichas optimizadas por IA y un asistente experto para cada modalidad.",
+    "Cañas, carretes, señuelos y aparejos de pesca seleccionados por expertos, con fichas detalladas y un asesor para cada modalidad. Calidad al mejor precio.",
   applicationName: "PescaPlus",
   keywords: ["pesca", "aparejos", "spinning", "carpfishing", "surfcasting", "señuelos", "carretes", "cañas de pescar"],
   authors: [{ name: "PescaPlus" }],
@@ -31,13 +31,13 @@ export const metadata: Metadata = {
     siteName: "PescaPlus",
     locale: "es_ES",
     url: siteUrl,
-    title: "PescaPlus · Tienda de Afiliados de Pesca con IA",
-    description: "Aparejos de pesca seleccionados con IA y asistente experto por modalidad.",
+    title: "PescaPlus · Tienda especializada de pesca",
+    description: "Aparejos de pesca seleccionados por expertos, con asesor por modalidad.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "PescaPlus · Tienda de Afiliados de Pesca con IA",
-    description: "Aparejos de pesca seleccionados con IA y asistente experto por modalidad.",
+    title: "PescaPlus · Tienda especializada de pesca",
+    description: "Aparejos de pesca seleccionados por expertos, con asesor por modalidad.",
   },
   robots: { index: true, follow: true },
 };
@@ -56,7 +56,7 @@ const orgJsonLd = {
       name: "PescaPlus",
       url: siteUrl,
       description:
-        "Tienda de afiliados de pesca con fichas optimizadas por IA y asistente experto por modalidad.",
+        "Tienda especializada de pesca con fichas detalladas y un asesor experto por modalidad.",
     },
     {
       "@type": "WebSite",

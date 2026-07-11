@@ -82,6 +82,11 @@ TU EXPERIENCIA:
 - Lectura del agua, meteorología, temporadas y comportamiento de las especies.
 - Mantenimiento y cuidado del equipo.
 
+IDENTIDAD (IMPORTANTE):
+- Eres un asesor HUMANO del equipo de PescaPlus; habla en primera persona como pescador experto.
+- NUNCA digas ni insinúes que eres una inteligencia artificial, un modelo, un bot o un asistente automático.
+- NUNCA menciones AliExpress ni ningún otro marketplace o proveedor externo. Si preguntan de dónde salen los productos, di que los selecciona nuestro equipo.
+
 CÓMO RESPONDES:
 - En español claro, práctico y directo; sin relleno.
 - FORMATO OBLIGATORIO: solo texto plano con **negrita**, listas con «- » o pasos numerados y enlaces [texto](/ruta). NUNCA uses tablas Markdown ni etiquetas HTML (nada de |---|, <br>, <table>…).
@@ -114,7 +119,7 @@ const EXPERT_TOPICS: ReadonlyArray<{ keywords: string[]; response: string }> = [
 2. **Elección de Señuelos**: Lleva siempre variedad. Minnows (peces rígidos) para aguas limpias, vinilos (blandos) plomados para rastrear el fondo y paseantes de superficie para el amanecer y atardecer.
 3. **Línea**: Usa hilo trenzado (PE) fino (de 0.12 mm a 0.16 mm) acoplado a un bajo de línea de fluorocarbono de 1.5 metros para que sea invisible para los peces.
 
-¿Te gustaría que te recomiende algún carrete o caña de spinning disponible en AliExpress?`,
+¿Te gustaría que te recomiende algún carrete o caña de spinning disponible en nuestra tienda?`,
   },
   {
     keywords: ['flyfishing', 'mosca', 'fly '],
@@ -124,7 +129,7 @@ const EXPERT_TOPICS: ReadonlyArray<{ keywords: string[]; response: string }> = [
 2. **Deriva Natural**: El secreto del éxito es evitar el 'drag' o arrastre. La mosca debe flotar a la misma velocidad que la corriente del río.
 3. **Moscas Básicas**: Lleva ninfas (como la Oreja de Liebre), secas (como la Adams) y streamers (como el Woolly Bugger) en diferentes tamaños.
 
-¿Deseas que te recomiende algún combo completo de pesca con mosca en AliExpress para empezar?`,
+¿Deseas que te recomiende algún combo completo de pesca con mosca en nuestra tienda para empezar?`,
   },
   {
     keywords: ['carp', 'carpa'],
@@ -134,7 +139,7 @@ const EXPERT_TOPICS: ReadonlyArray<{ keywords: string[]; response: string }> = [
 2. **Montaje Hair Rig**: Es obligatorio. El cebo se sitúa fuera del anzuelo en un hilo ('hair'), lo que permite que la carpa succione con confianza y se clave sola al intentar expulsarlo.
 3. **Cuidado de la Captura**: Usa siempre moqueta de desanzulado para proteger la piel del pez y devuélvelo al agua lo antes posible.
 
-¿Buscas recomendaciones sobre alarmas de mordida inalámbricas o cañas específicas de carpfishing en AliExpress?`,
+¿Buscas recomendaciones sobre alarmas de mordida inalámbricas o cañas específicas de carpfishing en nuestra tienda?`,
   },
   {
     keywords: ['sea', 'mar', 'playa', 'surfcasting'],
@@ -144,7 +149,7 @@ const EXPERT_TOPICS: ReadonlyArray<{ keywords: string[]; response: string }> = [
 2. **Carretes de Bobina Cónica**: Para ganar metros en el surfcasting desde playa, usa carretes tamaño 8000-10000 con bobina cónica que faciliten la salida del hilo.
 3. **Anzuelos Inoxidables**: Utiliza anzuelos de acero al carbono con recubrimientos protectores o acero inoxidable para evitar la oxidación en agua marina.
 
-¿Te gustaría que te recomiende un carrete de surfcasting de alta capacidad de AliExpress?`,
+¿Te gustaría que te recomiende un carrete de surfcasting de alta capacidad de nuestra selección?`,
   },
   {
     keywords: ['baitcasting'],
@@ -154,7 +159,7 @@ const EXPERT_TOPICS: ReadonlyArray<{ keywords: string[]; response: string }> = [
 2. **Uso del Pulgar**: El verdadero freno es tu dedo pulgar. Debe posarse suavemente sobre la bobina durante el lance y frenarla justo antes de que el señuelo toque el agua.
 3. **Líneas Rígidas**: Es más fácil aprender con monofilamento grueso o trenzado de 0.25 mm+ ya que se desenreda más fácilmente si ocurre un nido.
 
-¿Te sugiero algún carrete de baitcasting de alta velocidad en AliExpress?`,
+¿Te sugiero algún carrete de baitcasting de alta velocidad en nuestra tienda?`,
   },
   {
     keywords: ['señuelo', 'lure', 'bait', 'vinilo'],
@@ -164,7 +169,7 @@ const EXPERT_TOPICS: ReadonlyArray<{ keywords: string[]; response: string }> = [
 2. **Señuelos Blandos (vinilos de silicona)**: Súper eficaces en zonas con cobertura y algas. Móntalos con anzuelos Texas (anti-enganche) para pescar en el fondo.
 3. **Cucharas y Jigs**: Muy pesados, ideales para lanzar a gran distancia o pescar en vertical en zonas profundas.
 
-¿Te gustaría ver algún kit de señuelos económicos de AliExpress?`,
+¿Te gustaría ver algún kit de señuelos económicos de nuestra selección?`,
   },
   {
     keywords: ['caña', 'cañas', 'rod'],
@@ -174,13 +179,13 @@ const EXPERT_TOPICS: ReadonlyArray<{ keywords: string[]; response: string }> = [
 2. **Longitud**: Cañas cortas (1.80 m a 2.10 m) para precisión en ríos o desde kayak. Cañas largas (2.70 m a 4.50 m) para pescar a gran distancia desde la orilla.
 3. **Acción**: Rápida (para señuelos y clavados inmediatos) o parabólica/media (para absorber mejor las embestidas de peces grandes).
 
-¿Buscas una caña telescópica compacta o de tramos de carbono en AliExpress?`,
+¿Buscas una caña telescópica compacta o de tramos de carbono en nuestra tienda?`,
   },
 ]
 
 const DEFAULT_RESPONSE = `¡Hola pescador! Bienvenido a **PescaPlus**, tu asistente de pesca inteligente.
 
-Estoy aquí para ayudarte con consejos técnicos, elección de nudos, montaje de líneas y para sugerirte el mejor equipo de AliExpress para tus jornadas.
+Estoy aquí para ayudarte con consejos técnicos, elección de nudos, montaje de líneas y para sugerirte el mejor equipo de nuestra selección para tus jornadas.
 
 Cuéntame un poco más:
 - ¿Qué modalidad vas a practicar? (Spinning, Mosca, Carpa, Mar, Baitcasting)
@@ -389,7 +394,7 @@ function offlineProductDraft(
     description:
       `${title}. Producto recomendado para la modalidad de ${label}. ` +
       `${type?.tagline ?? ''} Excelente relación calidad-precio, valorado positivamente por ` +
-      `la comunidad de pescadores. Disponible en AliExpress con envío internacional.`.trim(),
+      `la comunidad de pescadores. Disponible en nuestra tienda con envío internacional.`.trim(),
     imageUrl: '',
     price,
     currency,
@@ -458,7 +463,7 @@ export async function generateProductDraft(
     return offlineProductDraft(prompt, typeFishing, currency)
   }
 
-  const instruction = `Genera una ficha de producto de pesca para una tienda de afiliados de AliExpress.
+  const instruction = `Genera una ficha de producto de pesca para una tienda de afiliados de nuestra selección.
 Modalidad: ${fishingLabel(typeFishing)} (${typeFishing}).
 Idea del usuario: "${prompt}".
 Responde ÚNICAMENTE con un objeto JSON válido, sin texto adicional, con esta forma exacta:
@@ -538,7 +543,7 @@ export async function generateSeoListing(input: {
     return offlineSeoListing(originalTitle, typeFishing, price, currency)
   }
 
-  const instruction = `Eres un copywriter SEO para una tienda de pesca. A partir de este producto de AliExpress, redacta una ficha ORIGINAL en español (no copies el texto de AliExpress).
+  const instruction = `Eres un copywriter SEO para una tienda de pesca. A partir de este producto de nuestra selección, redacta una ficha ORIGINAL en español (no copies el texto de nuestra selección).
 Título original (solo como referencia): "${cleanTitle(originalTitle)}"
 Modalidad: ${fishingLabel(typeFishing)} (${typeFishing}). Precio aprox: ${price ?? '—'} ${currency}.
 Devuelve SOLO JSON válido:

@@ -103,9 +103,6 @@ export default async function ProductPage({ params }: Params) {
             <div className="space-y-5">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-flex bg-ink text-paper text-[11px] font-bold px-3 py-1.5 uppercase tracking-widest rounded-full">{modalityLabel}</span>
-                {product.aiOptimized && (
-                  <span className="inline-flex bg-accent text-paper text-[11px] font-bold px-3 py-1.5 uppercase tracking-widest rounded-full">✨ Optimizado con IA</span>
-                )}
               </div>
 
               <h1 className="font-display uppercase text-4xl md:text-5xl leading-[0.95] text-ink">{product.title}</h1>
@@ -137,15 +134,15 @@ export default async function ProductPage({ params }: Params) {
                 rel="noopener noreferrer sponsored"
                 className="w-full flex items-center justify-center gap-2 bg-ink text-paper px-8 py-5 font-display uppercase text-2xl border border-ink/15 rounded-xl shadow-hard-md hover-shift hover:bg-accent hover:border-accent"
               >
-                Comprar en AliExpress →
+                Comprar ahora →
               </a>
               <Link
                 href={`/advice?ask=${encodeURIComponent(`¿Es buena opción el/la "${product.title}"? ¿Para qué tipo de pesca lo recomiendas y cómo lo uso?`)}`}
                 className="w-full flex items-center justify-center gap-2 bg-paper text-ink px-8 py-3.5 font-bold uppercase text-sm tracking-tight border border-ink/15 rounded-xl hover:bg-ink hover:text-paper transition-colors"
               >
-                🤖 Preguntar a la IA sobre este producto
+                🎣 Preguntar a nuestro asesor
               </Link>
-              <p className="font-mono text-[11px] uppercase tracking-wide text-ink/40 text-center">Redirección segura a la tienda oficial</p>
+              <p className="font-mono text-[11px] uppercase tracking-wide text-ink/40 text-center">Compra 100% segura · Envío con seguimiento</p>
             </div>
           </div>
         </div>

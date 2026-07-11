@@ -74,13 +74,8 @@ export default async function GuidePage({ params }: Params) {
 
         <div className="flex items-center gap-3 mb-4">
           {guide.typeFishing && (
-            <span className="bg-ink text-paper text-[11px] font-bold uppercase tracking-widest px-3 py-1.5">
+            <span className="bg-ink text-paper text-[11px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full">
               {fishingLabel(guide.typeFishing)}
-            </span>
-          )}
-          {guide.aiOptimized && (
-            <span className="bg-accent text-paper text-[11px] font-bold uppercase tracking-widest px-3 py-1.5 border border-ink/15 rounded-xl">
-              ✨ IA
             </span>
           )}
           <time className="font-mono text-[11px] uppercase tracking-widest text-ink/40">

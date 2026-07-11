@@ -617,7 +617,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
     "rating": 4.9,
     "reviews": 3098,
     "inStock": true,
-    "seoDescription": "Compra tu canoa telescópica de carbono para pesca spinning y baitcasting en nuestra tienda de AliExpress. Incluye mango de madera y peso ajustable desde 8g hasta 25g",
+    "seoDescription": "Compra tu canoa telescópica de carbono para pesca spinning y baitcasting en nuestra tienda. Incluye mango de madera y peso ajustable desde 8g hasta 25g",
     "aiOptimized": true
   },
   {
@@ -671,7 +671,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
     "rating": 4.9,
     "reviews": 2623,
     "inStock": true,
-    "seoDescription": "Compra el soporte de mango para DAIWA SHIMANO PENN en AliExpress y pruébalo tú mismo. ¡Reemplaza piezas dañadas y vuelve a pescar con confianza!",
+    "seoDescription": "Compra el soporte de mango para DAIWA SHIMANO PENN en nuestra tienda y pruébalo tú mismo. ¡Reemplaza piezas dañadas y vuelve a pescar con confianza!",
     "aiOptimized": true
   },
   {
@@ -1101,7 +1101,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
     "rating": 3.4,
     "reviews": 8,
     "inStock": true,
-    "seoDescription": "Compra ahora tu canoa de pesca Noeby Beast Float Tube para Lúcio en AliExpress y disfruta de la pesca en bote, spinning, bagre, depredadores y kayak con Fuji Toray. ",
+    "seoDescription": "Compra ahora tu canoa de pesca Noeby Beast Float Tube para Lúcio en nuestra tienda y disfruta de la pesca en bote, spinning, bagre, depredadores y kayak con Fuji Toray. ",
     "aiOptimized": true
   },
   {
@@ -1344,7 +1344,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
     "rating": 4.9,
     "reviews": 1444,
     "inStock": true,
-    "seoDescription": "Compra ahora tus plomos de pesca en forma de lágrima en nuestra oferta de AliExpress. ¡Llévate estos plomos de pesca para pescar en agua salada y dulce! Además, esto",
+    "seoDescription": "Compra ahora tus plomos de pesca en forma de lágrima en nuestra oferta. ¡Llévate estos plomos de pesca para pescar en agua salada y dulce! Además, esto",
     "aiOptimized": true
   },
   {
@@ -2233,7 +2233,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
     "rating": 4.8,
     "reviews": 797,
     "inStock": true,
-    "seoDescription": "Comprar nuestro soporte de caña de pesca para embarcaciones en PVC en AliExpress. ¡Ofrecemos envío rápido y una garantía de calidad! ¡Haz tu compra ahora y disfruta ",
+    "seoDescription": "Comprar nuestro soporte de caña de pesca para embarcaciones en PVC en nuestra tienda. ¡Ofrecemos envío rápido y una garantía de calidad! ¡Haz tu compra ahora y disfruta ",
     "aiOptimized": true
   },
   {

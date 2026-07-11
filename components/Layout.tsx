@@ -24,8 +24,8 @@ export default function Layout({ children }: LayoutProps) {
                 Pesca<span className="text-accent">Plus</span>
               </span>
               <p className="text-sm text-paper/70 max-w-sm leading-relaxed">
-                Aparejos de pesca seleccionados de AliExpress, con fichas optimizadas por
-                inteligencia artificial y un asistente experto por modalidad.
+                Aparejos de pesca seleccionados por nuestro equipo, con fichas detalladas
+                y un asesor experto para cada modalidad.
               </p>
             </div>
 
@@ -41,10 +41,10 @@ export default function Layout({ children }: LayoutProps) {
             </div>
 
             <div className="lg:col-span-3">
-              <h4 className="font-mono text-[11px] font-bold uppercase tracking-widest text-paper/50 mb-4">Afiliación</h4>
+              <h4 className="font-mono text-[11px] font-bold uppercase tracking-widest text-paper/50 mb-4">Aviso</h4>
               <p className="text-xs text-paper/60 leading-relaxed">
-                PescaPlus participa en el Programa de Afiliados de AliExpress. Algunos enlaces
-                redirigen a su tienda oficial, recibiendo una comisión por ventas aptas.
+                Algunos enlaces son de afiliados: podemos recibir una pequeña comisión por
+                las compras, sin ningún coste adicional para ti.
               </p>
             </div>
           </div>
@@ -53,7 +53,7 @@ export default function Layout({ children }: LayoutProps) {
             <p>&copy; {currentYear} PescaPlus</p>
             <div className="flex gap-6">
               <Link href="/guias" className="hover:text-accent transition-colors">Guías</Link>
-              <Link href="/advice" className="hover:text-accent transition-colors">Asistente IA</Link>
+              <Link href="/advice" className="hover:text-accent transition-colors">Asesor de pesca</Link>
               <Link href="/admin" className="hover:text-accent transition-colors">Admin</Link>
             </div>
           </div>

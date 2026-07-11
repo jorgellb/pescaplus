@@ -89,7 +89,7 @@ export default function Navbar() {
 
               <Link href="/mejores" className={navLink(pathname.startsWith('/mejores'))}>Mejores</Link>
               <Link href="/guias" className={navLink(pathname.startsWith('/guias'))}>Guías</Link>
-              <Link href="/advice" className={navLink(isActive('/advice'))}>Consejos IA</Link>
+              <Link href="/advice" className={navLink(isActive('/advice'))}>Consejos</Link>
             </div>
           </div>
 
@@ -108,7 +108,7 @@ export default function Navbar() {
               href="/advice"
               className="inline-flex items-center gap-1.5 bg-ink text-paper px-4 py-2.5 text-sm font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift hover:bg-accent hover:border-accent whitespace-nowrap"
             >
-              🤖 IA
+              🎣 Asesor
             </Link>
           </div>
 
@@ -166,7 +166,7 @@ export default function Navbar() {
           </div>
           <div className="pt-3 pb-1">
             <Link href="/advice" onClick={() => setMobileMenuOpen(false)} className="w-full text-center flex justify-center items-center gap-2 bg-ink text-paper px-4 py-3 font-bold uppercase text-sm border border-ink/15 rounded-xl">
-              🤖 Asistente IA
+              🎣 Asesor de pesca
             </Link>
           </div>
         </div>

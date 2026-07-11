@@ -64,7 +64,7 @@ export default async function SearchPage({
               href={askUrl}
               className="inline-flex items-center gap-2 self-start bg-accent text-paper px-4 py-2.5 text-xs font-bold uppercase tracking-tight border border-ink/15 rounded-xl shadow-hard hover-shift"
             >
-              🤖 Pregúntale al asistente IA
+              🎣 Pregúntale a nuestro asesor
             </Link>
           </div>
         )}
@@ -76,10 +76,10 @@ export default async function SearchPage({
             <span className="inline-block text-5xl">🔍</span>
             <h3 className="font-display uppercase text-2xl text-ink">Sin resultados directos</h3>
             <p className="text-sm text-ink/60">
-              No hemos encontrado una coincidencia exacta. Deja que el asistente IA te oriente según lo que necesitas.
+              No hemos encontrado una coincidencia exacta. Deja que nuestro asesor te oriente según lo que necesitas.
             </p>
             <Link href={askUrl} className="inline-block bg-ink text-paper px-5 py-2.5 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl hover:bg-accent transition-colors">
-              🤖 Preguntar al asistente
+              🎣 Preguntar al asesor
             </Link>
           </div>
         ) : (

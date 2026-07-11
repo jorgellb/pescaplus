@@ -218,8 +218,8 @@ export default function AdvicePage() {
     <Layout>
       <section className="bg-paper border-b border-ink/12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
-          <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3">● Asistente con IA</p>
-          <h1 className="font-display uppercase text-5xl md:text-6xl leading-none text-ink">Consejos de pesca</h1>
+          <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3">● Asesor de pesca</p>
+          <h1 className="font-display uppercase text-4xl sm:text-5xl md:text-6xl leading-[1.02] text-ink">Consejos de pesca</h1>
           <p className="text-ink/60 text-sm max-w-xl mt-3">
             Pregunta sobre técnicas, nudos, señuelos recomendados o configuraciones de bajo de línea.
           </p>
@@ -256,9 +256,9 @@ export default function AdvicePage() {
           <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-5 bg-[#eae6db]">
             {messages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center gap-4 max-w-sm mx-auto">
-                <span className="text-5xl w-20 h-20 flex items-center justify-center bg-paper border border-ink/15 rounded-xl shadow-hard">🤖</span>
+                <span className="text-5xl w-20 h-20 flex items-center justify-center bg-paper border border-ink/15 rounded-xl shadow-hard">🎣</span>
                 <div className="space-y-1">
-                  <h3 className="font-display uppercase text-xl text-ink">Asistente activo</h3>
+                  <h3 className="font-display uppercase text-xl text-ink">Tu asesor de pesca</h3>
                   <p className="text-xs text-ink/60 leading-relaxed">Elige una modalidad o escribe tu pregunta abajo.</p>
                 </div>
               </div>
@@ -267,7 +267,7 @@ export default function AdvicePage() {
                 {messages.map((message, index) => (
                   <div key={index} className={`flex items-start gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     {message.role === 'assistant' && (
-                      <div className="flex-shrink-0 w-8 h-8 bg-paper border border-ink/15 rounded-xl flex items-center justify-center text-sm">🤖</div>
+                      <div className="flex-shrink-0 w-8 h-8 bg-paper border border-ink/15 rounded-xl flex items-center justify-center text-sm">🎣</div>
                     )}
                     <div className={`flex flex-col gap-2 max-w-[85%] md:max-w-[75%] ${message.role === 'user' ? 'items-end' : 'items-start'}`}>
                       <div className={`w-full p-4 border border-ink/15 rounded-xl ${message.role === 'user' ? 'bg-accent text-paper' : 'bg-paper'}`}>
@@ -315,7 +315,7 @@ export default function AdvicePage() {
                 ))}
                 {loading && messages[messages.length - 1]?.role !== 'assistant' && (
                   <div className="flex items-start gap-3 justify-start">
-                    <div className="flex-shrink-0 w-8 h-8 bg-paper border border-ink/15 rounded-xl flex items-center justify-center text-sm">🤖</div>
+                    <div className="flex-shrink-0 w-8 h-8 bg-paper border border-ink/15 rounded-xl flex items-center justify-center text-sm">🎣</div>
                     <div className="bg-paper border border-ink/15 rounded-xl p-4">
                       <div className="flex items-center gap-1.5">
                         <div className="w-2 h-2 bg-accent animate-bounce" />

@@ -44,8 +44,8 @@ export default async function CategoryPage({ params }: Params) {
                 <CategoryIcon id={fishingType.id} className="w-10 h-10" strokeWidth={1.6} />
               </span>
             )}
-            <div>
-              <h1 className="font-display uppercase text-5xl md:text-6xl leading-none text-ink">{catName}</h1>
+            <div className="min-w-0">
+              <h1 className="font-display uppercase text-[1.7rem] sm:text-4xl md:text-6xl leading-[1.05] text-ink break-words">{catName}</h1>
               <p className="text-ink/60 text-sm md:text-base mt-2 max-w-xl">{categoryDescription}</p>
             </div>
           </div>

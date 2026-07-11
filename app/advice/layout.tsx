@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Consejos IA · Asistente de pesca',
+  title: 'Consejos de pesca · Asesor experto',
   description:
-    'Asistente de pesca con IA: técnicas, nudos, señuelos recomendados y configuración de aparejos por modalidad.',
+    'Consejos de pesca: técnicas, nudos, señuelos recomendados y configuración de aparejos por modalidad.',
   alternates: { canonical: '/advice' },
 }
 

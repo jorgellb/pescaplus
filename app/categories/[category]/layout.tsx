@@ -10,7 +10,7 @@ export async function generateMetadata({
   const type = getFishingType(category)
   const name = type?.name ?? 'Aparejos de pesca'
   const description =
-    type?.tagline ?? `Los mejores productos de ${name} seleccionados de AliExpress en PescaPlus.`
+    type?.tagline ?? `Los mejores productos de ${name} seleccionados por expertos en PescaPlus.`
   return {
     title: name,
     description,

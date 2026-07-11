@@ -30,6 +30,12 @@ body {
   color: var(--ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden; /* never let a wide element cause horizontal page scroll */
+}
+
+/* Long words/titles wrap instead of overflowing their box. */
+h1, h2, h3, h4, p, a, span, li {
+  overflow-wrap: break-word;
 }
 
 /* Editorial display headings (Fraunces serif) */

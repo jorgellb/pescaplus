@@ -29,9 +29,9 @@ export default async function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           <div className="lg:col-span-7">
             <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-5">
-              ● Tienda de pesca · Curada con IA
+              ● Tienda especializada de pesca
             </p>
-            <h1 className="font-display uppercase text-ink leading-[0.86] text-6xl sm:text-7xl md:text-8xl">
+            <h1 className="font-display uppercase text-ink leading-[0.9] text-[2.5rem] sm:text-6xl md:text-7xl lg:text-8xl">
               Equípate
               <br />
               como un
@@ -39,15 +39,15 @@ export default async function Home() {
               <span className="text-accent">profesional</span>
             </h1>
             <p className="mt-6 text-lg text-ink/70 max-w-md leading-snug">
-              Cañas, carretes, señuelos y aparejos de AliExpress, seleccionados y con fichas
-              redactadas por inteligencia artificial.
+              Cañas, carretes, señuelos y aparejos seleccionados por nuestro equipo de
+              pescadores. Calidad probada, al mejor precio.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/categories/canas" className="bg-ink text-paper px-7 py-4 text-sm font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift hover:bg-accent hover:border-accent">
                 Ver catálogo →
               </Link>
               <Link href="/advice" className="bg-paper text-ink px-7 py-4 text-sm font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift">
-                Asistente IA 🤖
+                Asesor de pesca
               </Link>
             </div>
           </div>
@@ -76,9 +76,9 @@ export default async function Home() {
       <Marquee
         items={[
           'Envío internacional',
-          '66 productos seleccionados',
-          'Fichas optimizadas con IA',
-          'Comisión segura',
+          'Selección experta',
+          'Fichas detalladas',
+          'Precios de fábrica',
           '11 categorías de pesca',
         ]}
       />
@@ -132,9 +132,9 @@ export default async function Home() {
       <section className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border border-ink/15 rounded-xl shadow-hard-md">
           {[
-            { n: '01', t: 'Fichas con IA', d: 'Títulos y descripciones redactados por IA, claros y honestos, sin la jerga confusa de los marketplaces.' },
+            { n: '01', t: 'Fichas claras', d: 'Títulos y descripciones detallados y honestos, sin la jerga confusa de otros sitios.' },
             { n: '02', t: 'Selección real', d: 'Filtramos por ventas y valoraciones de compradores reales. Solo lo que merece la pena.' },
-            { n: '03', t: 'Compra segura', d: 'Enlaces oficiales de AliExpress. Pagas en su tienda, de forma rápida y protegida.' },
+            { n: '03', t: 'Compra segura', d: 'Pago protegido y envío con seguimiento. Tu compra siempre respaldada, de forma rápida y sencilla.' },
           ].map((f, i) => (
             <div key={f.n} className={`p-7 ${i < 2 ? 'md:border-r border-ink/12 border-b-2 md:border-b-0' : ''}`}>
               <span className="font-display text-5xl text-accent leading-none">{f.n}</span>

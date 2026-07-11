@@ -102,7 +102,7 @@ export default async function RoundupPage({ params }: Params) {
             <Link href={`/categories/${slug}`} className="inline-flex items-center gap-2 bg-ink text-paper px-5 py-3 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift">
               <CategoryIcon id={type.id} className="w-4 h-4" strokeWidth={1.9} /> Ver toda la categoría
             </Link>
-            <Link href="/advice" className="bg-paper text-ink px-5 py-3 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift">Asistente IA 🤖</Link>
+            <Link href="/advice" className="bg-paper text-ink px-5 py-3 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift">🎣 Asesor de pesca</Link>
           </div>
         </div>
       </section>

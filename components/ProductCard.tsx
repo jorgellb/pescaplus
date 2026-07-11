@@ -7,7 +7,7 @@ type ProductCardProps = Pick<
   Product,
   'id' | 'title' | 'imageUrl' | 'price' | 'currency' | 'rating' | 'reviews' | 'typeFishing'
 > &
-  Partial<Pick<Product, 'videoUrl' | 'aiOptimized'>>
+  Partial<Pick<Product, 'videoUrl'>>
 
 export default function ProductCard({
   id,
@@ -19,7 +19,6 @@ export default function ProductCard({
   reviews,
   typeFishing,
   videoUrl,
-  aiOptimized,
 }: ProductCardProps) {
   return (
     <div className="group relative flex flex-col h-full bg-paper border border-ink/10 rounded-2xl overflow-hidden shadow-hard hover-shift">
@@ -35,14 +34,11 @@ export default function ProductCard({
         <span className="absolute top-2.5 left-2.5 z-20 pointer-events-none bg-ink/85 text-paper text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full backdrop-blur-sm">
           {fishingLabel(typeFishing)}
         </span>
-        <div className="absolute top-2.5 right-2.5 z-20 pointer-events-none flex flex-col items-end gap-1">
-          {aiOptimized && (
-            <span className="bg-accent text-paper text-[10px] font-bold uppercase px-2 py-1 rounded-full shadow-sm">✨ IA</span>
-          )}
-          {videoUrl && (
+        {videoUrl && (
+          <div className="absolute top-2.5 right-2.5 z-20 pointer-events-none">
             <span className="bg-paper/90 text-ink text-[10px] font-bold uppercase px-2 py-1 rounded-full shadow-sm backdrop-blur-sm">▶ Vídeo</span>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Details */}
