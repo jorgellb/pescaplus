@@ -64,6 +64,19 @@ export default function AdminSettingsPage() {
     }
   }
 
+  const refreshPrices = async () => {
+    setNote('♻️ Consultando AliExpress…')
+    const res = await fetch('/api/admin/refresh', { method: 'POST' })
+    const data = await res.json()
+    if (data.success && data.configured) {
+      setNote(`✅ Precios/enlaces revisados: ${data.updated} actualizados, ${data.unavailable} marcados sin stock (de ${data.checked}).`)
+    } else if (data.success && !data.configured) {
+      setNote('⚠️ AliExpress no está configurado (define ALIEXPRESS_APP_KEY/SECRET).')
+    } else {
+      setNote('❌ Error al refrescar precios.')
+    }
+  }
+
   const resetCatalog = async () => {
     if (!confirm('¿Restablecer el catálogo a los productos originales? Se perderán los cambios.')) return
     const res = await fetch('/api/admin/catalog', {
@@ -197,6 +210,12 @@ export default function AdminSettingsPage() {
       <section className="space-y-4 p-5 rounded-2xl border border-white/5 bg-slate-900/30">
         <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400">Mantenimiento del catálogo</h2>
         <div className="flex flex-wrap gap-3">
+          <button
+            onClick={refreshPrices}
+            className="text-sm font-semibold text-emerald-300 bg-emerald-500/5 hover:bg-emerald-500/10 border border-emerald-500/20 px-4 py-2.5 rounded-xl transition-all"
+          >
+            ♻️ Refrescar precios y enlaces (AliExpress)
+          </button>
           <button
             onClick={exportCatalog}
             className="text-sm font-semibold text-slate-200 bg-slate-800/60 hover:bg-slate-800 border border-white/5 px-4 py-2.5 rounded-xl transition-all"

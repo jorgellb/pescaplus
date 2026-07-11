@@ -196,3 +196,26 @@ export async function getAliExpressProductDetail(
     return undefined
   }
 }
+
+/**
+ * Batch-fetch several products by id (aliexpress.affiliate.productdetail.get
+ * accepts a comma-separated list). Used by the price/link refresh job.
+ */
+export async function getAliExpressProductsByIds(
+  productIds: string[],
+  typeFishing = 'general',
+): Promise<Product[]> {
+  if (productIds.length === 0) return []
+  try {
+    const data = (await callApi('aliexpress.affiliate.productdetail.get', {
+      product_ids: productIds.join(','),
+      target_currency: 'EUR',
+      target_language: 'ES',
+      tracking_id: TRACKING_ID,
+    })) as ProductListResult
+    return extractProducts(data).map((p) => normalize(p, typeFishing))
+  } catch (error) {
+    console.warn('AliExpress batch detail failed:', error)
+    return []
+  }
+}
