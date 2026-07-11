@@ -641,3 +641,119 @@ Tono experto, útil y ameno. Devuelve SOLO JSON válido:
     generatedBy: 'nvidia',
   }
 }
+
+// ---------------------------------------------------------------------------
+// AI rewriting from a free-form admin instruction (rewrite existing content)
+// ---------------------------------------------------------------------------
+
+/** Keep rewrites on-brand: human voice, never reveal AI or name a marketplace. */
+const BRAND_RULE =
+  'Escribe como el equipo humano de la tienda PescaPlus. NUNCA menciones AliExpress ni ningún marketplace, ni que el texto lo genera una inteligencia artificial. Mantén la veracidad: no inventes datos, marcas ni precios que no aparezcan.'
+
+const asString = (v: unknown, fallback: string) => (typeof v === 'string' && v.trim() ? v.trim() : fallback)
+
+export interface RewrittenProduct {
+  title: string
+  description: string
+  seoDescription: string
+  generatedBy: 'nvidia' | 'offline'
+}
+
+/** Rewrite a product's copy following a free-form instruction. Never throws. */
+export async function rewriteProductCopy(input: {
+  instruction: string
+  title: string
+  description: string
+  seoDescription?: string
+  typeFishing?: string
+}): Promise<RewrittenProduct> {
+  const current = {
+    title: input.title,
+    description: input.description,
+    seoDescription: input.seoDescription ?? '',
+  }
+  if (!isApiConfigured()) return { ...current, generatedBy: 'offline' }
+
+  const prompt = `Reescribe la ficha de este producto de pesca en español siguiendo esta indicación del administrador:
+"${input.instruction}"
+
+FICHA ACTUAL:
+- Título: ${input.title}
+- Descripción: ${input.description}
+- Meta descripción: ${current.seoDescription || '(vacía)'}
+${input.typeFishing ? `Categoría: ${fishingLabel(input.typeFishing)}.` : ''}
+
+${BRAND_RULE}
+Devuelve SOLO JSON válido: {"title": string (máx 90 caracteres), "description": string (2-5 frases, admite **negrita** y listas con "- "), "seoDescription": string (meta descripción, máx 160 caracteres)}`
+
+  const content = await callNvidia(
+    [
+      { role: 'system', content: 'Reescribes fichas de producto en español y respondes solo con JSON válido.' },
+      { role: 'user', content: prompt },
+    ],
+    { maxTokens: 900, temperature: 0.7 },
+  )
+  const parsed = content ? extractJson(content) : null
+  if (!parsed) return { ...current, generatedBy: 'offline' }
+  return {
+    title: asString(parsed.title, current.title).slice(0, 140),
+    description: asString(parsed.description, current.description).slice(0, 1200),
+    seoDescription: asString(parsed.seoDescription, current.seoDescription).slice(0, 165),
+    generatedBy: 'nvidia',
+  }
+}
+
+export interface RewrittenGuide {
+  title: string
+  excerpt: string
+  content: string
+  seoDescription: string
+  generatedBy: 'nvidia' | 'offline'
+}
+
+/** Rewrite a blog guide following a free-form instruction. Never throws. */
+export async function rewriteGuideCopy(input: {
+  instruction: string
+  title: string
+  excerpt: string
+  content: string
+  seoDescription?: string
+}): Promise<RewrittenGuide> {
+  const current = {
+    title: input.title,
+    excerpt: input.excerpt,
+    content: input.content,
+    seoDescription: input.seoDescription ?? '',
+  }
+  if (!isApiConfigured()) return { ...current, generatedBy: 'offline' }
+
+  const prompt = `Reescribe este artículo/guía de blog de pesca en español siguiendo esta indicación del administrador:
+"${input.instruction}"
+
+ARTÍCULO ACTUAL:
+Título: ${input.title}
+Extracto: ${input.excerpt}
+Contenido:
+${input.content}
+
+${BRAND_RULE}
+Usa markdown LIGERO en el contenido (**negrita** para los títulos de sección y "- " para listas; NO uses HTML ni #).
+Devuelve SOLO JSON válido: {"title": string, "excerpt": string (1-2 frases), "content": string (markdown ligero), "seoDescription": string (140-160 caracteres)}`
+
+  const content = await callNvidia(
+    [
+      { role: 'system', content: 'Reescribes artículos de blog de pesca en español y respondes solo con JSON válido.' },
+      { role: 'user', content: prompt },
+    ],
+    { maxTokens: 2200, temperature: 0.7 },
+  )
+  const parsed = content ? extractJson(content) : null
+  if (!parsed) return { ...current, generatedBy: 'offline' }
+  return {
+    title: asString(parsed.title, current.title).slice(0, 140),
+    excerpt: asString(parsed.excerpt, current.excerpt).slice(0, 300),
+    content: asString(parsed.content, current.content),
+    seoDescription: asString(parsed.seoDescription, current.seoDescription).slice(0, 165),
+    generatedBy: 'nvidia',
+  }
+}
