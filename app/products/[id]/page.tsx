@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Layout from '@/components/Layout'
-import ProductImage from '@/components/ProductImage'
+import ProductCard from '@/components/ProductCard'
 import ProductGallery from '@/components/ProductGallery'
 import { fishingLabel } from '@/lib/fishing'
 import { resolveProduct, relatedProducts } from '@/lib/product-service'
@@ -10,8 +10,6 @@ import { CATALOG } from '@/lib/catalog'
 
 type Params = { params: Promise<{ id: string }> }
 
-// Incremental Static Regeneration: pre-render catalog products, refresh hourly.
-// Imported / live AliExpress products render on demand (dynamicParams default).
 export const revalidate = 3600
 
 export function generateStaticParams() {
@@ -45,15 +43,10 @@ export default async function ProductPage({ params }: Params) {
     return (
       <Layout>
         <div className="max-w-7xl mx-auto px-4 py-24 text-center space-y-6">
-          <span className="text-5xl inline-block">🪝</span>
-          <h1 className="text-2xl font-bold text-slate-900">Aparejo no encontrado</h1>
-          <p className="text-slate-500 text-sm max-w-sm mx-auto">
-            El producto solicitado no existe o ha sido retirado del catálogo.
-          </p>
-          <Link
-            href="/"
-            className="inline-block bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-3 rounded-xl text-sm font-semibold transition-all"
-          >
+          <span className="text-6xl inline-block">🪝</span>
+          <h1 className="font-display uppercase text-4xl text-ink">Aparejo no encontrado</h1>
+          <p className="text-ink/60 text-sm max-w-sm mx-auto">El producto no existe o ha sido retirado del catálogo.</p>
+          <Link href="/" className="inline-block bg-ink text-paper px-6 py-3 text-sm font-bold uppercase border-2 border-ink shadow-hard hover-shift">
             Volver al inicio
           </Link>
         </div>
@@ -87,108 +80,68 @@ export default async function ProductPage({ params }: Params) {
     <Layout>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="max-w-7xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
-        {/* Breadcrumbs */}
-        <nav className="flex items-center gap-2 text-xs font-medium text-slate-400 mb-6">
-          <Link href="/" className="hover:text-sky-600 transition-colors">Inicio</Link>
-          <span>/</span>
-          <Link href={`/categories/${product.typeFishing}`} className="hover:text-sky-600 transition-colors">
-            {modalityLabel}
-          </Link>
-          <span>/</span>
-          <span className="text-slate-600 truncate max-w-[200px]">{product.title}</span>
+        <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-8">
+          <Link href="/" className="hover:text-accent">Inicio</Link> <span className="mx-1">/</span>{' '}
+          <Link href={`/categories/${product.typeFishing}`} className="hover:text-accent">{modalityLabel}</Link>{' '}
+          <span className="mx-1">/</span> <span className="text-ink truncate">{product.title.slice(0, 40)}</span>
         </nav>
 
-        {/* Product panel */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 p-5 md:p-8 rounded-2xl bg-white border border-slate-200 shadow-sm mb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 mb-20">
           <div className="lg:col-span-5">
-            <ProductGallery
-              images={product.images}
-              alts={product.imageAlts}
-              videoUrl={product.videoUrl}
-              title={product.title}
-            />
+            <ProductGallery images={product.images} alts={product.imageAlts} videoUrl={product.videoUrl} title={product.title} />
           </div>
 
           <div className="lg:col-span-7 flex flex-col">
             <div className="space-y-5">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex bg-sky-50 text-sky-700 border border-sky-100 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wide">
-                  {modalityLabel}
-                </span>
+                <span className="inline-flex bg-ink text-paper text-[11px] font-bold px-3 py-1.5 uppercase tracking-widest">{modalityLabel}</span>
                 {product.aiOptimized && (
-                  <span className="inline-flex bg-violet-50 text-violet-600 border border-violet-100 text-xs font-bold px-3 py-1.5 rounded-full">
-                    ✨ Ficha optimizada con IA
-                  </span>
+                  <span className="inline-flex bg-accent text-paper text-[11px] font-bold px-3 py-1.5 uppercase tracking-widest border-2 border-ink">✨ Optimizado con IA</span>
                 )}
               </div>
 
-              <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
-                {product.title}
-              </h1>
+              <h1 className="font-display uppercase text-4xl md:text-5xl leading-[0.95] text-ink">{product.title}</h1>
 
-              <div className="flex items-center gap-2">
-                <div className="flex text-amber-400" aria-hidden>
-                  {Array.from({ length: 5 }).map((_, idx) => (
-                    <span key={idx} className={idx < Math.round(product.rating) ? 'text-amber-400' : 'text-slate-300'}>★</span>
-                  ))}
-                </div>
-                <span className="text-sm font-semibold text-slate-700">{product.rating.toFixed(1)}</span>
-                <span className="text-xs text-slate-400">· {product.reviews.toLocaleString('es-ES')} vendidos</span>
+              <div className="flex items-center gap-2 font-mono text-sm">
+                <span className="text-accent">{'★'.repeat(Math.round(product.rating))}{'☆'.repeat(5 - Math.round(product.rating))}</span>
+                <span className="font-bold text-ink">{product.rating.toFixed(1)}</span>
+                <span className="text-ink/50">· {product.reviews.toLocaleString('es-ES')} vendidos</span>
               </div>
 
-              <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-extrabold text-slate-900">{product.price.toFixed(2)}</span>
-                <span className="text-lg font-bold text-slate-400">{product.currency}</span>
+              <div className="inline-flex items-baseline gap-2 border-2 border-ink shadow-hard px-5 py-3 bg-paper">
+                <span className="font-display text-5xl leading-none text-ink">{product.price.toFixed(2)}</span>
+                <span className="font-display text-2xl text-ink/60">{product.currency === 'EUR' ? '€' : product.currency}</span>
               </div>
 
               <div className="space-y-2 pt-2">
-                <h2 className="text-xs font-bold uppercase tracking-wide text-slate-400">Descripción</h2>
+                <h2 className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50">Descripción</h2>
                 <div
-                  className="text-sm text-slate-600 leading-relaxed [&_strong]:text-slate-800 [&_ul]:text-slate-600"
+                  className="text-[15px] text-ink/80 leading-relaxed [&_strong]:text-ink [&_a]:text-accent [&_a]:underline [&_ul]:list-disc [&_ul]:pl-5"
                   dangerouslySetInnerHTML={{ __html: renderDescription(product.description) }}
                 />
               </div>
             </div>
 
-            <div className="mt-auto pt-6 space-y-3">
+            <div className="mt-auto pt-8 space-y-3">
               <a
                 href={`/go/${product.id}`}
                 target="_blank"
                 rel="noopener noreferrer sponsored"
-                className="w-full flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg shadow-emerald-500/20 active:scale-[0.99] transition-all"
+                className="w-full flex items-center justify-center gap-2 bg-ink text-paper px-8 py-5 font-display uppercase text-2xl border-2 border-ink shadow-hard-md hover-shift hover:bg-accent hover:border-accent"
               >
-                Comprar en AliExpress 🛒
+                Comprar en AliExpress →
               </a>
-              <p className="text-center text-xs text-slate-400 max-w-md mx-auto">
-                Serás redirigido a la tienda oficial de AliExpress para pagar de forma segura.
-              </p>
+              <p className="font-mono text-[11px] uppercase tracking-wide text-ink/40 text-center">Redirección segura a la tienda oficial</p>
             </div>
           </div>
         </div>
 
-        {/* Related */}
         {related.length > 0 && (
           <div className="space-y-6">
-            <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Productos Relacionados</h2>
+            <h2 className="font-display uppercase text-3xl md:text-4xl leading-none border-b-2 border-ink pb-4">Relacionados</h2>
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {related.map((rp) => (
-                <Link
-                  key={rp.id}
-                  href={`/products/${rp.id}`}
-                  className="group rounded-2xl overflow-hidden bg-white border border-slate-200 hover:border-sky-300 hover:shadow-lg hover:shadow-slate-900/5 hover:-translate-y-1 transition-all duration-300 flex flex-col h-full"
-                >
-                  <div className="relative aspect-square bg-slate-50 overflow-hidden">
-                    <ProductImage src={rp.imageUrl} alt={rp.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  </div>
-                  <div className="p-4 flex flex-col justify-between flex-1 gap-2">
-                    <h3 className="font-semibold text-slate-800 group-hover:text-sky-600 line-clamp-2 transition-colors text-sm leading-snug">
-                      {rp.title}
-                    </h3>
-                    <span className="text-lg font-extrabold text-slate-900">
-                      {rp.price.toFixed(2)} <span className="text-xs font-semibold text-slate-400">{rp.currency}</span>
-                    </span>
-                  </div>
-                </Link>
+                <ProductCard key={rp.id} {...rp} />
               ))}
             </div>
           </div>

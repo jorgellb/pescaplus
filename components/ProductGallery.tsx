@@ -24,7 +24,7 @@ export default function ProductGallery({ images, alts, videoUrl, title }: Produc
   return (
     <div className="space-y-3">
       {/* Main viewer */}
-      <div className="relative overflow-hidden rounded-2xl bg-slate-50 aspect-square border border-slate-200 group">
+      <div className="relative overflow-hidden bg-[#e6e2d6] aspect-square border-2 border-ink shadow-hard group">
         {selected === 'video' && videoUrl ? (
           <video
             src={videoUrl}
@@ -52,8 +52,8 @@ export default function ProductGallery({ images, alts, videoUrl, title }: Produc
           {hasVideo && (
             <button
               onClick={() => setSelected('video')}
-              className={`relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
-                selected === 'video' ? 'border-sky-500' : 'border-slate-200 hover:border-slate-300'
+              className={`relative flex-shrink-0 w-16 h-16 overflow-hidden border-2 transition-all ${
+                selected === 'video' ? 'border-accent' : 'border-ink/30 hover:border-ink'
               }`}
               aria-label="Ver vídeo"
             >
@@ -65,8 +65,8 @@ export default function ProductGallery({ images, alts, videoUrl, title }: Produc
             <button
               key={img + idx}
               onClick={() => setSelected(idx)}
-              className={`relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
-                selected === idx ? 'border-sky-500' : 'border-slate-200 hover:border-slate-300'
+              className={`relative flex-shrink-0 w-16 h-16 overflow-hidden border-2 transition-all ${
+                selected === idx ? 'border-accent' : 'border-ink/30 hover:border-ink'
               }`}
               aria-label={altFor(idx)}
             >

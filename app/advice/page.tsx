@@ -20,15 +20,10 @@ const suggestedQuestions = [
 ]
 
 function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
+  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }
-
 function toSafeHtml(line: string): string {
-  return escapeHtml(line).replace(/\*\*(.+?)\*\*/g, '<strong class="text-sky-700 font-semibold">$1</strong>')
+  return escapeHtml(line).replace(/\*\*(.+?)\*\*/g, '<strong class="text-accent">$1</strong>')
 }
 
 export default function AdvicePage() {
@@ -41,11 +36,10 @@ export default function AdvicePage() {
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
-      // Hydrating from an external store (localStorage) is a valid effect use.
       // eslint-disable-next-line react-hooks/set-state-in-effect
       if (saved) setMessages(JSON.parse(saved))
     } catch {
-      /* ignore malformed storage */
+      /* ignore */
     }
   }, [])
 
@@ -53,7 +47,7 @@ export default function AdvicePage() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(messages))
     } catch {
-      /* storage may be unavailable */
+      /* ignore */
     }
   }, [messages])
 
@@ -71,7 +65,6 @@ export default function AdvicePage() {
     const history = [...messages, userMessage]
     setMessages(history)
     setLoading(true)
-
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -84,19 +77,11 @@ export default function AdvicePage() {
       const data = await response.json()
       setMessages((prev) => [
         ...prev,
-        {
-          role: 'assistant',
-          content: data.success
-            ? data.response
-            : 'Lo siento, hubo un problema al conectar con el asistente. Inténtalo de nuevo.',
-        },
+        { role: 'assistant', content: data.success ? data.response : 'Hubo un problema al conectar con el asistente. Inténtalo de nuevo.' },
       ])
     } catch (error) {
       console.error('Error in chat request:', error)
-      setMessages((prev) => [
-        ...prev,
-        { role: 'assistant', content: 'Lo siento, ocurrió un error de red. Prueba otra vez.' },
-      ])
+      setMessages((prev) => [...prev, { role: 'assistant', content: 'Error de red. Prueba otra vez.' }])
     } finally {
       setLoading(false)
     }
@@ -139,16 +124,11 @@ export default function AdvicePage() {
 
   const renderMessageContent = (content: string) =>
     content.split('\n').map((line, idx) => {
-      const isBullet =
-        line.trim().startsWith('-') || line.trim().startsWith('*') || /^\d+\./.test(line.trim())
+      const isBullet = line.trim().startsWith('-') || line.trim().startsWith('*') || /^\d+\./.test(line.trim())
       return (
         <p
           key={idx}
-          className={
-            isBullet
-              ? 'pl-4 py-0.5 text-slate-600 text-sm leading-relaxed'
-              : 'min-h-[1rem] py-1 text-slate-700 text-sm md:text-[14.5px] leading-relaxed'
-          }
+          className={isBullet ? 'pl-4 py-0.5 text-ink/70 text-sm leading-relaxed' : 'min-h-[1rem] py-1 text-ink/90 text-sm leading-relaxed'}
           dangerouslySetInnerHTML={{ __html: toSafeHtml(line) }}
         />
       )
@@ -156,75 +136,62 @@ export default function AdvicePage() {
 
   return (
     <Layout>
-      {/* Banner */}
-      <section className="bg-white border-b border-slate-200">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 space-y-2">
-          <span className="text-xs font-bold uppercase tracking-widest text-sky-600">Asistente con IA</span>
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900">
-            Consejos de pesca al instante
-          </h1>
-          <p className="text-slate-500 text-sm max-w-xl">
+      <section className="bg-paper border-b-2 border-ink">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
+          <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3">● Asistente con IA</p>
+          <h1 className="font-display uppercase text-5xl md:text-6xl leading-none text-ink">Consejos de pesca</h1>
+          <p className="text-ink/60 text-sm max-w-xl mt-3">
             Pregunta sobre técnicas, nudos, señuelos recomendados o configuraciones de bajo de línea.
           </p>
         </div>
       </section>
 
       <section className="max-w-4xl mx-auto px-4 py-8 sm:px-6">
-        {/* Modality filter */}
         <div className="mb-6 space-y-3">
-          <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Elige una modalidad:</p>
-          <div className="flex flex-wrap gap-2.5">
+          <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50">Elige modalidad:</p>
+          <div className="flex flex-wrap gap-2">
             {ADVICE_TYPES.map((type) => (
               <button
                 key={type.id}
                 onClick={() => getInitialAdvice(type.id)}
                 disabled={loading}
-                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed ${
-                  selectedType === type.id
-                    ? 'bg-sky-50 text-sky-700 border-sky-200'
-                    : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:text-slate-900'
+                className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold uppercase tracking-tight border-2 border-ink transition-colors disabled:opacity-50 ${
+                  selectedType === type.id ? 'bg-ink text-paper' : 'bg-paper text-ink hover:bg-ink hover:text-paper'
                 }`}
               >
-                <CategoryIcon id={type.id} className="w-4 h-4" strokeWidth={1.7} /> {type.name}
+                <CategoryIcon id={type.id} className="w-4 h-4" strokeWidth={1.9} /> {type.name}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Chat panel */}
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden flex flex-col h-[520px]">
+        <div className="border-2 border-ink shadow-hard bg-paper overflow-hidden flex flex-col h-[520px]">
           {messages.length > 0 && (
-            <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100 bg-slate-50">
-              <span className="text-xs font-semibold text-slate-500">Conversación en curso</span>
-              <button onClick={clearConversation} className="text-xs font-semibold text-slate-500 hover:text-sky-600 transition-colors">
-                Limpiar chat
-              </button>
+            <div className="flex items-center justify-between px-4 py-2.5 border-b-2 border-ink bg-paper">
+              <span className="font-mono text-[11px] uppercase tracking-widest text-ink/50">Conversación</span>
+              <button onClick={clearConversation} className="font-mono text-[11px] font-bold uppercase text-ink hover:text-accent">Limpiar</button>
             </div>
           )}
 
-          <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 bg-slate-50/60">
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-5 bg-[#eae6db]">
             {messages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center gap-4 max-w-sm mx-auto">
-                <span className="text-5xl w-20 h-20 flex items-center justify-center bg-sky-50 rounded-full border border-sky-100">🤖</span>
+                <span className="text-5xl w-20 h-20 flex items-center justify-center bg-paper border-2 border-ink shadow-hard">🤖</span>
                 <div className="space-y-1">
-                  <h3 className="text-base font-bold text-slate-800">Asistente virtual activo</h3>
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    Elige una modalidad para un informe inicial, o escribe tu pregunta abajo.
-                  </p>
+                  <h3 className="font-display uppercase text-xl text-ink">Asistente activo</h3>
+                  <p className="text-xs text-ink/60 leading-relaxed">Elige una modalidad o escribe tu pregunta abajo.</p>
                 </div>
               </div>
             ) : (
-              <div className="space-y-5">
+              <div className="space-y-4">
                 {messages.map((message, index) => (
                   <div key={index} className={`flex items-start gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     {message.role === 'assistant' && (
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-sky-100 flex items-center justify-center text-sm">🤖</div>
+                      <div className="flex-shrink-0 w-8 h-8 bg-paper border-2 border-ink flex items-center justify-center text-sm">🤖</div>
                     )}
                     <div
-                      className={`max-w-[85%] md:max-w-[75%] rounded-2xl p-4 ${
-                        message.role === 'user'
-                          ? 'bg-sky-600 text-white rounded-tr-sm shadow-sm'
-                          : 'bg-white border border-slate-200 rounded-tl-sm shadow-sm'
+                      className={`max-w-[85%] md:max-w-[75%] p-4 border-2 border-ink ${
+                        message.role === 'user' ? 'bg-accent text-paper' : 'bg-paper'
                       }`}
                     >
                       {message.role === 'user' ? (
@@ -234,19 +201,18 @@ export default function AdvicePage() {
                       )}
                     </div>
                     {message.role === 'user' && (
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-sky-600 flex items-center justify-center text-sm text-white">👤</div>
+                      <div className="flex-shrink-0 w-8 h-8 bg-ink text-paper flex items-center justify-center text-sm">👤</div>
                     )}
                   </div>
                 ))}
-
                 {loading && (
                   <div className="flex items-start gap-3 justify-start">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-sky-100 flex items-center justify-center text-sm">🤖</div>
-                    <div className="bg-white border border-slate-200 rounded-2xl rounded-tl-sm p-4 shadow-sm">
+                    <div className="flex-shrink-0 w-8 h-8 bg-paper border-2 border-ink flex items-center justify-center text-sm">🤖</div>
+                    <div className="bg-paper border-2 border-ink p-4">
                       <div className="flex items-center gap-1.5">
-                        <div className="w-1.5 h-1.5 bg-sky-400 rounded-full animate-bounce" />
-                        <div className="w-1.5 h-1.5 bg-sky-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
-                        <div className="w-1.5 h-1.5 bg-sky-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }} />
+                        <div className="w-2 h-2 bg-accent animate-bounce" />
+                        <div className="w-2 h-2 bg-accent animate-bounce" style={{ animationDelay: '0.2s' }} />
+                        <div className="w-2 h-2 bg-accent animate-bounce" style={{ animationDelay: '0.4s' }} />
                       </div>
                     </div>
                   </div>
@@ -256,41 +222,40 @@ export default function AdvicePage() {
             )}
           </div>
 
-          <div className="p-4 border-t border-slate-100 bg-white">
+          <div className="p-3 border-t-2 border-ink bg-paper">
             <div className="flex gap-2">
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Escribe tu consulta..."
-                className="flex-1 px-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-700 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 text-sm transition-all"
+                placeholder="Escribe tu consulta…"
+                className="flex-1 px-4 py-3 bg-paper border-2 border-ink text-ink placeholder-ink/40 focus:outline-none focus:border-accent text-sm transition-colors"
                 disabled={loading}
               />
               <button
                 onClick={sendMessage}
                 disabled={loading || !input.trim()}
-                className="bg-sky-600 hover:bg-sky-700 text-white px-6 rounded-xl font-bold text-sm shadow-sm active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1"
+                className="bg-ink text-paper px-6 text-sm font-bold uppercase border-2 border-ink hover:bg-accent transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                Enviar 🚀
+                Enviar
               </button>
             </div>
           </div>
         </div>
 
-        {/* Suggestions */}
         <div className="mt-8 space-y-3">
-          <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Consultas frecuentes:</p>
+          <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50">Consultas frecuentes:</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {suggestedQuestions.map((q, idx) => (
               <button
                 key={idx}
                 onClick={() => executeSendMessage(q)}
                 disabled={loading}
-                className="p-3.5 rounded-xl bg-white border border-slate-200 hover:border-sky-300 hover:shadow-sm text-xs text-slate-600 font-semibold cursor-pointer transition-all active:scale-[0.98] flex justify-between items-center gap-2 text-left disabled:opacity-50"
+                className="p-3.5 bg-paper border-2 border-ink shadow-hard hover-shift text-xs text-ink font-bold uppercase tracking-tight text-left flex justify-between items-center gap-2 disabled:opacity-50"
               >
                 <span>{q}</span>
-                <span className="text-sky-500 text-base">➔</span>
+                <span className="text-accent text-base">→</span>
               </button>
             ))}
           </div>

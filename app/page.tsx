@@ -1,127 +1,141 @@
 import Link from 'next/link'
 import Layout from '@/components/Layout'
-import { FISHING_TYPES } from '@/lib/fishing'
+import Marquee from '@/components/Marquee'
+import ProductCard from '@/components/ProductCard'
+import ProductImage from '@/components/ProductImage'
 import CategoryIcon from '@/components/graphics/CategoryIcon'
-import OceanWaves from '@/components/graphics/OceanWaves'
+import { FISHING_TYPES } from '@/lib/fishing'
+import { listProducts } from '@/lib/products-store'
 
-export default function Home() {
+export const revalidate = 3600
+
+export default async function Home() {
+  const all = await listProducts()
+  const withImg = all.filter((p) => p.imageUrl)
+  const heroA = withImg[0]
+  const heroB = withImg[1]
+  const featured = withImg.slice(0, 8)
+
   return (
     <Layout>
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-sky-50 via-white to-[#f6f8fb]">
-        <div className="absolute top-0 right-0 w-[38rem] h-[38rem] bg-sky-200/30 rounded-full blur-[120px] -z-0" />
-        <div className="absolute -top-10 left-1/4 w-80 h-80 bg-teal-200/25 rounded-full blur-[100px] -z-0" />
+      {/* HERO */}
+      <section className="border-b-2 border-ink">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          <div className="lg:col-span-7">
+            <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-5">
+              ● Tienda de pesca · Curada con IA
+            </p>
+            <h1 className="font-display uppercase text-ink leading-[0.86] text-6xl sm:text-7xl md:text-8xl">
+              Equípate
+              <br />
+              como un
+              <br />
+              <span className="text-accent">profesional</span>
+            </h1>
+            <p className="mt-6 text-lg text-ink/70 max-w-md leading-snug">
+              Cañas, carretes, señuelos y aparejos de AliExpress, seleccionados y con fichas
+              redactadas por inteligencia artificial.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="/categories/canas" className="bg-ink text-paper px-7 py-4 text-sm font-bold uppercase tracking-wide border-2 border-ink shadow-hard hover-shift hover:bg-accent hover:border-accent">
+                Ver catálogo →
+              </Link>
+              <Link href="/advice" className="bg-paper text-ink px-7 py-4 text-sm font-bold uppercase tracking-wide border-2 border-ink shadow-hard hover-shift">
+                Asistente IA 🤖
+              </Link>
+            </div>
+          </div>
 
-        <div className="relative max-w-5xl mx-auto px-4 text-center pt-24 pb-32 md:pt-32 md:pb-40">
-          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white text-sky-700 border border-sky-100 shadow-sm">
-            ⚡ Tu asistente de pesca con inteligencia artificial
-          </span>
-
-          <h1 className="mt-6 text-4xl md:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.08] max-w-4xl mx-auto">
-            Todo tu equipo de pesca,{' '}
-            <span className="text-sky-600">seleccionado con IA</span>
-          </h1>
-
-          <p className="mt-6 text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
-            Cañas, carretes, señuelos y aparejos de AliExpress con fichas optimizadas y consejos de
-            un experto virtual para cada modalidad.
-          </p>
-
-          <div className="mt-9 flex flex-col sm:flex-row justify-center items-center gap-3">
-            <Link
-              href="/categories/canas"
-              className="w-full sm:w-auto bg-sky-600 hover:bg-sky-700 text-white font-bold px-8 py-3.5 rounded-xl shadow-lg shadow-sky-600/20 hover:shadow-sky-600/30 active:scale-[0.98] transition-all"
-            >
-              Explorar catálogo
-            </Link>
-            <Link
-              href="/advice"
-              className="w-full sm:w-auto bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 font-bold px-8 py-3.5 rounded-xl shadow-sm active:scale-[0.98] transition-all"
-            >
-              Consultar Asistente IA 🤖
-            </Link>
+          <div className="lg:col-span-5">
+            <div className="relative">
+              {heroA && (
+                <div className="relative aspect-[4/5] border-2 border-ink shadow-hard-lg overflow-hidden bg-[#e6e2d6]">
+                  <ProductImage src={heroA.imageUrl} alt={heroA.title} priority sizes="(max-width: 1024px) 90vw, 40vw" className="absolute inset-0 w-full h-full object-cover" />
+                  <Link href={`/products/${heroA.id}`} className="absolute inset-0" aria-label={heroA.title} />
+                </div>
+              )}
+              {heroB && (
+                <div className="hidden sm:block absolute -bottom-8 -left-8 w-40 aspect-square border-2 border-ink shadow-hard bg-[#e6e2d6] overflow-hidden">
+                  <ProductImage src={heroB.imageUrl} alt={heroB.title} sizes="200px" className="absolute inset-0 w-full h-full object-cover" />
+                </div>
+              )}
+              <span className="absolute -top-5 -right-3 rotate-6 bg-accent text-paper font-display text-lg uppercase px-4 py-2 border-2 border-ink shadow-hard">
+                66 productos
+              </span>
+            </div>
           </div>
         </div>
-
-        <OceanWaves className="block w-full h-16 md:h-24" />
       </section>
 
-      {/* Categories */}
-      <section className="max-w-7xl mx-auto px-4 py-20 sm:px-6 lg:px-8">
-        <div className="text-center space-y-3 mb-14">
-          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900">
-            Compra por categoría
-          </h2>
-          <p className="text-slate-500 max-w-lg mx-auto">
-            Encuentra rápido lo que buscas entre nuestras {FISHING_TYPES.length} categorías de pesca.
-          </p>
+      <Marquee
+        items={[
+          'Envío internacional',
+          '66 productos seleccionados',
+          'Fichas optimizadas con IA',
+          'Comisión segura',
+          '11 categorías de pesca',
+        ]}
+      />
+
+      {/* CATEGORIES */}
+      <section className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
+        <div className="flex items-end justify-between mb-8 gap-4 border-b-2 border-ink pb-4">
+          <h2 className="font-display uppercase text-4xl md:text-5xl leading-none">Categorías</h2>
+          <span className="font-mono text-xs uppercase tracking-widest text-ink/50 hidden sm:block">Elige tu aparejo</span>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-          {FISHING_TYPES.map((type) => (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          {FISHING_TYPES.map((type, i) => (
             <Link
               key={type.id}
               href={`/categories/${type.id}`}
-              className="group relative rounded-2xl p-5 md:p-6 bg-white border border-slate-200 hover:border-sky-300 hover:shadow-lg hover:shadow-sky-600/5 hover:-translate-y-1 transition-all duration-300 flex flex-col"
+              className="group relative flex flex-col justify-between p-5 min-h-[10rem] border-2 border-ink -ml-[2px] -mt-[2px] bg-paper hover:bg-ink transition-colors"
             >
-              <span className={`inline-flex text-slate-700 p-3 rounded-xl mb-4 bg-gradient-to-br ${type.color} ring-1 ring-slate-900/5`}>
-                <CategoryIcon id={type.id} className="w-7 h-7" strokeWidth={1.5} />
-              </span>
-              <h3 className="text-base md:text-lg font-bold text-slate-900 group-hover:text-sky-600 transition-colors mb-1.5">
+              <div className="flex items-start justify-between">
+                <span className="font-mono text-xs font-bold text-ink/40 group-hover:text-paper/50">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <CategoryIcon id={type.id} className="w-8 h-8 text-ink group-hover:text-accent transition-colors" strokeWidth={1.6} />
+              </div>
+              <h3 className="font-display uppercase text-xl md:text-2xl leading-none text-ink group-hover:text-paper transition-colors mt-6">
                 {type.name}
               </h3>
-              <p className="text-slate-500 text-sm leading-relaxed line-clamp-2 flex-1">
-                {type.description}
-              </p>
-              <span className="flex items-center gap-1 text-xs font-bold text-sky-600 uppercase tracking-wide mt-4">
-                Ver productos
-                <span className="group-hover:translate-x-1 transition-transform">→</span>
-              </span>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* Value props */}
-      <section className="bg-white border-y border-slate-200 py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center space-y-3 mb-14">
-            <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">¿Por qué PescaPlus?</h2>
-            <p className="text-slate-500 max-w-lg mx-auto">
-              La herramienta que todo pescador necesita antes de comprar su próximo aparejo.
-            </p>
+      {/* FEATURED */}
+      {featured.length > 0 && (
+        <section className="bg-ink text-paper border-y-2 border-ink py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-end justify-between mb-8 gap-4 border-b-2 border-paper/30 pb-4">
+              <h2 className="font-display uppercase text-4xl md:text-5xl leading-none">Lo más buscado</h2>
+              <Link href="/categories/canas" className="font-mono text-xs font-bold uppercase tracking-widest text-accent hover:underline whitespace-nowrap">Ver todo →</Link>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              {featured.map((p) => (
+                <ProductCard key={p.id} {...p} />
+              ))}
+            </div>
           </div>
+        </section>
+      )}
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                icon: '🤖',
-                tint: 'bg-sky-50 text-sky-600',
-                title: 'Fichas optimizadas con IA',
-                text: 'Cada producto tiene título y descripción redactados por IA, claros y honestos, sin la típica jerga confusa de los marketplaces.',
-              },
-              {
-                icon: '🎯',
-                tint: 'bg-emerald-50 text-emerald-600',
-                title: 'Selección de AliExpress',
-                text: 'Filtramos las mejores cañas, carretes y aparejos según ventas y valoraciones de compradores reales.',
-              },
-              {
-                icon: '🔗',
-                tint: 'bg-amber-50 text-amber-600',
-                title: 'Compra segura',
-                text: 'Te redirigimos con enlaces oficiales de AliExpress para que compres de forma rápida y protegida.',
-              },
-            ].map((f) => (
-              <div key={f.title} className="text-center md:text-left space-y-3">
-                <span className={`inline-flex text-2xl w-14 h-14 items-center justify-center rounded-2xl ${f.tint}`}>
-                  {f.icon}
-                </span>
-                <h3 className="text-lg font-bold text-slate-900">{f.title}</h3>
-                <p className="text-slate-500 text-sm leading-relaxed">{f.text}</p>
-              </div>
-            ))}
-          </div>
+      {/* VALUE PROPS */}
+      <section className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border-2 border-ink shadow-hard-md">
+          {[
+            { n: '01', t: 'Fichas con IA', d: 'Títulos y descripciones redactados por IA, claros y honestos, sin la jerga confusa de los marketplaces.' },
+            { n: '02', t: 'Selección real', d: 'Filtramos por ventas y valoraciones de compradores reales. Solo lo que merece la pena.' },
+            { n: '03', t: 'Compra segura', d: 'Enlaces oficiales de AliExpress. Pagas en su tienda, de forma rápida y protegida.' },
+          ].map((f, i) => (
+            <div key={f.n} className={`p-7 ${i < 2 ? 'md:border-r-2 border-ink border-b-2 md:border-b-0' : ''}`}>
+              <span className="font-display text-5xl text-accent leading-none">{f.n}</span>
+              <h3 className="font-display uppercase text-2xl mt-4 leading-none">{f.t}</h3>
+              <p className="text-sm text-ink/70 mt-3 leading-relaxed">{f.d}</p>
+            </div>
+          ))}
         </div>
       </section>
     </Layout>

@@ -14,7 +14,7 @@ const SORT_OPTIONS: { key: SortKey; label: string }[] = [
 ]
 
 const inputCls =
-  'w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-700 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 text-sm transition-all'
+  'w-full px-4 py-3 bg-paper border-2 border-ink text-ink placeholder-ink/40 focus:outline-none focus:border-accent text-sm transition-colors'
 
 export default function CategoryBrowser({
   category,
@@ -72,26 +72,23 @@ export default function CategoryBrowser({
     <>
       <div className="mb-8 flex flex-col sm:flex-row gap-3">
         <form onSubmit={search} className="flex gap-2 flex-1">
-          <div className="relative flex-1">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">🔍</span>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar en esta categoría..."
-              className={`${inputCls} pl-10`}
-            />
-          </div>
-          <button type="submit" className="bg-sky-600 hover:bg-sky-700 text-white px-5 py-2.5 rounded-xl font-semibold text-sm shadow-sm active:scale-[0.98] transition-all">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Buscar en esta categoría…"
+            className={inputCls}
+          />
+          <button type="submit" className="bg-ink text-paper px-5 py-3 text-sm font-bold uppercase tracking-wide border-2 border-ink shadow-hard hover:bg-accent hover:border-accent transition-colors whitespace-nowrap">
             Buscar
           </button>
         </form>
-        <label className="flex items-center gap-2 text-xs text-slate-500 sm:justify-end">
-          <span className="font-semibold uppercase tracking-wide whitespace-nowrap">Ordenar</span>
+        <label className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-ink/60">
+          <span className="font-bold whitespace-nowrap">Ordenar</span>
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as SortKey)}
-            className="bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-slate-700 text-sm focus:outline-none focus:border-sky-500 cursor-pointer"
+            className="bg-paper border-2 border-ink px-3 py-3 text-ink text-sm focus:outline-none cursor-pointer"
           >
             {SORT_OPTIONS.map((o) => (
               <option key={o.key} value={o.key}>{o.label}</option>
@@ -101,24 +98,22 @@ export default function CategoryBrowser({
       </div>
 
       {!loading && products.length > 0 && (
-        <p className="text-sm text-slate-500 mb-6">
-          <span className="font-bold text-slate-800">{products.length}</span> {products.length === 1 ? 'producto' : 'productos'}
+        <p className="font-mono text-xs uppercase tracking-widest text-ink/60 mb-6">
+          <span className="font-bold text-ink">{products.length}</span> {products.length === 1 ? 'producto' : 'productos'}
         </p>
       )}
 
       {loading ? (
         <div className="flex flex-col items-center justify-center py-24 gap-4">
-          <div className="w-12 h-12 rounded-full border-4 border-slate-200 border-t-sky-500 animate-spin" />
-          <p className="text-slate-400 text-sm">Buscando...</p>
+          <div className="w-12 h-12 border-4 border-ink border-t-accent animate-spin" />
+          <p className="font-mono text-xs uppercase tracking-widest text-ink/50">Buscando…</p>
         </div>
       ) : sortedProducts.length === 0 ? (
-        <div className="text-center py-20 rounded-2xl bg-white border border-slate-200 max-w-lg mx-auto px-8 space-y-5">
+        <div className="text-center py-16 border-2 border-ink shadow-hard bg-paper max-w-lg mx-auto px-8 space-y-4">
           <span className="inline-block text-5xl">⚓</span>
-          <div className="space-y-2">
-            <h3 className="text-lg font-bold text-slate-800">No hay productos</h3>
-            <p className="text-sm text-slate-500 max-w-sm mx-auto">Prueba con otras palabras clave o restablece el filtro.</p>
-          </div>
-          <button onClick={reset} className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all">
+          <h3 className="font-display uppercase text-2xl text-ink">Sin productos</h3>
+          <p className="text-sm text-ink/60 max-w-sm mx-auto">Prueba con otras palabras clave o restablece el filtro.</p>
+          <button onClick={reset} className="bg-ink text-paper px-5 py-2.5 text-xs font-bold uppercase tracking-wide border-2 border-ink hover:bg-accent transition-colors">
             Ver todos
           </button>
         </div>
