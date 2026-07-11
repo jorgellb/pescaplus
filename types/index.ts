@@ -40,6 +40,8 @@ export interface Guide {
   /** Article body in the lightweight markdown used across the app. */
   content: string
   coverImage: string
+  /** Alt text for the cover image (SEO/accessibility). */
+  coverImageAlt: string
   /** Related fishing category id, or '' for general guides. */
   typeFishing: string
   seoTitle: string

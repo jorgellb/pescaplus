@@ -53,6 +53,7 @@ model Guide {
   excerpt        String   @default("")
   content        String
   coverImage     String   @default("")
+  coverImageAlt  String   @default("")
   typeFishing    String   @default("")
   seoTitle       String   @default("")
   seoDescription String   @default("")

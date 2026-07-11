@@ -47,7 +47,7 @@ export default async function GuidesIndex() {
                 className="group flex flex-col bg-paper border-2 border-ink shadow-hard hover-shift"
               >
                 <div className="relative aspect-[16/10] overflow-hidden bg-[#e6e2d6] border-b-2 border-ink">
-                  <ProductImage src={g.coverImage} alt={g.title} sizes="(max-width: 768px) 100vw, 33vw" className="absolute inset-0 w-full h-full object-cover" />
+                  <ProductImage src={g.coverImage} alt={g.coverImageAlt || g.title} sizes="(max-width: 768px) 100vw, 33vw" className="absolute inset-0 w-full h-full object-cover" />
                   {g.typeFishing && (
                     <span className="absolute top-0 left-0 bg-ink text-paper text-[10px] font-bold uppercase tracking-widest px-2.5 py-1.5">
                       {fishingLabel(g.typeFishing)}

@@ -98,6 +98,7 @@ Tono experto, útil y ameno. Devuelve SOLO JSON válido:
       excerpt: String(p.excerpt || '').slice(0, 300),
       content: String(p.content || ''),
       coverImage: coverFor(typeFishing),
+      coverImageAlt: '',
       typeFishing,
       seoTitle: '',
       seoDescription: String(p.seoDescription || '').slice(0, 165),

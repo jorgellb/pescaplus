@@ -13,6 +13,7 @@ export type GuideInput = {
   excerpt?: string
   content: string
   coverImage?: string
+  coverImageAlt?: string
   typeFishing?: string
   seoTitle?: string
   seoDescription?: string
@@ -43,6 +44,7 @@ function applyInput(input: GuideInput, id: string, createdAt: string): Guide {
     excerpt: input.excerpt?.trim() || content.replace(/[#*_>-]/g, '').slice(0, 160).trim(),
     content,
     coverImage: input.coverImage?.trim() || '',
+    coverImageAlt: input.coverImageAlt?.trim() || '',
     typeFishing: input.typeFishing?.trim() || '',
     seoTitle: input.seoTitle?.trim() || '',
     seoDescription: input.seoDescription?.trim() || content.slice(0, 160),
@@ -85,6 +87,7 @@ function toGuide(row: any): Guide {
     excerpt: row.excerpt,
     content: row.content,
     coverImage: row.coverImage,
+    coverImageAlt: row.coverImageAlt ?? '',
     typeFishing: row.typeFishing,
     seoTitle: row.seoTitle,
     seoDescription: row.seoDescription,

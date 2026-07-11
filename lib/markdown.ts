@@ -7,7 +7,8 @@
  * are emitted, with link URLs validated to http(s)/relative schemes. Affiliate
  * links get rel="nofollow sponsored" automatically.
  *
- * Supported: **bold**, _italic_, [texto](https://url), and `- ` bullet lists.
+ * Supported: **bold**, _italic_, [texto](https://url), ![alt](https://img),
+ * and `- ` bullet lists.
  */
 
 function escapeHtml(value: string): string {
@@ -20,6 +21,13 @@ function escapeHtml(value: string): string {
 
 function inline(text: string): string {
   return text
+    // images: ![alt](url) — validated URL, escaped alt. Must run before links.
+    .replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, (_m, alt: string, url: string) => {
+      if (/^(https?:\/\/|\/)/i.test(url)) {
+        return `<img src="${url}" alt="${alt}" loading="lazy" class="my-4 max-w-full h-auto border-2 border-ink" />`
+      }
+      return ''
+    })
     // links: [texto](url) — only http(s) or relative URLs are allowed
     .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_m, label: string, url: string) => {
       if (/^(https?:\/\/|\/)/i.test(url)) {

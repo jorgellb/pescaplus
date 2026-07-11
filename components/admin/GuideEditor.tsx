@@ -15,6 +15,7 @@ type FormState = {
   title: string
   typeFishing: string
   coverImage: string
+  coverImageAlt: string
   excerpt: string
   content: string
   seoTitle: string
@@ -27,6 +28,7 @@ function toForm(g: Guide | null): FormState {
     title: g?.title ?? '',
     typeFishing: g?.typeFishing ?? '',
     coverImage: g?.coverImage ?? '',
+    coverImageAlt: g?.coverImageAlt ?? '',
     excerpt: g?.excerpt ?? '',
     content: g?.content ?? '',
     seoTitle: g?.seoTitle ?? '',
@@ -105,6 +107,7 @@ export default function GuideEditor({ initial, onClose, onSaved }: GuideEditorPr
       title: form.title.trim(),
       typeFishing: form.typeFishing,
       coverImage: form.coverImage.trim(),
+      coverImageAlt: form.coverImageAlt.trim(),
       excerpt: form.excerpt.trim(),
       content: form.content.trim(),
       seoTitle: form.seoTitle.trim(),
@@ -165,9 +168,15 @@ export default function GuideEditor({ initial, onClose, onSaved }: GuideEditorPr
             </div>
           </div>
 
-          <div className="space-y-1">
-            <label className={labelCls}>Imagen de portada (URL)</label>
-            <input value={form.coverImage} onChange={(e) => set('coverImage', e.target.value)} placeholder="https://…" className={field} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className={labelCls}>Imagen de portada (URL)</label>
+              <input value={form.coverImage} onChange={(e) => set('coverImage', e.target.value)} placeholder="https://…" className={field} />
+            </div>
+            <div className="space-y-1">
+              <label className={labelCls}>ALT de la portada (SEO/accesibilidad)</label>
+              <input value={form.coverImageAlt} onChange={(e) => set('coverImageAlt', e.target.value)} placeholder="Describe la imagen" className={field} />
+            </div>
           </div>
 
           <div className="space-y-1">
@@ -187,7 +196,8 @@ export default function GuideEditor({ initial, onClose, onSaved }: GuideEditorPr
                 <div className="flex flex-wrap gap-1.5">
                   <button onClick={() => surround('**', '**', 'Título de sección')} className="px-2.5 py-1 text-xs font-bold border border-ink/25 bg-paper hover:bg-ink/5">B</button>
                   <button onClick={() => surround('_', '_', 'cursiva')} className="px-2.5 py-1 text-xs italic border border-ink/25 bg-paper hover:bg-ink/5">i</button>
-                  <button onClick={() => surround('[', '](https://)', 'texto')} className="px-2.5 py-1 text-xs border border-ink/25 bg-paper hover:bg-ink/5">🔗</button>
+                  <button onClick={() => surround('[', '](https://)', 'texto')} className="px-2.5 py-1 text-xs border border-ink/25 bg-paper hover:bg-ink/5">🔗 Enlace</button>
+                  <button onClick={() => surround('\n![', '](https://)\n', 'texto alt de la imagen')} className="px-2.5 py-1 text-xs border border-ink/25 bg-paper hover:bg-ink/5">🖼️ Imagen</button>
                 </div>
                 <textarea ref={contentRef} value={form.content} onChange={(e) => set('content', e.target.value)} rows={12} className={`${field} resize-y font-mono text-xs leading-relaxed`} />
               </>

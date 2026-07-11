@@ -17,6 +17,7 @@ const guideSchema = z.object({
   excerpt: z.string().max(400).optional(),
   content: z.string().min(1).max(20000),
   coverImage: z.string().max(1200).optional(),
+  coverImageAlt: z.string().max(300).optional(),
   typeFishing: z.string().max(40).optional(),
   seoTitle: z.string().max(120).optional(),
   seoDescription: z.string().max(200).optional(),

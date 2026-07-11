@@ -30,6 +30,7 @@ export const GUIDE_SEED: Guide[] = [
       'Consejo final: para empezar, una caña telescópica o de tramos de carbono de 2,40 m y acción rápida cubre casi todo. Mira nuestra selección de [cañas de pesca](/categories/canas).',
     ].join('\n'),
     coverImage: `${IMG}/S8c413d3dac7d48bdbe06d7e93e063d00N.jpg`,
+    coverImageAlt: 'Cañas de pescar telescópicas de fibra de carbono',
     typeFishing: 'canas',
     seoTitle: '',
     seoDescription:
@@ -66,6 +67,7 @@ export const GUIDE_SEED: Guide[] = [
       'Compara modelos reales en la sección de [carretes](/categories/carretes).',
     ].join('\n'),
     coverImage: `${IMG}/S16d271cca6ea490baf57e45474420a26a.jpg`,
+    coverImageAlt: 'Carretes de pesca de spinning con freno frontal',
     typeFishing: 'carretes',
     seoTitle: '',
     seoDescription:
@@ -100,6 +102,7 @@ export const GUIDE_SEED: Guide[] = [
       'Lleva variedad y cambia si en 15 minutos no hay actividad. Encuentra kits y modelos en [señuelos](/categories/senuelos).',
     ].join('\n'),
     coverImage: `${IMG}/Sf31b5d1820634625b622c48264d66061n.jpg`,
+    coverImageAlt: 'Señuelos de vinilo para pesca de depredadores',
     typeFishing: 'senuelos',
     seoTitle: '',
     seoDescription:

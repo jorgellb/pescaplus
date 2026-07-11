@@ -93,7 +93,7 @@ export default async function GuidePage({ params }: Params) {
 
         {guide.coverImage && (
           <div className="relative aspect-[16/9] mt-8 border-2 border-ink shadow-hard overflow-hidden bg-[#e6e2d6]">
-            <ProductImage src={guide.coverImage} alt={guide.title} priority sizes="(max-width: 768px) 100vw, 768px" className="absolute inset-0 w-full h-full object-cover" />
+            <ProductImage src={guide.coverImage} alt={guide.coverImageAlt || guide.title} priority sizes="(max-width: 768px) 100vw, 768px" className="absolute inset-0 w-full h-full object-cover" />
           </div>
         )}
 

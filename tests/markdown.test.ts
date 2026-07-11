@@ -34,6 +34,18 @@ describe('renderDescription', () => {
     expect(html).not.toContain('javascript:')
   })
 
+  it('renders images with alt and a valid src', () => {
+    const html = renderDescription('![Un carrete](https://img/x.jpg)')
+    expect(html).toContain('<img src="https://img/x.jpg"')
+    expect(html).toContain('alt="Un carrete"')
+    expect(html).toContain('loading="lazy"')
+  })
+
+  it('rejects images with unsafe src', () => {
+    const html = renderDescription('![x](javascript:alert)')
+    expect(html).not.toContain('<img')
+  })
+
   it('renders bullet lists', () => {
     const html = renderDescription('- uno\n- dos')
     expect(html).toContain('<ul')
