@@ -7,6 +7,7 @@ import { fishingLabel } from '@/lib/fishing'
 import { resolveProduct, relatedProducts } from '@/lib/product-service'
 import { renderDescription } from '@/lib/markdown'
 import { CATALOG } from '@/lib/catalog'
+import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -57,6 +58,12 @@ export default async function ProductPage({ params }: Params) {
   const related = await relatedProducts(product)
   const modalityLabel = fishingLabel(product.typeFishing)
 
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: 'Inicio', url: SITE_URL },
+    { name: modalityLabel, url: `${SITE_URL}/categories/${product.typeFishing}` },
+    { name: product.title },
+  ])
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -79,6 +86,7 @@ export default async function ProductPage({ params }: Params) {
   return (
     <Layout>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <div className="max-w-7xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
         <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-8">
           <Link href="/" className="hover:text-accent">Inicio</Link> <span className="mx-1">/</span>{' '}

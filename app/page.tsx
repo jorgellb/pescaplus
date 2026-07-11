@@ -4,8 +4,13 @@ import Marquee from '@/components/Marquee'
 import ProductCard from '@/components/ProductCard'
 import ProductImage from '@/components/ProductImage'
 import CategoryIcon from '@/components/graphics/CategoryIcon'
+import type { Metadata } from 'next'
 import { FISHING_TYPES } from '@/lib/fishing'
 import { listProducts } from '@/lib/products-store'
+
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+}
 
 export const revalidate = 3600
 

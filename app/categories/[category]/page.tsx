@@ -4,6 +4,7 @@ import CategoryIcon from '@/components/graphics/CategoryIcon'
 import CategoryBrowser from './CategoryBrowser'
 import { FISHING_TYPES, getFishingType } from '@/lib/fishing'
 import { listProducts } from '@/lib/products-store'
+import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
 
 type Params = { params: Promise<{ category: string }> }
 
@@ -21,8 +22,14 @@ export default async function CategoryPage({ params }: Params) {
   const categoryDescription = fishingType?.tagline ?? 'Los mejores aparejos para tus salidas de pesca.'
   const products = await listProducts({ typeFishing: category })
 
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: 'Inicio', url: SITE_URL },
+    { name: categoryName },
+  ])
+
   return (
     <Layout>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <section className="bg-paper border-b-2 border-ink">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-5">

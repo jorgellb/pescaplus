@@ -5,13 +5,16 @@ import { listProducts } from '@/lib/products-store'
 const base = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const now = new Date()
+
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: `${base}/`, changeFrequency: 'weekly', priority: 1 },
-    { url: `${base}/advice`, changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${base}/`, lastModified: now, changeFrequency: 'weekly', priority: 1 },
+    { url: `${base}/advice`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
   ]
 
   const categoryRoutes: MetadataRoute.Sitemap = FISHING_TYPES.map((t) => ({
     url: `${base}/categories/${t.id}`,
+    lastModified: now,
     changeFrequency: 'weekly',
     priority: 0.8,
   }))
@@ -21,6 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const products = await listProducts()
     productRoutes = products.map((p) => ({
       url: `${base}/products/${p.id}`,
+      lastModified: now,
       changeFrequency: 'weekly',
       priority: 0.7,
     }))

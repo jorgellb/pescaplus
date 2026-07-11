@@ -6,34 +6,33 @@
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "gen:catalog": "node scripts/gen-catalog.mjs",
+    "db:reseed": "node scripts/reseed-db.mjs"
   },
   "dependencies": {
-    "@langchain/core": "^0.3.80",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
-    "axios": "^1.7.9",
-    "dotenv": "^16.4.7",
-    "langchain": "^0.3.10",
+    "dotenv": "^16.6.1",
     "next": "^16.2.10",
     "pg": "^8.22.0",
     "prisma": "^7.8.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "zod": "^3.24.1"
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.0.0",
-    "@types/node": "^20.17.14",
+    "@types/node": "^24.0.0",
     "@types/pg": "^8.20.0",
-    "@types/react": "^19.0.8",
-    "@types/react-dom": "^19.0.3",
-    "eslint": "^9.18.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "eslint": "^9.39.5",
     "eslint-config-next": "^16.2.10",
     "tailwindcss": "^4.0.0",
-    "typescript": "^5.7.3"
+    "typescript": "^5.9.3"
   }
 }
