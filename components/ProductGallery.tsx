@@ -24,7 +24,7 @@ export default function ProductGallery({ images, alts, videoUrl, title }: Produc
   return (
     <div className="space-y-3">
       {/* Main viewer */}
-      <div className="relative overflow-hidden bg-[#e6e2d6] aspect-square border-2 border-ink shadow-hard group">
+      <div className="relative overflow-hidden bg-[#e6e2d6] aspect-square border border-ink/15 rounded-xl shadow-hard group">
         {selected === 'video' && videoUrl ? (
           <video
             src={videoUrl}

@@ -19,7 +19,7 @@ export default async function GuidesIndex() {
 
   return (
     <Layout>
-      <section className="bg-paper border-b-2 border-ink">
+      <section className="bg-paper border-b border-ink/12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3">● Blog</p>
           <h1 className="font-display uppercase text-5xl md:text-7xl leading-[0.9] text-ink">
@@ -33,7 +33,7 @@ export default async function GuidesIndex() {
 
       <section className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         {guides.length === 0 ? (
-          <div className="text-center py-20 border-2 border-ink shadow-hard bg-paper max-w-lg mx-auto px-8 space-y-4">
+          <div className="text-center py-20 border border-ink/15 rounded-xl shadow-hard bg-paper max-w-lg mx-auto px-8 space-y-4">
             <span className="inline-block text-5xl">📝</span>
             <h2 className="font-display uppercase text-2xl text-ink">Aún no hay guías</h2>
             <p className="text-sm text-ink/60">Vuelve pronto: estamos preparando contenido.</p>
@@ -44,9 +44,9 @@ export default async function GuidesIndex() {
               <Link
                 key={g.id}
                 href={`/guias/${g.id}`}
-                className="group flex flex-col bg-paper border-2 border-ink shadow-hard hover-shift"
+                className="group flex flex-col bg-paper border border-ink/15 rounded-xl shadow-hard hover-shift"
               >
-                <div className="relative aspect-[16/10] overflow-hidden bg-[#e6e2d6] border-b-2 border-ink">
+                <div className="relative aspect-[16/10] overflow-hidden bg-[#e6e2d6] border-b border-ink/12">
                   <ProductImage src={g.coverImage} alt={g.coverImageAlt || g.title} sizes="(max-width: 768px) 100vw, 33vw" className="absolute inset-0 w-full h-full object-cover" />
                   {g.typeFishing && (
                     <span className="absolute top-0 left-0 bg-ink text-paper text-[10px] font-bold uppercase tracking-widest px-2.5 py-1.5">

@@ -131,8 +131,8 @@ export default function GuideEditor({ initial, onClose, onSaved }: GuideEditorPr
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ink/30 backdrop-blur-sm p-4 sm:p-8" onClick={onClose}>
-      <div className="w-full max-w-3xl my-4 bg-white border-2 border-ink shadow-hard-lg" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between px-6 py-4 border-b-2 border-ink sticky top-0 bg-white z-10">
+      <div className="w-full max-w-3xl my-4 bg-white border border-ink/15 rounded-xl shadow-hard-lg" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-ink/12 sticky top-0 bg-white z-10">
           <h2 className="font-display uppercase text-xl text-ink">{initial ? 'Editar guía' : 'Nueva guía'}</h2>
           <button onClick={onClose} className="text-ink/50 hover:text-ink text-xl">✕</button>
         </div>
@@ -224,9 +224,9 @@ export default function GuideEditor({ initial, onClose, onSaved }: GuideEditorPr
           {error && <p className="text-xs text-red-600 bg-red-50 border border-red-200 px-3 py-2">{error}</p>}
         </div>
 
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t-2 border-ink sticky bottom-0 bg-white">
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-ink/12 sticky bottom-0 bg-white">
           <button onClick={onClose} className="text-sm font-semibold text-ink/60 hover:text-ink px-4 py-2.5">Cancelar</button>
-          <button onClick={save} disabled={saving} className="bg-ink text-paper hover:bg-accent font-bold text-sm px-6 py-2.5 border-2 border-ink transition-colors disabled:opacity-40">
+          <button onClick={save} disabled={saving} className="bg-ink text-paper hover:bg-accent font-bold text-sm px-6 py-2.5 border border-ink/15 rounded-xl transition-colors disabled:opacity-40">
             {saving ? 'Guardando…' : initial ? 'Guardar' : 'Crear guía'}
           </button>
         </div>

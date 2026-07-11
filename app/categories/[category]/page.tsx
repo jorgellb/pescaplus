@@ -32,7 +32,7 @@ export default async function CategoryPage({ params }: Params) {
   return (
     <Layout>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
-      <section className="bg-paper border-b-2 border-ink">
+      <section className="bg-paper border-b border-ink/12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-5">
             <Link href="/" className="hover:text-accent">Inicio</Link> <span className="mx-1">/</span>{' '}
@@ -40,7 +40,7 @@ export default async function CategoryPage({ params }: Params) {
           </nav>
           <div className="flex items-center gap-5">
             {fishingType && (
-              <span className="inline-flex flex-shrink-0 text-ink p-4 border-2 border-ink shadow-hard bg-paper">
+              <span className="inline-flex flex-shrink-0 text-ink p-4 border border-ink/15 rounded-xl shadow-hard bg-paper">
                 <CategoryIcon id={fishingType.id} className="w-10 h-10" strokeWidth={1.6} />
               </span>
             )}

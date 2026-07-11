@@ -52,7 +52,7 @@ export default function AdminGuidesPage() {
         </div>
         <button
           onClick={() => setCreating(true)}
-          className="inline-flex items-center gap-2 bg-ink text-paper hover:bg-accent font-extrabold text-sm px-5 py-2.5 border-2 border-ink transition-colors"
+          className="inline-flex items-center gap-2 bg-ink text-paper hover:bg-accent font-extrabold text-sm px-5 py-2.5 border border-ink/15 rounded-xl transition-colors"
         >
           <span className="text-base leading-none">＋</span> Nueva guía
         </button>

@@ -216,7 +216,7 @@ export default function AdvicePage() {
 
   return (
     <Layout>
-      <section className="bg-paper border-b-2 border-ink">
+      <section className="bg-paper border-b border-ink/12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
           <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3">● Asistente con IA</p>
           <h1 className="font-display uppercase text-5xl md:text-6xl leading-none text-ink">Consejos de pesca</h1>
@@ -235,7 +235,7 @@ export default function AdvicePage() {
                 key={type.id}
                 onClick={() => getInitialAdvice(type.id)}
                 disabled={loading}
-                className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold uppercase tracking-tight border-2 border-ink transition-colors disabled:opacity-50 ${
+                className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold uppercase tracking-tight border border-ink/15 rounded-xl transition-colors disabled:opacity-50 ${
                   selectedType === type.id ? 'bg-ink text-paper' : 'bg-paper text-ink hover:bg-ink hover:text-paper'
                 }`}
               >
@@ -245,9 +245,9 @@ export default function AdvicePage() {
           </div>
         </div>
 
-        <div className="border-2 border-ink shadow-hard bg-paper overflow-hidden flex flex-col h-[520px]">
+        <div className="border border-ink/15 rounded-xl shadow-hard bg-paper overflow-hidden flex flex-col h-[520px]">
           {messages.length > 0 && (
-            <div className="flex items-center justify-between px-4 py-2.5 border-b-2 border-ink bg-paper">
+            <div className="flex items-center justify-between px-4 py-2.5 border-b border-ink/12 bg-paper">
               <span className="font-mono text-[11px] uppercase tracking-widest text-ink/50">Conversación</span>
               <button onClick={clearConversation} className="font-mono text-[11px] font-bold uppercase text-ink hover:text-accent">Limpiar</button>
             </div>
@@ -256,7 +256,7 @@ export default function AdvicePage() {
           <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-5 bg-[#eae6db]">
             {messages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center gap-4 max-w-sm mx-auto">
-                <span className="text-5xl w-20 h-20 flex items-center justify-center bg-paper border-2 border-ink shadow-hard">🤖</span>
+                <span className="text-5xl w-20 h-20 flex items-center justify-center bg-paper border border-ink/15 rounded-xl shadow-hard">🤖</span>
                 <div className="space-y-1">
                   <h3 className="font-display uppercase text-xl text-ink">Asistente activo</h3>
                   <p className="text-xs text-ink/60 leading-relaxed">Elige una modalidad o escribe tu pregunta abajo.</p>
@@ -267,10 +267,10 @@ export default function AdvicePage() {
                 {messages.map((message, index) => (
                   <div key={index} className={`flex items-start gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     {message.role === 'assistant' && (
-                      <div className="flex-shrink-0 w-8 h-8 bg-paper border-2 border-ink flex items-center justify-center text-sm">🤖</div>
+                      <div className="flex-shrink-0 w-8 h-8 bg-paper border border-ink/15 rounded-xl flex items-center justify-center text-sm">🤖</div>
                     )}
                     <div className={`flex flex-col gap-2 max-w-[85%] md:max-w-[75%] ${message.role === 'user' ? 'items-end' : 'items-start'}`}>
-                      <div className={`w-full p-4 border-2 border-ink ${message.role === 'user' ? 'bg-accent text-paper' : 'bg-paper'}`}>
+                      <div className={`w-full p-4 border border-ink/15 rounded-xl ${message.role === 'user' ? 'bg-accent text-paper' : 'bg-paper'}`}>
                         {message.role === 'user' ? (
                           <p className="text-sm font-medium leading-relaxed whitespace-pre-wrap">{message.content}</p>
                         ) : (
@@ -291,7 +291,7 @@ export default function AdvicePage() {
                                 key={p.id}
                                 href={`/products/${p.id}`}
                                 target="_blank"
-                                className="flex items-center gap-2 bg-paper border-2 border-ink p-1.5 pr-3 hover:bg-ink/5 transition-colors max-w-[210px]"
+                                className="flex items-center gap-2 bg-paper border border-ink/15 rounded-xl p-1.5 pr-3 hover:bg-ink/5 transition-colors max-w-[210px]"
                               >
                                 <span className="relative block w-9 h-9 flex-shrink-0 bg-[#e6e2d6] overflow-hidden">
                                   <ProductImage src={p.imageUrl} alt={p.title} sizes="40px" className="absolute inset-0 w-full h-full object-cover" />
@@ -315,8 +315,8 @@ export default function AdvicePage() {
                 ))}
                 {loading && messages[messages.length - 1]?.role !== 'assistant' && (
                   <div className="flex items-start gap-3 justify-start">
-                    <div className="flex-shrink-0 w-8 h-8 bg-paper border-2 border-ink flex items-center justify-center text-sm">🤖</div>
-                    <div className="bg-paper border-2 border-ink p-4">
+                    <div className="flex-shrink-0 w-8 h-8 bg-paper border border-ink/15 rounded-xl flex items-center justify-center text-sm">🤖</div>
+                    <div className="bg-paper border border-ink/15 rounded-xl p-4">
                       <div className="flex items-center gap-1.5">
                         <div className="w-2 h-2 bg-accent animate-bounce" />
                         <div className="w-2 h-2 bg-accent animate-bounce" style={{ animationDelay: '0.2s' }} />
@@ -330,14 +330,14 @@ export default function AdvicePage() {
             )}
           </div>
 
-          <div className="p-3 border-t-2 border-ink bg-paper">
+          <div className="p-3 border-t border-ink/12 bg-paper">
             {!loading && messages.length > 0 && messages[messages.length - 1].role === 'assistant' && (
               <div className="flex gap-2 overflow-x-auto pb-2.5 -mx-1 px-1 scrollbar-none">
                 {FOLLOW_UPS.map((q) => (
                   <button
                     key={q}
                     onClick={() => executeSendMessage(q)}
-                    className="flex-shrink-0 px-3 py-1.5 bg-paper border-2 border-ink text-[11px] font-bold uppercase tracking-tight text-ink hover:bg-ink hover:text-paper transition-colors"
+                    className="flex-shrink-0 px-3 py-1.5 bg-paper border border-ink/15 rounded-xl text-[11px] font-bold uppercase tracking-tight text-ink hover:bg-ink hover:text-paper transition-colors"
                   >
                     {q}
                   </button>
@@ -351,13 +351,13 @@ export default function AdvicePage() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Escribe tu consulta…"
-                className="flex-1 px-4 py-3 bg-paper border-2 border-ink text-ink placeholder-ink/40 focus:outline-none focus:border-accent text-sm transition-colors"
+                className="flex-1 px-4 py-3 bg-paper border border-ink/15 rounded-xl text-ink placeholder-ink/40 focus:outline-none focus:border-accent text-sm transition-colors"
                 disabled={loading}
               />
               <button
                 onClick={sendMessage}
                 disabled={loading || !input.trim()}
-                className="bg-ink text-paper px-6 text-sm font-bold uppercase border-2 border-ink hover:bg-accent transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="bg-ink text-paper px-6 text-sm font-bold uppercase border border-ink/15 rounded-xl hover:bg-accent transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Enviar
               </button>
@@ -373,7 +373,7 @@ export default function AdvicePage() {
                 key={idx}
                 onClick={() => executeSendMessage(q)}
                 disabled={loading}
-                className="p-3.5 bg-paper border-2 border-ink shadow-hard hover-shift text-xs text-ink font-bold uppercase tracking-tight text-left flex justify-between items-center gap-2 disabled:opacity-50"
+                className="p-3.5 bg-paper border border-ink/15 rounded-xl shadow-hard hover-shift text-xs text-ink font-bold uppercase tracking-tight text-left flex justify-between items-center gap-2 disabled:opacity-50"
               >
                 <span>{q}</span>
                 <span className="text-accent text-base">→</span>

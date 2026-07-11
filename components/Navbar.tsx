@@ -42,7 +42,7 @@ export default function Navbar() {
     }`
 
   return (
-    <nav className="sticky top-0 z-50 w-full bg-paper border-b-2 border-ink">
+    <nav className="sticky top-0 z-50 w-full bg-paper border-b border-ink/12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center gap-8">
@@ -67,7 +67,7 @@ export default function Navbar() {
                 </button>
 
                 {catOpen && (
-                  <div className="absolute left-0 mt-2 w-[30rem] p-2 grid grid-cols-2 gap-0.5 bg-paper border-2 border-ink shadow-hard-md">
+                  <div className="absolute left-0 mt-2 w-[30rem] p-2 grid grid-cols-2 gap-0.5 bg-paper border border-ink/15 rounded-xl shadow-hard-md">
                     {FISHING_TYPES.map((type) => (
                       <Link
                         key={type.id}
@@ -100,13 +100,13 @@ export default function Navbar() {
                 name="q"
                 placeholder="Buscar…"
                 aria-label="Buscar productos"
-                className="w-36 lg:w-52 pl-8 pr-3 py-2 bg-paper border-2 border-ink text-ink placeholder-ink/40 text-sm focus:outline-none focus:border-accent transition-colors"
+                className="w-36 lg:w-52 pl-8 pr-3 py-2 bg-paper border border-ink/15 rounded-xl text-ink placeholder-ink/40 text-sm focus:outline-none focus:border-accent transition-colors"
               />
               <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-ink/50 text-sm pointer-events-none">🔍</span>
             </form>
             <Link
               href="/advice"
-              className="inline-flex items-center gap-1.5 bg-ink text-paper px-4 py-2.5 text-sm font-bold uppercase tracking-wide border-2 border-ink shadow-hard hover-shift hover:bg-accent hover:border-accent whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 bg-ink text-paper px-4 py-2.5 text-sm font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift hover:bg-accent hover:border-accent whitespace-nowrap"
             >
               🤖 IA
             </Link>
@@ -116,7 +116,7 @@ export default function Navbar() {
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               type="button"
-              className="inline-flex items-center justify-center p-2 border-2 border-ink text-ink"
+              className="inline-flex items-center justify-center p-2 border border-ink/15 rounded-xl text-ink"
               aria-expanded={mobileMenuOpen}
             >
               <span className="sr-only">Abrir menú</span>
@@ -131,7 +131,7 @@ export default function Navbar() {
       </div>
 
       {/* Mobile menu */}
-      <div className={`md:hidden ${mobileMenuOpen ? 'block' : 'hidden'} border-t-2 border-ink bg-paper max-h-[70vh] overflow-y-auto`}>
+      <div className={`md:hidden ${mobileMenuOpen ? 'block' : 'hidden'} border-t border-ink/12 bg-paper max-h-[70vh] overflow-y-auto`}>
         <div className="px-3 py-3">
           <form action="/search" method="get" className="flex gap-2 mb-4" onSubmit={() => setMobileMenuOpen(false)}>
             <input
@@ -139,9 +139,9 @@ export default function Navbar() {
               name="q"
               placeholder="Buscar productos…"
               aria-label="Buscar productos"
-              className="flex-1 px-3 py-2.5 bg-paper border-2 border-ink text-ink placeholder-ink/40 text-sm focus:outline-none focus:border-accent"
+              className="flex-1 px-3 py-2.5 bg-paper border border-ink/15 rounded-xl text-ink placeholder-ink/40 text-sm focus:outline-none focus:border-accent"
             />
-            <button className="bg-ink text-paper px-4 text-sm font-bold uppercase border-2 border-ink">🔍</button>
+            <button className="bg-ink text-paper px-4 text-sm font-bold uppercase border border-ink/15 rounded-xl">🔍</button>
           </form>
           <p className="px-2 pb-1.5 font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50">Categorías</p>
           <div className="grid grid-cols-2 gap-0.5">
@@ -160,12 +160,12 @@ export default function Navbar() {
             ))}
           </div>
           <div className="grid grid-cols-3 gap-2 pt-3">
-            <Link href="/mejores" onClick={() => setMobileMenuOpen(false)} className="text-center px-3 py-2.5 text-sm font-bold uppercase border-2 border-ink text-ink">Mejores</Link>
-            <Link href="/guias" onClick={() => setMobileMenuOpen(false)} className="text-center px-3 py-2.5 text-sm font-bold uppercase border-2 border-ink text-ink">Guías</Link>
-            <Link href="/advice" onClick={() => setMobileMenuOpen(false)} className="text-center px-3 py-2.5 text-sm font-bold uppercase border-2 border-ink text-ink">Consejos</Link>
+            <Link href="/mejores" onClick={() => setMobileMenuOpen(false)} className="text-center px-3 py-2.5 text-sm font-bold uppercase border border-ink/15 rounded-xl text-ink">Mejores</Link>
+            <Link href="/guias" onClick={() => setMobileMenuOpen(false)} className="text-center px-3 py-2.5 text-sm font-bold uppercase border border-ink/15 rounded-xl text-ink">Guías</Link>
+            <Link href="/advice" onClick={() => setMobileMenuOpen(false)} className="text-center px-3 py-2.5 text-sm font-bold uppercase border border-ink/15 rounded-xl text-ink">Consejos</Link>
           </div>
           <div className="pt-3 pb-1">
-            <Link href="/advice" onClick={() => setMobileMenuOpen(false)} className="w-full text-center flex justify-center items-center gap-2 bg-ink text-paper px-4 py-3 font-bold uppercase text-sm border-2 border-ink">
+            <Link href="/advice" onClick={() => setMobileMenuOpen(false)} className="w-full text-center flex justify-center items-center gap-2 bg-ink text-paper px-4 py-3 font-bold uppercase text-sm border border-ink/15 rounded-xl">
               🤖 Asistente IA
             </Link>
           </div>

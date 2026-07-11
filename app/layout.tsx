@@ -1,9 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Anton, Space_Grotesk, Space_Mono } from "next/font/google";
+import { Fraunces, Space_Grotesk, Space_Mono } from "next/font/google";
 import "./globals.css";
 
 const grotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-grotesk", display: "swap" });
-const anton = Anton({ subsets: ["latin"], weight: "400", variable: "--font-anton", display: "swap" });
+// Editorial serif for display headings (replaces the brutalist Anton poster face).
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "900"],
+  style: ["normal", "italic"],
+  variable: "--font-fraunces",
+  display: "swap",
+});
 const mono = Space_Mono({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-mono-custom", display: "swap" });
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
@@ -68,7 +75,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${grotesk.variable} ${anton.variable} ${mono.variable}`}>
+    <html lang="es" className={`${grotesk.variable} ${fraunces.variable} ${mono.variable}`}>
       <body>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }} />
         {children}

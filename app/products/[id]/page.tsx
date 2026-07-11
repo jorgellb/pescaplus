@@ -47,7 +47,7 @@ export default async function ProductPage({ params }: Params) {
           <span className="text-6xl inline-block">🪝</span>
           <h1 className="font-display uppercase text-4xl text-ink">Aparejo no encontrado</h1>
           <p className="text-ink/60 text-sm max-w-sm mx-auto">El producto no existe o ha sido retirado del catálogo.</p>
-          <Link href="/" className="inline-block bg-ink text-paper px-6 py-3 text-sm font-bold uppercase border-2 border-ink shadow-hard hover-shift">
+          <Link href="/" className="inline-block bg-ink text-paper px-6 py-3 text-sm font-bold uppercase border border-ink/15 rounded-xl shadow-hard hover-shift">
             Volver al inicio
           </Link>
         </div>
@@ -102,9 +102,9 @@ export default async function ProductPage({ params }: Params) {
           <div className="lg:col-span-7 flex flex-col">
             <div className="space-y-5">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex bg-ink text-paper text-[11px] font-bold px-3 py-1.5 uppercase tracking-widest">{modalityLabel}</span>
+                <span className="inline-flex bg-ink text-paper text-[11px] font-bold px-3 py-1.5 uppercase tracking-widest rounded-full">{modalityLabel}</span>
                 {product.aiOptimized && (
-                  <span className="inline-flex bg-accent text-paper text-[11px] font-bold px-3 py-1.5 uppercase tracking-widest border-2 border-ink">✨ Optimizado con IA</span>
+                  <span className="inline-flex bg-accent text-paper text-[11px] font-bold px-3 py-1.5 uppercase tracking-widest rounded-full">✨ Optimizado con IA</span>
                 )}
               </div>
 
@@ -116,7 +116,7 @@ export default async function ProductPage({ params }: Params) {
                 <span className="text-ink/50">· {product.reviews.toLocaleString('es-ES')} vendidos</span>
               </div>
 
-              <div className="inline-flex items-baseline gap-2 border-2 border-ink shadow-hard px-5 py-3 bg-paper">
+              <div className="inline-flex items-baseline gap-2 border border-ink/15 rounded-xl shadow-hard px-5 py-3 bg-paper">
                 <span className="font-display text-5xl leading-none text-ink">{product.price.toFixed(2)}</span>
                 <span className="font-display text-2xl text-ink/60">{product.currency === 'EUR' ? '€' : product.currency}</span>
               </div>
@@ -135,13 +135,13 @@ export default async function ProductPage({ params }: Params) {
                 href={`/go/${product.id}`}
                 target="_blank"
                 rel="noopener noreferrer sponsored"
-                className="w-full flex items-center justify-center gap-2 bg-ink text-paper px-8 py-5 font-display uppercase text-2xl border-2 border-ink shadow-hard-md hover-shift hover:bg-accent hover:border-accent"
+                className="w-full flex items-center justify-center gap-2 bg-ink text-paper px-8 py-5 font-display uppercase text-2xl border border-ink/15 rounded-xl shadow-hard-md hover-shift hover:bg-accent hover:border-accent"
               >
                 Comprar en AliExpress →
               </a>
               <Link
                 href={`/advice?ask=${encodeURIComponent(`¿Es buena opción el/la "${product.title}"? ¿Para qué tipo de pesca lo recomiendas y cómo lo uso?`)}`}
-                className="w-full flex items-center justify-center gap-2 bg-paper text-ink px-8 py-3.5 font-bold uppercase text-sm tracking-tight border-2 border-ink hover:bg-ink hover:text-paper transition-colors"
+                className="w-full flex items-center justify-center gap-2 bg-paper text-ink px-8 py-3.5 font-bold uppercase text-sm tracking-tight border border-ink/15 rounded-xl hover:bg-ink hover:text-paper transition-colors"
               >
                 🤖 Preguntar a la IA sobre este producto
               </Link>
@@ -152,7 +152,7 @@ export default async function ProductPage({ params }: Params) {
 
         {related.length > 0 && (
           <div className="space-y-6">
-            <h2 className="font-display uppercase text-3xl md:text-4xl leading-none border-b-2 border-ink pb-4">Relacionados</h2>
+            <h2 className="font-display uppercase text-3xl md:text-4xl leading-none border-b border-ink/12 pb-4">Relacionados</h2>
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {related.map((rp) => (
                 <ProductCard key={rp.id} {...rp} />
