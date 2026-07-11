@@ -31,6 +31,8 @@ interface NvidiaOptions {
   temperature?: number
   topP?: number
   timeoutMs?: number
+  /** Abort if the stream stalls (no bytes) for this long. Streaming only. */
+  idleMs?: number
 }
 
 /**
@@ -201,24 +203,155 @@ function isApiConfigured(): boolean {
   return Boolean(NVIDIA_API_KEY) && NVIDIA_API_KEY !== 'your_nvidia_api_key'
 }
 
+/** Build a retrieval-augmented context block from relevant catalog products. */
+function buildProductContext(products: RetrievedProduct[]): string {
+  const lines = products
+    .map((p) => `- ${p.title} — ${p.price.toFixed(2)} ${p.currency} — /products/${p.id}`)
+    .join('\n')
+  return `CATÁLOGO RELEVANTE (productos reales de la tienda; recomiéndalos con enlace directo [Nombre](/products/id)):
+${lines}
+
+Si el usuario busca equipo, recomienda 1-3 de estos productos concretos con su enlace y una frase de por qué encajan. No inventes otros productos ni precios. Si es una pregunta de técnica pura, no fuerces productos.`
+}
+
+interface RetrievedProduct {
+  id: string
+  title: string
+  price: number
+  currency: string
+}
+
 /**
  * Chat with the fishing expert. Uses the NVIDIA API when a key is configured and
- * falls back to a curated offline expert on any failure, so the endpoint never
- * throws and the UI always gets a useful answer.
+ * falls back to a curated offline expert on any failure. When `relevantProducts`
+ * are supplied they are injected into the context (RAG) so the assistant can
+ * recommend real products with direct links.
  */
-export async function chatWithFishingExpert(messages: ChatMessage[]): Promise<string> {
+export async function chatWithFishingExpert(
+  messages: ChatMessage[],
+  relevantProducts: RetrievedProduct[] = [],
+): Promise<string> {
   if (!isApiConfigured()) {
     return getLocalExpertResponse(messages)
   }
 
   const hasSystem = messages[0]?.role === 'system'
+  const systemContent =
+    SYSTEM_PROMPT + (relevantProducts.length ? `\n\n${buildProductContext(relevantProducts)}` : '')
   const formattedMessages = hasSystem
     ? messages
-    : [{ role: 'system' as const, content: SYSTEM_PROMPT }, ...messages]
+    : [{ role: 'system' as const, content: systemContent }, ...messages]
 
   // Lower temperature for more reliable, accurate advice; room for thorough answers.
   const content = await callNvidia(formattedMessages, { maxTokens: 1200, temperature: 0.55, topP: 0.9 })
   return content || getLocalExpertResponse(messages)
+}
+
+/**
+ * Stream the NVIDIA chat API token by token (SSE). Walks the same fallback chain
+ * as `callNvidia`: if a model fails before yielding anything, the next is tried;
+ * once a model starts emitting, its stream is committed. Yields nothing if every
+ * model fails (the caller then falls back to the offline expert).
+ */
+async function* streamNvidia(
+  messages: ChatMessage[],
+  { maxTokens = 1024, temperature = 0.7, topP = 0.95, idleMs = 20000 }: NvidiaOptions = {},
+): AsyncGenerator<string> {
+  for (const model of NVIDIA_MODELS) {
+    const controller = new AbortController()
+    let timer = setTimeout(() => controller.abort(), idleMs)
+    let yielded = false
+    let reader: ReadableStreamDefaultReader<Uint8Array> | undefined
+    try {
+      const response = await fetch(`${NVIDIA_BASE_URL}/chat/completions`, {
+        method: 'POST',
+        signal: controller.signal,
+        headers: {
+          Authorization: `Bearer ${NVIDIA_API_KEY}`,
+          Accept: 'text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ model, messages, max_tokens: maxTokens, temperature, top_p: topP, stream: true }),
+      })
+      if (!response.ok || !response.body) {
+        console.warn(`NVIDIA stream ${model} -> HTTP ${response.status}, trying next`)
+        continue
+      }
+      reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+      for (;;) {
+        const { done, value } = await reader.read()
+        if (done) break
+        clearTimeout(timer)
+        timer = setTimeout(() => controller.abort(), idleMs)
+        buffer += decoder.decode(value, { stream: true })
+        for (;;) {
+          const nl = buffer.indexOf('\n')
+          if (nl === -1) break
+          const line = buffer.slice(0, nl).trim()
+          buffer = buffer.slice(nl + 1)
+          if (!line.startsWith('data:')) continue
+          const payload = line.slice(5).trim()
+          if (payload === '[DONE]') return
+          try {
+            const json = JSON.parse(payload)
+            const delta: unknown = json.choices?.[0]?.delta?.content
+            if (typeof delta === 'string' && delta) {
+              yielded = true
+              yield delta
+            }
+          } catch {
+            /* keepalive or partial chunk — ignore */
+          }
+        }
+      }
+      if (yielded) return
+    } catch (error) {
+      if (yielded) return
+      console.warn(`NVIDIA stream ${model} failed (${(error as Error).message}), trying next`)
+    } finally {
+      clearTimeout(timer)
+      reader?.cancel().catch(() => {})
+    }
+  }
+}
+
+/** Split text into small chunks so the offline fallback also animates while typing. */
+async function* simulateStream(text: string): AsyncGenerator<string> {
+  for (const token of text.match(/\S+\s*|\s+/g) ?? [text]) {
+    yield token
+    await new Promise((resolve) => setTimeout(resolve, 12))
+  }
+}
+
+/**
+ * Streaming counterpart of `chatWithFishingExpert`. Yields the answer token by
+ * token from NVIDIA, or a simulated stream of the offline expert when the API is
+ * not configured or every model fails.
+ */
+export async function* streamFishingExpert(
+  messages: ChatMessage[],
+  relevantProducts: RetrievedProduct[] = [],
+): AsyncGenerator<string> {
+  if (!isApiConfigured()) {
+    yield* simulateStream(getLocalExpertResponse(messages))
+    return
+  }
+
+  const hasSystem = messages[0]?.role === 'system'
+  const systemContent =
+    SYSTEM_PROMPT + (relevantProducts.length ? `\n\n${buildProductContext(relevantProducts)}` : '')
+  const formattedMessages = hasSystem
+    ? messages
+    : [{ role: 'system' as const, content: systemContent }, ...messages]
+
+  let any = false
+  for await (const chunk of streamNvidia(formattedMessages, { maxTokens: 1200, temperature: 0.55, topP: 0.9 })) {
+    any = true
+    yield chunk
+  }
+  if (!any) yield* simulateStream(getLocalExpertResponse(messages))
 }
 
 // ---------------------------------------------------------------------------

@@ -1,12 +1,14 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
+import Link from 'next/link'
 import Layout from '@/components/Layout'
 import { FISHING_TYPES } from '@/lib/fishing'
 import CategoryIcon from '@/components/graphics/CategoryIcon'
-import type { ChatMessage } from '@/types'
+import ProductImage from '@/components/ProductImage'
+import type { ChatMessage, ChatProductRef } from '@/types'
 
-type Message = { role: 'user' | 'assistant'; content: string }
+type Message = { role: 'user' | 'assistant'; content: string; products?: ChatProductRef[] }
 
 const STORAGE_KEY = 'pescaplus-chat-v1'
 const ADVICE_TOPIC_IDS = ['canas', 'carretes', 'senuelos', 'anzuelos', 'lineas']
@@ -17,6 +19,13 @@ const suggestedQuestions = [
   '¿Cuál es la mejor técnica para pescar carpas?',
   '¿Qué señuelos funcionan mejor para truchas?',
   '¿Cómo preparar mi bajo de línea para pesca en mar?',
+]
+
+const FOLLOW_UPS = [
+  '¿Qué señuelos me recomiendas?',
+  '¿Qué nudo debería usar?',
+  '¿Qué línea es mejor?',
+  'Recomiéndame equipo económico',
 ]
 
 function escapeHtml(value: string): string {
@@ -39,6 +48,7 @@ export default function AdvicePage() {
   const [loading, setLoading] = useState(false)
   const [selectedType, setSelectedType] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const autoAskRef = useRef(false)
 
   useEffect(() => {
     try {
@@ -72,6 +82,28 @@ export default function AdvicePage() {
     const history = [...messages, userMessage]
     setMessages(history)
     setLoading(true)
+
+    // Patch the streaming assistant message in place as tokens arrive.
+    const patchLast = (patch: Partial<Message>) =>
+      setMessages((prev) => {
+        if (prev.length === 0) return prev
+        const copy = prev.slice()
+        copy[copy.length - 1] = { ...copy[copy.length - 1], ...patch }
+        return copy
+      })
+
+    let appended = false
+    let content = ''
+    let products: ChatProductRef[] | undefined
+    const flush = () => {
+      if (appended) {
+        patchLast({ content, products })
+      } else {
+        appended = true
+        setMessages((prev) => [...prev, { role: 'assistant', content, products }])
+      }
+    }
+
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -79,20 +111,61 @@ export default function AdvicePage() {
         body: JSON.stringify({
           messages: history.map((m): ChatMessage => ({ role: m.role, content: m.content })),
           typeFishing: selectedType || undefined,
+          stream: true,
         }),
       })
-      const data = await response.json()
-      setMessages((prev) => [
-        ...prev,
-        { role: 'assistant', content: data.success ? data.response : 'Hubo un problema al conectar con el asistente. Inténtalo de nuevo.' },
-      ])
+      if (!response.ok || !response.body) throw new Error('stream unavailable')
+
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+      let metaParsed = false
+      for (;;) {
+        const { done, value } = await reader.read()
+        if (done) break
+        buffer += decoder.decode(value, { stream: true })
+        if (!metaParsed) {
+          const nl = buffer.indexOf('\n')
+          if (nl === -1) continue // wait for the full metadata frame
+          try {
+            products = JSON.parse(buffer.slice(0, nl)).products
+          } catch {
+            /* ignore malformed frame */
+          }
+          content = buffer.slice(nl + 1)
+          buffer = ''
+          metaParsed = true
+          if (content) flush()
+          continue
+        }
+        content += buffer
+        buffer = ''
+        flush()
+      }
+      if (!content.trim()) {
+        content = 'No he podido generar una respuesta. Inténtalo de nuevo.'
+        flush()
+      }
     } catch (error) {
-      console.error('Error in chat request:', error)
-      setMessages((prev) => [...prev, { role: 'assistant', content: 'Error de red. Prueba otra vez.' }])
+      console.error('Error in chat stream:', error)
+      content = content || 'Error de red. Prueba otra vez.'
+      flush()
     } finally {
       setLoading(false)
     }
   }
+
+  // Deep-link from a product page: /advice?ask=... auto-sends the question on load.
+  useEffect(() => {
+    if (autoAskRef.current) return
+    const q = new URLSearchParams(window.location.search).get('ask')?.trim()
+    if (q) {
+      autoAskRef.current = true
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      executeSendMessage(q)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const sendMessage = () => {
     if (!input.trim()) return
@@ -116,7 +189,7 @@ export default function AdvicePage() {
     try {
       const response = await fetch(`/api/chat?typeFishing=${typeFishing}`)
       const data = await response.json()
-      if (data.success) setMessages([{ role: 'assistant', content: data.response }])
+      if (data.success) setMessages([{ role: 'assistant', content: data.response, products: data.products }])
     } catch (error) {
       console.error('Error fetching initial advice:', error)
     } finally {
@@ -196,15 +269,43 @@ export default function AdvicePage() {
                     {message.role === 'assistant' && (
                       <div className="flex-shrink-0 w-8 h-8 bg-paper border-2 border-ink flex items-center justify-center text-sm">🤖</div>
                     )}
-                    <div
-                      className={`max-w-[85%] md:max-w-[75%] p-4 border-2 border-ink ${
-                        message.role === 'user' ? 'bg-accent text-paper' : 'bg-paper'
-                      }`}
-                    >
-                      {message.role === 'user' ? (
-                        <p className="text-sm font-medium leading-relaxed whitespace-pre-wrap">{message.content}</p>
-                      ) : (
-                        <div className="space-y-0.5">{renderMessageContent(message.content)}</div>
+                    <div className={`flex flex-col gap-2 max-w-[85%] md:max-w-[75%] ${message.role === 'user' ? 'items-end' : 'items-start'}`}>
+                      <div className={`w-full p-4 border-2 border-ink ${message.role === 'user' ? 'bg-accent text-paper' : 'bg-paper'}`}>
+                        {message.role === 'user' ? (
+                          <p className="text-sm font-medium leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                        ) : (
+                          <div className="space-y-0.5">
+                            {renderMessageContent(message.content)}
+                            {loading && index === messages.length - 1 && (
+                              <span className="inline-block w-2 h-4 align-middle bg-accent animate-pulse" />
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      {message.role === 'assistant' && message.products && message.products.length > 0 && (
+                        <div className="w-full space-y-1.5">
+                          <p className="font-mono text-[10px] uppercase tracking-widest text-ink/40">Productos recomendados</p>
+                          <div className="flex flex-wrap gap-2">
+                            {message.products.map((p) => (
+                              <Link
+                                key={p.id}
+                                href={`/products/${p.id}`}
+                                target="_blank"
+                                className="flex items-center gap-2 bg-paper border-2 border-ink p-1.5 pr-3 hover:bg-ink/5 transition-colors max-w-[210px]"
+                              >
+                                <span className="relative block w-9 h-9 flex-shrink-0 bg-[#e6e2d6] overflow-hidden">
+                                  <ProductImage src={p.imageUrl} alt={p.title} sizes="40px" className="absolute inset-0 w-full h-full object-cover" />
+                                </span>
+                                <span className="min-w-0">
+                                  <span className="block text-[11px] font-bold text-ink leading-tight line-clamp-1">{p.title}</span>
+                                  <span className="block font-display text-sm text-ink leading-none">
+                                    {p.price.toFixed(2)} {p.currency === 'EUR' ? '€' : p.currency}
+                                  </span>
+                                </span>
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
                       )}
                     </div>
                     {message.role === 'user' && (
@@ -212,7 +313,7 @@ export default function AdvicePage() {
                     )}
                   </div>
                 ))}
-                {loading && (
+                {loading && messages[messages.length - 1]?.role !== 'assistant' && (
                   <div className="flex items-start gap-3 justify-start">
                     <div className="flex-shrink-0 w-8 h-8 bg-paper border-2 border-ink flex items-center justify-center text-sm">🤖</div>
                     <div className="bg-paper border-2 border-ink p-4">
@@ -230,6 +331,19 @@ export default function AdvicePage() {
           </div>
 
           <div className="p-3 border-t-2 border-ink bg-paper">
+            {!loading && messages.length > 0 && messages[messages.length - 1].role === 'assistant' && (
+              <div className="flex gap-2 overflow-x-auto pb-2.5 -mx-1 px-1 scrollbar-none">
+                {FOLLOW_UPS.map((q) => (
+                  <button
+                    key={q}
+                    onClick={() => executeSendMessage(q)}
+                    className="flex-shrink-0 px-3 py-1.5 bg-paper border-2 border-ink text-[11px] font-bold uppercase tracking-tight text-ink hover:bg-ink hover:text-paper transition-colors"
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="flex gap-2">
               <input
                 type="text"

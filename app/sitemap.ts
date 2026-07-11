@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next'
 import { FISHING_TYPES } from '@/lib/fishing'
 import { listProducts } from '@/lib/products-store'
 import { listGuides } from '@/lib/guides-store'
+import { roundupSlugs } from '@/lib/roundups'
 
 const base = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
@@ -10,6 +11,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${base}/`, lastModified: now, changeFrequency: 'weekly', priority: 1 },
+    { url: `${base}/mejores`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
     { url: `${base}/guias`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${base}/advice`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
   ]
@@ -20,6 +22,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: 'weekly',
     priority: 0.8,
   }))
+
+  let roundupRoutes: MetadataRoute.Sitemap = []
+  try {
+    const slugs = await roundupSlugs()
+    roundupRoutes = slugs.map((slug) => ({
+      url: `${base}/mejores/${slug}`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.75,
+    }))
+  } catch {
+    /* store unavailable — ship the rest */
+  }
 
   let productRoutes: MetadataRoute.Sitemap = []
   try {
@@ -47,5 +62,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     /* guides store unavailable */
   }
 
-  return [...staticRoutes, ...categoryRoutes, ...productRoutes, ...guideRoutes]
+  return [...staticRoutes, ...categoryRoutes, ...roundupRoutes, ...productRoutes, ...guideRoutes]
 }

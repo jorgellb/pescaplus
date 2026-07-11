@@ -22,6 +22,8 @@ export interface Product {
   affiliateUrl: string
   category: string
   typeFishing: FishingTypeId | string
+  /** Subcategory id within the main category (see SUBCATEGORIES); '' if unset. */
+  subcategory: string
   rating: number
   reviews: number
   inStock: boolean
@@ -57,9 +59,18 @@ export interface ChatMessage {
   content: string
 }
 
+export interface ChatProductRef {
+  id: string
+  title: string
+  price: number
+  currency: string
+  imageUrl: string
+}
+
 export interface ChatApiResponse {
   success: boolean
   response?: string
+  products?: ChatProductRef[]
   error?: string
 }
 

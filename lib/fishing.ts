@@ -178,3 +178,94 @@ export function fishingLabel(id: string): string {
 export function fishingKeyword(id: string): string {
   return FISHING_TYPE_MAP.get(id)?.keyword ?? 'fishing gear'
 }
+
+// ---------------------------------------------------------------------------
+// Subcategories
+// ---------------------------------------------------------------------------
+
+export interface Subcategory {
+  id: string
+  name: string
+}
+
+/**
+ * Gear/technique-based subcategories for each main category. Product-facing
+ * taxonomy used to filter within a category page. The first entry of each list
+ * is the sensible default for products that don't match a more specific rule.
+ */
+export const SUBCATEGORIES: Record<FishingTypeId, Subcategory[]> = {
+  anzuelos: [
+    { id: 'simples', name: 'Simples' },
+    { id: 'triples', name: 'Triples' },
+    { id: 'montaje', name: 'Montajes y carpa' },
+    { id: 'especiales', name: 'Especiales' },
+  ],
+  lineas: [
+    { id: 'trenzado', name: 'Trenzado' },
+    { id: 'monofilamento', name: 'Monofilamento' },
+    { id: 'fluorocarbono', name: 'Fluorocarbono' },
+  ],
+  senuelos: [
+    { id: 'vinilos', name: 'Vinilos y cebos blandos' },
+    { id: 'duros', name: 'Duros (minnow y crank)' },
+    { id: 'cucharillas', name: 'Cucharillas y jigs' },
+    { id: 'superficie', name: 'Superficie y otros' },
+  ],
+  canas: [
+    { id: 'spinning', name: 'Spinning' },
+    { id: 'mar', name: 'Mar y surfcasting' },
+    { id: 'telescopicas', name: 'Telescópicas' },
+    { id: 'baitcasting', name: 'Baitcasting y otras' },
+  ],
+  carretes: [
+    { id: 'spinning', name: 'Spinning / frontales' },
+    { id: 'baitcasting', name: 'Baitcasting' },
+    { id: 'mar', name: 'Surfcasting y mar' },
+  ],
+  electronica: [
+    { id: 'sondas', name: 'Sondas y GPS' },
+    { id: 'camaras', name: 'Cámaras' },
+    { id: 'accesorios', name: 'Accesorios electrónicos' },
+  ],
+  embarcaciones: [
+    { id: 'floattube', name: 'Float tubes' },
+    { id: 'kayaks', name: 'Kayaks y botes' },
+    { id: 'accesorios', name: 'Accesorios náuticos' },
+  ],
+  minuteria: [
+    { id: 'emerillones', name: 'Emerillones y giratorios' },
+    { id: 'conectores', name: 'Grapas y conectores' },
+    { id: 'montaje', name: 'Perlas, gomas y montaje' },
+    { id: 'kits', name: 'Kits de montaje' },
+  ],
+  plomos: [
+    { id: 'fondo', name: 'Fondo y surfcasting' },
+    { id: 'jig', name: 'Jigs y lastres' },
+    { id: 'especiales', name: 'Especiales' },
+  ],
+  herramientas: [
+    { id: 'alicates', name: 'Alicates y pinzas' },
+    { id: 'corte', name: 'Tijeras y cortahilos' },
+    { id: 'otras', name: 'Medición y otras' },
+  ],
+  equipo: [
+    { id: 'almacenaje', name: 'Cajas y bolsas' },
+    { id: 'vestuario', name: 'Guantes y ropa' },
+    { id: 'accesorios', name: 'Accesorios varios' },
+  ],
+}
+
+/** Subcategories for a category id (empty array for unknown categories). */
+export function getSubcategories(categoryId: string): Subcategory[] {
+  return isFishingTypeId(categoryId) ? SUBCATEGORIES[categoryId] : []
+}
+
+/** Whether `subId` is a valid subcategory of `categoryId`. */
+export function isValidSubcategory(categoryId: string, subId: string): boolean {
+  return getSubcategories(categoryId).some((s) => s.id === subId)
+}
+
+/** Human-readable subcategory name, or '' if unknown. */
+export function subcategoryLabel(categoryId: string, subId: string): string {
+  return getSubcategories(categoryId).find((s) => s.id === subId)?.name ?? ''
+}

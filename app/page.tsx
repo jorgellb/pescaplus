@@ -7,6 +7,7 @@ import CategoryIcon from '@/components/graphics/CategoryIcon'
 import type { Metadata } from 'next'
 import { FISHING_TYPES } from '@/lib/fishing'
 import { listProducts } from '@/lib/products-store'
+import { getTrendingProducts } from '@/lib/trending'
 
 export const metadata: Metadata = {
   alternates: { canonical: '/' },
@@ -15,11 +16,10 @@ export const metadata: Metadata = {
 export const revalidate = 3600
 
 export default async function Home() {
-  const all = await listProducts()
+  const [all, featured] = await Promise.all([listProducts(), getTrendingProducts(8)])
   const withImg = all.filter((p) => p.imageUrl)
   const heroA = withImg[0]
   const heroB = withImg[1]
-  const featured = withImg.slice(0, 8)
 
   return (
     <Layout>
@@ -116,7 +116,7 @@ export default async function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-end justify-between mb-8 gap-4 border-b-2 border-paper/30 pb-4">
               <h2 className="font-display uppercase text-4xl md:text-5xl leading-none">Lo más buscado</h2>
-              <Link href="/categories/canas" className="font-mono text-xs font-bold uppercase tracking-widest text-accent hover:underline whitespace-nowrap">Ver todo →</Link>
+              <Link href="/mejores" className="font-mono text-xs font-bold uppercase tracking-widest text-accent hover:underline whitespace-nowrap">Guías de compra →</Link>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
               {featured.map((p) => (

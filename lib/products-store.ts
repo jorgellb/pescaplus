@@ -1,5 +1,6 @@
 import type { Product } from '@/types'
 import { CATALOG, slugify, filterProducts, type ProductFilter } from '@/lib/catalog'
+import { decodeEntities } from '@/lib/text'
 
 /**
  * Mutable product repository used by both the public site and the admin backend.
@@ -27,6 +28,7 @@ export type ProductInput = {
   affiliateUrl: string
   category?: string
   typeFishing: string
+  subcategory?: string
   rating?: number
   reviews?: number
   inStock?: boolean
@@ -108,6 +110,7 @@ function applyInput(input: ProductInput, id: string): Product {
     affiliateUrl: input.affiliateUrl.trim(),
     category: input.category?.trim() || 'fishing',
     typeFishing: input.typeFishing,
+    subcategory: input.subcategory?.trim() || '',
     rating: input.rating ?? 0,
     reviews: input.reviews ?? 0,
     inStock: input.inStock ?? true,
@@ -145,22 +148,23 @@ function toProduct(row: any): Product {
   return {
     id: row.id,
     aliexpressId: row.aliexpressId,
-    title: row.title,
-    description: row.description,
+    title: decodeEntities(row.title),
+    description: decodeEntities(row.description),
     imageUrl: row.imageUrl,
     images: row.images?.length ? row.images : [row.imageUrl].filter(Boolean),
-    imageAlts: row.imageAlts ?? [],
+    imageAlts: (row.imageAlts ?? []).map(decodeEntities),
     videoUrl: row.videoUrl ?? '',
     price: row.price,
     currency: row.currency,
     affiliateUrl: row.affiliateUrl,
     category: row.category,
     typeFishing: row.typeFishing,
+    subcategory: row.subcategory ?? '',
     rating: row.rating,
     reviews: row.reviews,
     inStock: row.inStock,
-    seoTitle: row.seoTitle ?? '',
-    seoDescription: row.seoDescription || row.description?.slice(0, 160) || '',
+    seoTitle: decodeEntities(row.seoTitle ?? ''),
+    seoDescription: decodeEntities(row.seoDescription || row.description?.slice(0, 160) || ''),
     aiOptimized: row.aiOptimized ?? false,
   }
 }

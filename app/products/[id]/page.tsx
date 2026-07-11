@@ -139,6 +139,12 @@ export default async function ProductPage({ params }: Params) {
               >
                 Comprar en AliExpress →
               </a>
+              <Link
+                href={`/advice?ask=${encodeURIComponent(`¿Es buena opción el/la "${product.title}"? ¿Para qué tipo de pesca lo recomiendas y cómo lo uso?`)}`}
+                className="w-full flex items-center justify-center gap-2 bg-paper text-ink px-8 py-3.5 font-bold uppercase text-sm tracking-tight border-2 border-ink hover:bg-ink hover:text-paper transition-colors"
+              >
+                🤖 Preguntar a la IA sobre este producto
+              </Link>
               <p className="font-mono text-[11px] uppercase tracking-wide text-ink/40 text-center">Redirección segura a la tienda oficial</p>
             </div>
           </div>

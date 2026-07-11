@@ -21,6 +21,7 @@ model Product {
   affiliateUrl String
   category    String
   typeFishing String   // spinning, flyfishing, carp, etc.
+  subcategory String   @default("") // gear/technique within typeFishing (see SUBCATEGORIES)
   rating      Float    @default(0)
   reviews     Int      @default(0)
   inStock     Boolean  @default(true)

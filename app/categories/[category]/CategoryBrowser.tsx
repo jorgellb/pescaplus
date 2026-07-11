@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import type { Product } from '@/types'
 import ProductCard from '@/components/ProductCard'
+import { getSubcategories } from '@/lib/fishing'
 
 type SortKey = 'relevance' | 'price-asc' | 'price-desc' | 'rating'
 
@@ -27,6 +28,16 @@ export default function CategoryBrowser({
   const [loading, setLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [sort, setSort] = useState<SortKey>('relevance')
+  const [sub, setSub] = useState('')
+
+  // Subcategory chips: only those with at least one product in the full category.
+  const subFilters = useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const p of initialProducts) if (p.subcategory) counts.set(p.subcategory, (counts.get(p.subcategory) ?? 0) + 1)
+    return getSubcategories(category)
+      .filter((s) => counts.has(s.id))
+      .map((s) => ({ ...s, count: counts.get(s.id) ?? 0 }))
+  }, [initialProducts, category])
 
   const search = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -51,11 +62,12 @@ export default function CategoryBrowser({
   const reset = () => {
     setSearchQuery('')
     setSort('relevance')
+    setSub('')
     setProducts(initialProducts)
   }
 
   const sortedProducts = useMemo(() => {
-    const copy = [...products]
+    const copy = (sub ? products.filter((p) => p.subcategory === sub) : products).slice()
     switch (sort) {
       case 'price-asc':
         return copy.sort((a, b) => a.price - b.price)
@@ -66,7 +78,7 @@ export default function CategoryBrowser({
       default:
         return copy
     }
-  }, [products, sort])
+  }, [products, sort, sub])
 
   return (
     <>
@@ -97,9 +109,33 @@ export default function CategoryBrowser({
         </label>
       </div>
 
-      {!loading && products.length > 0 && (
+      {subFilters.length > 1 && (
+        <div className="flex flex-wrap gap-2 mb-6">
+          <button
+            onClick={() => setSub('')}
+            className={`px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-tight border-2 border-ink transition-colors ${
+              sub === '' ? 'bg-ink text-paper' : 'bg-paper text-ink hover:bg-ink hover:text-paper'
+            }`}
+          >
+            Todas
+          </button>
+          {subFilters.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => setSub(s.id)}
+              className={`px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-tight border-2 border-ink transition-colors ${
+                sub === s.id ? 'bg-ink text-paper' : 'bg-paper text-ink hover:bg-ink hover:text-paper'
+              }`}
+            >
+              {s.name} <span className="opacity-50">{s.count}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {!loading && sortedProducts.length > 0 && (
         <p className="font-mono text-xs uppercase tracking-widest text-ink/60 mb-6">
-          <span className="font-bold text-ink">{products.length}</span> {products.length === 1 ? 'producto' : 'productos'}
+          <span className="font-bold text-ink">{sortedProducts.length}</span> {sortedProducts.length === 1 ? 'producto' : 'productos'}
         </p>
       )}
 

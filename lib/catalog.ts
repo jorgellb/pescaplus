@@ -1,5 +1,6 @@
 import type { Product } from '@/types'
 import { CATALOG_SEED } from '@/lib/catalog-data'
+import { decodeEntities } from '@/lib/text'
 
 /**
  * Catalog logic. The product data lives in `catalog-data.ts`, which is generated
@@ -7,7 +8,7 @@ import { CATALOG_SEED } from '@/lib/catalog-data'
  * This keeps generated data separate from the query helpers below.
  */
 
-type SeedOptional = 'images' | 'imageAlts' | 'videoUrl' | 'seoTitle' | 'seoDescription' | 'aiOptimized'
+type SeedOptional = 'images' | 'imageAlts' | 'videoUrl' | 'seoTitle' | 'seoDescription' | 'aiOptimized' | 'subcategory'
 export type CatalogSeed = Omit<Product, SeedOptional> & Partial<Pick<Product, SeedOptional>>
 
 /** Fill media/SEO defaults so catalog seeds satisfy the full Product shape. */
@@ -15,11 +16,14 @@ export function withProductDefaults(p: CatalogSeed): Product {
   const images = p.images?.length ? p.images : [p.imageUrl].filter(Boolean)
   return {
     ...p,
+    title: decodeEntities(p.title),
+    description: decodeEntities(p.description),
+    subcategory: p.subcategory ?? '',
     images,
-    imageAlts: p.imageAlts?.length ? p.imageAlts : [],
+    imageAlts: (p.imageAlts?.length ? p.imageAlts : []).map(decodeEntities),
     videoUrl: p.videoUrl ?? '',
-    seoTitle: p.seoTitle ?? '',
-    seoDescription: p.seoDescription || p.description.slice(0, 160),
+    seoTitle: decodeEntities(p.seoTitle ?? ''),
+    seoDescription: decodeEntities(p.seoDescription || p.description.slice(0, 160)),
     aiOptimized: p.aiOptimized ?? false,
   }
 }

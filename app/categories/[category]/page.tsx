@@ -3,7 +3,7 @@ import Layout from '@/components/Layout'
 import CategoryIcon from '@/components/graphics/CategoryIcon'
 import CategoryBrowser from './CategoryBrowser'
 import { FISHING_TYPES, getFishingType } from '@/lib/fishing'
-import { listProducts } from '@/lib/products-store'
+import { getTrendingRanked } from '@/lib/trending'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
 
 type Params = { params: Promise<{ category: string }> }
@@ -20,7 +20,7 @@ export default async function CategoryPage({ params }: Params) {
   const fishingType = getFishingType(category)
   const categoryName = fishingType?.name ?? category
   const categoryDescription = fishingType?.tagline ?? 'Los mejores aparejos para tus salidas de pesca.'
-  const products = await listProducts({ typeFishing: category })
+  const products = await getTrendingRanked(category)
 
   const breadcrumbLd = breadcrumbJsonLd([
     { name: 'Inicio', url: SITE_URL },
