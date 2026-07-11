@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import type { ProductApiResponse } from '@/types'
 import { getProduct, updateProduct, deleteProduct } from '@/lib/products-store'
@@ -70,6 +71,8 @@ export async function PATCH(
     if (!product) {
       return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 })
     }
+    revalidatePath(`/products/${id}`)
+    revalidatePath(`/categories/${product.typeFishing}`)
     return NextResponse.json({ success: true, product })
   } catch (error) {
     console.error('Error updating product:', error)
@@ -88,10 +91,13 @@ export async function DELETE(
 
   const { id } = await params
   try {
+    const existing = await getProduct(id)
     const removed = await deleteProduct(id)
     if (!removed) {
       return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 })
     }
+    revalidatePath(`/products/${id}`)
+    if (existing) revalidatePath(`/categories/${existing.typeFishing}`)
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error deleting product:', error)

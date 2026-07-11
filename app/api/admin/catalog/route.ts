@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { isRequestAuthenticated } from '@/lib/admin-auth'
 import { listProducts, resetToCatalog } from '@/lib/products-store'
@@ -22,5 +23,6 @@ export async function POST(request: NextRequest) {
   }
 
   const count = await resetToCatalog()
+  revalidatePath('/', 'layout')
   return NextResponse.json({ success: true, count })
 }

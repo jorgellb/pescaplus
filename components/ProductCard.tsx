@@ -26,17 +26,17 @@ export default function ProductCard({
     <div className="group relative rounded-2xl overflow-hidden bg-white border border-slate-200 hover:border-sky-300 hover:shadow-lg hover:shadow-slate-900/5 hover:-translate-y-1 transition-all duration-300 flex flex-col h-full">
       {/* Image */}
       <div className="relative aspect-square overflow-hidden bg-slate-50">
-        <Link href={`/products/${id}`}>
-          <ProductImage
-            src={imageUrl}
-            alt={title}
-            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          />
-        </Link>
-        <span className="absolute top-3 left-3 z-10 bg-white/95 backdrop-blur text-[10px] font-bold text-sky-700 px-2.5 py-1 rounded-full border border-sky-100 shadow-sm uppercase tracking-wide">
+        <ProductImage
+          src={imageUrl}
+          alt={title}
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 22vw"
+          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+        />
+        <Link href={`/products/${id}`} className="absolute inset-0 z-10" aria-label={title} />
+        <span className="absolute top-3 left-3 z-20 pointer-events-none bg-white/95 backdrop-blur text-[10px] font-bold text-sky-700 px-2.5 py-1 rounded-full border border-sky-100 shadow-sm uppercase tracking-wide">
           {fishingLabel(typeFishing)}
         </span>
-        <div className="absolute top-3 right-3 z-10 flex flex-col items-end gap-1.5">
+        <div className="absolute top-3 right-3 z-20 pointer-events-none flex flex-col items-end gap-1.5">
           {aiOptimized && (
             <span className="bg-violet-50 text-[10px] font-bold text-violet-600 px-2 py-1 rounded-full border border-violet-100 shadow-sm">
               ✨ IA

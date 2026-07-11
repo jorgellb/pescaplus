@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { isRequestAuthenticated } from '@/lib/admin-auth'
 import { generateSeoListing } from '@/lib/nvidia-ai'
@@ -67,6 +68,12 @@ export async function POST(request: NextRequest) {
     const product = existing
       ? await updateProduct(existing.id, input)
       : await createProduct(input)
+
+    if (product) {
+      revalidatePath(`/categories/${product.typeFishing}`)
+      revalidatePath(`/products/${product.id}`)
+      revalidatePath('/')
+    }
 
     return NextResponse.json({
       success: true,

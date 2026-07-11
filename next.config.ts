@@ -6,6 +6,15 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
+  images: {
+    // Optimize product images from the AliExpress CDNs (and legacy Unsplash).
+    remotePatterns: [
+      { protocol: "https", hostname: "*.aliexpress-media.com" },
+      { protocol: "https", hostname: "**.alicdn.com" },
+      { protocol: "https", hostname: "images.unsplash.com" },
+    ],
+    formats: ["image/avif", "image/webp"],
+  },
 };
 
 export default nextConfig;

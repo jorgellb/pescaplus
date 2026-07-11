@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import type { Product, ProductsApiResponse } from '@/types'
 import { listProducts, createProduct, activeBackend } from '@/lib/products-store'
@@ -76,6 +77,8 @@ export async function POST(request: NextRequest) {
       ...parsed.data,
       currency: parsed.data.currency || settings.defaultCurrency,
     })
+    revalidatePath(`/categories/${product.typeFishing}`)
+    revalidatePath('/')
     return NextResponse.json({ success: true, product }, { status: 201 })
   } catch (error) {
     console.error('Error creating product:', error)

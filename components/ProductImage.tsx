@@ -1,22 +1,42 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 
 interface ProductImageProps {
   src: string
   alt: string
-  /** Classes applied to the <img> (e.g. object-fit / transitions). */
+  /** object-fit / transition classes applied to the image. */
   className?: string
   /** Load eagerly for above-the-fold hero images. Defaults to lazy. */
   priority?: boolean
+  /** Responsive sizes hint for next/image. */
+  sizes?: string
+}
+
+// Hosts we can safely route through the Next image optimizer (see next.config.ts).
+const OPTIMIZABLE = /(^|\.)(aliexpress-media\.com|alicdn\.com|unsplash\.com)$/i
+
+function canOptimize(src: string): boolean {
+  try {
+    return OPTIMIZABLE.test(new URL(src).hostname)
+  } catch {
+    return false
+  }
 }
 
 /**
- * Resilient product image. External catalog/AliExpress images occasionally 404;
- * instead of showing a broken image icon we fall back to a branded placeholder.
- * Kept as a small client component so the rest of the tree can stay server-rendered.
+ * Resilient product image. Known CDNs are served through next/image (AVIF/WebP,
+ * responsive srcset); arbitrary admin-provided URLs fall back to a plain <img>.
+ * Any load error shows a branded placeholder instead of a broken image icon.
  */
-export default function ProductImage({ src, alt, className, priority }: ProductImageProps) {
+export default function ProductImage({
+  src,
+  alt,
+  className,
+  priority,
+  sizes = '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw',
+}: ProductImageProps) {
   const [failed, setFailed] = useState(false)
 
   if (!src || failed) {
@@ -31,8 +51,22 @@ export default function ProductImage({ src, alt, className, priority }: ProductI
     )
   }
 
+  if (canOptimize(src)) {
+    return (
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        sizes={sizes}
+        priority={priority}
+        onError={() => setFailed(true)}
+        className={className}
+      />
+    )
+  }
+
   return (
-    // eslint-disable-next-line @next/next/no-img-element -- external hosts + graceful onError fallback
+    // eslint-disable-next-line @next/next/no-img-element -- arbitrary admin host, not optimizable
     <img
       src={src}
       alt={alt}

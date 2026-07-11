@@ -6,8 +6,17 @@ import ProductGallery from '@/components/ProductGallery'
 import { fishingLabel } from '@/lib/fishing'
 import { resolveProduct, relatedProducts } from '@/lib/product-service'
 import { renderDescription } from '@/lib/markdown'
+import { CATALOG } from '@/lib/catalog'
 
 type Params = { params: Promise<{ id: string }> }
+
+// Incremental Static Regeneration: pre-render catalog products, refresh hourly.
+// Imported / live AliExpress products render on demand (dynamicParams default).
+export const revalidate = 3600
+
+export function generateStaticParams() {
+  return CATALOG.map((p) => ({ id: p.id }))
+}
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { id } = await params

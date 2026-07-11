@@ -40,6 +40,7 @@ export default function ProductGallery({ images, alts, videoUrl, title }: Produc
             src={gallery[selected as number] ?? gallery[0] ?? ''}
             alt={altFor(typeof selected === 'number' ? selected : 0)}
             priority
+            sizes="(max-width: 1024px) 100vw, 45vw"
             className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
         )}
