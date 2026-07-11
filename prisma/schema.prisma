@@ -47,6 +47,23 @@ model FishingAdvice {
   @@index([typeFishing])
 }
 
+model Guide {
+  id             String   @id
+  title          String
+  excerpt        String   @default("")
+  content        String
+  coverImage     String   @default("")
+  typeFishing    String   @default("")
+  seoTitle       String   @default("")
+  seoDescription String   @default("")
+  aiOptimized    Boolean  @default(false)
+  published      Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([published])
+}
+
 model ProductClick {
   id           String   @id @default(cuid())
   productId    String

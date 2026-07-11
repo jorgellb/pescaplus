@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { FISHING_TYPES } from '@/lib/fishing'
 import { listProducts } from '@/lib/products-store'
+import { listGuides } from '@/lib/guides-store'
 
 const base = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
@@ -9,6 +10,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${base}/`, lastModified: now, changeFrequency: 'weekly', priority: 1 },
+    { url: `${base}/guias`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${base}/advice`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
   ]
 
@@ -32,5 +34,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     /* store unavailable — ship static + category routes only */
   }
 
-  return [...staticRoutes, ...categoryRoutes, ...productRoutes]
+  let guideRoutes: MetadataRoute.Sitemap = []
+  try {
+    const guides = await listGuides({ publishedOnly: true })
+    guideRoutes = guides.map((g) => ({
+      url: `${base}/guias/${g.id}`,
+      lastModified: new Date(g.updatedAt),
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    }))
+  } catch {
+    /* guides store unavailable */
+  }
+
+  return [...staticRoutes, ...categoryRoutes, ...productRoutes, ...guideRoutes]
 }

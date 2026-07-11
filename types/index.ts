@@ -33,6 +33,23 @@ export interface Product {
   aiOptimized: boolean
 }
 
+export interface Guide {
+  id: string
+  title: string
+  excerpt: string
+  /** Article body in the lightweight markdown used across the app. */
+  content: string
+  coverImage: string
+  /** Related fishing category id, or '' for general guides. */
+  typeFishing: string
+  seoTitle: string
+  seoDescription: string
+  aiOptimized: boolean
+  published: boolean
+  createdAt: string
+  updatedAt: string
+}
+
 export interface ChatMessage {
   role: 'user' | 'assistant' | 'system'
   content: string

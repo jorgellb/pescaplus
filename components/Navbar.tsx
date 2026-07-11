@@ -72,6 +72,7 @@ export default function Navbar() {
                 )}
               </div>
 
+              <Link href="/guias" className={navLink(pathname.startsWith('/guias'))}>Guías</Link>
               <Link href="/advice" className={navLink(isActive('/advice'))}>Consejos IA</Link>
             </div>
           </div>
@@ -142,7 +143,11 @@ export default function Navbar() {
               </Link>
             ))}
           </div>
-          <div className="pt-4 pb-1">
+          <div className="grid grid-cols-2 gap-2 pt-3">
+            <Link href="/guias" onClick={() => setMobileMenuOpen(false)} className="text-center px-3 py-2.5 text-sm font-bold uppercase border-2 border-ink text-ink">Guías</Link>
+            <Link href="/advice" onClick={() => setMobileMenuOpen(false)} className="text-center px-3 py-2.5 text-sm font-bold uppercase border-2 border-ink text-ink">Consejos</Link>
+          </div>
+          <div className="pt-3 pb-1">
             <Link href="/advice" onClick={() => setMobileMenuOpen(false)} className="w-full text-center flex justify-center items-center gap-2 bg-ink text-paper px-4 py-3 font-bold uppercase text-sm border-2 border-ink">
               🤖 Asistente IA
             </Link>

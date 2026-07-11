@@ -52,6 +52,7 @@ export default function Layout({ children }: LayoutProps) {
           <div className="mt-12 pt-6 border-t border-paper/20 flex flex-col md:flex-row justify-between items-center gap-3 font-mono text-[11px] uppercase tracking-widest text-paper/50">
             <p>&copy; {currentYear} PescaPlus</p>
             <div className="flex gap-6">
+              <Link href="/guias" className="hover:text-accent transition-colors">Guías</Link>
               <Link href="/advice" className="hover:text-accent transition-colors">Asistente IA</Link>
               <Link href="/admin" className="hover:text-accent transition-colors">Admin</Link>
             </div>

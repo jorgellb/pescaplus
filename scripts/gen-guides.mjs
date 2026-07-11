@@ -1,0 +1,121 @@
+/**
+ * Generate lib/guides-data.ts — a few SEO buying guides written by the NVIDIA
+ * agent. Run: `node scripts/gen-guides.mjs`
+ */
+import 'dotenv/config'
+import { readFileSync, writeFileSync } from 'fs'
+import { fileURLToPath } from 'url'
+import { dirname, join } from 'path'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const OUT = join(__dirname, '..', 'lib', 'guides-data.ts')
+
+const KEY = process.env.NVIDIA_API_KEY
+const URL = process.env.NVIDIA_BASE_URL ?? 'https://integrate.api.nvidia.com/v1'
+const MODELS = (process.env.NVIDIA_MODELS?.split(',').map((s) => s.trim()).filter(Boolean)) || [
+  'nvidia/nemotron-3-super-120b-a12b',
+  'nvidia/llama-3.3-nemotron-super-49b-v1.5',
+  'nvidia/nemotron-3-nano-30b-a3b',
+  'nvidia/nvidia-nemotron-nano-9b-v2',
+  'nvidia/nemotron-mini-4b-instruct',
+]
+const nvidiaOn = KEY && KEY !== 'your_nvidia_api_key'
+
+const TOPICS = [
+  { topic: 'Cómo elegir tu primera caña de pescar', typeFishing: 'canas' },
+  { topic: 'Guía de carretes: spinning, baitcasting y surfcasting', typeFishing: 'carretes' },
+  { topic: 'Los mejores señuelos para depredadores y cómo usarlos', typeFishing: 'senuelos' },
+  { topic: 'Iniciación al carpfishing: equipo, montajes y cebado', typeFishing: 'carpfishing' },
+]
+
+let rr = 0
+function extractJson(text) {
+  const c = String(text || '').replace(/```json/gi, '').replace(/```/g, '')
+  const s = c.indexOf('{'), e = c.lastIndexOf('}')
+  if (s === -1 || e <= s) return null
+  try { return JSON.parse(c.slice(s, e + 1)) } catch { return null }
+}
+async function nvidiaJson(instruction) {
+  const start = rr++ % MODELS.length
+  const chain = MODELS.map((_, i) => MODELS[(start + i) % MODELS.length])
+  for (const model of chain) {
+    const ctrl = new AbortController()
+    const t = setTimeout(() => ctrl.abort(), 20000)
+    try {
+      const r = await fetch(`${URL}/chat/completions`, {
+        method: 'POST', signal: ctrl.signal,
+        headers: { Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ model, messages: [
+          { role: 'system', content: 'Eres un redactor experto en pesca. Respondes solo con JSON válido.' },
+          { role: 'user', content: instruction },
+        ], max_tokens: 1800, temperature: 0.75, top_p: 0.9 }),
+      })
+      if (r.ok) { const p = extractJson((await r.json()).choices?.[0]?.message?.content); if (p) return p }
+    } catch { /* next model */ } finally { clearTimeout(t) }
+  }
+  return null
+}
+
+function slugify(title) {
+  const b = String(title).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '').slice(0, 60)
+  return b || 'guia'
+}
+
+function coverFor(typeFishing) {
+  try {
+    const src = readFileSync(join(__dirname, '..', 'lib', 'catalog-data.ts'), 'utf8')
+    const arr = JSON.parse(src.match(/CatalogSeed\[\]\s*=\s*(\[[\s\S]*\])\s*$/)[1])
+    return arr.find((p) => p.typeFishing === typeFishing)?.imageUrl || ''
+  } catch { return '' }
+}
+
+async function main() {
+  const guides = []
+  const used = new Set()
+  let i = 0
+  for (const { topic, typeFishing } of TOPICS) {
+    process.stdout.write(`\n[${topic.slice(0, 40)}] generando… `)
+    const instruction = `Escribe una guía/artículo de blog de pesca en español sobre: "${topic}" (categoría: ${typeFishing}).
+Tono experto, útil y ameno. Devuelve SOLO JSON válido:
+{"title": string (SEO), "excerpt": string (1-2 frases), "content": string (500-700 palabras, markdown ligero: **negrita** para secciones y "- " para listas; NADA de HTML ni #), "seoDescription": string (140-160 chars)}`
+    let p = nvidiaOn ? await nvidiaJson(instruction) : null
+    if (!p) {
+      p = {
+        title: topic,
+        excerpt: `Todo lo que necesitas saber sobre ${topic.toLowerCase()}.`,
+        content: `**Introducción**\nGuía práctica sobre ${topic.toLowerCase()}.\n\n**Consejos**\n- Define tu objetivo y presupuesto.\n- Prioriza calidad en carrete y línea.\n- Lee valoraciones reales.\n\nExplora nuestras categorías y usa el asistente IA si tienes dudas.`,
+        seoDescription: `Guía: ${topic}. Consejos y recomendaciones en PescaPlus.`.slice(0, 160),
+      }
+    }
+    let id = slugify(p.title); let n = 2
+    while (used.has(id)) id = `${slugify(p.title)}-${n++}`
+    used.add(id)
+    const at = new Date(Date.now() - i * 2 * 86400000).toISOString()
+    guides.push({
+      id,
+      title: String(p.title).slice(0, 140),
+      excerpt: String(p.excerpt || '').slice(0, 300),
+      content: String(p.content || ''),
+      coverImage: coverFor(typeFishing),
+      typeFishing,
+      seoTitle: '',
+      seoDescription: String(p.seoDescription || '').slice(0, 165),
+      aiOptimized: Boolean(nvidiaOn && p),
+      published: true,
+      createdAt: at,
+      updatedAt: at,
+    })
+    process.stdout.write('OK')
+    i++
+  }
+
+  const header = `import type { Guide } from '@/types'
+
+// Generated by scripts/gen-guides.mjs. Regenerate: node scripts/gen-guides.mjs
+export const GUIDE_SEED: Guide[] = ${JSON.stringify(guides, null, 2)}
+`
+  writeFileSync(OUT, header)
+  console.log(`\n\n✅ ${guides.length} guías escritas en lib/guides-data.ts`)
+}
+main().catch((e) => { console.error('\n❌', e.message); process.exit(1) })

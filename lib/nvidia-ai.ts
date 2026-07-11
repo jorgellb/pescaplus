@@ -418,3 +418,74 @@ Devuelve SOLO JSON válido:
     generatedBy: 'nvidia',
   }
 }
+
+// ---------------------------------------------------------------------------
+// AI guide / blog generation
+// ---------------------------------------------------------------------------
+
+export interface GuideDraft {
+  title: string
+  excerpt: string
+  content: string
+  seoDescription: string
+  generatedBy: 'nvidia' | 'offline'
+}
+
+function offlineGuide(topic: string, label: string): GuideDraft {
+  const t = topic.trim() || `Guía de ${label || 'pesca'}`
+  const title = t.charAt(0).toUpperCase() + t.slice(1)
+  const content = [
+    `Esta guía te ayuda con **${t}**${label ? ` en la modalidad de ${label.toLowerCase()}` : ''}. Reunimos lo esencial para que elijas bien tu equipo y mejores tus resultados.`,
+    ``,
+    `**Qué tener en cuenta**`,
+    `- Define tu objetivo: especie, lugar y presupuesto.`,
+    `- Prioriza calidad en las piezas que más sufren (carrete y línea).`,
+    `- Lee valoraciones reales antes de comprar.`,
+    ``,
+    `**Recomendaciones**`,
+    `- Empieza con un equipo versátil y amplía según tu técnica.`,
+    `- Mantén y limpia tu material tras cada salida.`,
+    ``,
+    `Explora nuestras categorías para encontrar el aparejo ideal y usa el asistente IA si tienes dudas.`,
+  ].join('\n')
+  return {
+    title,
+    excerpt: `Todo lo que necesitas saber sobre ${t.toLowerCase()}: qué mirar, recomendaciones y consejos prácticos.`,
+    content,
+    seoDescription: `Guía de ${t.toLowerCase()}: consejos, qué tener en cuenta y recomendaciones para acertar. Aparejos seleccionados en PescaPlus.`.slice(0, 160),
+    generatedBy: 'offline',
+  }
+}
+
+/** Generate a fishing buying guide / blog article. Never throws. */
+export async function generateGuide(topic: string, typeFishing?: string): Promise<GuideDraft> {
+  const label = typeFishing ? fishingLabel(typeFishing) : ''
+  const fallback = offlineGuide(topic, label)
+  if (!isApiConfigured()) return fallback
+
+  const instruction = `Escribe una guía/artículo de blog de pesca en español sobre: "${topic}"${label ? ` (categoría: ${label})` : ''}.
+Tono experto, útil y ameno. Devuelve SOLO JSON válido:
+{"title": string (atractivo y con palabras clave SEO),
+ "excerpt": string (resumen de 1-2 frases),
+ "content": string (400-700 palabras en markdown LIGERO: usa **negrita** para los títulos de sección y "- " para listas; NO uses HTML ni #),
+ "seoDescription": string (meta descripción de 140-160 caracteres)}`
+
+  const content = await callNvidia(
+    [
+      { role: 'system', content: 'Eres un redactor experto en pesca. Respondes solo con JSON válido.' },
+      { role: 'user', content: instruction },
+    ],
+    { maxTokens: 1800, temperature: 0.75 },
+  )
+  const parsed = content ? extractJson(content) : null
+  if (!parsed) return fallback
+
+  const str = (v: unknown, f: string) => (typeof v === 'string' && v.trim() ? v.trim() : f)
+  return {
+    title: str(parsed.title, fallback.title).slice(0, 140),
+    excerpt: str(parsed.excerpt, fallback.excerpt).slice(0, 300),
+    content: str(parsed.content, fallback.content),
+    seoDescription: str(parsed.seoDescription, fallback.seoDescription).slice(0, 165),
+    generatedBy: 'nvidia',
+  }
+}
