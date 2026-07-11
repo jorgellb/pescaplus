@@ -27,6 +27,16 @@ export default function AdminSettingsPage() {
   const [integrations, setIntegrations] = useState<Integrations | null>(null)
   const [saving, setSaving] = useState(false)
   const [note, setNote] = useState('')
+  const [origin, setOrigin] = useState('')
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setOrigin(window.location.origin)
+  }, [])
+
+  const copyUrl = (url: string) => {
+    navigator.clipboard?.writeText(url).then(() => setNote('✅ URL copiada al portapapeles.'))
+  }
 
   const load = useCallback(async () => {
     const res = await fetch('/api/admin/settings')
@@ -230,6 +240,58 @@ export default function AdminSettingsPage() {
           </button>
         </div>
       </section>
+
+      {/* Product feeds */}
+      <section className="space-y-4 p-5 rounded-2xl border border-ink/15 bg-white">
+        <h2 className="text-xs font-bold uppercase tracking-widest text-ink/60">Feeds de producto (shopping)</h2>
+        <p className="text-sm text-ink/60">
+          Importa estos feeds en las plataformas para vender tu catálogo. Se generan al vuelo desde tu catálogo actual
+          (pega la URL en la plataforma y se actualizará sola).
+        </p>
+        <FeedRow label="Google Merchant Center (XML)" path="/api/feeds/google" origin={origin} onCopy={copyUrl} />
+        <FeedRow label="Meta · Instagram y Facebook (CSV)" path="/api/feeds/meta" origin={origin} onCopy={copyUrl} download />
+      </section>
+    </div>
+  )
+}
+
+function FeedRow({
+  label,
+  path,
+  origin,
+  onCopy,
+  download,
+}: {
+  label: string
+  path: string
+  origin: string
+  onCopy: (url: string) => void
+  download?: boolean
+}) {
+  const url = `${origin}${path}`
+  return (
+    <div className="flex flex-col sm:flex-row sm:items-center gap-2 justify-between p-3 border border-ink/15 rounded-xl bg-paper">
+      <div className="min-w-0">
+        <p className="text-sm font-bold text-ink">{label}</p>
+        <p className="font-mono text-[11px] text-ink/50 truncate">{url || path}</p>
+      </div>
+      <div className="flex gap-2 flex-shrink-0">
+        <a
+          href={path}
+          target="_blank"
+          rel="noopener noreferrer"
+          {...(download ? { download: '' } : {})}
+          className="text-xs font-bold text-paper bg-ink hover:bg-accent px-3 py-2 rounded-lg transition-colors"
+        >
+          {download ? '⬇️ Descargar' : '↗ Abrir'}
+        </a>
+        <button
+          onClick={() => onCopy(url)}
+          className="text-xs font-bold text-ink bg-ink/5 border border-ink/15 hover:bg-ink/10 px-3 py-2 rounded-lg transition-colors"
+        >
+          Copiar URL
+        </button>
+      </div>
     </div>
   )
 }
