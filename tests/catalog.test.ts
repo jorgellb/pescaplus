@@ -5,7 +5,7 @@ import type { Product } from '@/types'
 function make(partial: Partial<Product>): Product {
   return withProductDefaults({
     id: partial.id ?? 'x',
-    aliexpressId: 'a',
+    sku: 'a',
     title: partial.title ?? 'Producto',
     description: partial.description ?? '',
     imageUrl: partial.imageUrl ?? 'https://img/x.jpg',

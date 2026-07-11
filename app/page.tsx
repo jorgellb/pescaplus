@@ -9,6 +9,7 @@ import { FISHING_TYPES } from '@/lib/fishing'
 import { listProducts } from '@/lib/products-store'
 import { getTrendingProducts } from '@/lib/trending'
 import { getTaxonomy, categoryName } from '@/lib/taxonomy-store'
+import { proxiedImage } from '@/lib/img-proxy'
 
 export const metadata: Metadata = {
   alternates: { canonical: '/' },
@@ -56,13 +57,13 @@ export default async function Home() {
             <div className="relative">
               {heroA && (
                 <div className="relative aspect-[4/5] border border-ink/15 rounded-xl shadow-hard-lg overflow-hidden bg-[#e6e2d6]">
-                  <ProductImage src={heroA.imageUrl} alt={heroA.title} priority sizes="(max-width: 1024px) 90vw, 40vw" className="absolute inset-0 w-full h-full object-cover" />
+                  <ProductImage src={proxiedImage(heroA.imageUrl, heroA.title)} alt={heroA.title} priority sizes="(max-width: 1024px) 90vw, 40vw" className="absolute inset-0 w-full h-full object-cover" />
                   <Link href={`/products/${heroA.id}`} className="absolute inset-0" aria-label={heroA.title} />
                 </div>
               )}
               {heroB && (
                 <div className="hidden sm:block absolute -bottom-8 -left-8 w-40 aspect-square border border-ink/15 rounded-xl shadow-hard bg-[#e6e2d6] overflow-hidden">
-                  <ProductImage src={heroB.imageUrl} alt={heroB.title} sizes="200px" className="absolute inset-0 w-full h-full object-cover" />
+                  <ProductImage src={proxiedImage(heroB.imageUrl, heroB.title)} alt={heroB.title} sizes="200px" className="absolute inset-0 w-full h-full object-cover" />
                 </div>
               )}
               <span className="absolute -top-5 -right-3 rotate-6 bg-accent text-paper font-display text-lg uppercase px-4 py-2 border border-ink/15 rounded-xl shadow-hard">

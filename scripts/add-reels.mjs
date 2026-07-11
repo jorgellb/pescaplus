@@ -192,7 +192,7 @@ async function main() {
     const rate = parseFloat(String(p.evaluate_rate || '').replace('%', ''))
     added.push({
       id,
-      aliexpressId: String(p.product_id),
+      sku: String(p.product_id),
       title: seo.title,
       description: seo.description,
       imageUrl: p.product_main_image_url,

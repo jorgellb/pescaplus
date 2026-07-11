@@ -6,6 +6,7 @@ import { listProducts, createProduct, activeBackend } from '@/lib/products-store
 import { isFishingTypeId } from '@/lib/fishing'
 import { isRequestAuthenticated } from '@/lib/admin-auth'
 import { getSettings } from '@/lib/settings-store'
+import { proxyProductImages } from '@/lib/img-proxy'
 
 /**
  * Public storefront listing. Reads from the curated store (catalog + products
@@ -20,10 +21,10 @@ export async function GET(request: NextRequest): Promise<NextResponse<ProductsAp
     const search = searchParams.get('search')?.trim() || undefined
     const scopedType = typeParam && isFishingTypeId(typeParam) ? typeParam : undefined
 
-    const products: Product[] = await listProducts({
-      search,
-      typeFishing: scopedType ?? typeParam,
-    })
+    const raw = await listProducts({ search, typeFishing: scopedType ?? typeParam })
+    // Admin (authenticated) gets the real data for editing; the public storefront
+    // gets image/marketplace fields sanitized so nothing leaks to the client.
+    const products: Product[] = isRequestAuthenticated(request) ? raw : raw.map(proxyProductImages)
     const source: ProductsApiResponse['source'] =
       activeBackend() === 'database' ? 'database' : 'catalog'
 
@@ -56,7 +57,7 @@ const productInputSchema = z.object({
   rating: z.number().min(0).max(5).optional(),
   reviews: z.number().int().min(0).optional(),
   inStock: z.boolean().optional(),
-  aliexpressId: z.string().max(120).optional(),
+  sku: z.string().max(120).optional(),
 })
 
 /** Create a product (admin only). */

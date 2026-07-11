@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
+import { proxiedImage } from '@/lib/img-proxy'
 
 interface ProductImageProps {
   src: string
@@ -14,21 +15,11 @@ interface ProductImageProps {
   sizes?: string
 }
 
-// Hosts we can safely route through the Next image optimizer (see next.config.ts).
-const OPTIMIZABLE = /(^|\.)(aliexpress-media\.com|alicdn\.com|unsplash\.com)$/i
-
-function canOptimize(src: string): boolean {
-  try {
-    return OPTIMIZABLE.test(new URL(src).hostname)
-  } catch {
-    return false
-  }
-}
-
 /**
- * Resilient product image. Known CDNs are served through next/image (AVIF/WebP,
- * responsive srcset); arbitrary admin-provided URLs fall back to a plain <img>.
- * Any load error shows a branded placeholder instead of a broken image icon.
+ * Resilient product image. Third-party CDN images are rewritten to our own
+ * same-origin proxy path (hiding the origin host) and served through next/image
+ * (AVIF/WebP, responsive srcset); arbitrary admin-provided URLs fall back to a
+ * plain <img>. Any load error shows a branded placeholder.
  */
 export default function ProductImage({
   src,
@@ -51,10 +42,14 @@ export default function ProductImage({
     )
   }
 
-  if (canOptimize(src)) {
+  // CDN images become a same-origin path (/img/...) so the origin host is hidden
+  // and next/image can still optimize them (local paths are optimized by default).
+  const resolved = proxiedImage(src, alt)
+
+  if (resolved.startsWith('/')) {
     return (
       <Image
-        src={src}
+        src={resolved}
         alt={alt}
         fill
         sizes={sizes}
@@ -68,7 +63,7 @@ export default function ProductImage({
   return (
     // eslint-disable-next-line @next/next/no-img-element -- arbitrary admin host, not optimizable
     <img
-      src={src}
+      src={resolved}
       alt={alt}
       onError={() => setFailed(true)}
       loading={priority ? 'eager' : 'lazy'}

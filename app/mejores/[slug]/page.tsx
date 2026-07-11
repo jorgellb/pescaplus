@@ -7,6 +7,7 @@ import CategoryIcon from '@/components/graphics/CategoryIcon'
 import { getRoundup, roundupSlugs, ROUNDUP_YEAR } from '@/lib/roundups'
 import { getFishingType } from '@/lib/fishing'
 import { SITE_URL, absoluteUrl, breadcrumbJsonLd } from '@/lib/seo'
+import { absoluteProxiedImage } from '@/lib/img-proxy'
 
 type Params = { params: Promise<{ slug: string }> }
 
@@ -61,7 +62,7 @@ export default async function RoundupPage({ params }: Params) {
       position: it.rank,
       url: absoluteUrl(`/products/${it.product.id}`),
       name: it.product.title,
-      image: it.product.imageUrl || undefined,
+      image: it.product.imageUrl ? absoluteProxiedImage(it.product.imageUrl, it.product.title) : undefined,
     })),
   }
 

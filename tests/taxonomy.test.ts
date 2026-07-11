@@ -42,7 +42,7 @@ describe('taxonomy store', () => {
 
 describe('multi-category filtering', () => {
   const p = withProductDefaults({
-    id: 'x', aliexpressId: 'x', title: 'Bolsa para carretes', description: 'funda',
+    id: 'x', sku: 'x', title: 'Bolsa para carretes', description: 'funda',
     imageUrl: 'i', price: 10, currency: 'EUR', affiliateUrl: 'a', category: 'fishing',
     typeFishing: 'equipo', categories: ['equipo', 'carretes'], rating: 4, reviews: 1, inStock: true,
   })

@@ -6,7 +6,7 @@ import type { Product } from '@/types'
 const products: Product[] = [
   withProductDefaults({
     id: 'carrete-x',
-    aliexpressId: '1005001',
+    sku: '1005001',
     title: 'Carrete de Spinning <Pro> "2500"',
     description: 'Un **carrete** con [enlace](https://x).',
     imageUrl: 'https://img/a.jpg',

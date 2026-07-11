@@ -7,7 +7,7 @@ import type { FishingTypeId } from '@/lib/fishing'
  */
 export interface Product {
   id: string
-  aliexpressId: string
+  sku: string
   title: string
   description: string
   imageUrl: string

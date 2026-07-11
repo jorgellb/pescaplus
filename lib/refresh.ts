@@ -23,7 +23,7 @@ export async function refreshCatalogPrices(): Promise<RefreshResult> {
   }
 
   const products = await listProducts()
-  const targets = products.filter((p) => /^\d+$/.test(p.aliexpressId))
+  const targets = products.filter((p) => /^\d+$/.test(p.sku))
 
   let updated = 0
   let unavailable = 0
@@ -31,11 +31,11 @@ export async function refreshCatalogPrices(): Promise<RefreshResult> {
 
   for (let i = 0; i < targets.length; i += BATCH) {
     const batch = targets.slice(i, i + BATCH)
-    const fresh = await getAliExpressProductsByIds(batch.map((p) => p.aliexpressId))
-    const byId = new Map(fresh.map((f) => [f.aliexpressId, f]))
+    const fresh = await getAliExpressProductsByIds(batch.map((p) => p.sku))
+    const byId = new Map(fresh.map((f) => [f.sku, f]))
 
     for (const p of batch) {
-      const f = byId.get(p.aliexpressId)
+      const f = byId.get(p.sku)
 
       if (!f || !f.affiliateUrl || f.price <= 0) {
         if (p.inStock) {

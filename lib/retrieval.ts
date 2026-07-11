@@ -1,6 +1,7 @@
 import type { Product } from '@/types'
 import { listProducts } from '@/lib/products-store'
 import { isFishingTypeId } from '@/lib/fishing'
+import { proxyProductImages } from '@/lib/img-proxy'
 
 /**
  * Lightweight retrieval for the chat assistant (RAG-lite). Scores catalog
@@ -57,5 +58,5 @@ export async function retrieveProducts(
       .slice(0, limit)
   }
 
-  return top
+  return top.map(proxyProductImages)
 }

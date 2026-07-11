@@ -109,12 +109,12 @@ function buildFaq(short: string, priceFrom: number | null): RoundupFaq[] {
       a: `Encontrarás ${short} de calidad desde ${price}. Para empezar no necesitas lo más caro: busca un modelo bien valorado que se ajuste a tu tipo de pesca y a tu presupuesto.`,
     },
     {
-      q: `¿Merece la pena comprar ${short} en AliExpress?`,
-      a: `Sí, siempre que elijas productos con muchas valoraciones positivas. En PescaPlus filtramos por ventas y reseñas reales y enlazamos a la tienda oficial, así compras de forma segura y a buen precio.`,
+      q: `¿Es fiable comprar ${short} en PescaPlus?`,
+      a: `Sí. Seleccionamos productos con muchas valoraciones positivas y filtramos por ventas y reseñas reales, así compras de forma segura y a buen precio.`,
     },
     {
       q: `¿Cómo elijo ${short} si soy principiante?`,
-      a: `Empieza por un modelo versátil y de gama media: cubre casi cualquier situación mientras aprendes. Si tienes dudas, nuestro asistente con IA te recomienda el más adecuado según lo que vayas a pescar.`,
+      a: `Empieza por un modelo versátil y de gama media: cubre casi cualquier situación mientras aprendes. Si tienes dudas, nuestro asesor te recomienda el más adecuado según lo que vayas a pescar.`,
     },
   ]
 }

@@ -7,6 +7,7 @@ import { listGuides, getGuide } from '@/lib/guides-store'
 import { fishingLabel } from '@/lib/fishing'
 import { renderDescription } from '@/lib/markdown'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
+import { proxiedImage, absoluteProxiedImage } from '@/lib/img-proxy'
 
 type Params = { params: Promise<{ slug: string }> }
 
@@ -30,7 +31,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       type: 'article',
       title: guide.title,
       description,
-      images: guide.coverImage ? [guide.coverImage] : undefined,
+      images: guide.coverImage ? [proxiedImage(guide.coverImage, guide.title)] : undefined,
       publishedTime: guide.createdAt,
       modifiedTime: guide.updatedAt,
     },
@@ -48,7 +49,7 @@ export default async function GuidePage({ params }: Params) {
     '@type': 'Article',
     headline: guide.title,
     description: guide.seoDescription || guide.excerpt,
-    image: guide.coverImage ? [guide.coverImage] : undefined,
+    image: guide.coverImage ? [absoluteProxiedImage(guide.coverImage, guide.title)] : undefined,
     datePublished: guide.createdAt,
     dateModified: guide.updatedAt,
     author: { '@type': 'Organization', name: 'PescaPlus' },
@@ -88,7 +89,7 @@ export default async function GuidePage({ params }: Params) {
 
         {guide.coverImage && (
           <div className="relative aspect-[16/9] mt-8 border border-ink/15 rounded-xl shadow-hard overflow-hidden bg-[#e6e2d6]">
-            <ProductImage src={guide.coverImage} alt={guide.coverImageAlt || guide.title} priority sizes="(max-width: 768px) 100vw, 768px" className="absolute inset-0 w-full h-full object-cover" />
+            <ProductImage src={proxiedImage(guide.coverImage, guide.title)} alt={guide.coverImageAlt || guide.title} priority sizes="(max-width: 768px) 100vw, 768px" className="absolute inset-0 w-full h-full object-cover" />
           </div>
         )}
 

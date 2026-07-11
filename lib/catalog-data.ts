@@ -5,7 +5,7 @@ import type { CatalogSeed } from '@/lib/catalog'
 export const CATALOG_SEED: CatalogSeed[] = [
   {
     "id": "gancho-magnetico-neodimio-16-90mm-para-pescada-fuerte",
-    "aliexpressId": "1005006732796033",
+    "sku": "1005006732796033",
     "title": "Gancho Magnético Neodimio 16-90mm para Pescada Fuerte",
     "description": "Imán de tierras raras N52 con cáncamo orificio avellanado, ideal para pescar en ríos o mar. Resistente a la corrosión y fácil de usar. Perfecto para anzuelos de pesca deportiva. Captura más peces con este gancho magnético ultraresistente.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Sa014833d6ada414488b08fdccbfcef76r.jpg",
@@ -32,7 +32,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "anzuelos-de-pesca-corrosion-resistente-4-uds-sougayilang",
-    "aliexpressId": "1005007022169541",
+    "sku": "1005007022169541",
     "title": "Anzuelos de Pesca Corrosión Resistente 4 Uds. Sougayilang",
     "description": "Anzuelos de alta durabilidad con acabado anticorrosión para pesca en agua dulce y marina. Ideal para cebo de lubina en carpas y especies grandes. Diseño práctico que garantiza atrapas más con cada uso. Pack de 4 unidades ofrece excelente relación calidad-precio.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S28a2aa74386443cfbc0659ce6efdb949c.jpg",
@@ -59,7 +59,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "anzuelos-de-pesca-100-unidades-acero-carbono-para-mosca-y-ca",
-    "aliexpressId": "1005005592634334",
+    "sku": "1005005592634334",
     "title": "Anzuelos de pesca 100 unidades - Acero Carbono para mosca y carpa",
     "description": "Juego de 100 anzuelos de acero rico en carbono, ideales para pesca con mosca y carpa. Diseño de un solo círculo garantiza mayor resistencia y eficacia en la captura. Variedad de series para adaptarse a diferentes técnicas y condiciones acuáticas. Excelente relación calidad-precio para pescadores exigentes.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S26d9ac259701424591f5c2a8b94693fbi.jpg",
@@ -86,7 +86,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "50-conectores-acero-inox-para-pesca-con-caja-snap-in-rotativ",
-    "aliexpressId": "1005008666344520",
+    "sku": "1005008666344520",
     "title": "50 Conectores Acero Inox para Pesca con Caja Snap-In Rotativa",
     "description": "Duraderos y resistentes a la corrosión, ideales para señuelos y ganchos. La caja snap-in permite acceso rápido y montaje eficiente de aparejos. Mejora la seguridad y durabilidad de tus conexiones en cualquier entorno acuático. Perfecto para pescadores profesionales y amateuros.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S0ec7a7f0b7834ed59f766a08c9f569f0L.jpg",
@@ -113,7 +113,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "bombillas-led-recargables-usb-para-pesca-y-camping-luces-nit",
-    "aliexpressId": "1005007170943662",
+    "sku": "1005007170943662",
     "title": "Bombillas LED Recargables USB para Pesca y Camping: Luces Nitidas para la Noche",
     "description": "Bombillas LED recargables por USB para exteriores, ideales para acampar y pescar. Ofrece una luz de emergencia brillante y un gancho para sujeción.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S394c275a9ec24dfb8ef7ccf6c2f2aa33X.png",
@@ -140,7 +140,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "dndyuju-100x-conectores-giratorios-de-pesca-con-anzuelo-resi",
-    "aliexpressId": "1005007038842184",
+    "sku": "1005007038842184",
     "title": "DNDYUJU 100X Conectores Giratorios de Pesca con Anzuelo, Resistentes al Acero Inoxidable 3",
     "description": "Conectores giratorios de pesca resistentes con anzuelo de acero inoxidable 304. Perfectos para pesca deportiva y recreativa. Incluye accesorios de pesca y herramienta de pesca.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Sc796444e80b14689bd7530c77b8d1472X.jpg",
@@ -167,7 +167,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "hilo-de-pesca-japones-finisimo-para-carpa",
-    "aliexpressId": "1005006782897605",
+    "sku": "1005006782897605",
     "title": "Hilo de Pesca Japonés Finísimo para Carpa",
     "description": "Líneas de pesca de alta calidad con monofilamento japonés trenzado, ideales para capturar carpas. Diseñadas para durabilidad y precisión en pesca con mosca. Disponibles en 100m y 150m para adaptarse a cualquier técnica.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S5f4469c6278346e281ee6368eb327ff0u.jpg",
@@ -194,7 +194,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "linea-de-inversion-larga-distancia-genuina-japon",
-    "aliexpressId": "1005005796871626",
+    "sku": "1005005796871626",
     "title": "Línea de Inversión Larga Distancia Genuina Japón",
     "description": "Diseñada para pesca profesional, ofrece resistencia y durabilidad en condiciones extremas. Ideal para técnicas de larga distancia en ríos, océanos o lagos. Fabricada en Japón, garantiza calidad y rendimiento óptimo. Perfecta para pescadores exigentes que buscan equipo confiable.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S3f71452e8844419aa25ca2326cb95f76G.jpg",
@@ -220,7 +220,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "lineas-de-pesca-resistentes-tijeras-portatiles-para-carpa-y-",
-    "aliexpressId": "1005006904495621",
+    "sku": "1005006904495621",
     "title": "Líneas de pesca resistentes, tijeras portátiles para carpa y trenzado PE",
     "description": "Diseñadas con acero inoxidable 420, estas líneas ofrecen durabilidad y resistencia en agua dulce. Las tijeras portátiles facilitan cortes precisos en líneas de PE, ideales para trenzado y montaje de señuelos. Perfectas para pescadores de carpa que buscan herramientas eficientes y versátiles.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S5cfde317db2e42a3b5d704ffb72dc52fd.jpg",
@@ -247,7 +247,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "lineas-de-pesca-linethink-100m-500m-multifilamento-pe-100-tr",
-    "aliexpressId": "1005006863875347",
+    "sku": "1005006863875347",
     "title": "Líneas de pesca LineThink 100M-500M: Multifilamento PE 100% Trenzado 8-100LB",
     "description": "Descubre líneas duraderas y resistentes para pesca en cualquier condición. Ideal para técnicas como el spinning o el fly fishing. Su diseño trenzado ofrece mayor control y menos enredos. Perfecta para pescadores profesionales y amateurs.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Hc1100e2f32ab4d0fa70fbd92160ecdb83.jpg",
@@ -273,7 +273,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "zukibo-sedal-de-pesca-multifilamento-japones-resistente-y-fi",
-    "aliexpressId": "1005007659815170",
+    "sku": "1005007659815170",
     "title": "Zukibo Sedal de Pesca Multifilamento Japones - Resistente y Fino",
     "description": "Zukibo sedal de pesca multifilamento japonés, resistente y fino, ideal para pesca de anzuelos y tirolinas. Fabricado con fibra de rendimiento y PE, ofrece una excelente acción y resistencia a la abrasión.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Sca229b86def54e24bf912e0505fc4986A.jpg",
@@ -300,7 +300,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "tijeras-de-acero-inoxidable-420-para-pesca-portatiles-y-resi",
-    "aliexpressId": "1005005180127688",
+    "sku": "1005005180127688",
     "title": "Tijeras de Acero Inoxidable 420 para Pesca - Portátiles y Resistentes",
     "description": "Ideal para pescadores de carpa, estas tijeras de acero inoxidable 420 ofrecen durabilidad y precisión al cortar líneas o preparar señuelos. Diseño ergonómico y portátil, perfecto para uso en campo. Incluye herramientas esenciales como alicates y línea trenzada para una experiencia de pesca completa.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S5cfde317db2e42a3b5d704ffb72dc52fd.jpg",
@@ -327,7 +327,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "senuelos-blandos-6-5-8-5cm-para-carpa-tpe-10-unidades",
-    "aliexpressId": "1005008932393764",
+    "sku": "1005008932393764",
     "title": "Señuelos Blandos 6.5-8.5cm para Carpa TPE 10 Unidades",
     "description": "Señuelos versátiles ideales para carpa y otros peces. Fabricados en TPE resistente, imitan gusanos naturales. Incluye anzuelos y hilo para montaje fácil. Perfectos para técnicas de pesca con aparejos.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Sf31b5d1820634625b622c48264d66061n.jpg",
@@ -354,7 +354,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "senuelos-blandos-spiker-5cm-7cm-para-perca-y-lubina-tpe-tpr-",
-    "aliexpressId": "1005007974312387",
+    "sku": "1005007974312387",
     "title": "Señuelos Blandos Spiker 5cm/7cm para Perca y Lubina - TPE/TPR con Brillo UV",
     "description": "Señuelos realistas y flotantes ideales para pesca de perca y lubina. Fabricados en TPE y TPR duraderos, atraen peces con su diseño Spiker y brillo UV. Perfectos para montaje Drop Rig, ofrecen alta efectividad en aguas dulces. Fáciles de usar y resistentes para múltiples lanzamientos.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Sae1ad20a2e2744a9a2db2d2604d6de42w.png",
@@ -381,7 +381,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "senuelos-de-pesca-para-carpa-y-lubina-isca-artificial-pva",
-    "aliexpressId": "1005007306688719",
+    "sku": "1005007306688719",
     "title": "Señuelos de Pesca para Carpa y Lubina - Isca Artificial PVA",
     "description": "Ideal para atraer carpas y lubinas, estos señuelos PVA ofrecen un diseño realista y durabilidad. Fáciles de usar en diferentes condiciones de agua. Perfectos para pescadores que buscan resultados efectivos. Incluyen múltiples opciones para adaptarse a distintas técnicas de pesca.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Hf0fcbd64a0f443669f454a27526cd5e8b.jpg",
@@ -407,7 +407,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "4-unidades-set-senuelo-de-lapiz-que-se-hunde-10cm-24g-agua-s",
-    "aliexpressId": "1005008248024792",
+    "sku": "1005008248024792",
     "title": "4 Unidades Set Señuelo de Lápiz que se hunde 10cm 24g Agua Salada",
     "description": "Señuelos de pesca duraderos ideales para agua salada. Atraen peces como el curricán con su diseño realista. Set de 4 unidades ofrece buen valor para pescadores. Fácil de usar y efectivo en diferentes condiciones.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Sc054e71889114d2d9eb7283f33262e55u.jpg",
@@ -434,7 +434,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "calidad-premium-sensacion-de-trucha-10-uds-sensuelos-suaves-",
-    "aliexpressId": "1005008132321535",
+    "sku": "1005008132321535",
     "title": "Calidad Premium, Sensación de Trucha: 10 uds Sensuélos Suaves 5,5 cm, 7 cm y 10 cm con T d",
     "description": "Disfruta de una pesca más emocionante con estos sensuélos suaves de alta calidad, diseñados para imitar la acción de los caracoles y otros peces. Con una T de cola y anzuelo de cabeza de Jigging, estos sensuélos se adhieren perfectamente a la carpa y se mueven suavemente en el agua, creando una sensación de trucha irresistible. Además, el kit incluye 3 uds de anzuelo de cabeza de Jigging y 3 g, 5 g y 10 g de plantilla de metal, lo que te permite personalizar tu pesca y lograr más capturas. Esta es una excelente opción para pescadores de todos los niveles.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S41234ea5a4144f4a8bf98aed42190c56y.jpg",
@@ -461,7 +461,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "senuelo-de-gusano-atrayente-para-carpa-cebos-suaves-con-olor",
-    "aliexpressId": "1005007026402632",
+    "sku": "1005007026402632",
     "title": "Señuelo de Gusano Atrayente para Carpa - Cebos Suaves con Olor a Pescado",
     "description": "Diseñado para imitar gusanos naturales, este señuelo suave atrae a carpas con su aroma auténtico. Ideal para pesca en lagos o ríos, garantiza capturas efectivas gracias a su movimiento realista. Fácil de usar y duradero, mejora tus resultados en cualquier entorno acuático. Perfecto para pescadores experimentados y principiantes.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S275f7e202f2a44ba9b26549a1db78072K.jpg",
@@ -487,7 +487,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "cana-giratoria-josby-fibra-de-carbono-telescopica-3m-aparejo",
-    "aliexpressId": "1005007476698670",
+    "sku": "1005007476698670",
     "title": "Caña Giratoria JOSBY Fibra de Carbono Telescópica 3M - Aparejos de Alta Calidad",
     "description": "La caña giratoria JOSBY combina durabilidad y resistencia con fibra de carbono de alta calidad. Ideal para pesca en agua dulce o salada, ofrece precisión y fuerza en cada lanzamiento. Su diseño telescópico permite fácil transporte y montaje rápido. Incluye aparejos premium para maximizar tus capturas.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S8c413d3dac7d48bdbe06d7e93e063d00N.jpg",
@@ -514,7 +514,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "canas-de-pesca-telescopicas-ligeras-y-resistentes-perfectas-",
-    "aliexpressId": "1005010044109351",
+    "sku": "1005010044109351",
     "title": "Cañas de pesca telescópicas ligeras y resistentes, perfectas para spinning y casting",
     "description": "Cañas de pesca telescópicas de alta calidad, ligeras y resistentes, ideales para spinning y casting. Perfectas para disfrutar de la pesca en cualquier lugar y con cualquier tipo de pesca.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S3619d057a58641c1b500d04e8819afd94.jpeg",
@@ -541,7 +541,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "lider-en-canas-de-pesca-cana-telescopica-de-carbono-de-1-5-m",
-    "aliexpressId": "1005007010099857",
+    "sku": "1005007010099857",
     "title": "Líder en Cañas de Pesca: Caña telescópica de carbono de 1,5 M-3M para pesca nocturna y al ",
     "description": "La mejor caña telescópica de carbono para pesca nocturna y al aire libre, con una longitud ajustable de 1,5 a 3 metros y accesorios de herramientas esenciales.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Sdcdb80774bde4cefab23cb73679b1782K.jpg",
@@ -568,7 +568,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "cana-de-pesca-telescopica-de-carbono-3m-ideal-para-pesca-en-",
-    "aliexpressId": "1005010043997544",
+    "sku": "1005010043997544",
     "title": "Caña de pesca telescópica de carbono 3M, ideal para pesca en roca, spinning, fly, carpa, f",
     "description": "La caña de pesca telescópica de carbono 3M es una opción perfecta para pescadores de todos los niveles. Con una longitud ajustable y un peso ligero, ofrece una experiencia de pesca cómoda y precisa.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Sd50c6f2122dc481e94718d39f3e7a5e0s.jpg",
@@ -595,7 +595,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "cana-telescopica-de-carbono-para-pesca-spinning-y-baitcastin",
-    "aliexpressId": "1005007171319089",
+    "sku": "1005007171319089",
     "title": "Caña telescópica de carbono para pesca spinning y baitcasting, ajustable hasta 2.4M",
     "description": "La canoa telescópica de carbono perfecta para tu spinning y baitcasting, con mango de madera y peso ajustable desde 8g hasta 25g.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S0bbb2566ae474001a3654c459e7911e51.jpg",
@@ -622,7 +622,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "canica-de-fibra-de-carbono-telescopica-kit-carrete-3-8kg",
-    "aliexpressId": "1005007033481061",
+    "sku": "1005007033481061",
     "title": "Cánica de Fibra de Carbono Telescópica Kit Carrete 3-8kg",
     "description": "Diseñada para máxima resistencia, esta caña de pesca telescópica de fibra de carbono combina durabilidad y ligereza. Ideal para lanzamientos precisos con su carrete giratorio, perfecta para pescar en ríos, lagos o mar. Su resistencia 3-8kg permite capturar especies de diferentes tamaños. Fácil montaje y almacenamiento gracias a su diseño telescópico.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S89859bcfdf31475fbb4a9cdce83944f69.jpg",
@@ -649,7 +649,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "soporte-de-mango-para-daiwa-shimano-penn-soporte-giratorio-e",
-    "aliexpressId": "1005008077695289",
+    "sku": "1005008077695289",
     "title": "Soporte de mango para DAIWA SHIMANO PENN: Soporte giratorio, equilibrador y barra de equil",
     "description": "Soporte de mango para DAIWA SHIMANO PENN con función giratoria y equilibrista, perfecto para reemplazar piezas dañadas o agotadas.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S16d271cca6ea490baf57e45474420a26a.jpg",
@@ -676,7 +676,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "carrete-deukio-7000-arrastre-12kg-metal-giratorio",
-    "aliexpressId": "1005005993921615",
+    "sku": "1005005993921615",
     "title": "Carrete DEUKIO 7000 - Arrastre 12KG Metal Giratorio",
     "description": "El carrete DEUKIO 7000 ofrece máxima resistencia con su estructura de metal, ideal para pescar en aguas profundas. Su arrastre de 12KG permite capturar especies grandes con facilidad. Diseñado para pescadores profesionales y recreativos, combina durabilidad y rendimiento en cada uso.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S5fc678251b094a49a12cb886456ce276j.png",
@@ -703,7 +703,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "bolsa-eva-portatil-para-carretes-de-pesca-funda-protectora-t",
-    "aliexpressId": "1005008715585969",
+    "sku": "1005008715585969",
     "title": "Bolsa EVA Portátil para Carretes de Pesca - Funda Protectora Tambor/Giratorio/Balsa",
     "description": "Protege tus carretes de pesca de daños con esta funda de EVA resistente. Ideal para tambor, giratorio o balsa, ofrece portabilidad y almacenamiento seguro. Incluye espacio para accesorios de pesca como anzuelos y cuerdas. Perfecta para pescadores que buscan comodidad y organización.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S0e63a10890344f8bae97a4d3db49c9cdg.jpeg",
@@ -729,7 +729,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "cana-telescopica-de-fibra-de-carbono-para-carp",
-    "aliexpressId": "1005005564609386",
+    "sku": "1005005564609386",
     "title": "Caña Telescópica de Fibra de Carbono para Carp",
     "description": "Diseñada para pescadores de carpas, esta cana telescópica combina durabilidad con portabilidad. Su alimentador giratorio facilita la pesca con mosca, mientras la fibra de carbono asegura resistencia. Ideal para viajes y diferentes condiciones de agua.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/H929eb562a535461aaaef600c60ed6d15U.jpg",
@@ -756,7 +756,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "zukibo-nuevo-ganador-nanofil-naranja-la-l-aacute-nea-de-prue",
-    "aliexpressId": "1005010429975592",
+    "sku": "1005010429975592",
     "title": "Zukibo Nanofil Naranja — Línea de pesca multifilamento de alta resistencia",
     "description": "Línea de pesca de alta calidad para carretes giratorios, fabricada con multifilamento de nylon y recubrimiento naranja de alta visibilidad. Diseñada para lances precisos y una recuperación fiable frente a la mayoría de especies.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S6c93c8c4307249d2aa1eee78989c5216D.jpg",
@@ -783,7 +783,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "carrete-de-pesca-giratorio-5-2-1-con-sedal-y-senuelo-incluid",
-    "aliexpressId": "1005007257688520",
+    "sku": "1005007257688520",
     "title": "Carrete de Pesca Giratorio 5.2:1 con Sedal y Señuelo Incluidos",
     "description": "Carrete de alta calidad con sistema de rueda 5.2:1 para mayor control. Incluye sedal de pesca, señuelo y cebo, ideal para principiantes y expertos. Diseñado para uso en ríos, lagos y costas. Resistente y fácil de manejar.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Sf817cc179fd04dcaa09367eda9f06049H.jpg",
@@ -810,7 +810,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "buscador-de-peces-inalambrico-con-sonar-tecnologia-portatil",
-    "aliexpressId": "1005006199962438",
+    "sku": "1005006199962438",
     "title": "Buscador de Peces Inalámbrico con Sonar Tecnología Portátil",
     "description": "Permite localizar peces en tiempo real con tecnología sonar avanzada. Ideal para pescadores amateur y profesionales. Fácil de usar en ríos, lagos o mar. Mejora tus capturas con detección precisa y silenciosa.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Se38dabf6357f422c9633adbe7898838bK.jpg",
@@ -837,7 +837,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "sonar-inalambrico-bluetooth-inteligente-para-pesca-48m",
-    "aliexpressId": "1005009145220820",
+    "sku": "1005009145220820",
     "title": "Sonar inalámbrico Bluetooth inteligente para pesca 48m",
     "description": "Equipado con tecnología Bluetooth, ofrece detección en tiempo real de peces hasta 48 metros. Portátil y compatible con iOS/Android, ideal para pesca al aire libre. Mejora tu eficiencia en la búsqueda de peces con datos precisos y actualizados.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S112ec48474624672bd1d48571623afe2j.jpg",
@@ -864,7 +864,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "sonar-de-peces-f12b-recargable-portatil-y-resistente-para-pe",
-    "aliexpressId": "1005011653973162",
+    "sku": "1005011653973162",
     "title": "Sonar de Peces F12B Recargable, Portátil y Resistente para Pesca en Hielo en Invierno",
     "description": "Soporte para pesca en hielo con un sonar inalámbrico recargable de 90 metros de profundidad, perfecto para los pescadores de hielo en invierno.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/H178fcb00a4e845369467327c2923f230d.jpg",
@@ -891,7 +891,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "alarma-sonar-portatil-100m-para-pesca-45",
-    "aliexpressId": "1005008679750736",
+    "sku": "1005008679750736",
     "title": "Alarma Sonar Portátil 100M para Pesca 45°",
     "description": "Descubre peces en lagos y mar con alcance de 100 metros. Cobertura de 45° optimiza la detección. Ideal para pescadores amateur y profesional. Mejora tu éxito en la pesca con tecnología avanzada.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S75767ba9aaa44a14ad1efc3d63e1d3ecI.jpg",
@@ -918,7 +918,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "aprovecha-los-viajes-en-tu-barco-con-la-cubierta-de-transduc",
-    "aliexpressId": "1005009328333579",
+    "sku": "1005009328333579",
     "title": "Aprovecha los viajes en tu barco con la cubierta de transductor ABKY-LVS34 de Garmin Lives",
     "description": "Lleva la precisión de tu Garmin Livescope Plus a todos tus viajes en barco con la cubierta de transductor ABKY-LVS34. Ideal para pescadores de todos los niveles, esta cubierta te permitirá visualizar mejor los obstáculos y la profundidad en tiempo real.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S45f1ea24424d450da5668c275a48a36aV.jpg",
@@ -945,7 +945,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "buscador-de-peces-portatil-para-hielo-con-sonar-y-transducto",
-    "aliexpressId": "32711659077",
+    "sku": "32711659077",
     "title": "Buscador de Peces Portátil para Hielo con Sonar y Transductor - 0.7-100m",
     "description": "Ideal para pescadores de hielo, ofrece detección precisa de peces con tecnología sonar. Incluye alarma visual y sonora para localizar truchas o salmones. Fácil de usar en condiciones extremas con diseño resistente. Amplia cobertura de profundidad hasta 100 metros.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S0b85d8f3196943f8ac00761c6c675619X.jpg",
@@ -972,7 +972,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "kit-de-pesca-de-silicona-3-tamanos-bobbers-y-flotadores-de-c",
-    "aliexpressId": "1005005120038756",
+    "sku": "1005005120038756",
     "title": "Kit de Pesca de Silicona 3 Tamaños - Bobbers y Flotadores de Cobre",
     "description": "Equipo duradero para pesca en ríos, lagos o mar. Incluye bobbers de silicona y flotadores de cobre para mayor precisión. El bloque de rotación facilita el cambio rápido de accesorios. Ideal para principiantes y expertos que buscan calidad y versatilidad.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S37dcc871d0114c9f8040fa1695440e47U.jpg",
@@ -999,7 +999,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "cebo-para-lubina-ned-rig-finesse-7-5cm-3-2g",
-    "aliexpressId": "1005008512445549",
+    "sku": "1005008512445549",
     "title": "Cebo para Lubina Ned Rig Finesse 7.5cm 3.2g",
     "description": "Cebo suave flotante con alta flotabilidad para pesca en agua dulce. Ideal para técnicas Ned Rig y Finesse. Diseñado para atraer lubina y otros peces de fondo. Resistente y fácil de usar en diferentes condiciones.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S084bb6389fa94367aaaa6e324d72f02dc.jpg",
@@ -1026,7 +1026,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "soporte-de-clip-para-telefono-de-pesca-correa-ajustable-para",
-    "aliexpressId": "1005008388932623",
+    "sku": "1005008388932623",
     "title": "Soporte de Clip para Teléfono de Pesca - Correa Ajustable para Embarcaciones",
     "description": "Ideal para pescadores, este soporte de clip permite montar tu teléfono de forma segura en embarcaciones. La correa ajustable ofrece comodidad en el pecho mientras pescas. Perfecto para grabar videos o seguir GPS en tiempo real. Diseñado para uso en agua dulce o salada.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Sfc061bc13e2847f7a478eba1808c0c1aP.jpg",
@@ -1052,7 +1052,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "conector-flotadores-acero-inoxidable-15-60uds-pesca-carpa-sa",
-    "aliexpressId": "1005006583268591",
+    "sku": "1005006583268591",
     "title": "Conector Flotadores Acero Inoxidable 15-60uds. Pesca Carpa Salvaje",
     "description": "Conector duradero en acero inoxidable para flotadores de pesca. Ideal para capturar carpa cruciana y otros peces en agua dulce. Fácil instalación y conexión segura. Accesorio esencial para pescadores de embarcaciones.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S55b14ccbb2604fbf856ea50a5bc667c5M.jpg",
@@ -1079,7 +1079,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "cana-de-pesca-noeby-beast-float-tube-para-lucio-3-longitudes",
-    "aliexpressId": "1005006815356082",
+    "sku": "1005006815356082",
     "title": "Caña de Pesca Noeby Beast Float Tube para Lúcio - 3 Longitudes, Fuji Toray, Pesca en Bote,",
     "description": "La canoa de pesca Noeby Beast Float Tube para Lúcio de 1.68m, 1.72m y 1.75m es perfecta para disfrutar de la pesca en bote, spinning, bagre, depredadores y kayak con Fuji Toray.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S7f902679fca34e3cb130ce5d0c1b4b3as.jpg",
@@ -1106,7 +1106,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "flotador-electrico-con-accesorios-para-pesca-luminoso-y-repo",
-    "aliexpressId": "1005008032309130",
+    "sku": "1005008032309130",
     "title": "Flotador Eléctrico con Accesorios para Pesca - Luminoso y Reposapiés Nano",
     "description": "Ideal para pescadores, este flotador eléctrico mejora la visibilidad en el agua. Incluye ganchos, reposapiés y tubo flotante para mayor comodidad. Perfecto para atraer peces y organizar tu equipo de pesca. Duradero y fácil de usar en embarcaciones.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S08010588177d4699858e84b108a8a27f5.jpg",
@@ -1133,7 +1133,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "kit-de-pesca-profesional-170-410-piezas-con-aparejos-anzuelo",
-    "aliexpressId": "1005010751124379",
+    "sku": "1005010751124379",
     "title": "Kit de Pesca Profesional 170-410 Piezas con Aparejos, Anzuelos y Plomos",
     "description": "Kit completo para pesca en agua dulce y salada. Incluye aparejos, anzuelos y plomos resistentes. Ideal para Lubina, Trucha y otras especies. Fácil de usar y duradero en condiciones extremas.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Sfe2c5e3fd6c94bb28e4ff322ed033ea08.jpg",
@@ -1160,7 +1160,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "broches-de-acero-inoxidable-resistentes-para-pesca-en-agua-s",
-    "aliexpressId": "1005010089085971",
+    "sku": "1005010089085971",
     "title": "Broches de acero inoxidable resistentes para pesca en agua salada con conexión a línea de ",
     "description": "Disfruta de una pesca segura y eficiente con estos broches giratorios de acero inoxidable de alta resistencia. Conecta tu línea de pesca directamente al barril y prepárate para pescar con mayor seguridad y comodidad.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S16bd714a7d024aa4bd8d57ef44b7cc01B.jpg",
@@ -1187,7 +1187,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "kit-profesional-de-pesca-170-410-piezas-completo",
-    "aliexpressId": "1005009234471853",
+    "sku": "1005009234471853",
     "title": "Kit Profesional de Pesca 170-410 Piezas Completo",
     "description": "Incluye anzuelos, plomos y emergilones para pesca en agua dulce y salada. Diseñado para lubricina, trucha y otros peces. Caja organizada facilita transporte y almacenamiento. Ideal para principiantes y expertos.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Sfe2c5e3fd6c94bb28e4ff322ed033ea08.jpg",
@@ -1214,7 +1214,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "kit-20-conectores-giratorios-para-pesca-anillo-rodante",
-    "aliexpressId": "1005006995191734",
+    "sku": "1005006995191734",
     "title": "Kit 20 Conectores Giratorios para Pesca - Anillo Rodante",
     "description": "Conectores duraderos y fáciles de usar, ideales para señuelos y líneas de pesca. Su diseño giratorio previene enredos y permite una conexión rápida. Perfectos para pescadores de todos los niveles. Resistentes y versátiles para diferentes técnicas.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S277985557240485c8ddc215278a216d4P.jpg",
@@ -1241,7 +1241,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "50-unidades-barril-laton-para-pesca-con-giratorios-y-anillos",
-    "aliexpressId": "1005003086458997",
+    "sku": "1005003086458997",
     "title": "50 unidades barril latón para pesca con giratorios y anillos sólidos",
     "description": "Este barril de latón ofrece durabilidad y resistencia para pesca en agua dulce o salada. Los giratorios y anillos sólidos mejoran el lanzamiento y reducen enredos. Conector de línea y pin de pesca incluidos para montaje rápido y seguro. Ideal para pescadores profesionales y aficionados que buscan calidad y versatilidad.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Hb8f626237c2e4dbaaf940e8c2ff686efK.jpg",
@@ -1268,7 +1268,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "giratorios-de-pesca-premium-anillos-de-acero-inoxidable-y-an",
-    "aliexpressId": "1005006727867078",
+    "sku": "1005006727867078",
     "title": "Giratorios de Pesca Premium: Anillos de Acero Inoxidable y Anzuelos para Acciones Perfecta",
     "description": "Disfruta de una pesca más eficiente y divertida con estos 50 giratorios de pesca de alta calidad, compuestos por anillos de acero inoxidable sólidos y anzuelos. ¡Sigue los consejos de pesca y captura tu propia captura con estos accesorios esenciales!",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S89befbabe71c403ba08d93496f7b4835J.jpg",
@@ -1295,7 +1295,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "plomos-de-pesca-para-trolling-con-accion-rapida-y-esmerillon",
-    "aliexpressId": "1005009516005117",
+    "sku": "1005009516005117",
     "title": "Plomos de Pesca para Trolling con Acción Rápida y Esmerillón Doble",
     "description": "Diseñados para trolling, estos plomos ofrecen acción rápida para atraer peces. Su forma de oliva garantiza resistencia en aguas profundas. Ideales para pesca en ríos, lagos o mar. Versátiles y duraderos.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S6b14a7cb3f2c4e40ab0d3c01406b5b2cJ.png",
@@ -1322,7 +1322,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "caja-de-pesas-de-pesca-plomos-en-forma-de-lagrima-plomos-de-",
-    "aliexpressId": "1005009649177325",
+    "sku": "1005009649177325",
     "title": "Caja de pesas de pesca plomos en forma de lágrima, plomos de pesca para la línea de captur",
     "description": "Caja de pesas de pesca plomos en forma de lágrima para la línea de captura de Bass Casting Drop Shot, ideales para pescar en agua salada y dulce. Diseñados para una mayor durabilidad y rendimiento, estos plomos de pesca proporcionan una excelente caída y una mejor conexión con la línea.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S98acb5d33d174dc2b0e62faae17bc7dc4.jpg",
@@ -1349,7 +1349,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "pesas-de-plomo-para-pesca-gotas-de-agua-3-5g-20g",
-    "aliexpressId": "1005010112283696",
+    "sku": "1005010112283696",
     "title": "Pesas de Plomo para Pesca: Gotas de Agua 3.5g-20g",
     "description": "Ideal para atraer peces con diseño único. Disponibles en múltiples pesos desde 3.5g hasta 20g. Hechos de plomo duradero para mayor efectividad en diferentes técnicas de pesca.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S2c81ac25d90f4aeda28b895025cced806.jpg",
@@ -1376,7 +1376,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "plomos-de-pesca-30-unidades-plomo-dividido-ovalado-y-forma-d",
-    "aliexpressId": "1005009444132581",
+    "sku": "1005009444132581",
     "title": "Plomos de Pesca 30 Unidades: Plomo Dividido Ovalado y Forma de Frijol",
     "description": "Ideales para técnicas de pesca como still fishing o trolling, estos plomos divididos ofrecen mayor movilidad en el agua. Su diseño ovalado y forma de frijol mejora el lanzamiento y atrae mejor a los peces. Fabricados en plomo de alta calidad, garantizan durabilidad y eficacia en cualquier entorno acuático.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S5c9a47f7dbb349e7b60e8e4dbbbae28d8.jpg",
@@ -1403,7 +1403,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "5-uds-plomos-de-pescado-profundos-2-97-eur-accelera-la-captu",
-    "aliexpressId": "1005009234756005",
+    "sku": "1005009234756005",
     "title": "5 uds Plomos de Pescado Profundos: 2.97 EUR - Accelera la captura de peces en aguas profun",
     "description": "Desarrollados para pescar en aguas profundas, nuestros plomos de pesca profesionales están diseñados para ofrecer una mayor profundidad y rendimiento. Cada plomo está equipado con una hélice de plomo giratoria y una anzolera de 5g, 7g o 10g, ideal para diferentes tipos de peces y condiciones del agua.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Sb9cfd407e845436f83c2221a81f22c26N.jpg",
@@ -1430,7 +1430,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "10-unids-lote-pesas-de-pesca-plomos-de-alta-calidad-con-peso",
-    "aliexpressId": "1005008332816102",
+    "sku": "1005008332816102",
     "title": "10 unids/lote pesas de pesca plomos de alta calidad con pesos de 3,5g a 20g",
     "description": "Lista de plomos de pesca con pesos de 3,5g, 5g, 7g, 10g, 14g y 20g. Ideal para pescadores de cualquier nivel. Incluye accesorios de carpa para una pesca segura y eficiente.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Sdd972ead2f9141e99a5c2914480d82ffq.png",
@@ -1457,7 +1457,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "alicates-de-pescade-multifuncion-herramientas-esenciales-par",
-    "aliexpressId": "1005003139640296",
+    "sku": "1005003139640296",
     "title": "Alicates de Pescade Multifunción - Herramientas Esenciales para Invierno",
     "description": "Alicates de pesca versátiles para trenzar moscas, atar aparejos y manipular anzuelos. Diseñados para durabilidad y precisión en condiciones extremas. Ideal para pescadores de hielo y deportistas en invierno. Incluye pinzas y tijeras en un solo juego práctico.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S83202c7b779541508dcad39b76802475r.jpg",
@@ -1484,7 +1484,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "tijeras-de-pesca-portatiles-para-electricistas-acero-inoxida",
-    "aliexpressId": "1005007170439662",
+    "sku": "1005007170439662",
     "title": "Tijeras de Pesca Portátiles para Electricistas: Acero Inoxidable 420",
     "description": "Descubre nuestras tijeras de pesca portátiles para electricistas, ideales para cortar líneas tensadas de PE en condiciones de seguridad y comodidad. Con un mango ergonómico y una hoja de acero inoxidable 420, estas herramientas son perfectas para pescadores, carpinteros y electricistas.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Se25e6b75530e48f78a5332278eb9ff18f.jpg",
@@ -1511,7 +1511,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "aplicadores-de-pesca-de-dientes-remium-herramienta-de-cuidad",
-    "aliexpressId": "1005009421055054",
+    "sku": "1005009421055054",
     "title": "Aplicadores de pesca de dientes Remium: Herramienta de cuidado multiusos y remover de anzu",
     "description": "Los aplicadores de pesca de dientes Remium son una herramienta versátil y de calidad para el cuidado de mascotas, especialmente para el pelo de las orejas. Diseñados con dientes de acero inoxidable, estos aplicadores se adhieren a la piel de las mascotas y se mueven suavemente para eliminar el pelo muerto y la suciedad,leaving only a suave y limpio pelo. Además, estos aplicadores también son útiles para remover los anzuelos y las gotitas de agua de los peces, lo que les ayuda a mantenerse saludables y felices.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S031680167dec4a5cbdd734ced31d642eQ.jpg",
@@ -1538,7 +1538,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "tijeras-de-acero-inoxidable-para-cortar-alambre-braid-pe-con",
-    "aliexpressId": "1005010572700777",
+    "sku": "1005010572700777",
     "title": "Tijeras de Acero Inoxidable para Cortar Alambre Braid PE con Llavero Retractil",
     "description": "Ideal para pescadores, estas tijeras de acero inoxidable ofrecen durabilidad y precisión al cortar alambres trenzados. Su diseño ergonómico facilita el uso en cualquier condición. Incluye llavero retráctil para llevarlas siempre a mano. Perfectas para reparaciones rápidas en redes o equipos de pesca.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Sc1c19dd5df1b4d298c93803424598adez.jpg",
@@ -1565,7 +1565,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "clip-de-sujecion-rapida-y-organizador-de-canas-de-pesca-para",
-    "aliexpressId": "1005010228751850",
+    "sku": "1005010228751850",
     "title": "Clip de sujeción rápida y organizador de cañas de pesca para pesca en agua dulce",
     "description": "Dos clips de sujeción rápida y un organizador de cañas de pesca para una pesca en agua dulce más segura y organizada.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Sce7bf1498f43484f81f2cf6032a40ab8u.jpg",
@@ -1592,7 +1592,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "alicates-para-pesca-pinzas-abrazaderas-y-senuelo-de-calidad",
-    "aliexpressId": "1005012014036498",
+    "sku": "1005012014036498",
     "title": "Alicates para Pesca: Pinzas, Abrazaderas y Señuelo de Calidad",
     "description": "Ideal para pescadores profesionales y aficionados. Incluye pinzas resistentes, abrazaderas seguras y señuelo práctico. Perfecto para capturar, preparar cebo y manejar equipo de pesca. Duradero y versátil para uso en agua dulce o salada.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S0d2edf29ce87452f9ec88770ef42c6b4y.jpg",
@@ -1619,7 +1619,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "bolsa-de-pesca-impermeable-y-ajustable-para-carrete-y-acceso",
-    "aliexpressId": "1005006994960995",
+    "sku": "1005006994960995",
     "title": "Bolsa de pesca impermeable y ajustable para carrete y accesorios - Hirisi W125",
     "description": "Una bolsa de pesca impermeable y ajustable para llevar tus carretes y accesorios en cualquier condición climática. Con 3 compartimentos ajustables para organizar y proteger tus materiales de pesca.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Sabc5f185b1f84f1ea0c7b17018d1ca81r.jpg",
@@ -1646,7 +1646,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "cajas-de-pesca-con-compartimentos-almacena-senuelos-anzuelos",
-    "aliexpressId": "1005005534544942",
+    "sku": "1005005534544942",
     "title": "Cajas de Pesca con Compartimentos: Almacena Señuelos, Anzuelos y Accesorios",
     "description": "Diseño resistente para proteger tu equipo de pesca. Organización inteligente con múltiples compartimentos. Ideal para pescadores de río, playa o lago. Fácil acceso y transporte práctico.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S57b0b4af7bba4037add267adbda340b64.jpg",
@@ -1673,7 +1673,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "luminosos-abalorios-de-pesca-cuerdas-suaves-flotantes-y-bril",
-    "aliexpressId": "1005005044224996",
+    "sku": "1005005044224996",
     "title": "Luminosos Abalorios de Pesca, Cuerdas Suaves, Flotantes y Brillantes, para Pescar al Aire ",
     "description": "Abalorios de pesca luminosos de alta calidad, ideales para pescar en condiciones de poca luz. Con 4 mm, 5 mm y 6 mm, y una bolsa de 100 unidades, son una excelente opción para pescadores de todos los niveles. Estos abalorios flotantes brillantes son perfectos para pescar al aire libre y atraer a los peces en las noches estrelladas.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S7248b9babe3d432fab279fc6316c593ch.jpg",
@@ -1700,7 +1700,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "bolsa-de-pesca-plegable-y-multiusos-para-equipo-de-pesca",
-    "aliexpressId": "1005009732648021",
+    "sku": "1005009732648021",
     "title": "Bolsa de pesca plegable y multiusos para equipo de pesca",
     "description": "Almacenar y transportar de forma segura y práctica tus herramientas de pesca con esta bolsa de caña plegable y multiusos.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S39b00791f4064c8f90747f96a62cf31eH.jpg",
@@ -1727,7 +1727,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "lixada-bolsa-de-transporte-resistente-para-carretes-de-pesca",
-    "aliexpressId": "1005010332565335",
+    "sku": "1005010332565335",
     "title": "Lixada Bolsa de Transporte Resistente para Carretes de Pesca - 3 Partes para Aparcamiento ",
     "description": "Una lixada bolsa de transporte impermeable para carretes giratorios con 3 compartimentos para organizar tus herramientas de pesca y mantenerlas seguras durante el transporte.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S2665b96bfbf444a49eade61eed1425d84.jpg",
@@ -1754,7 +1754,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "bolsa-de-pesca-impermeable-para-carrete-giratorio",
-    "aliexpressId": "1005005042824273",
+    "sku": "1005005042824273",
     "title": "Bolsa de Pesca Impermeable para Carrete Giratorio",
     "description": "Protege tu equipo de pesca con una bolsa impermeable y resistente a golpes. Ideal para almacenar carretes y aparejos de manera segura. Diseño duradero y práctico para pescadores de todos los niveles. Fácil de transportar y mantener en orden.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Haf49f0d202754cb18d176f3fffba15e7K.jpg",
@@ -1781,7 +1781,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "carrete-de-pesca-baitcasting-seasir-rodamiento-ceramico",
-    "aliexpressId": "1005006381299125",
+    "sku": "1005006381299125",
     "title": "Carrete de Pesca Baitcasting SEASIR Rodamiento Cerámico",
     "description": "Diseñado para precisión y durabilidad, este carrete ofrece un rodamiento cerámico híbrido para lanzamientos suaves. La arandela de fibra de carbono reduce fricción, mientras el freno N52 garantiza control total. Ideal para pesca deportiva y amateur en ríos, lagos o mar.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Saacb2b875833441787c727cf2b568d60P.png",
@@ -1808,7 +1808,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "carrete-de-pesca-rooblinos-nx-para-agua-salada-y-de-agua-dul",
-    "aliexpressId": "1005007540028443",
+    "sku": "1005007540028443",
     "title": "Carrete de Pesca Rooblinos NX para Agua Salada y de Agua Dulce, Aparcele para Carpa y Truc",
     "description": "El carrete de pesca Rooblinos NX es una excelente opción para pescadores de agua salada y dulce. Con un diseño compacto y resistente, este carrete incluye una variedad de aparejos intercambiables para carpa y trucha, ofreciendo una gran variedad de opciones para diferentes tipos de pesca.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S9592cb46acc64b1b98951074b1e08d631.png",
@@ -1835,7 +1835,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "anatono-vrigo-carrete-de-pesca-ultraligero-bfs-para-agua-sal",
-    "aliexpressId": "1005008666914075",
+    "sku": "1005008666914075",
     "title": "Anatono Vrigo: Carrete de pesca ultraligero BFS para agua salada, 6 + 1BB Baitcaster de po",
     "description": "Ligero y potente, el carrete de pesca Anatono Vrigo es ideal para la pesca en agua salada. Con una relación de engranaje de 7,2, ofrece una acción suave y precisa. Incluye un baitcaster de 6KG con 6 anzuelos y 1 BB.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S007721d3dad341f2b45053d0aa5e8f21G.jpg",
@@ -1862,7 +1862,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "carrete-de-pesca-ultraligero-bfs-160g-7-2-relacion-agua-sala",
-    "aliexpressId": "1005007887715480",
+    "sku": "1005007887715480",
     "title": "Carrete de Pesca Ultraligero BFS 160g 7.2 Relación Agua Salada 6KG",
     "description": "Diseñado para pesca en agua salada, ofrece durabilidad y precisión con su relación de engranaje 7.2. Ideal para técnicas como el baitcasting y la pesca deportiva. Su construcción ultraligera mejora la maniobrabilidad. Resistente a 6KG, perfecto para capturar especies grandes.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S007721d3dad341f2b45053d0aa5e8f21G.jpg",
@@ -1889,7 +1889,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "carrete-de-pesca-giratorio-rooblinos-potente-y-duradero-para",
-    "aliexpressId": "1005009414702320",
+    "sku": "1005009414702320",
     "title": "Carrete de Pesca Giratorio Rooblinos: Potente y Duradero para Agua Salada y Dulce",
     "description": "Este carrete giratorio Rooblinos es una excelente opción para pescadores de agua salada y dulce. Fabricado con rodamientos de acero inoxidable, ofrece una gran precisión y durabilidad.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Sc8348698dd814845a4fc944b734ab0fd0.jpg",
@@ -1916,7 +1916,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "carrete-de-pesca-giratorio-25kg-con-rodamientos-de-acero-ino",
-    "aliexpressId": "1005007425906934",
+    "sku": "1005007425906934",
     "title": "Carrete de Pesca Giratorio 25KG con Rodamientos de Acero Inoxidable – Agua Salada y Dulce",
     "description": "Carrete de pesca robusto con capacidad de 25KG, ideal para condiciones extremas. Rodamientos de acero inoxidable garantizan durabilidad y rotación suave. Perfecto para pescadores de agua salada y dulce. Diseño ergonómico y fácil de usar.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Sc8348698dd814845a4fc944b734ab0fd0.jpg",
@@ -1943,7 +1943,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "linea-de-pesca-ftk-con-revestimiento-de-fluorocarbono-pesca-",
-    "aliexpressId": "1005008733076855",
+    "sku": "1005008733076855",
     "title": "Línea de pesca FTK con revestimiento de fluorocarbono: pesca deportiva y precisa",
     "description": "La línea de pesca FTK con revestimiento de fluorocarbono es una opción ideal para pescadores avanzados que buscan una pesca precisa y deportiva. Fabricada con fibra de carbono, ofrece una rigidez y durabilidad excepcionales, ideal para la captura de carpas y otras especies pesqueras.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Sfb9858252e414112894397aed965c283Y.jpg",
@@ -1970,7 +1970,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "linea-de-pesca-ultra-resistente-y-moteada-de-fluorocarbono-p",
-    "aliexpressId": "1005007535388264",
+    "sku": "1005007535388264",
     "title": "Línea de Pesca Ultra Resistente y Moteada de Fluorocarbono para Pesca de Carpa Oleta",
     "description": "Una línea de pesca de nailon de 1000M con una monofilamento súper fuerte y recubierta de fluorocarbono moteado, diseñada específicamente para la pesca de carpa olta.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S27e5463f72454a5fb17ffdcc2ef80ed44.jpg",
@@ -1997,7 +1997,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "linea-de-pesca-super-fuerte-alambre-japones-100m-200m-con-ap",
-    "aliexpressId": "1005007010410413",
+    "sku": "1005007010410413",
     "title": "Línea de pesca súper fuerte, alambre japonés 100M/200M con aparejos transparentes",
     "description": "Fabricada en nailón de alta resistencia, ideal para pesca en ríos y lagos. Los aparejos transparentes garantizan mayor visibilidad y captura exitosa. Diseño duradero que resiste golpes y condiciones adversas. Perfecta para pescadores deportivos y principiantes.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S257b77bf83154851a2d1dd4dd11f94aed.jpg",
@@ -2024,7 +2024,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "proberos-sadel-de-pesca-con-revestimiento-de-fluorocarbono-l",
-    "aliexpressId": "1005006982584963",
+    "sku": "1005006982584963",
     "title": "Proberos — Línea de pesca con revestimiento de fluorocarbono, alta resistencia",
     "description": "Proporciona una acción precisa y rápida en el agua, ideal para pescar carpas y otras especies pesadas. Fabricado con un revestimiento de fluorocarbono de alta calidad y una línea de monofilamento de fibra de carbono de 2,2LB-29,3LB, garantiza una durabilidad y resistencia excepcionales.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S09359807215b438691841a1300f94383w.jpg",
@@ -2051,7 +2051,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "proberos-silla-de-pesca-con-revestimiento-de-fluorocarbono-l",
-    "aliexpressId": "1005006471679105",
+    "sku": "1005006471679105",
     "title": "Proberos — Línea de pesca fluorocarbono de fibra de carbono, baja visibilidad",
     "description": "Línea de pesca de alta calidad con revestimiento de fluorocarbono para una mayor durabilidad y resistencia. La línea de monofilamento de fibra de carbono de 2,2LB-29,3LB ofrece una excelente sensibilidad y precisión en el juego del anzuelo. La línea de hundimiento incluida garantiza una pesca más eficiente y una mayor profundidad.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S09359807215b438691841a1300f94383w.jpg",
@@ -2078,7 +2078,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "swimbait-multiarticular-11g-27g-hundimiento-lento-anzuelo-tr",
-    "aliexpressId": "1005007792837244",
+    "sku": "1005007792837244",
     "title": "Swimbait Multiarticular 11g-27g | Hundimiento Lento, Anzuelo Triple para Carpa",
     "description": "Ideal para pesca de carpa con hundimiento lento y anzuelo triple para mayor efectividad. Diseño biónico que imita movimientos naturales del cebo. Resistente y versátil para diferentes condiciones de agua.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S3ccb0e7e99594ca58da13ea204cb07e7Z.jpg",
@@ -2105,7 +2105,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "cuchara-giratoria-triple-anzuelo-7-20g-spinnerbait-para-luci",
-    "aliexpressId": "1005006010722762",
+    "sku": "1005006010722762",
     "title": "Cuchara Giratoria Triple Anzuelo 7-20g - Spinnerbait para Lucio y Carpa",
     "description": "Cuchara giratoria con plate de hundimiento VIB para pesca en agua dulce. Anzuelo triple garantiza mayor captura de luci y carpa. Diseño duradero de metal ideal para técnicas de spinnerbait.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S9d5b0b8409d1402c97cf5fec9b29e5b3I.jpg",
@@ -2132,7 +2132,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "anzuelos-para-carpa-juego-de-6-con-sedal-y-boilie",
-    "aliexpressId": "1005005047534621",
+    "sku": "1005005047534621",
     "title": "Anzuelos para Carpa: Juego de 6 con Sedal y Boilie",
     "description": "Juego de 6 anzuelos listos para usar en pesca de carpa. Diseñados para mayor eficacia en ríos y lagos. Incluye sedal y boilie para atractar mejor. Duraderos y fáciles de manejar, ideales para principiantes y profesionales.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Sf98f06b3a4454ee18abd1cdc249868e5d.jpg",
@@ -2158,7 +2158,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "hirisi-6-uds-aparaje-de-pelo-para-pesca-de-carpa-juego-de-an",
-    "aliexpressId": "1005008156599999",
+    "sku": "1005008156599999",
     "title": "Hirisi, 6 uds., Aparaje de pelo para pesca de carpa, juego de anzuelos y accesorios",
     "description": "Disfruta de la pesca en tu carpa con este set de alta calidad, incluye 6 anzuelos de pesca, un aparejo de pelo y accesorios para una pesca cómoda y segura.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S85bdf151f5dd4cd8aa7d0ba6e77a3203X.jpg",
@@ -2185,7 +2185,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "anzuelos-iseama-offset-para-pesca-con-mosca-jig-y-marina-100",
-    "aliexpressId": "1005006860958243",
+    "sku": "1005006860958243",
     "title": "Anzuelos Iseama Offset: Para pesca con mosca, jig y marina (100 unidades)",
     "description": "Set de 100 anzuelos Iseama offset ideales para pesca con mosca y jig. Diseñados para mayor resistencia y precisión en capturas. Incluye púas afiladas para mayor efectividad en agua dulce y marina. Perfectos para pescadores profesionales y aficionados.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S1f3bebe40a2d4abd8056be2dd3a03d8f0.jpg",
@@ -2211,7 +2211,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "soporte-de-cana-de-pesca-para-embarcaciones-en-pvc-ideal-par",
-    "aliexpressId": "1005006990143901",
+    "sku": "1005006990143901",
     "title": "Soporte de caña de pesca para embarcaciones en PVC, ideal para Kayak, barcos de agua, infl",
     "description": "Aprovecha este soporte de caña de pesca para tu embarcación de PVC, perfecto para tu kayak, barco de agua, inflable o bote. Incluye pasamanos y riel deslizante para una maniobrabilidad y seguridad máximas.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S2334a3d1911544baa4a4640c662fda3bG.jpg",
@@ -2238,7 +2238,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   },
   {
     "id": "soporte-inflable-para-canas-de-pescar-pvc-plegable-para-bote",
-    "aliexpressId": "1005006843700248",
+    "sku": "1005006843700248",
     "title": "Soporte Inflable para Cáñas de Pescar PVC - Plegable para Botes y Kayaks",
     "description": "Diseñado para pescadores, este soporte inflable de PVC es duradero y fácil de transportar. Se adapta a botes, dinghies, balsas y kayaks. Fija tu caña en el ángulo ideal para mayor estabilidad. Ideal para pesca recreativa o profesional.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S32cf54acb765448cb4a7e561990bf746L.jpg",

@@ -55,7 +55,7 @@ ${extraImages ? extraImages + '\n' : ''}      <g:availability>${p.inStock ? 'in_
       <g:price>${p.price.toFixed(2)} ${xmlEscape(p.currency)}</g:price>
       <g:condition>new</g:condition>
       <g:brand>PescaPlus</g:brand>
-      <g:mpn>${xmlEscape(p.aliexpressId)}</g:mpn>
+      <g:mpn>${xmlEscape(p.sku)}</g:mpn>
       <g:google_product_category>${xmlEscape(GOOGLE_CATEGORY)}</g:google_product_category>
       <g:product_type>${xmlEscape(fishingLabel(p.typeFishing))}</g:product_type>
     </item>`

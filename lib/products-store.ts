@@ -36,7 +36,7 @@ export type ProductInput = {
   seoTitle?: string
   seoDescription?: string
   aiOptimized?: boolean
-  aliexpressId?: string
+  sku?: string
 }
 
 export function isDatabaseConfigured(): boolean {
@@ -99,7 +99,7 @@ function applyInput(input: ProductInput, id: string): Product {
   const title = input.title.trim()
   return {
     id,
-    aliexpressId: input.aliexpressId?.trim() || id,
+    sku: input.sku?.trim() || id,
     title,
     description,
     imageUrl: gallery[0] ?? '',
@@ -150,7 +150,7 @@ async function ensureSeeded(prisma: any): Promise<void> {
 function toProduct(row: any): Product {
   return {
     id: row.id,
-    aliexpressId: row.aliexpressId,
+    sku: row.sku,
     title: decodeEntities(row.title),
     description: decodeEntities(row.description),
     imageUrl: row.imageUrl,

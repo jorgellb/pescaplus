@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { Product } from '@/types'
 import { fishingLabel } from '@/lib/fishing'
+import { proxiedImage } from '@/lib/img-proxy'
 import ProductImage from './ProductImage'
 
 type ProductCardProps = Pick<
@@ -25,7 +26,7 @@ export default function ProductCard({
       {/* Image */}
       <div className="relative aspect-square overflow-hidden bg-[#e6e2d6]">
         <ProductImage
-          src={imageUrl}
+          src={proxiedImage(imageUrl, title)}
           alt={title}
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 22vw"
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"

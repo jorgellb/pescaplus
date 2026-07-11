@@ -59,12 +59,12 @@ export async function POST(request: NextRequest) {
     typeFishing: p.typeFishing,
     rating: p.rating,
     reviews: p.reviews,
-    aliexpressId: p.id,
+    sku: p.id,
   }
 
   try {
     // De-duplicate by AliExpress id: update if we've imported this before.
-    const existing = (await listProducts()).find((x) => x.aliexpressId === p.id)
+    const existing = (await listProducts()).find((x) => x.sku === p.id)
     const product = existing
       ? await updateProduct(existing.id, input)
       : await createProduct(input)

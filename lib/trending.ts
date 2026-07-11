@@ -1,6 +1,7 @@
 import type { Product } from '@/types'
 import { listProducts } from '@/lib/products-store'
 import { getClickStats } from '@/lib/clicks-store'
+import { proxyProductImages } from '@/lib/img-proxy'
 
 /**
  * "Most wanted" ranking for storefront sections. Blends real affiliate-click
@@ -28,7 +29,7 @@ export async function getTrendingRanked(typeFishing?: string): Promise<Product[]
     clickCounts(),
   ])
   const score = trendingScore(clicks)
-  return [...products].sort((a, b) => score(b) - score(a))
+  return [...products].sort((a, b) => score(b) - score(a)).map(proxyProductImages)
 }
 
 /** Top storefront picks: image-bearing products ordered by trending, capped. */

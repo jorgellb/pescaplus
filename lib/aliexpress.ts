@@ -117,7 +117,7 @@ function normalize(raw: RawAliProduct, typeFishing: string): Product {
   const title = raw.product_title ?? 'Producto AliExpress'
   return {
     id,
-    aliexpressId: id,
+    sku: id,
     title,
     description: title,
     imageUrl: raw.product_main_image_url ?? '',

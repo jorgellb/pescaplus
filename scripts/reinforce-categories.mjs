@@ -196,7 +196,7 @@ async function main() {
       usedIds.add(id)
       const rate = parseFloat(String(p.evaluate_rate || '').replace('%', ''))
       added.push({
-        id, aliexpressId: String(p.product_id), title: seo.title, description: seo.description,
+        id, sku: String(p.product_id), title: seo.title, description: seo.description,
         imageUrl: p.product_main_image_url, images: images(p), videoUrl: video(p), price, currency,
         affiliateUrl: p.promotion_link || p.product_detail_url, category: 'fishing',
         typeFishing: category, subcategory: sub,

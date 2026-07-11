@@ -4,6 +4,7 @@ import Layout from '@/components/Layout'
 import ProductCard from '@/components/ProductCard'
 import ProductGallery from '@/components/ProductGallery'
 import { getTaxonomy, categoryName } from '@/lib/taxonomy-store'
+import { proxiedImage, absoluteProxiedImage } from '@/lib/img-proxy'
 import { resolveProduct, relatedProducts } from '@/lib/product-service'
 import { renderDescription } from '@/lib/markdown'
 import { CATALOG } from '@/lib/catalog'
@@ -30,7 +31,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       title: product.title,
       description,
       type: 'website',
-      images: product.images.length ? product.images.slice(0, 4) : undefined,
+      images: product.images.length ? product.images.slice(0, 4).map((i) => proxiedImage(i, product.title)) : undefined,
     },
     twitter: { card: 'summary_large_image', title: product.title, description },
   }
@@ -68,7 +69,7 @@ export default async function ProductPage({ params }: Params) {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.title,
-    image: product.images,
+    image: product.images.map((i) => absoluteProxiedImage(i, product.title)),
     description: product.seoDescription || product.description,
     category: modalityLabel,
     offers: {
@@ -76,7 +77,7 @@ export default async function ProductPage({ params }: Params) {
       price: product.price.toFixed(2),
       priceCurrency: product.currency,
       availability: product.inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-      url: product.affiliateUrl,
+      url: `${SITE_URL}/products/${product.id}`,
     },
     ...(product.reviews > 0 && product.rating > 0
       ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: product.rating.toFixed(1), reviewCount: product.reviews } }
@@ -96,7 +97,12 @@ export default async function ProductPage({ params }: Params) {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 mb-20">
           <div className="lg:col-span-5">
-            <ProductGallery images={product.images} alts={product.imageAlts} videoUrl={product.videoUrl} title={product.title} />
+            <ProductGallery
+              images={product.images.map((i) => proxiedImage(i, product.title))}
+              alts={product.imageAlts}
+              videoUrl={proxiedImage(product.videoUrl, product.title)}
+              title={product.title}
+            />
           </div>
 
           <div className="lg:col-span-7 flex flex-col">
