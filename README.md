@@ -1,5 +1,7 @@
 # Tienda de Afiliados de Pesca - PescaPlus
 
+[![CI](https://github.com/jorgellb/pescaplus/actions/workflows/ci.yml/badge.svg)](https://github.com/jorgellb/pescaplus/actions/workflows/ci.yml)
+
 Tienda de afiliados de pesca con integración de AliExpress y asistente IA de NVIDIA.
 
 > **Funciona sin configuración.** El catálogo de productos vive en `lib/catalog.ts`
