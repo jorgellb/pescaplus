@@ -76,12 +76,22 @@ export default function Navbar() {
             </div>
           </div>
 
-          <div className="hidden md:flex items-center">
+          <div className="hidden md:flex items-center gap-3">
+            <form action="/search" method="get" className="relative">
+              <input
+                type="text"
+                name="q"
+                placeholder="Buscar…"
+                aria-label="Buscar productos"
+                className="w-36 lg:w-52 pl-8 pr-3 py-2 bg-paper border-2 border-ink text-ink placeholder-ink/40 text-sm focus:outline-none focus:border-accent transition-colors"
+              />
+              <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-ink/50 text-sm pointer-events-none">🔍</span>
+            </form>
             <Link
               href="/advice"
-              className="inline-flex items-center gap-1.5 bg-ink text-paper px-5 py-2.5 text-sm font-bold uppercase tracking-wide border-2 border-ink shadow-hard hover-shift hover:bg-accent hover:border-accent"
+              className="inline-flex items-center gap-1.5 bg-ink text-paper px-4 py-2.5 text-sm font-bold uppercase tracking-wide border-2 border-ink shadow-hard hover-shift hover:bg-accent hover:border-accent whitespace-nowrap"
             >
-              🤖 Asistente IA
+              🤖 IA
             </Link>
           </div>
 
@@ -106,6 +116,16 @@ export default function Navbar() {
       {/* Mobile menu */}
       <div className={`md:hidden ${mobileMenuOpen ? 'block' : 'hidden'} border-t-2 border-ink bg-paper max-h-[70vh] overflow-y-auto`}>
         <div className="px-3 py-3">
+          <form action="/search" method="get" className="flex gap-2 mb-4" onSubmit={() => setMobileMenuOpen(false)}>
+            <input
+              type="text"
+              name="q"
+              placeholder="Buscar productos…"
+              aria-label="Buscar productos"
+              className="flex-1 px-3 py-2.5 bg-paper border-2 border-ink text-ink placeholder-ink/40 text-sm focus:outline-none focus:border-accent"
+            />
+            <button className="bg-ink text-paper px-4 text-sm font-bold uppercase border-2 border-ink">🔍</button>
+          </form>
           <p className="px-2 pb-1.5 font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50">Categorías</p>
           <div className="grid grid-cols-2 gap-0.5">
             {FISHING_TYPES.map((type) => (
