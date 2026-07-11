@@ -5,7 +5,7 @@ import ProductImage from './ProductImage'
 
 type ProductCardProps = Pick<
   Product,
-  'id' | 'title' | 'imageUrl' | 'price' | 'currency' | 'affiliateUrl' | 'rating' | 'reviews' | 'typeFishing'
+  'id' | 'title' | 'imageUrl' | 'price' | 'currency' | 'rating' | 'reviews' | 'typeFishing'
 > &
   Partial<Pick<Product, 'videoUrl' | 'aiOptimized'>>
 
@@ -15,7 +15,6 @@ export default function ProductCard({
   imageUrl,
   price,
   currency,
-  affiliateUrl,
   rating,
   reviews,
   typeFishing,
@@ -69,7 +68,7 @@ export default function ProductCard({
             {price.toFixed(2)} <span className="text-sm font-semibold text-slate-400">{currency}</span>
           </span>
           <a
-            href={affiliateUrl}
+            href={`/go/${id}`}
             target="_blank"
             rel="noopener noreferrer sponsored"
             className="inline-flex items-center gap-1 text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 px-3 py-2 rounded-lg shadow-sm shadow-emerald-500/20 active:scale-[0.97] transition-all"

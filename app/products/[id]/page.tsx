@@ -152,7 +152,7 @@ export default async function ProductPage({ params }: Params) {
 
             <div className="mt-auto pt-6 space-y-3">
               <a
-                href={product.affiliateUrl}
+                href={`/go/${product.id}`}
                 target="_blank"
                 rel="noopener noreferrer sponsored"
                 className="w-full flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg shadow-emerald-500/20 active:scale-[0.99] transition-all"

@@ -47,6 +47,17 @@ model FishingAdvice {
   @@index([typeFishing])
 }
 
+model ProductClick {
+  id           String   @id @default(cuid())
+  productId    String
+  productTitle String   @default("")
+  typeFishing  String   @default("")
+  createdAt    DateTime @default(now())
+
+  @@index([productId])
+  @@index([createdAt])
+}
+
 model ChatSession {
   id        String   @id @default(cuid())
   userId    String
