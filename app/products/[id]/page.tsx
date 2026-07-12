@@ -62,6 +62,50 @@ export default async function ProductPage({ params }: Params) {
   const modalityLabel = categoryName(taxonomy, product.typeFishing)
   const productCategories = product.categories?.length ? product.categories : [product.typeFishing]
 
+  const specs: { label: string; value: string }[] = [
+    { label: 'Modalidad', value: modalityLabel },
+    { label: 'Categorías', value: productCategories.map((c) => categoryName(taxonomy, c)).join(', ') },
+    { label: 'Valoración media', value: `${product.rating.toFixed(1)} / 5` },
+    { label: 'Unidades vendidas', value: product.reviews.toLocaleString('es-ES') },
+    { label: 'Disponibilidad', value: product.inStock ? 'Disponible' : 'No disponible' },
+  ]
+
+  const faqs: { q: string; a: string }[] = [
+    {
+      q: `¿Para qué tipo de pesca es ideal ${product.title}?`,
+      a: `Está pensado principalmente para ${modalityLabel.toLowerCase()}. Si tienes dudas sobre si encaja con tu técnica o tu nivel, puedes preguntar gratis a nuestro asesor de pesca.`,
+    },
+    {
+      q: '¿El precio incluye el envío?',
+      a: 'El precio mostrado es orientativo. El importe final, los gastos de envío y los plazos dependen de la tienda del vendedor, que es donde se completa la compra.',
+    },
+    {
+      q: '¿Cómo se realiza la compra?',
+      a: 'Al pulsar «Comprar ahora» te llevamos a la tienda del vendedor, donde finalizas el pedido con su proceso de pago y envío. Algunos enlaces son de afiliados.',
+    },
+    {
+      q: '¿Puedo pedir una recomendación antes de comprar?',
+      a: 'Sí. Nuestro asesor de pesca resuelve tus dudas sobre este y otros aparejos y te ayuda a elegir según tu presupuesto y tu modalidad.',
+    },
+  ]
+
+  const faqLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  }
+
+  const trustBadges: { icon: string; label: string }[] = [
+    { icon: '🔒', label: 'Compra 100% segura' },
+    { icon: '📦', label: 'Envío con seguimiento' },
+    { icon: '🎣', label: 'Seleccionado por expertos' },
+    { icon: '💬', label: 'Asesor de pesca gratis' },
+  ]
+
   const breadcrumbLd = breadcrumbJsonLd([
     { name: 'Inicio', url: SITE_URL },
     { name: modalityLabel, url: `${SITE_URL}/categories/${product.typeFishing}` },
@@ -91,6 +135,7 @@ export default async function ProductPage({ params }: Params) {
     <Layout>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
       <div className="max-w-7xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
         <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-8">
           <Link href="/" className="hover:text-accent">Inicio</Link> <span className="mx-1">/</span>{' '}
@@ -193,6 +238,46 @@ export default async function ProductPage({ params }: Params) {
                 Ver todo en {modalityLabel} →
               </Link>
               <p className="font-mono text-[11px] uppercase tracking-wide text-ink/40 text-center">Compra 100% segura · Envío con seguimiento</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Trust badges */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-14">
+          {trustBadges.map((b) => (
+            <div key={b.label} className="flex items-center gap-3 border border-ink/12 rounded-xl bg-paper px-4 py-3">
+              <span className="text-2xl leading-none">{b.icon}</span>
+              <span className="font-mono text-[11px] font-bold uppercase tracking-wide text-ink/70 leading-tight">{b.label}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Details + FAQ */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 mb-20">
+          <div className="space-y-4">
+            <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3">Ficha técnica</h2>
+            <dl className="divide-y divide-ink/10 border border-ink/12 rounded-xl overflow-hidden">
+              {specs.map((s) => (
+                <div key={s.label} className="flex items-baseline justify-between gap-4 px-4 py-3 bg-paper">
+                  <dt className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50 flex-shrink-0">{s.label}</dt>
+                  <dd className="text-sm font-semibold text-ink text-right break-words">{s.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+
+          <div className="space-y-4">
+            <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3">Preguntas frecuentes</h2>
+            <div className="space-y-2">
+              {faqs.map((f) => (
+                <details key={f.q} className="group border border-ink/12 rounded-xl bg-paper px-4 py-3 [&_summary]:list-none">
+                  <summary className="flex items-center justify-between gap-3 cursor-pointer text-sm font-bold text-ink">
+                    {f.q}
+                    <span className="flex-shrink-0 text-accent transition-transform group-open:rotate-45 text-lg leading-none">+</span>
+                  </summary>
+                  <p className="text-sm text-ink/70 leading-relaxed mt-2">{f.a}</p>
+                </details>
+              ))}
             </div>
           </div>
         </div>
