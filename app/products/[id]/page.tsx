@@ -177,11 +177,11 @@ export default async function ProductPage({ params }: Params) {
 
         {related.length > 0 && (
           <div className="space-y-6">
-            <div className="flex items-end justify-between gap-4 border-b border-ink/12 pb-4">
-              <h2 className="font-display uppercase text-3xl md:text-4xl leading-none">Relacionados en {modalityLabel}</h2>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-4 border-b border-ink/12 pb-4">
+              <h2 className="font-display uppercase text-2xl sm:text-3xl md:text-4xl leading-none break-words">Relacionados en {modalityLabel}</h2>
               <Link href={`/categories/${product.typeFishing}`} className="font-mono text-xs font-bold uppercase tracking-widest text-accent hover:underline whitespace-nowrap">Ver toda la categoría →</Link>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {related.map((rp) => (
                 <ProductCard key={rp.id} {...rp} />
               ))}
