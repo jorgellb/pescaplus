@@ -47,7 +47,7 @@ export default function AdvicePage() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [selectedType, setSelectedType] = useState('')
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesRef = useRef<HTMLDivElement>(null)
   const autoAskRef = useRef(false)
 
   useEffect(() => {
@@ -68,8 +68,14 @@ export default function AdvicePage() {
     }
   }, [messages])
 
+  // Keep the CHAT PANEL pinned to the bottom — scroll only its own container,
+  // never the page (scrollIntoView would drag the whole window down on every
+  // streamed token). Skip if the user has scrolled up to read.
   const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const el = messagesRef.current
+    if (!el) return
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 140
+    if (nearBottom) el.scrollTop = el.scrollHeight
   }, [])
 
   useEffect(() => {
@@ -253,7 +259,7 @@ export default function AdvicePage() {
             </div>
           )}
 
-          <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-5 bg-[#eae6db]">
+          <div ref={messagesRef} className="flex-1 overflow-y-auto p-4 md:p-6 space-y-5 bg-[#eae6db]">
             {messages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center gap-4 max-w-sm mx-auto">
                 <span className="text-5xl w-20 h-20 flex items-center justify-center bg-paper border border-ink/15 rounded-xl shadow-hard">🎣</span>
@@ -325,7 +331,6 @@ export default function AdvicePage() {
                     </div>
                   </div>
                 )}
-                <div ref={messagesEndRef} />
               </div>
             )}
           </div>
