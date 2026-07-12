@@ -3,6 +3,7 @@ import type { Product } from '@/types'
 import { fishingLabel } from '@/lib/fishing'
 import { proxiedImage } from '@/lib/img-proxy'
 import ProductImage from './ProductImage'
+import FavoriteButton from './FavoriteButton'
 
 type ProductCardProps = Pick<
   Product,
@@ -23,12 +24,13 @@ export default function ProductCard({
   inStock,
 }: ProductCardProps) {
   const soldOut = inStock === false
+  const src = proxiedImage(imageUrl, title)
   return (
     <div className="group relative flex flex-col h-full bg-paper border border-ink/10 rounded-2xl overflow-hidden shadow-hard hover-shift">
       {/* Image */}
       <div className="relative aspect-square overflow-hidden bg-[#e6e2d6]">
         <ProductImage
-          src={proxiedImage(imageUrl, title)}
+          src={src}
           alt={title}
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 22vw"
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
@@ -47,6 +49,7 @@ export default function ProductCard({
             <span className="bg-ink/85 text-paper text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full backdrop-blur-sm">Agotado</span>
           </div>
         )}
+        <FavoriteButton product={{ id, title, price, currency, imageUrl: src }} className="absolute bottom-2.5 right-2.5 z-20 shadow-sm" />
       </div>
 
       {/* Details */}

@@ -6,13 +6,21 @@ import { usePathname } from 'next/navigation'
 import { FISHING_TYPES } from '@/lib/fishing'
 import CategoryIcon from '@/components/graphics/CategoryIcon'
 import { openAsesor } from '@/lib/asesor-bus'
+import { getFavorites, onFavoritesChanged } from '@/lib/product-history'
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [catOpen, setCatOpen] = useState(false)
   const [names, setNames] = useState<Record<string, string>>({})
+  const [favCount, setFavCount] = useState(0)
   const pathname = usePathname()
   const catRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const update = () => setFavCount(getFavorites().length)
+    update()
+    return onFavoritesChanged(update)
+  }, [])
 
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
@@ -105,6 +113,16 @@ export default function Navbar() {
               />
               <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-ink/50 text-sm pointer-events-none">🔍</span>
             </form>
+            <Link
+              href="/favoritos"
+              aria-label={`Favoritos${favCount > 0 ? ` (${favCount})` : ''}`}
+              className="relative inline-flex items-center justify-center w-10 h-10 border border-ink/15 rounded-xl text-ink hover:bg-ink hover:text-paper transition-colors"
+            >
+              <svg viewBox="0 0 24 24" className="w-5 h-5" fill={favCount > 0 ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 1 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z" /></svg>
+              {favCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-accent text-paper text-[10px] font-bold rounded-full flex items-center justify-center">{favCount}</span>
+              )}
+            </Link>
             {/* Opens the floating chat widget; falls back to the full page if it isn't mounted. */}
             <Link
               href="/advice"
@@ -165,7 +183,9 @@ export default function Navbar() {
           <div className="grid grid-cols-3 gap-2 pt-3">
             <Link href="/mejores" onClick={() => setMobileMenuOpen(false)} className="text-center px-3 py-2.5 text-sm font-bold uppercase border border-ink/15 rounded-xl text-ink">Mejores</Link>
             <Link href="/guias" onClick={() => setMobileMenuOpen(false)} className="text-center px-3 py-2.5 text-sm font-bold uppercase border border-ink/15 rounded-xl text-ink">Guías</Link>
-            <Link href="/advice" onClick={() => setMobileMenuOpen(false)} className="text-center px-3 py-2.5 text-sm font-bold uppercase border border-ink/15 rounded-xl text-ink">Consejos</Link>
+            <Link href="/favoritos" onClick={() => setMobileMenuOpen(false)} className="text-center px-3 py-2.5 text-sm font-bold uppercase border border-ink/15 rounded-xl text-ink">
+              Favoritos{favCount > 0 ? ` (${favCount})` : ''}
+            </Link>
           </div>
           <div className="pt-3 pb-1">
             <Link

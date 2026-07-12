@@ -4,6 +4,9 @@ import Layout from '@/components/Layout'
 import ProductCard from '@/components/ProductCard'
 import ProductGallery from '@/components/ProductGallery'
 import AsesorButton from '@/components/AsesorButton'
+import FavoriteButton from '@/components/FavoriteButton'
+import RecentTracker from '@/components/RecentTracker'
+import RecentlyViewed from '@/components/RecentlyViewed'
 import { getTaxonomy, categoryName } from '@/lib/taxonomy-store'
 import { proxiedImage, absoluteProxiedImage } from '@/lib/img-proxy'
 import { resolveProduct, relatedProducts } from '@/lib/product-service'
@@ -61,6 +64,14 @@ export default async function ProductPage({ params }: Params) {
   const taxonomy = await getTaxonomy()
   const modalityLabel = categoryName(taxonomy, product.typeFishing)
   const productCategories = product.categories?.length ? product.categories : [product.typeFishing]
+
+  const snapshot = {
+    id: product.id,
+    title: product.title,
+    price: product.price,
+    currency: product.currency,
+    imageUrl: proxiedImage(product.imageUrl, product.title),
+  }
 
   const specs: { label: string; value: string }[] = [
     { label: 'Modalidad', value: modalityLabel },
@@ -136,6 +147,7 @@ export default async function ProductPage({ params }: Params) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <RecentTracker {...snapshot} />
       <div className="max-w-7xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
         <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-8">
           <Link href="/" className="hover:text-accent">Inicio</Link> <span className="mx-1">/</span>{' '}
@@ -225,12 +237,15 @@ export default async function ProductPage({ params }: Params) {
                   <span className="font-mono text-[11px] uppercase tracking-wide">Vuelve a consultarlo pronto</span>
                 </div>
               )}
-              <AsesorButton
-                ask={`¿Es buena opción el/la "${product.title}"? ¿Para qué tipo de pesca lo recomiendas y cómo lo uso?`}
-                className="w-full flex items-center justify-center gap-2 bg-paper text-ink px-8 py-3.5 font-bold uppercase text-sm tracking-tight border border-ink/15 rounded-xl hover:bg-ink hover:text-paper transition-colors"
-              >
-                🎣 Preguntar a nuestro asesor
-              </AsesorButton>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <AsesorButton
+                  ask={`¿Es buena opción el/la "${product.title}"? ¿Para qué tipo de pesca lo recomiendas y cómo lo uso?`}
+                  className="w-full flex items-center justify-center gap-2 bg-paper text-ink px-6 py-3.5 font-bold uppercase text-sm tracking-tight border border-ink/15 rounded-xl hover:bg-ink hover:text-paper transition-colors"
+                >
+                  🎣 Preguntar
+                </AsesorButton>
+                <FavoriteButton product={snapshot} variant="full" className="w-full px-6 py-3.5 text-sm" />
+              </div>
               <Link
                 href={`/categories/${product.typeFishing}`}
                 className="block text-center font-mono text-xs font-bold uppercase tracking-widest text-accent hover:underline"
@@ -295,6 +310,10 @@ export default async function ProductPage({ params }: Params) {
             </div>
           </div>
         )}
+
+        <div className="mt-16">
+          <RecentlyViewed excludeId={product.id} />
+        </div>
       </div>
     </Layout>
   )
