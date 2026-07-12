@@ -57,7 +57,9 @@ export default async function ProductPage({ params }: Params) {
   }
 
   const related = await relatedProducts(product)
-  const modalityLabel = categoryName(await getTaxonomy(), product.typeFishing)
+  const taxonomy = await getTaxonomy()
+  const modalityLabel = categoryName(taxonomy, product.typeFishing)
+  const productCategories = product.categories?.length ? product.categories : [product.typeFishing]
 
   const breadcrumbLd = breadcrumbJsonLd([
     { name: 'Inicio', url: SITE_URL },
@@ -131,6 +133,20 @@ export default async function ProductPage({ params }: Params) {
                   dangerouslySetInnerHTML={{ __html: renderDescription(product.description) }}
                 />
               </div>
+
+              {/* Internal linking: product → its categories */}
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/40">Categorías:</span>
+                {productCategories.map((cat) => (
+                  <Link
+                    key={cat}
+                    href={`/categories/${cat}`}
+                    className="px-3 py-1 text-xs font-bold text-ink border border-ink/15 rounded-full hover:bg-ink hover:text-paper transition-colors"
+                  >
+                    {categoryName(taxonomy, cat)}
+                  </Link>
+                ))}
+              </div>
             </div>
 
             <div className="mt-auto pt-8 space-y-3">
@@ -148,6 +164,12 @@ export default async function ProductPage({ params }: Params) {
               >
                 🎣 Preguntar a nuestro asesor
               </Link>
+              <Link
+                href={`/categories/${product.typeFishing}`}
+                className="block text-center font-mono text-xs font-bold uppercase tracking-widest text-accent hover:underline"
+              >
+                Ver todo en {modalityLabel} →
+              </Link>
               <p className="font-mono text-[11px] uppercase tracking-wide text-ink/40 text-center">Compra 100% segura · Envío con seguimiento</p>
             </div>
           </div>
@@ -155,7 +177,10 @@ export default async function ProductPage({ params }: Params) {
 
         {related.length > 0 && (
           <div className="space-y-6">
-            <h2 className="font-display uppercase text-3xl md:text-4xl leading-none border-b border-ink/12 pb-4">Relacionados</h2>
+            <div className="flex items-end justify-between gap-4 border-b border-ink/12 pb-4">
+              <h2 className="font-display uppercase text-3xl md:text-4xl leading-none">Relacionados en {modalityLabel}</h2>
+              <Link href={`/categories/${product.typeFishing}`} className="font-mono text-xs font-bold uppercase tracking-widest text-accent hover:underline whitespace-nowrap">Ver toda la categoría →</Link>
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {related.map((rp) => (
                 <ProductCard key={rp.id} {...rp} />

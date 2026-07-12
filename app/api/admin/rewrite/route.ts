@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { isRequestAuthenticated } from '@/lib/admin-auth'
-import { rewriteProductCopy, rewriteGuideCopy } from '@/lib/nvidia-ai'
+import { rewriteProductCopy, rewriteGuideCopy, polishProductSeo } from '@/lib/nvidia-ai'
 
 const schema = z.discriminatedUnion('kind', [
   z.object({
@@ -9,6 +9,14 @@ const schema = z.discriminatedUnion('kind', [
     instruction: z.string().min(2).max(600),
     title: z.string().max(300),
     description: z.string().max(4000),
+    seoDescription: z.string().max(400).optional(),
+    typeFishing: z.string().max(40).optional(),
+  }),
+  z.object({
+    kind: z.literal('product-seo'),
+    title: z.string().max(300),
+    description: z.string().max(4000),
+    seoTitle: z.string().max(200).optional(),
     seoDescription: z.string().max(400).optional(),
     typeFishing: z.string().max(40).optional(),
   }),
@@ -36,6 +44,10 @@ export async function POST(request: NextRequest) {
   try {
     if (parsed.data.kind === 'product') {
       const draft = await rewriteProductCopy(parsed.data)
+      return NextResponse.json({ success: true, draft })
+    }
+    if (parsed.data.kind === 'product-seo') {
+      const draft = await polishProductSeo(parsed.data)
       return NextResponse.json({ success: true, draft })
     }
     const draft = await rewriteGuideCopy({ ...parsed.data, excerpt: parsed.data.excerpt ?? '' })

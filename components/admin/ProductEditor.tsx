@@ -76,6 +76,7 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
   const [aiNote, setAiNote] = useState('')
   const [rewritePrompt, setRewritePrompt] = useState('')
   const [rewriteLoading, setRewriteLoading] = useState(false)
+  const [polishLoading, setPolishLoading] = useState(false)
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((f) => ({ ...f, [key]: value }))
@@ -229,6 +230,47 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
     }
   }
 
+  const polishSeo = async () => {
+    if (!form.title.trim()) return
+    setPolishLoading(true)
+    setAiNote('')
+    setError('')
+    try {
+      const res = await fetch('/api/admin/rewrite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          kind: 'product-seo',
+          title: form.title,
+          description: form.description,
+          seoTitle: form.seoTitle,
+          seoDescription: form.seoDescription,
+          typeFishing: form.typeFishing,
+        }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        const d = data.draft
+        setForm((f) => ({
+          ...f,
+          title: d.title ?? f.title,
+          seoTitle: d.seoTitle ?? f.seoTitle,
+          description: d.description ?? f.description,
+          seoDescription: d.seoDescription ?? f.seoDescription,
+        }))
+        setAiNote(
+          d.generatedBy === 'nvidia'
+            ? '✨ Ficha pulida para SEO: título limpio (sin vendedores), descripción y metadatos optimizados. Revisa antes de guardar.'
+            : 'Configura NVIDIA para pulir con IA (no se ha cambiado nada).',
+        )
+      } else setError(data.error || 'No se pudo pulir la ficha')
+    } catch {
+      setError('Error de red al pulir SEO')
+    } finally {
+      setPolishLoading(false)
+    }
+  }
+
   const save = async () => {
     setError('')
     const price = parseFloat(form.price)
@@ -337,6 +379,17 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
                 </button>
               </div>
               <p className="text-[10px] text-ink/50">Toma el título, la descripción y la meta actuales y los reescribe según tu indicación.</p>
+            </div>
+
+            <div className="border-t border-accent/20 pt-3">
+              <button
+                onClick={polishSeo}
+                disabled={polishLoading || !form.title.trim()}
+                className="w-full bg-accent text-paper hover:opacity-90 font-bold text-sm px-4 py-2.5 rounded-lg active:scale-[0.99] transition-all disabled:opacity-40"
+              >
+                {polishLoading ? 'Puliendo SEO…' : '✨ Pulir SEO (limpia el título, describe y optimiza)'}
+              </button>
+              <p className="text-[10px] text-ink/50 mt-1.5">Un clic: quita nombres de vendedor del título y genera título, descripción y metadatos optimizados para SEO.</p>
             </div>
 
             {aiNote && <p className="text-[11px] text-accent">{aiNote}</p>}

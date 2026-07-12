@@ -759,3 +759,66 @@ Devuelve SOLO JSON válido: {"title": string, "excerpt": string (1-2 frases), "c
     generatedBy: 'nvidia',
   }
 }
+
+export interface PolishedProduct {
+  title: string
+  seoTitle: string
+  description: string
+  seoDescription: string
+  generatedBy: 'nvidia' | 'offline'
+}
+
+/**
+ * SEO polish for a product: cleans the title (strips marketplace seller/brand
+ * names), and produces an SEO-optimised title, meta title, description and meta
+ * description. Never throws.
+ */
+export async function polishProductSeo(input: {
+  title: string
+  description: string
+  seoTitle?: string
+  seoDescription?: string
+  typeFishing?: string
+}): Promise<PolishedProduct> {
+  const current = {
+    title: input.title,
+    seoTitle: input.seoTitle ?? '',
+    description: input.description,
+    seoDescription: input.seoDescription ?? '',
+  }
+  if (!isApiConfigured()) return { ...current, generatedBy: 'offline' }
+
+  const prompt = `Eres un especialista en SEO para una tienda de pesca online en España. Revisa y PULE esta ficha de producto.
+
+FICHA ACTUAL:
+- Título: ${input.title}
+- Descripción: ${input.description}
+${input.typeFishing ? `- Categoría: ${fishingLabel(input.typeFishing)}` : ''}
+
+TAREAS:
+1. TÍTULO: ELIMINA nombres de marca o de vendedor propios de marketplaces (p. ej. DEUKIO, Sougayilang, Zukibo, Lixada, Noeby, DNDYUJU, Rooblinos, SEASIR, JOSBY, Proberos, Hirisi, Anatono…) y códigos internos raros. Deja un título limpio, natural y optimizado para SEO que describa el producto (tipo + característica/medida clave + uso), en español, MÁXIMO 65 caracteres, sin mayúsculas gritonas.
+2. DESCRIPCIÓN: reescribe una descripción PERFECTA para SEO: 3-5 frases con beneficios, usos y palabras clave naturales de pesca (sin repetir en exceso). Puedes usar **negrita** para conceptos clave.
+3. seoTitle: meta título para Google de ~60 caracteres con la palabra clave principal.
+4. seoDescription: meta descripción de 140-160 caracteres con llamada a la acción.
+
+${BRAND_RULE}
+Devuelve SOLO JSON válido: {"title": string, "seoTitle": string, "description": string, "seoDescription": string}`
+
+  const content = await callNvidia(
+    [
+      { role: 'system', content: 'Eres un experto SEO que pule fichas de producto en español y responde solo con JSON válido.' },
+      { role: 'user', content: prompt },
+    ],
+    { maxTokens: 900, temperature: 0.6 },
+  )
+  const parsed = content ? extractJson(content) : null
+  if (!parsed) return { ...current, generatedBy: 'offline' }
+  const title = asString(parsed.title, current.title).slice(0, 140)
+  return {
+    title,
+    seoTitle: asString(parsed.seoTitle, title).slice(0, 90),
+    description: asString(parsed.description, current.description).slice(0, 1200),
+    seoDescription: asString(parsed.seoDescription, current.seoDescription).slice(0, 165),
+    generatedBy: 'nvidia',
+  }
+}
