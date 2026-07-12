@@ -73,12 +73,16 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     const { messages, typeFishing, stream } = parsed.data
 
-    // Tag the last user message with the selected modality so both the live model
-    // and the offline fallback can tailor the answer.
+    // Tag the last user message with the selected modality and reinforce Spanish
+    // right where the model reads last (helps the weaker fallback models never
+    // drift into English or mix languages).
     const lastUserIndex = messages.map((m) => m.role).lastIndexOf('user')
     const formattedMessages = messages.map((msg, index) =>
-      index === lastUserIndex && typeFishing
-        ? { ...msg, content: `[Modalidad de pesca: ${typeFishing}] ${msg.content}` }
+      index === lastUserIndex
+        ? {
+            ...msg,
+            content: `${typeFishing ? `[Modalidad de pesca: ${typeFishing}] ` : ''}${msg.content}\n\n(Responde exclusivamente en español, sin nada de inglés.)`,
+          }
         : msg,
     )
 
