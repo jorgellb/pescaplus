@@ -4,6 +4,7 @@ import { chatWithFishingExpert, streamFishingExpert } from '@/lib/nvidia-ai'
 import type { ChatApiResponse, ChatMessage, ChatProductRef, Product } from '@/types'
 import { fishingLabel } from '@/lib/fishing'
 import { retrieveProducts } from '@/lib/retrieval'
+import { rateLimit, clientIp, tooManyRequests } from '@/lib/rate-limit'
 
 /** Trim retrieved products to the light shape sent to the chat UI (max 3). */
 function toRefs(products: Product[]): ChatProductRef[] {
@@ -63,6 +64,10 @@ const chatRequestSchema = z.object({
 
 export async function POST(request: NextRequest): Promise<Response> {
   try {
+    // Throttle the AI endpoint per IP — each call costs money upstream.
+    const limit = rateLimit(`chat:${clientIp(request)}`, 20, 60_000)
+    if (!limit.ok) return tooManyRequests(limit.retryAfter)
+
     const parsed = chatRequestSchema.safeParse(await request.json())
     if (!parsed.success) {
       return NextResponse.json(
@@ -106,6 +111,11 @@ export async function POST(request: NextRequest): Promise<Response> {
 
 export async function GET(request: NextRequest): Promise<NextResponse<ChatApiResponse>> {
   try {
+    const limit = rateLimit(`chat:${clientIp(request)}`, 20, 60_000)
+    if (!limit.ok) {
+      return NextResponse.json({ success: false, error: 'Demasiadas solicitudes. Inténtalo en un momento.' }, { status: 429 })
+    }
+
     const typeFishing = new URL(request.url).searchParams.get('typeFishing') || 'general'
     const prompt = `Dame consejos para empezar en la modalidad de ${fishingLabel(
       typeFishing,
