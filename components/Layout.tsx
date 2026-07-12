@@ -12,9 +12,10 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-paper text-ink flex flex-col">
+      <a href="#contenido" className="skip-link">Saltar al contenido</a>
       <Navbar />
 
-      <main className="flex-1 w-full">{children}</main>
+      <main id="contenido" className="flex-1 w-full">{children}</main>
 
       <ChatWidget />
 

@@ -247,7 +247,7 @@ export default function ChatWidget() {
           </div>
 
           {/* Messages */}
-          <div ref={messagesRef} className="flex-1 overflow-y-auto p-3 space-y-3 bg-[#eae6db]">
+          <div ref={messagesRef} aria-live="polite" className="flex-1 overflow-y-auto p-3 space-y-3 bg-[#eae6db]">
             {messages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center gap-3 px-2">
                 <span className="text-4xl w-16 h-16 flex items-center justify-center bg-paper border border-ink/15 rounded-2xl shadow-hard">🎣</span>
