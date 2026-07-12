@@ -8,7 +8,7 @@ import { decodeEntities } from '@/lib/text'
  * This keeps generated data separate from the query helpers below.
  */
 
-type SeedOptional = 'images' | 'imageAlts' | 'videoUrl' | 'seoTitle' | 'seoDescription' | 'aiOptimized' | 'subcategory' | 'categories'
+type SeedOptional = 'images' | 'imageAlts' | 'videoUrl' | 'seoTitle' | 'seoDescription' | 'aiOptimized' | 'subcategory' | 'subcategories' | 'categories'
 export type CatalogSeed = Omit<Product, SeedOptional> & Partial<Pick<Product, SeedOptional>>
 
 /** Fill media/SEO defaults so catalog seeds satisfy the full Product shape. */
@@ -18,7 +18,8 @@ export function withProductDefaults(p: CatalogSeed): Product {
     ...p,
     title: decodeEntities(p.title),
     description: decodeEntities(p.description),
-    subcategory: p.subcategory ?? '',
+    subcategory: p.subcategory ?? (p.subcategories?.[0] ?? ''),
+    subcategories: p.subcategories?.length ? p.subcategories : (p.subcategory ? [p.subcategory] : []),
     categories: p.categories?.length ? p.categories : [p.typeFishing],
     images,
     imageAlts: (p.imageAlts?.length ? p.imageAlts : []).map(decodeEntities),

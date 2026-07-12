@@ -35,7 +35,7 @@ export default function CategoryBrowser({
   // Subcategory chips: only those with at least one product in the full category.
   const subFilters = useMemo(() => {
     const counts = new Map<string, number>()
-    for (const p of initialProducts) if (p.subcategory) counts.set(p.subcategory, (counts.get(p.subcategory) ?? 0) + 1)
+    for (const p of initialProducts) for (const sub of p.subcategories) counts.set(sub, (counts.get(sub) ?? 0) + 1)
     return subcategories
       .filter((s) => counts.has(s.id))
       .map((s) => ({ ...s, count: counts.get(s.id) ?? 0 }))

@@ -25,8 +25,10 @@ export interface Product {
   typeFishing: FishingTypeId | string
   /** All main categories this product belongs to (includes the primary `typeFishing`). */
   categories: string[]
-  /** Subcategory id within the primary category (see SUBCATEGORIES); '' if unset. */
+  /** Primary subcategory id within the primary category (= subcategories[0]); '' if unset. */
   subcategory: string
+  /** All subcategory placements (ids). A product can live in several subcategories. */
+  subcategories: string[]
   rating: number
   reviews: number
   inStock: boolean

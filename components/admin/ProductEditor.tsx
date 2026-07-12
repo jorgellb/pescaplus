@@ -24,7 +24,7 @@ type FormState = {
   title: string
   typeFishing: string
   categories: string[]
-  subcategory: string
+  subcategories: string[]
   price: string
   currency: string
   rating: string
@@ -45,7 +45,7 @@ function toForm(p: Product | null): FormState {
     title: p?.title ?? '',
     typeFishing: primary,
     categories: p?.categories?.length ? [...new Set([primary, ...p.categories])] : [primary],
-    subcategory: p?.subcategory ?? '',
+    subcategories: p?.subcategories?.length ? p.subcategories : (p?.subcategory ? [p.subcategory] : []),
     price: p ? String(p.price) : '',
     currency: p?.currency ?? 'EUR',
     rating: p ? String(p.rating) : '4.6',
@@ -90,7 +90,9 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
       .catch(() => {})
   }, [])
 
-  const primarySubs = tax.find((c) => c.id === form.typeFishing)?.subcategories ?? []
+  const subsOf = (catId: string) => tax.find((c) => c.id === catId)?.subcategories ?? []
+  // Subcategory ids valid for the currently selected categories.
+  const allowedSubs = (cats: string[]) => new Set(cats.flatMap((c) => subsOf(c).map((s) => s.id)))
 
   const toggleCategory = (id: string) =>
     setForm((f) => {
@@ -99,8 +101,10 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
       if (categories.length === 0) categories = [id] // never leave it empty
       // If the primary was removed, promote the first remaining category.
       const typeFishing = categories.includes(f.typeFishing) ? f.typeFishing : categories[0]
-      const subcategory = typeFishing === f.typeFishing ? f.subcategory : ''
-      return { ...f, categories, typeFishing, subcategory }
+      // Drop subcategories that no longer belong to any selected category.
+      const allowed = allowedSubs(categories)
+      const subcategories = f.subcategories.filter((s) => allowed.has(s))
+      return { ...f, categories, typeFishing, subcategories }
     })
 
   const setPrimary = (id: string) =>
@@ -108,7 +112,14 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
       ...f,
       typeFishing: id,
       categories: f.categories.includes(id) ? f.categories : [...f.categories, id],
-      subcategory: '',
+    }))
+
+  const toggleSub = (subId: string) =>
+    setForm((f) => ({
+      ...f,
+      subcategories: f.subcategories.includes(subId)
+        ? f.subcategories.filter((s) => s !== subId)
+        : [...f.subcategories, subId],
     }))
 
   // --- image manager ---
@@ -294,7 +305,7 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
       category: 'fishing',
       typeFishing: form.typeFishing,
       categories: [...new Set([form.typeFishing, ...form.categories])],
-      subcategory: form.subcategory,
+      subcategories: form.subcategories,
       rating: parseFloat(form.rating) || 0,
       reviews: parseInt(form.reviews, 10) || 0,
       inStock: form.inStock,
@@ -405,24 +416,13 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
                 <label className={labelCls}>Título</label>
                 <input value={form.title} onChange={(e) => set('title', e.target.value)} className={field} />
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className={labelCls}>Categoría principal</label>
-                  <select value={form.typeFishing} onChange={(e) => setPrimary(e.target.value)} className={field}>
-                    {tax.map((t) => (
-                      <option key={t.id} value={t.id}>{t.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-1">
-                  <label className={labelCls}>Subcategoría</label>
-                  <select value={form.subcategory} onChange={(e) => set('subcategory', e.target.value)} className={field}>
-                    <option value="">— Sin subcategoría —</option>
-                    {primarySubs.map((s) => (
-                      <option key={s.id} value={s.id}>{s.name}</option>
-                    ))}
-                  </select>
-                </div>
+              <div className="space-y-1">
+                <label className={labelCls}>Categoría principal (define la URL y las migas)</label>
+                <select value={form.typeFishing} onChange={(e) => setPrimary(e.target.value)} className={field}>
+                  {tax.map((t) => (
+                    <option key={t.id} value={t.id}>{t.name}</option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>
@@ -459,6 +459,42 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
                 <span className="text-sm text-ink/50">Disponible</span>
               </label>
             </div>
+          </div>
+
+          {/* Subcategories (multi, per selected category) */}
+          <div className="space-y-2">
+            <label className={labelCls}>Subcategorías (marca dónde va, dentro de cada categoría)</label>
+            <div className="space-y-2.5 rounded-xl border border-ink/12 bg-paper p-3">
+              {form.categories.map((catId) => {
+                const cat = tax.find((c) => c.id === catId)
+                const subs = cat?.subcategories ?? []
+                if (subs.length === 0) return null
+                return (
+                  <div key={catId} className="flex flex-wrap items-center gap-1.5">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-ink/40 w-full sm:w-28 sm:flex-shrink-0">{cat?.name}</span>
+                    {subs.map((s) => {
+                      const on = form.subcategories.includes(s.id)
+                      return (
+                        <button
+                          key={s.id}
+                          type="button"
+                          onClick={() => toggleSub(s.id)}
+                          className={`px-2.5 py-1 text-[11px] font-bold rounded-lg border transition-colors ${
+                            on ? 'bg-accent text-paper border-accent' : 'bg-white text-ink/60 border-ink/20 hover:border-ink/40'
+                          }`}
+                        >
+                          {s.name}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )
+              })}
+              {form.categories.every((c) => (tax.find((t) => t.id === c)?.subcategories.length ?? 0) === 0) && (
+                <p className="text-[11px] text-ink/40">Las categorías seleccionadas no tienen subcategorías.</p>
+              )}
+            </div>
+            <p className="text-[10px] text-ink/50">Puedes marcar varias. El producto aparecerá en la página de cada subcategoría marcada.</p>
           </div>
 
           {/* Numeric */}

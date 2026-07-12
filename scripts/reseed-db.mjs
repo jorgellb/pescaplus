@@ -23,14 +23,15 @@ async function run() {
     for (const p of products) {
       await client.query(
         `INSERT INTO "Product"
-          (id,"aliexpressId",title,description,"imageUrl",images,"videoUrl",price,currency,"affiliateUrl",category,"typeFishing",rating,reviews,"inStock","seoDescription","aiOptimized","subcategory","categories","updatedAt")
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,now())`,
+          (id,"aliexpressId",title,description,"imageUrl",images,"videoUrl",price,currency,"affiliateUrl",category,"typeFishing",rating,reviews,"inStock","seoDescription","aiOptimized","subcategory","categories","subcategories","updatedAt")
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,now())`,
         [
           p.id, p.sku, p.title, p.description, p.imageUrl,
           p.images ?? [], p.videoUrl ?? '', p.price, p.currency, p.affiliateUrl,
           p.category ?? 'fishing', p.typeFishing, p.rating ?? 0, p.reviews ?? 0,
           p.inStock ?? true, p.seoDescription ?? '', p.aiOptimized ?? false, p.subcategory ?? '',
           (p.categories?.length ? p.categories : [p.typeFishing]),
+          (p.subcategories?.length ? p.subcategories : (p.subcategory ? [p.subcategory] : [])),
         ],
       )
     }

@@ -54,6 +54,7 @@ const productInputSchema = z.object({
   typeFishing: z.string().min(1).max(40),
   categories: z.array(z.string().max(40)).max(11).optional(),
   subcategory: z.string().max(40).optional(),
+  subcategories: z.array(z.string().max(40)).max(20).optional(),
   rating: z.number().min(0).max(5).optional(),
   reviews: z.number().int().min(0).optional(),
   inStock: z.boolean().optional(),

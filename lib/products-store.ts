@@ -30,6 +30,7 @@ export type ProductInput = {
   typeFishing: string
   categories?: string[]
   subcategory?: string
+  subcategories?: string[]
   rating?: number
   reviews?: number
   inStock?: boolean
@@ -113,7 +114,8 @@ function applyInput(input: ProductInput, id: string): Product {
     typeFishing: input.typeFishing,
     // Ensure the primary category is always part of the categories set (deduped).
     categories: [...new Set([input.typeFishing, ...(input.categories ?? [])].filter(Boolean))],
-    subcategory: input.subcategory?.trim() || '',
+    subcategory: (input.subcategories?.filter(Boolean)[0] ?? input.subcategory ?? '').trim(),
+    subcategories: [...new Set((input.subcategories?.length ? input.subcategories : (input.subcategory ? [input.subcategory] : [])).filter(Boolean))],
     rating: input.rating ?? 0,
     reviews: input.reviews ?? 0,
     inStock: input.inStock ?? true,
@@ -163,7 +165,8 @@ function toProduct(row: any): Product {
     category: row.category,
     typeFishing: row.typeFishing,
     categories: row.categories?.length ? row.categories : [row.typeFishing],
-    subcategory: row.subcategory ?? '',
+    subcategory: row.subcategory ?? (row.subcategories?.[0] ?? ''),
+    subcategories: row.subcategories?.length ? row.subcategories : (row.subcategory ? [row.subcategory] : []),
     rating: row.rating,
     reviews: row.reviews,
     inStock: row.inStock,

@@ -22,7 +22,8 @@ model Product {
   category    String
   typeFishing String   // primary category (spinning, flyfishing, carp, etc.)
   categories  String[] @default([]) // all main categories (includes typeFishing)
-  subcategory String   @default("") // gear/technique within typeFishing (see SUBCATEGORIES)
+  subcategory String   @default("") // primary subcategory (= subcategories[0])
+  subcategories String[] @default([]) // all subcategory placements
   rating      Float    @default(0)
   reviews     Int      @default(0)
   inStock     Boolean  @default(true)

@@ -39,12 +39,12 @@ describe('catalog integrity', () => {
     }
   })
 
-  it('assigns every product a valid subcategory of its category', () => {
+  it('assigns every product valid subcategories within its categories', () => {
     for (const p of CATALOG) {
-      expect(
-        isValidSubcategory(p.typeFishing, p.subcategory),
-        `${p.id} -> ${p.typeFishing}/${p.subcategory}`,
-      ).toBe(true)
+      for (const sub of p.subcategories) {
+        const ok = p.categories.some((c) => isValidSubcategory(c, sub))
+        expect(ok, `${p.id} -> ${sub}`).toBe(true)
+      }
     }
   })
 })

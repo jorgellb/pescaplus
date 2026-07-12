@@ -20,11 +20,15 @@ export async function generateStaticParams() {
   const seen = new Set<string>()
   const params: { category: string; subcategory: string }[] = []
   for (const p of products) {
-    if (!p.subcategory || !isValidSubcategory(p.typeFishing, p.subcategory)) continue
-    const key = `${p.typeFishing}/${p.subcategory}`
-    if (seen.has(key)) continue
-    seen.add(key)
-    params.push({ category: p.typeFishing, subcategory: p.subcategory })
+    for (const cat of p.categories) {
+      for (const sub of p.subcategories) {
+        if (!isValidSubcategory(cat, sub)) continue
+        const key = `${cat}/${sub}`
+        if (seen.has(key)) continue
+        seen.add(key)
+        params.push({ category: cat, subcategory: sub })
+      }
+    }
   }
   return params
 }
@@ -56,7 +60,7 @@ export default async function SubcategoryPage({ params }: Params) {
   const sub = subs.find((s) => s.id === subcategory)
   if (!sub) notFound()
 
-  const products = ranked.filter((p) => p.subcategory === subcategory)
+  const products = ranked.filter((p) => p.subcategories.includes(subcategory))
   const description = `${sub.name} para ${catName.toLowerCase()}. ${fishingType.tagline} Encuentra el modelo ideal al mejor precio y con envío rápido.`
 
   const breadcrumbLd = breadcrumbJsonLd([

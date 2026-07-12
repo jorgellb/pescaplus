@@ -48,16 +48,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }))
     const seen = new Set<string>()
     for (const p of products) {
-      if (!p.subcategory || !isValidSubcategory(p.typeFishing, p.subcategory)) continue
-      const key = `${p.typeFishing}/${p.subcategory}`
-      if (seen.has(key)) continue
-      seen.add(key)
-      subcategoryRoutes.push({
-        url: `${base}/categories/${p.typeFishing}/${p.subcategory}`,
-        lastModified: now,
-        changeFrequency: 'weekly',
-        priority: 0.75,
-      })
+      for (const cat of p.categories) {
+        for (const sub of p.subcategories) {
+          if (!isValidSubcategory(cat, sub)) continue
+          const key = `${cat}/${sub}`
+          if (seen.has(key)) continue
+          seen.add(key)
+          subcategoryRoutes.push({
+            url: `${base}/categories/${cat}/${sub}`,
+            lastModified: now,
+            changeFrequency: 'weekly',
+            priority: 0.75,
+          })
+        }
+      }
     }
   } catch {
     /* store unavailable — ship static + category routes only */

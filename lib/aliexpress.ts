@@ -132,6 +132,7 @@ function normalize(raw: RawAliProduct, typeFishing: string): Product {
     typeFishing,
     categories: [typeFishing],
     subcategory: '',
+    subcategories: [],
     rating: Number.isFinite(rate) ? Math.min(rate / 20, 5) : 0,
     reviews: raw.lastest_volume ?? 0,
     inStock: true,
