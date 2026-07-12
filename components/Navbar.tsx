@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { FISHING_TYPES } from '@/lib/fishing'
 import CategoryIcon from '@/components/graphics/CategoryIcon'
+import { openAsesor } from '@/lib/asesor-bus'
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -104,8 +105,10 @@ export default function Navbar() {
               />
               <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-ink/50 text-sm pointer-events-none">🔍</span>
             </form>
+            {/* Opens the floating chat widget; falls back to the full page if it isn't mounted. */}
             <Link
               href="/advice"
+              onClick={(e) => { if (openAsesor()) e.preventDefault() }}
               className="inline-flex items-center gap-1.5 bg-ink text-paper px-4 py-2.5 text-sm font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift hover:bg-accent hover:border-accent whitespace-nowrap"
             >
               🎣 Asesor
@@ -165,7 +168,11 @@ export default function Navbar() {
             <Link href="/advice" onClick={() => setMobileMenuOpen(false)} className="text-center px-3 py-2.5 text-sm font-bold uppercase border border-ink/15 rounded-xl text-ink">Consejos</Link>
           </div>
           <div className="pt-3 pb-1">
-            <Link href="/advice" onClick={() => setMobileMenuOpen(false)} className="w-full text-center flex justify-center items-center gap-2 bg-ink text-paper px-4 py-3 font-bold uppercase text-sm border border-ink/15 rounded-xl">
+            <Link
+              href="/advice"
+              onClick={(e) => { setMobileMenuOpen(false); if (openAsesor()) e.preventDefault() }}
+              className="w-full text-center flex justify-center items-center gap-2 bg-ink text-paper px-4 py-3 font-bold uppercase text-sm border border-ink/15 rounded-xl"
+            >
               🎣 Asesor de pesca
             </Link>
           </div>

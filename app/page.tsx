@@ -5,6 +5,7 @@ import Marquee from '@/components/Marquee'
 import ProductCard from '@/components/ProductCard'
 import ProductImage from '@/components/ProductImage'
 import CategoryIcon from '@/components/graphics/CategoryIcon'
+import AsesorButton from '@/components/AsesorButton'
 import { FISHING_TYPES } from '@/lib/fishing'
 import { listProducts } from '@/lib/products-store'
 import { listGuides } from '@/lib/guides-store'
@@ -97,9 +98,9 @@ export default async function Home() {
               <Link href="/categories/canas" className="bg-ink text-paper px-7 py-4 text-sm font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift hover:bg-accent hover:border-accent">
                 Ver catálogo →
               </Link>
-              <Link href="/advice" className="bg-paper text-ink px-7 py-4 text-sm font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift">
+              <AsesorButton className="bg-paper text-ink px-7 py-4 text-sm font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift">
                 Asesor de pesca
-              </Link>
+              </AsesorButton>
             </div>
           </div>
 

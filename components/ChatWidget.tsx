@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import ProductImage from '@/components/ProductImage'
 import { toSafeHtml } from '@/lib/chat-format'
+import { onOpenAsesor } from '@/lib/asesor-bus'
 import type { ChatMessage, ChatProductRef } from '@/types'
 
 type Message = { role: 'user' | 'assistant'; content: string; products?: ChatProductRef[] }
@@ -62,7 +63,10 @@ export default function ChatWidget() {
     if (open) inputRef.current?.focus()
   }, [open])
 
-  // Deep-link: `#asesor` (e.g. from a link) opens the assistant.
+  // Open on request from any button (navbar/footer) via the shared bus…
+  useEffect(() => onOpenAsesor(() => setOpen(true)), [])
+
+  // …or from a `#asesor` deep-link.
   useEffect(() => {
     const openFromHash = () => {
       if (window.location.hash === '#asesor') setOpen(true)

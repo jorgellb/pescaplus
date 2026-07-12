@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import Layout from '@/components/Layout'
 import ProductImage from '@/components/ProductImage'
 import CategoryIcon from '@/components/graphics/CategoryIcon'
+import AsesorButton from '@/components/AsesorButton'
 import { getRoundup, roundupSlugs, ROUNDUP_YEAR } from '@/lib/roundups'
 import { getFishingType } from '@/lib/fishing'
 import { SITE_URL, absoluteUrl, breadcrumbJsonLd } from '@/lib/seo'
@@ -103,7 +104,7 @@ export default async function RoundupPage({ params }: Params) {
             <Link href={`/categories/${slug}`} className="inline-flex items-center gap-2 bg-ink text-paper px-5 py-3 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift">
               <CategoryIcon id={type.id} className="w-4 h-4" strokeWidth={1.9} /> Ver toda la categoría
             </Link>
-            <Link href="/advice" className="bg-paper text-ink px-5 py-3 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift">🎣 Asesor de pesca</Link>
+            <AsesorButton className="bg-paper text-ink px-5 py-3 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift">🎣 Asesor de pesca</AsesorButton>
           </div>
         </div>
       </section>
