@@ -6,7 +6,7 @@
   --accent: #0f766e;
   /* Font families are self-hosted via next/font (see app/layout.tsx). */
   --font-sans: var(--font-grotesk), system-ui, sans-serif;
-  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  --font-display: var(--font-oswald), "Arial Narrow", system-ui, sans-serif;
   --font-mono: var(--font-mono-custom), ui-monospace, monospace;
   /* Hairline rule colour for editorial borders/dividers. */
   --line: color-mix(in srgb, var(--ink) 14%, var(--paper));
@@ -38,11 +38,10 @@ h1, h2, h3, h4, p, a, span, li {
   overflow-wrap: break-word;
 }
 
-/* Editorial display headings (Fraunces serif) */
+/* Condensed display headings (Oswald) */
 .font-display {
   font-family: var(--font-display);
-  letter-spacing: -0.015em;
-  font-optical-sizing: auto;
+  letter-spacing: 0.005em;
   font-weight: 600;
 }
 
