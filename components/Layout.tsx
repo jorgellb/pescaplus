@@ -44,8 +44,13 @@ export default function Layout({ children }: LayoutProps) {
             </div>
 
             <div className="lg:col-span-3">
-              <h4 className="font-mono text-[11px] font-bold uppercase tracking-widest text-paper/50 mb-4">Aviso</h4>
-              <p className="text-xs text-paper/60 leading-relaxed">
+              <h4 className="font-mono text-[11px] font-bold uppercase tracking-widest text-paper/50 mb-4">Ayuda</h4>
+              <ul className="space-y-2 text-sm font-bold uppercase tracking-tight">
+                <li><Link href="/contacto" className="hover:text-accent transition-colors">Contacto</Link></li>
+                <li><Link href="/guias" className="hover:text-accent transition-colors">Guías</Link></li>
+                <li><Link href="/advice" className="hover:text-accent transition-colors">Asesor de pesca</Link></li>
+              </ul>
+              <p className="text-xs text-paper/60 leading-relaxed mt-4">
                 Algunos enlaces son de afiliados: podemos recibir una pequeña comisión por
                 las compras, sin ningún coste adicional para ti.
               </p>
@@ -54,9 +59,10 @@ export default function Layout({ children }: LayoutProps) {
 
           <div className="mt-12 pt-6 border-t border-paper/20 flex flex-col md:flex-row justify-between items-center gap-3 font-mono text-[11px] uppercase tracking-widest text-paper/50">
             <p>&copy; {currentYear} PescaPlus</p>
-            <div className="flex gap-6">
-              <Link href="/guias" className="hover:text-accent transition-colors">Guías</Link>
-              <Link href="/advice" className="hover:text-accent transition-colors">Asesor de pesca</Link>
+            <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
+              <Link href="/aviso-legal" className="hover:text-accent transition-colors">Aviso legal</Link>
+              <Link href="/privacidad" className="hover:text-accent transition-colors">Privacidad</Link>
+              <Link href="/cookies" className="hover:text-accent transition-colors">Cookies</Link>
               <Link href="/admin" className="hover:text-accent transition-colors">Admin</Link>
             </div>
           </div>

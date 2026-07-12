@@ -93,3 +93,15 @@ model ChatSession {
 
   @@index([userId])
 }
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String   @default("")
+  email     String   @default("")
+  subject   String   @default("")
+  message   String
+  handled   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
