@@ -284,8 +284,8 @@ export const CATALOG_SEED: CatalogSeed[] = [
   {
     "id": "zukibo-sedal-de-pesca-multifilamento-japones-resistente-y-fi",
     "sku": "1005007659815170",
-    "title": "Zukibo Sedal de Pesca Multifilamento Japones - Resistente y Fino",
-    "description": "Zukibo sedal de pesca multifilamento japonés, resistente y fino, ideal para pesca de anzuelos y tirolinas. Fabricado con fibra de rendimiento y PE, ofrece una excelente acción y resistencia a la abrasión.",
+    "title": "Sedal de pesca multifilamento japonés, resistente y fino",
+    "description": "sedal de pesca multifilamento japonés, resistente y fino, ideal para pesca de anzuelos y tirolinas. Fabricado con fibra de rendimiento y PE, ofrece una excelente acción y resistencia a la abrasión.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Sca229b86def54e24bf912e0505fc4986A.jpg",
     "images": [
       "https://ae-pic-a1.aliexpress-media.com/kf/Sca229b86def54e24bf912e0505fc4986A.jpg",
@@ -305,9 +305,9 @@ export const CATALOG_SEED: CatalogSeed[] = [
     "rating": 4.9,
     "reviews": 2455,
     "inStock": true,
-    "seoDescription": "Compra tu sedal de pesca multifilamento japonés Zukibo en nuestra tienda online. Resistente y fino, ideal para pesca de anzuelos y tirolinas. Fabricado con fibra de ",
+    "seoDescription": "Compra tu sedal de pesca multifilamento japonés en nuestra tienda online. Resistente y fino, ideal para pesca de anzuelos y tirolinas. Fabricado con fibra de",
     "aiOptimized": true,
-    "seoTitle": "Zukibo Sedal de Pesca Multifilamento Japones: Resistente y Fino"
+    "seoTitle": "Sedal de pesca multifilamento japonés, resistente y fino"
   },
   {
     "id": "tijeras-de-acero-inoxidable-420-para-pesca-portatiles-y-resi",
@@ -368,8 +368,8 @@ export const CATALOG_SEED: CatalogSeed[] = [
   {
     "id": "senuelos-blandos-spiker-5cm-7cm-para-perca-y-lubina-tpe-tpr-",
     "sku": "1005007974312387",
-    "title": "Blandos Spiker Señuelos 5cm/7cm para Perca y Lubina - TPE/TPR con Brillo UV",
-    "description": "Sensores flotantes y realistas para pesca de perca y lubina. Fabricados en TPE y TPR, atraen peces con su diseño Spiker y brillo UV. Perfectos para montaje Drop Rig, ofrecen alta efectividad en aguas dulces. Fáciles de usar y resistentes para múltiples lanzamientos.",
+    "title": "Señuelos blandos 5-7 cm para perca y lubina, TPE/TPR con brillo UV",
+    "description": "Sensores flotantes y realistas para pesca de perca y lubina. Fabricados en TPE y TPR, atraen peces con su diseño y brillo UV. Perfectos para montaje Drop Rig, ofrecen alta efectividad en aguas dulces. Fáciles de usar y resistentes para múltiples lanzamientos.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Sae1ad20a2e2744a9a2db2d2604d6de42w.png",
     "images": [
       "https://ae-pic-a1.aliexpress-media.com/kf/Sae1ad20a2e2744a9a2db2d2604d6de42w.png",
@@ -389,9 +389,9 @@ export const CATALOG_SEED: CatalogSeed[] = [
     "rating": 4.9,
     "reviews": 4554,
     "inStock": true,
-    "seoDescription": "Compra Sensores Spiker para pesca de perca y lubina en nuestra tienda de pesca online. Fabricados en TPE y TPR, estos sensores flotantes y realistas ofrecen alta efe",
+    "seoDescription": "Compra Sensores para pesca de perca y lubina en nuestra tienda de pesca online. Fabricados en TPE y TPR, estos sensores flotantes y realistas ofrecen alta efe",
     "aiOptimized": true,
-    "seoTitle": "Sensores Spiker para pesca de perca y lubina - 5cm y 7cm - TPE/TPR con brillo UV"
+    "seoTitle": "Señuelos blandos 5-7 cm para perca y lubina, TPE/TPR con brillo UV"
   },
   {
     "id": "senuelos-de-pesca-para-carpa-y-lubina-isca-artificial-pva",
@@ -785,7 +785,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   {
     "id": "zukibo-nuevo-ganador-nanofil-naranja-la-l-aacute-nea-de-prue",
     "sku": "1005010429975592",
-    "title": "Zukibo Nanofil Naranja: Resistente línea multifilamento de pesca",
+    "title": "Línea de pesca multifilamento naranja de alta resistencia",
     "description": "*Línea de pesca de alta calidad para carretes giratorios*\n*Fabricada con multifilamento de nylon y recubrimiento naranja de alta visibilidad*\n*Diseñada para lances precisos y una recuperación fiable frente a la mayoría de especies*",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S6c93c8c4307249d2aa1eee78989c5216D.jpg",
     "images": [
@@ -806,9 +806,9 @@ export const CATALOG_SEED: CatalogSeed[] = [
     "rating": 4.8,
     "reviews": 1021,
     "inStock": true,
-    "seoDescription": "Compra la línea de pesca Zukibo Nanofil Naranja y disfruta de una pesca precisa y fiable. La línea multifilamento de nylon y el recubrimiento naranja de alta visibil",
+    "seoDescription": "Compra la línea de pesca Naranja y disfruta de una pesca precisa y fiable. La línea multifilamento de nylon y el recubrimiento naranja de alta visibil",
     "aiOptimized": true,
-    "seoTitle": "Zukibo Nanofil Naranja: Resistente línea multifilamento de pesca"
+    "seoTitle": "Línea de pesca multifilamento naranja de alta resistencia"
   },
   {
     "id": "carrete-de-pesca-giratorio-5-2-1-con-sedal-y-senuelo-incluid",
@@ -1120,8 +1120,8 @@ export const CATALOG_SEED: CatalogSeed[] = [
   {
     "id": "cana-de-pesca-noeby-beast-float-tube-para-lucio-3-longitudes",
     "sku": "1005006815356082",
-    "title": "Caña de Pesca Noeby Beast Float Tube para Lúcio, 1.68m, 1.72m y 1.75m, Pesca en Bote, Fuji Toray",
-    "description": "La canoa de pesca Noeby Beast Float Tube para Lúcio de 1.68m, 1.72m y 1.75m es perfecta para disfrutar de la pesca en bote, spinning, bagre, depredadores y kayak con Fuji Toray.",
+    "title": "Caña de pesca para float tube y lucio, 3 tramos (1,68-1,75 m)",
+    "description": "La canoa de pesca Beast Float Tube para Lúcio de 1.68m, 1.72m y 1.75m es perfecta para disfrutar de la pesca en bote, spinning, bagre, depredadores y kayak con Fuji Toray.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S7f902679fca34e3cb130ce5d0c1b4b3as.jpg",
     "images": [
       "https://ae-pic-a1.aliexpress-media.com/kf/S7f902679fca34e3cb130ce5d0c1b4b3as.jpg",
@@ -1141,9 +1141,9 @@ export const CATALOG_SEED: CatalogSeed[] = [
     "rating": 3.4,
     "reviews": 8,
     "inStock": true,
-    "seoDescription": "Compra la canoa de pesca Noeby Beast Float Tube para Lúcio de 1.68m, 1.72m y 1.75m en nuestra tienda de pesca online. Elige tu medida y disfruta de la pesca en bote,",
+    "seoDescription": "Compra la canoa de pesca Beast Float Tube para Lúcio de 1.68m, 1.72m y 1.75m en nuestra tienda de pesca online. Elige tu medida y disfruta de la pesca en bote,",
     "aiOptimized": true,
-    "seoTitle": "Caña de Pesca Noeby Beast Float Tube para Lúcio, 1.68m, 1.72m y 1.75m, Pesca en Bote, Fuji"
+    "seoTitle": "Caña de pesca para float tube y lucio, 3 tramos (1,68-1,75 m)"
   },
   {
     "id": "flotador-electrico-con-accesorios-para-pesca-luminoso-y-repo",
@@ -1792,7 +1792,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   {
     "id": "lixada-bolsa-de-transporte-resistente-para-carretes-de-pesca",
     "sku": "1005010332565335",
-    "title": "Lixada Bolsa de Transporte Resistente para Aparcamiento de Carretes de Pesca con 3 Partes",
+    "title": "Bolsa de transporte resistente para carretes de pesca, 3 fundas",
     "description": "* Una bolsa de transporte impermeable y resistente para carretes giratorios con 3 compartimentos para organizar tus herramientas de pesca y mantenerlas seguras durante el transporte.\n* Ideal para pescadores en movimiento, viajeros o aquellos que necesiten transportar sus carretes de pesca.\n* Diseñado para proteger y mantener en orden tus equipos de pesca durante el transporte.\n* Incluye 3 compartimentos independientes para diferentes tipos de herramientas y accesorios de pesca.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S2665b96bfbf444a49eade61eed1425d84.jpg",
     "images": [
@@ -1813,9 +1813,9 @@ export const CATALOG_SEED: CatalogSeed[] = [
     "rating": 4.5,
     "reviews": 610,
     "inStock": true,
-    "seoDescription": "Compra la Bolsa de Transporte Lixada Resistente para Aparcamiento de Carretes de Pesca con 3 Partes y protejas tus equipos de pesca durante el transporte. ¡Puedes or",
+    "seoDescription": "Compra la Bolsa de Transporte Resistente para Aparcamiento de Carretes de Pesca con 3 Partes y protejas tus equipos de pesca durante el transporte. ¡Puedes or",
     "aiOptimized": true,
-    "seoTitle": "Bolsa de Transporte Lixada Resistente para Aparcamiento de Carretes de Pesca con 3 Partes"
+    "seoTitle": "Bolsa de transporte resistente para carretes de pesca, 3 fundas"
   },
   {
     "id": "bolsa-de-pesca-impermeable-para-carrete-giratorio",
@@ -1960,8 +1960,8 @@ export const CATALOG_SEED: CatalogSeed[] = [
   {
     "id": "carrete-de-pesca-giratorio-rooblinos-potente-y-duradero-para",
     "sku": "1005009414702320",
-    "title": "Carrete de Pesca Giratorio Rooblinos: Potente y Duradero para Agua Salada y Dulce",
-    "description": "Este carrete giratorio Rooblinos es una excelente opción para pescadores de agua salada y dulce. Fabricado con rodamientos de acero inoxidable, ofrece una gran precisión y durabilidad.",
+    "title": "Carrete de pesca giratorio potente y duradero, agua salada y dulce",
+    "description": "Este carrete giratorio es una excelente opción para pescadores de agua salada y dulce. Fabricado con rodamientos de acero inoxidable, ofrece una gran precisión y durabilidad.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Sc8348698dd814845a4fc944b734ab0fd0.jpg",
     "images": [
       "https://ae-pic-a1.aliexpress-media.com/kf/Sc8348698dd814845a4fc944b734ab0fd0.jpg",
@@ -1981,9 +1981,9 @@ export const CATALOG_SEED: CatalogSeed[] = [
     "rating": 4.9,
     "reviews": 1808,
     "inStock": true,
-    "seoDescription": "Compra tu carrete giratorio Rooblinos en nuestra tienda online y disfruta de pesca potente y duradera en agua salada y dulce.",
+    "seoDescription": "Compra tu carrete giratorio en nuestra tienda online y disfruta de pesca potente y duradera en agua salada y dulce.",
     "aiOptimized": true,
-    "seoTitle": "Carrete de pesca giratorio Rooblinos: Potente y duradero para agua salada y dulce"
+    "seoTitle": "Carrete de pesca giratorio potente y duradero, agua salada y dulce"
   },
   {
     "id": "carrete-de-pesca-giratorio-25kg-con-rodamientos-de-acero-ino",
@@ -2128,7 +2128,7 @@ export const CATALOG_SEED: CatalogSeed[] = [
   {
     "id": "proberos-silla-de-pesca-con-revestimiento-de-fluorocarbono-l",
     "sku": "1005006471679105",
-    "title": "Proberos — Línea de pesca fluorocarbono de fibra de carbono, baja visibilidad",
+    "title": "Línea de pesca de fluorocarbono de baja visibilidad, fibra de carbono",
     "description": "**Desarrollada para durar**\nUna línea de pesca de alta calidad con revestimiento de fluorocarbono para mayor durabilidad y resistencia.\nLa línea de monofilamento de fibra de carbono de 2,2LB-29,3LB ofrece excelente sensibilidad y precision en el juego del anzuelo.\nIncluye línea de hundimiento para una pesca más eficiente y profundidad.",
     "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/S09359807215b438691841a1300f94383w.jpg",
     "images": [
@@ -2149,9 +2149,9 @@ export const CATALOG_SEED: CatalogSeed[] = [
     "rating": 4.7,
     "reviews": 17507,
     "inStock": true,
-    "seoDescription": "Compra la línea de pesca Proberos fluorocarbono de fibra de carbono en nuestra tienda de pesca online. **Más visibilidad, más profundidad, más pesca**.",
+    "seoDescription": "Compra la línea de pesca fluorocarbono de fibra de carbono en nuestra tienda de pesca online. **Más visibilidad, más profundidad, más pesca**.",
     "aiOptimized": true,
-    "seoTitle": "Proberos fluorocarbono de fibra de carbono, baja visibilidad"
+    "seoTitle": "Línea de pesca de fluorocarbono de baja visibilidad, fibra de carbono"
   },
   {
     "id": "swimbait-multiarticular-11g-27g-hundimiento-lento-anzuelo-tr",
