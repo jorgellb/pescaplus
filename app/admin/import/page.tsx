@@ -12,10 +12,32 @@ export default function AdminImportPage() {
   const [keyword, setKeyword] = useState('')
   const [results, setResults] = useState<Product[]>([])
   const [loading, setLoading] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [searched, setSearched] = useState(false)
   const [error, setError] = useState('')
   const [status, setStatus] = useState<Record<string, ImportState>>({})
   const [notConfigured, setNotConfigured] = useState(false)
+  const [page, setPage] = useState(1)
+  const [hasMore, setHasMore] = useState(false)
+  // The category/keyword actually searched, so "load more" keeps using them even
+  // if the inputs change afterwards.
+  const [active, setActive] = useState<{ category: string; keyword: string }>({ category: '', keyword: '' })
+
+  const fetchPage = async (src: { category: string; keyword: string }, pageNum: number): Promise<Product[] | null> => {
+    const q = new URLSearchParams({ category: src.category, page: String(pageNum) })
+    if (src.keyword) q.set('keyword', src.keyword)
+    const res = await fetch(`/api/admin/aliexpress-search?${q}`)
+    if (res.status === 503) {
+      setNotConfigured(true)
+      return null
+    }
+    const data = await res.json()
+    if (!data.success) {
+      setError(data.error || 'Error en la búsqueda')
+      return []
+    }
+    return data.products as Product[]
+  }
 
   const search = async (e?: React.FormEvent) => {
     e?.preventDefault()
@@ -23,22 +45,45 @@ export default function AdminImportPage() {
     setError('')
     setSearched(true)
     setStatus({})
+    const src = { category, keyword: keyword.trim() }
+    setActive(src)
     try {
-      const q = new URLSearchParams({ category })
-      if (keyword.trim()) q.set('keyword', keyword.trim())
-      const res = await fetch(`/api/admin/aliexpress-search?${q}`)
-      if (res.status === 503) {
-        setNotConfigured(true)
+      const products = await fetchPage(src, 1)
+      if (products === null) {
         setResults([])
         return
       }
-      const data = await res.json()
-      setResults(data.success ? data.products : [])
-      if (!data.success) setError(data.error || 'Error en la búsqueda')
+      setResults(products)
+      setPage(1)
+      setHasMore(products.length > 0)
     } catch {
       setError('Error de red al buscar en AliExpress')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadMore = async () => {
+    if (loadingMore || loading) return
+    setLoadingMore(true)
+    setError('')
+    try {
+      const next = page + 1
+      const products = await fetchPage(active, next)
+      if (!products) return
+      // Append only products we don't already have, so duplicates across pages
+      // (common in AliExpress results) never pile up.
+      setResults((prev) => {
+        const have = new Set(prev.map((p) => p.id))
+        const fresh = products.filter((p) => !have.has(p.id))
+        setHasMore(fresh.length > 0)
+        return [...prev, ...fresh]
+      })
+      setPage(next)
+    } catch {
+      setError('Error de red al cargar más resultados')
+    } finally {
+      setLoadingMore(false)
     }
   }
 
@@ -136,7 +181,11 @@ export default function AdminImportPage() {
           Sin resultados. Prueba otra categoría o palabra clave.
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="space-y-6">
+          <p className="font-mono text-[11px] uppercase tracking-widest text-ink/50">
+            {results.length} productos{active.keyword ? ` · "${active.keyword}"` : ''} — importa los que quieras
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {results.map((p) => {
             const st = status[p.id] ?? 'idle'
             return (
@@ -187,6 +236,19 @@ export default function AdminImportPage() {
               </div>
             )
           })}
+          </div>
+
+          {hasMore && (
+            <div className="pt-2 text-center">
+              <button
+                onClick={loadMore}
+                disabled={loadingMore}
+                className="bg-white text-ink border border-ink/20 hover:bg-ink hover:text-paper font-bold text-sm px-8 py-3 rounded-xl active:scale-[0.98] transition-all disabled:opacity-40"
+              >
+                {loadingMore ? 'Cargando más…' : 'Cargar más resultados ↓'}
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
