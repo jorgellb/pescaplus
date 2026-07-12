@@ -56,6 +56,11 @@ const orgJsonLd = {
       url: siteUrl,
       description:
         "Tienda especializada de pesca con fichas detalladas y un asesor experto por modalidad.",
+      logo: {
+        "@type": "ImageObject",
+        url: `${siteUrl}/icon`,
+      },
+      image: `${siteUrl}/opengraph-image`,
     },
     {
       "@type": "WebSite",
@@ -64,6 +69,15 @@ const orgJsonLd = {
       name: "PescaPlus",
       inLanguage: "es-ES",
       publisher: { "@id": `${siteUrl}/#organization` },
+      // Enables Google's sitelinks search box.
+      potentialAction: {
+        "@type": "SearchAction",
+        target: {
+          "@type": "EntryPoint",
+          urlTemplate: `${siteUrl}/search?q={search_term_string}`,
+        },
+        "query-input": "required name=search_term_string",
+      },
     },
   ],
 };
