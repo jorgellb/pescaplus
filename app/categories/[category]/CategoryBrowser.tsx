@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import Link from 'next/link'
 import type { Product } from '@/types'
 import type { Subcategory } from '@/lib/fishing'
 import ProductCard from '@/components/ProductCard'
@@ -30,7 +31,6 @@ export default function CategoryBrowser({
   const [loading, setLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [sort, setSort] = useState<SortKey>('relevance')
-  const [sub, setSub] = useState('')
 
   // Subcategory chips: only those with at least one product in the full category.
   const subFilters = useMemo(() => {
@@ -64,12 +64,11 @@ export default function CategoryBrowser({
   const reset = () => {
     setSearchQuery('')
     setSort('relevance')
-    setSub('')
     setProducts(initialProducts)
   }
 
   const sortedProducts = useMemo(() => {
-    const copy = (sub ? products.filter((p) => p.subcategory === sub) : products).slice()
+    const copy = products.slice()
     switch (sort) {
       case 'price-asc':
         return copy.sort((a, b) => a.price - b.price)
@@ -80,7 +79,7 @@ export default function CategoryBrowser({
       default:
         return copy
     }
-  }, [products, sort, sub])
+  }, [products, sort])
 
   return (
     <>
@@ -111,26 +110,17 @@ export default function CategoryBrowser({
         </label>
       </div>
 
-      {subFilters.length > 1 && (
+      {subFilters.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-6">
-          <button
-            onClick={() => setSub('')}
-            className={`px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-tight border border-ink/15 rounded-xl transition-colors ${
-              sub === '' ? 'bg-ink text-paper' : 'bg-paper text-ink hover:bg-ink hover:text-paper'
-            }`}
-          >
-            Todas
-          </button>
+          <span className="inline-flex items-center font-mono text-[11px] font-bold uppercase tracking-widest text-ink/40 mr-1">Subcategorías:</span>
           {subFilters.map((s) => (
-            <button
+            <Link
               key={s.id}
-              onClick={() => setSub(s.id)}
-              className={`px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-tight border border-ink/15 rounded-xl transition-colors ${
-                sub === s.id ? 'bg-ink text-paper' : 'bg-paper text-ink hover:bg-ink hover:text-paper'
-              }`}
+              href={`/categories/${category}/${s.id}`}
+              className="px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-tight border border-ink/15 rounded-full bg-paper text-ink hover:bg-ink hover:text-paper transition-colors"
             >
               {s.name} <span className="opacity-50">{s.count}</span>
-            </button>
+            </Link>
           ))}
         </div>
       )}

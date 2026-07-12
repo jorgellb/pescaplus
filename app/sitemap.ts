@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next'
-import { FISHING_TYPES } from '@/lib/fishing'
+import { FISHING_TYPES, isValidSubcategory } from '@/lib/fishing'
 import { listProducts } from '@/lib/products-store'
 import { listGuides } from '@/lib/guides-store'
 import { roundupSlugs } from '@/lib/roundups'
@@ -37,6 +37,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   let productRoutes: MetadataRoute.Sitemap = []
+  let subcategoryRoutes: MetadataRoute.Sitemap = []
   try {
     const products = await listProducts()
     productRoutes = products.map((p) => ({
@@ -45,6 +46,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly',
       priority: 0.7,
     }))
+    const seen = new Set<string>()
+    for (const p of products) {
+      if (!p.subcategory || !isValidSubcategory(p.typeFishing, p.subcategory)) continue
+      const key = `${p.typeFishing}/${p.subcategory}`
+      if (seen.has(key)) continue
+      seen.add(key)
+      subcategoryRoutes.push({
+        url: `${base}/categories/${p.typeFishing}/${p.subcategory}`,
+        lastModified: now,
+        changeFrequency: 'weekly',
+        priority: 0.75,
+      })
+    }
   } catch {
     /* store unavailable — ship static + category routes only */
   }
@@ -62,5 +76,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     /* guides store unavailable */
   }
 
-  return [...staticRoutes, ...categoryRoutes, ...roundupRoutes, ...productRoutes, ...guideRoutes]
+  return [...staticRoutes, ...categoryRoutes, ...subcategoryRoutes, ...roundupRoutes, ...productRoutes, ...guideRoutes]
 }
