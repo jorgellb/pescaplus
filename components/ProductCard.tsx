@@ -8,7 +8,7 @@ type ProductCardProps = Pick<
   Product,
   'id' | 'title' | 'imageUrl' | 'price' | 'currency' | 'rating' | 'reviews' | 'typeFishing'
 > &
-  Partial<Pick<Product, 'videoUrl'>>
+  Partial<Pick<Product, 'videoUrl' | 'inStock'>>
 
 export default function ProductCard({
   id,
@@ -20,7 +20,9 @@ export default function ProductCard({
   reviews,
   typeFishing,
   videoUrl,
+  inStock,
 }: ProductCardProps) {
+  const soldOut = inStock === false
   return (
     <div className="group relative flex flex-col h-full bg-paper border border-ink/10 rounded-2xl overflow-hidden shadow-hard hover-shift">
       {/* Image */}
@@ -35,9 +37,14 @@ export default function ProductCard({
         <span className="absolute top-2.5 left-2.5 z-20 pointer-events-none bg-ink/85 text-paper text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full backdrop-blur-sm">
           {fishingLabel(typeFishing)}
         </span>
-        {videoUrl && (
+        {videoUrl && !soldOut && (
           <div className="absolute top-2.5 right-2.5 z-20 pointer-events-none">
             <span className="bg-paper/90 text-ink text-[10px] font-bold uppercase px-2 py-1 rounded-full shadow-sm backdrop-blur-sm">▶ Vídeo</span>
+          </div>
+        )}
+        {soldOut && (
+          <div className="absolute top-2.5 right-2.5 z-20 pointer-events-none">
+            <span className="bg-ink/85 text-paper text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full backdrop-blur-sm">Agotado</span>
           </div>
         )}
       </div>
@@ -60,14 +67,23 @@ export default function ProductCard({
           <span className="font-display text-[26px] leading-none text-ink self-center">
             {price.toFixed(2)}<span className="text-sm align-top">{currency === 'EUR' ? '€' : ` ${currency}`}</span>
           </span>
-          <a
-            href={`/go/${id}`}
-            target="_blank"
-            rel="noopener noreferrer sponsored"
-            className="relative z-20 inline-flex items-center text-xs font-bold uppercase tracking-wide text-paper bg-ink hover:bg-accent px-3.5 py-2 rounded-lg transition-colors"
-          >
-            Comprar
-          </a>
+          {soldOut ? (
+            <Link
+              href={`/products/${id}`}
+              className="relative z-20 inline-flex items-center text-xs font-bold uppercase tracking-wide text-ink border border-ink/20 px-3.5 py-2 rounded-lg hover:bg-ink hover:text-paper transition-colors"
+            >
+              Ver ficha
+            </Link>
+          ) : (
+            <a
+              href={`/go/${id}`}
+              target="_blank"
+              rel="noopener noreferrer sponsored"
+              className="relative z-20 inline-flex items-center text-xs font-bold uppercase tracking-wide text-paper bg-ink hover:bg-accent px-3.5 py-2 rounded-lg transition-colors"
+            >
+              Comprar
+            </a>
+          )}
         </div>
       </div>
     </div>

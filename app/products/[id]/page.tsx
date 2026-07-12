@@ -112,6 +112,15 @@ export default async function ProductPage({ params }: Params) {
             <div className="space-y-5">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-flex bg-ink text-paper text-[11px] font-bold px-3 py-1.5 uppercase tracking-widest rounded-full">{modalityLabel}</span>
+                {product.inStock ? (
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 uppercase tracking-widest rounded-full border border-accent/40 text-accent">
+                    <span className="w-1.5 h-1.5 rounded-full bg-accent" /> Disponible
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 uppercase tracking-widest rounded-full border border-ink/20 text-ink/50">
+                    <span className="w-1.5 h-1.5 rounded-full bg-ink/40" /> No disponible
+                  </span>
+                )}
               </div>
 
               <h1 className="font-display uppercase text-4xl md:text-5xl leading-[0.95] text-ink">{product.title}</h1>
@@ -122,9 +131,14 @@ export default async function ProductPage({ params }: Params) {
                 <span className="text-ink/50">· {product.reviews.toLocaleString('es-ES')} vendidos</span>
               </div>
 
-              <div className="inline-flex items-baseline gap-2 border border-ink/15 rounded-xl shadow-hard px-5 py-3 bg-paper">
-                <span className="font-display text-5xl leading-none text-ink">{product.price.toFixed(2)}</span>
-                <span className="font-display text-2xl text-ink/60">{product.currency === 'EUR' ? '€' : product.currency}</span>
+              <div className="space-y-1.5">
+                <div className="inline-flex items-baseline gap-2 border border-ink/15 rounded-xl shadow-hard px-5 py-3 bg-paper">
+                  <span className="font-display text-5xl leading-none text-ink">{product.price.toFixed(2)}</span>
+                  <span className="font-display text-2xl text-ink/60">{product.currency === 'EUR' ? '€' : product.currency}</span>
+                </div>
+                <p className="font-mono text-[11px] uppercase tracking-wide text-ink/40">
+                  Precio orientativo · puede variar en la tienda del vendedor
+                </p>
               </div>
 
               <div className="space-y-2 pt-2">
@@ -151,14 +165,21 @@ export default async function ProductPage({ params }: Params) {
             </div>
 
             <div className="mt-auto pt-8 space-y-3">
-              <a
-                href={`/go/${product.id}`}
-                target="_blank"
-                rel="noopener noreferrer sponsored"
-                className="w-full flex items-center justify-center gap-2 bg-ink text-paper px-8 py-5 font-display uppercase text-2xl border border-ink/15 rounded-xl shadow-hard-md hover-shift hover:bg-accent hover:border-accent"
-              >
-                Comprar ahora →
-              </a>
+              {product.inStock ? (
+                <a
+                  href={`/go/${product.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer sponsored"
+                  className="w-full flex items-center justify-center gap-2 bg-ink text-paper px-8 py-5 font-display uppercase text-2xl border border-ink/15 rounded-xl shadow-hard-md hover-shift hover:bg-accent hover:border-accent"
+                >
+                  Comprar ahora →
+                </a>
+              ) : (
+                <div className="w-full flex flex-col items-center justify-center gap-1 bg-ink/5 text-ink/50 px-8 py-5 border border-ink/15 rounded-xl cursor-not-allowed">
+                  <span className="font-display uppercase text-2xl leading-none">No disponible</span>
+                  <span className="font-mono text-[11px] uppercase tracking-wide">Vuelve a consultarlo pronto</span>
+                </div>
+              )}
               <AsesorButton
                 ask={`¿Es buena opción el/la "${product.title}"? ¿Para qué tipo de pesca lo recomiendas y cómo lo uso?`}
                 className="w-full flex items-center justify-center gap-2 bg-paper text-ink px-8 py-3.5 font-bold uppercase text-sm tracking-tight border border-ink/15 rounded-xl hover:bg-ink hover:text-paper transition-colors"
