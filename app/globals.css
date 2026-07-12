@@ -3,7 +3,7 @@
 :root {
   --paper: #f2efe6;
   --ink: #111111;
-  --accent: #1b39ff;
+  --accent: #0f766e;
   /* Font families are self-hosted via next/font (see app/layout.tsx). */
   --font-sans: var(--font-grotesk), system-ui, sans-serif;
   --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;

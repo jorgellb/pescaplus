@@ -6,7 +6,7 @@ export const contentType = 'image/png'
 
 const PAPER = '#f2efe6'
 const INK = '#111111'
-const ACCENT = '#1b39ff'
+const ACCENT = '#0f766e'
 
 export default function OpengraphImage() {
   return new ImageResponse(

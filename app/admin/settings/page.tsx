@@ -199,7 +199,7 @@ export default function AdminSettingsPage() {
             type="checkbox"
             checked={settings.aiAssistantEnabled}
             onChange={(e) => set('aiAssistantEnabled', e.target.checked)}
-            className="accent-[#1b39ff]"
+            className="accent-[#0f766e]"
           />
           <span className="text-sm text-ink/80">Habilitar asistente IA en la tienda</span>
         </label>
