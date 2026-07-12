@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Navbar from './Navbar'
+import ChatWidget from './ChatWidget'
 import { FISHING_TYPES } from '@/lib/fishing'
 
 interface LayoutProps {
@@ -14,6 +15,8 @@ export default function Layout({ children }: LayoutProps) {
       <Navbar />
 
       <main className="flex-1 w-full">{children}</main>
+
+      <ChatWidget />
 
       {/* Footer */}
       <footer className="bg-ink text-paper border-t border-ink/12 mt-24">

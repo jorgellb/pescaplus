@@ -6,6 +6,7 @@ import Layout from '@/components/Layout'
 import { FISHING_TYPES } from '@/lib/fishing'
 import CategoryIcon from '@/components/graphics/CategoryIcon'
 import ProductImage from '@/components/ProductImage'
+import { toSafeHtml } from '@/lib/chat-format'
 import type { ChatMessage, ChatProductRef } from '@/types'
 
 type Message = { role: 'user' | 'assistant'; content: string; products?: ChatProductRef[] }
@@ -27,20 +28,6 @@ const FOLLOW_UPS = [
   '¿Qué línea es mejor?',
   'Recomiéndame equipo económico',
 ]
-
-function escapeHtml(value: string): string {
-  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
-function toSafeHtml(line: string): string {
-  return escapeHtml(line)
-    // links (e.g. category recommendations) — only relative or https URLs
-    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_m, label: string, url: string) =>
-      /^(https?:\/\/|\/)/i.test(url)
-        ? `<a href="${url}" class="text-accent underline font-semibold hover:opacity-80">${label}</a>`
-        : label,
-    )
-    .replace(/\*\*(.+?)\*\*/g, '<strong class="text-accent">$1</strong>')
-}
 
 export default function AdvicePage() {
   const [messages, setMessages] = useState<Message[]>([])

@@ -152,7 +152,7 @@ export default async function Home() {
                 <span className="font-mono text-xs font-bold text-ink/35">{String(i + 1).padStart(2, '0')}</span>
                 <CategoryIcon id={type.id} className="w-12 h-12 md:w-16 md:h-16 text-ink/70 group-hover:text-accent transition-colors" strokeWidth={1.4} />
               </div>
-              <h3 className="font-display text-2xl md:text-[1.7rem] leading-none text-ink group-hover:text-accent transition-colors mt-6">
+              <h3 className="font-display text-xl md:text-[1.7rem] leading-[1.05] text-ink group-hover:text-accent transition-colors mt-6 hyphens-none">
                 {categoryName(taxonomy, type.id)}
               </h3>
             </Link>
