@@ -63,9 +63,6 @@ export default function ChatWidget() {
     if (open) inputRef.current?.focus()
   }, [open])
 
-  // Open on request from any button (navbar/footer) via the shared bus…
-  useEffect(() => onOpenAsesor(() => setOpen(true)), [])
-
   // …or from a `#asesor` deep-link.
   useEffect(() => {
     const openFromHash = () => {
@@ -152,6 +149,24 @@ export default function ChatWidget() {
       setLoading(false)
     }
   }
+
+  // Keep a live reference so the bus always calls the latest closure (fresh
+  // conversation history), avoiding stale-closure sends.
+  const sendRef = useRef(executeSendMessage)
+  useEffect(() => {
+    sendRef.current = executeSendMessage
+  })
+
+  // Open on request from any button (navbar/footer/product/search) via the shared
+  // bus; an optional question is auto-sent as if the user had typed it.
+  useEffect(
+    () =>
+      onOpenAsesor((question) => {
+        setOpen(true)
+        if (question?.trim()) sendRef.current(question)
+      }),
+    [],
+  )
 
   const sendMessage = () => {
     if (!input.trim()) return

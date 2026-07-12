@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import Layout from '@/components/Layout'
 import ProductCard from '@/components/ProductCard'
+import AsesorButton from '@/components/AsesorButton'
 import { listProducts } from '@/lib/products-store'
 import { retrieveProducts } from '@/lib/retrieval'
 
@@ -26,8 +26,6 @@ export default async function SearchPage({
   // when relevance scoring finds nothing.
   let results = query ? await retrieveProducts(query, undefined, 40) : []
   if (query && results.length === 0) results = await listProducts({ search: query })
-
-  const askUrl = `/advice?ask=${encodeURIComponent(`Estoy buscando "${query}". ¿Qué me recomiendas y por qué?`)}`
 
   return (
     <Layout>
@@ -60,12 +58,12 @@ export default async function SearchPage({
               <span className="font-bold text-ink">{results.length}</span>{' '}
               {results.length === 1 ? 'resultado' : 'resultados'} · por relevancia
             </p>
-            <Link
-              href={askUrl}
+            <AsesorButton
+              ask={`Estoy buscando "${query}". ¿Qué me recomiendas y por qué?`}
               className="inline-flex items-center gap-2 self-start bg-accent text-paper px-4 py-2.5 text-xs font-bold uppercase tracking-tight border border-ink/15 rounded-xl shadow-hard hover-shift"
             >
               🎣 Pregúntale a nuestro asesor
-            </Link>
+            </AsesorButton>
           </div>
         )}
 
@@ -78,9 +76,12 @@ export default async function SearchPage({
             <p className="text-sm text-ink/60">
               No hemos encontrado una coincidencia exacta. Deja que nuestro asesor te oriente según lo que necesitas.
             </p>
-            <Link href={askUrl} className="inline-block bg-ink text-paper px-5 py-2.5 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl hover:bg-accent transition-colors">
+            <AsesorButton
+              ask={`Estoy buscando "${query}". ¿Qué me recomiendas y por qué?`}
+              className="inline-block bg-ink text-paper px-5 py-2.5 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl hover:bg-accent transition-colors"
+            >
               🎣 Preguntar al asesor
-            </Link>
+            </AsesorButton>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">

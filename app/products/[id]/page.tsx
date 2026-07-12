@@ -3,6 +3,7 @@ import Link from 'next/link'
 import Layout from '@/components/Layout'
 import ProductCard from '@/components/ProductCard'
 import ProductGallery from '@/components/ProductGallery'
+import AsesorButton from '@/components/AsesorButton'
 import { getTaxonomy, categoryName } from '@/lib/taxonomy-store'
 import { proxiedImage, absoluteProxiedImage } from '@/lib/img-proxy'
 import { resolveProduct, relatedProducts } from '@/lib/product-service'
@@ -158,12 +159,12 @@ export default async function ProductPage({ params }: Params) {
               >
                 Comprar ahora →
               </a>
-              <Link
-                href={`/advice?ask=${encodeURIComponent(`¿Es buena opción el/la "${product.title}"? ¿Para qué tipo de pesca lo recomiendas y cómo lo uso?`)}`}
+              <AsesorButton
+                ask={`¿Es buena opción el/la "${product.title}"? ¿Para qué tipo de pesca lo recomiendas y cómo lo uso?`}
                 className="w-full flex items-center justify-center gap-2 bg-paper text-ink px-8 py-3.5 font-bold uppercase text-sm tracking-tight border border-ink/15 rounded-xl hover:bg-ink hover:text-paper transition-colors"
               >
                 🎣 Preguntar a nuestro asesor
-              </Link>
+              </AsesorButton>
               <Link
                 href={`/categories/${product.typeFishing}`}
                 className="block text-center font-mono text-xs font-bold uppercase tracking-widest text-accent hover:underline"
