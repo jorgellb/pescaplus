@@ -765,13 +765,20 @@ export interface PolishedProduct {
   seoTitle: string
   description: string
   seoDescription: string
+  imageAlts: string[]
   generatedBy: 'nvidia' | 'offline'
+}
+
+const asStringArray = (v: unknown, len: number): string[] => {
+  if (!Array.isArray(v)) return []
+  return v.slice(0, len).map((x) => (typeof x === 'string' ? x.trim().slice(0, 240) : ''))
 }
 
 /**
  * SEO polish for a product: cleans the title (strips marketplace seller/brand
- * names), and produces an SEO-optimised title, meta title, description and meta
- * description. Never throws.
+ * names) and produces an SEO-optimised title, meta title, a description with a
+ * natural internal link to its category, an SEO meta description and descriptive
+ * image alt texts. Never throws.
  */
 export async function polishProductSeo(input: {
   title: string
@@ -779,37 +786,44 @@ export async function polishProductSeo(input: {
   seoTitle?: string
   seoDescription?: string
   typeFishing?: string
+  imageCount?: number
 }): Promise<PolishedProduct> {
   const current = {
     title: input.title,
     seoTitle: input.seoTitle ?? '',
     description: input.description,
     seoDescription: input.seoDescription ?? '',
+    imageAlts: [] as string[],
   }
   if (!isApiConfigured()) return { ...current, generatedBy: 'offline' }
+
+  const imageCount = Math.min(Math.max(input.imageCount ?? 0, 0), 12)
+  const catId = input.typeFishing || ''
+  const catLabel = catId ? fishingLabel(catId) : ''
+  const catLink = catId ? `/categories/${catId}` : ''
 
   const prompt = `Eres un especialista en SEO para una tienda de pesca online en España. Revisa y PULE esta ficha de producto.
 
 FICHA ACTUAL:
 - Título: ${input.title}
 - Descripción: ${input.description}
-${input.typeFishing ? `- Categoría: ${fishingLabel(input.typeFishing)}` : ''}
+${catLabel ? `- Categoría: ${catLabel} (página: ${catLink})` : ''}
 
 TAREAS:
-1. TÍTULO: ELIMINA nombres de marca o de vendedor propios de marketplaces (p. ej. DEUKIO, Sougayilang, Zukibo, Lixada, Noeby, DNDYUJU, Rooblinos, SEASIR, JOSBY, Proberos, Hirisi, Anatono…) y códigos internos raros. Deja un título limpio, natural y optimizado para SEO que describa el producto (tipo + característica/medida clave + uso), en español, MÁXIMO 65 caracteres, sin mayúsculas gritonas.
-2. DESCRIPCIÓN: reescribe una descripción PERFECTA para SEO: 3-5 frases con beneficios, usos y palabras clave naturales de pesca (sin repetir en exceso). Puedes usar **negrita** para conceptos clave.
-3. seoTitle: meta título para Google de ~60 caracteres con la palabra clave principal.
-4. seoDescription: meta descripción de 140-160 caracteres con llamada a la acción.
+1. TÍTULO ("title"): ELIMINA nombres de marca o de vendedor propios de marketplaces (p. ej. DEUKIO, Sougayilang, Zukibo, Lixada, Noeby, DNDYUJU, Rooblinos, SEASIR, JOSBY, Proberos, Hirisi, Anatono…) y códigos internos raros. Deja un título limpio, natural y optimizado para SEO que describa el producto (tipo + característica/medida clave + uso), en español, MÁXIMO 65 caracteres, sin mayúsculas gritonas.
+2. DESCRIPCIÓN ("description"): reescribe una descripción PERFECTA para SEO: 3-5 frases con beneficios, usos y palabras clave naturales de pesca (sin repetir en exceso). Usa **negrita** para 1-2 conceptos clave.${catLink ? ` INCLUYE UNA sola vez un ENLACE INTERNO contextual a su categoría con esta sintaxis markdown EXACTA: [texto ancla natural](${catLink}). El texto ancla debe ser natural y descriptivo (p. ej. "${catLabel.toLowerCase()}"), integrado en una frase, NO al final suelto.` : ''}
+3. "seoTitle": meta título para Google de máximo 60 caracteres con la palabra clave principal al inicio; puedes añadir " | PescaPlus" si cabe.
+4. "seoDescription": meta descripción de 140-160 caracteres, atractiva y con llamada a la acción, con la palabra clave principal.${imageCount > 0 ? `\n5. "imageAlts": array de EXACTAMENTE ${imageCount} textos alternativos (alt) para las imágenes, todos DISTINTOS entre sí, en español, de 6 a 14 palabras, describiendo el producto y su uso con palabras clave; SIN "imagen de", SIN nombres de vendedor, SIN comillas.` : ''}
 
 ${BRAND_RULE}
-Devuelve SOLO JSON válido: {"title": string, "seoTitle": string, "description": string, "seoDescription": string}`
+Devuelve SOLO JSON válido: {"title": string, "seoTitle": string, "description": string, "seoDescription": string${imageCount > 0 ? ', "imageAlts": string[]' : ''}}`
 
   const content = await callNvidia(
     [
       { role: 'system', content: 'Eres un experto SEO que pule fichas de producto en español y responde solo con JSON válido.' },
       { role: 'user', content: prompt },
     ],
-    { maxTokens: 900, temperature: 0.6 },
+    { maxTokens: 1300, temperature: 0.6 },
   )
   const parsed = content ? extractJson(content) : null
   if (!parsed) return { ...current, generatedBy: 'offline' }
@@ -817,8 +831,9 @@ Devuelve SOLO JSON válido: {"title": string, "seoTitle": string, "description":
   return {
     title,
     seoTitle: asString(parsed.seoTitle, title).slice(0, 90),
-    description: asString(parsed.description, current.description).slice(0, 1200),
+    description: asString(parsed.description, current.description).slice(0, 1400),
     seoDescription: asString(parsed.seoDescription, current.seoDescription).slice(0, 165),
+    imageAlts: imageCount > 0 ? asStringArray(parsed.imageAlts, imageCount) : [],
     generatedBy: 'nvidia',
   }
 }

@@ -13,6 +13,8 @@ export default function AdminProductsPage() {
   const [editing, setEditing] = useState<Product | null>(null)
   const [creating, setCreating] = useState(false)
   const [backend, setBackend] = useState<string>('')
+  const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [bulk, setBulk] = useState<{ done: number; total: number; ok: number; fail: number } | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -52,6 +54,80 @@ export default function AdminProductsPage() {
     if (!q) return products
     return products.filter((p) => p.title.toLowerCase().includes(q))
   }, [products, query])
+
+  const toggleSel = (id: string) =>
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  const allFilteredSelected = filtered.length > 0 && filtered.every((p) => selected.has(p.id))
+  const toggleAll = () =>
+    setSelected((prev) => {
+      if (allFilteredSelected) {
+        const next = new Set(prev)
+        filtered.forEach((p) => next.delete(p.id))
+        return next
+      }
+      return new Set([...prev, ...filtered.map((p) => p.id)])
+    })
+
+  /** Polish SEO for every selected product, sequentially, then reload. */
+  const bulkPolish = async () => {
+    const targets = products.filter((p) => selected.has(p.id))
+    if (targets.length === 0) return
+    if (!confirm(`¿Optimizar SEO de ${targets.length} producto(s)? Se reescribirán título, descripción, metadatos y alt de imágenes con IA. Puede tardar un poco.`)) return
+
+    setBulk({ done: 0, total: targets.length, ok: 0, fail: 0 })
+    let ok = 0
+    let fail = 0
+    for (let i = 0; i < targets.length; i++) {
+      const p = targets[i]
+      try {
+        const res = await fetch('/api/admin/rewrite', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            kind: 'product-seo',
+            title: p.title,
+            description: p.description,
+            seoTitle: p.seoTitle ?? '',
+            seoDescription: p.seoDescription ?? '',
+            typeFishing: p.typeFishing,
+            imageCount: p.images?.length ?? 0,
+          }),
+        })
+        const data = await res.json()
+        if (data.success && data.draft?.generatedBy === 'nvidia') {
+          const d = data.draft
+          const imageAlts = (p.images ?? []).map((_, idx) => d.imageAlts?.[idx] || p.imageAlts?.[idx] || '')
+          const patch = await fetch(`/api/products/${p.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title: d.title,
+              seoTitle: d.seoTitle,
+              description: d.description,
+              seoDescription: d.seoDescription,
+              imageAlts,
+            }),
+          })
+          if (patch.ok) ok++
+          else fail++
+        } else {
+          fail++
+        }
+      } catch {
+        fail++
+      }
+      setBulk({ done: i + 1, total: targets.length, ok, fail })
+    }
+    await load()
+    setSelected(new Set())
+    // Leave the summary visible briefly, then clear.
+    setTimeout(() => setBulk(null), 6000)
+  }
 
   const stats = useMemo(() => {
     const total = products.length
@@ -115,6 +191,34 @@ export default function AdminProductsPage() {
         className="w-full sm:max-w-xs px-4 py-2.5 bg-paper border border-ink/15 rounded-xl text-ink placeholder-ink/40 focus:outline-none focus:border-accent text-sm transition-all"
       />
 
+      {/* Bulk action bar */}
+      {(selected.size > 0 || bulk) && (
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-accent/40 bg-accent/5 px-4 py-3">
+          <div className="flex items-center gap-3 text-sm">
+            <span className="font-bold text-ink">{selected.size} seleccionado{selected.size === 1 ? '' : 's'}</span>
+            {bulk && (
+              <span className="font-mono text-xs text-ink/60">
+                Pulido {bulk.done}/{bulk.total} · {bulk.ok} ok{bulk.fail ? ` · ${bulk.fail} fallo(s)` : ''}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {!bulk && (
+              <button onClick={() => setSelected(new Set())} className="text-xs font-semibold text-ink/70 hover:text-ink px-3 py-2 rounded-lg border border-ink/15">
+                Quitar selección
+              </button>
+            )}
+            <button
+              onClick={bulkPolish}
+              disabled={!!bulk || selected.size === 0}
+              className="inline-flex items-center gap-2 bg-ink text-paper hover:bg-accent font-extrabold text-sm px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              {bulk ? `Optimizando… ${bulk.done}/${bulk.total}` : `✨ Pulir SEO (${selected.size})`}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Table */}
       {loading ? (
         <div className="py-24 text-center text-ink/60 text-sm">Cargando productos…</div>
@@ -127,6 +231,15 @@ export default function AdminProductsPage() {
           <table className="w-full text-sm min-w-[640px]">
             <thead>
               <tr className="text-left text-[11px] uppercase tracking-widest text-ink/50 border-b border-ink/15">
+                <th className="pl-4 pr-1 py-3 w-8">
+                  <input
+                    type="checkbox"
+                    checked={allFilteredSelected}
+                    onChange={toggleAll}
+                    aria-label="Seleccionar todos"
+                    className="w-4 h-4 accent-[#0f766e] cursor-pointer"
+                  />
+                </th>
                 <th className="px-4 py-3 font-bold">Producto</th>
                 <th className="px-4 py-3 font-bold">Modalidad</th>
                 <th className="px-4 py-3 font-bold">Precio</th>
@@ -136,7 +249,16 @@ export default function AdminProductsPage() {
             </thead>
             <tbody>
               {filtered.map((p) => (
-                <tr key={p.id} className="border-b border-ink/15 last:border-0 hover:bg-white/[0.02]">
+                <tr key={p.id} className={`border-b border-ink/15 last:border-0 hover:bg-white/[0.02] ${selected.has(p.id) ? 'bg-accent/5' : ''}`}>
+                  <td className="pl-4 pr-1 py-3">
+                    <input
+                      type="checkbox"
+                      checked={selected.has(p.id)}
+                      onChange={() => toggleSel(p.id)}
+                      aria-label={`Seleccionar ${p.title}`}
+                      className="w-4 h-4 accent-[#0f766e] cursor-pointer"
+                    />
+                  </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <div className="relative w-11 h-11 rounded-lg overflow-hidden bg-paper border border-ink/15 flex-shrink-0">

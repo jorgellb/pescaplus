@@ -28,9 +28,15 @@ function inline(text: string): string {
       }
       return ''
     })
-    // links: [texto](url) — only http(s) or relative URLs are allowed
+    // links: [texto](url) — only http(s) or relative URLs are allowed.
     .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_m, label: string, url: string) => {
-      if (/^(https?:\/\/|\/)/i.test(url)) {
+      // Internal links (relative) are followed and open in the same tab so they
+      // pass SEO equity to our own category/product pages.
+      if (/^\//.test(url)) {
+        return `<a href="${url}" rel="noopener" class="text-sky-600 underline underline-offset-2 hover:text-sky-700">${label}</a>`
+      }
+      // External links (affiliate) get nofollow/sponsored and open in a new tab.
+      if (/^https?:\/\//i.test(url)) {
         return `<a href="${url}" target="_blank" rel="nofollow noopener sponsored" class="text-sky-600 underline underline-offset-2 hover:text-sky-700">${label}</a>`
       }
       return label

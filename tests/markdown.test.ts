@@ -28,6 +28,16 @@ describe('renderDescription', () => {
     expect(html).toContain('>guía</a>')
   })
 
+  it('renders internal (relative) links as followed, same-tab links for SEO equity', () => {
+    const html = renderDescription('Explora nuestros [carretes de spinning](/categories/carretes)')
+    expect(html).toContain('href="/categories/carretes"')
+    expect(html).toContain('>carretes de spinning</a>')
+    // Internal links must NOT be nofollow/sponsored nor open in a new tab.
+    expect(html).not.toContain('nofollow')
+    expect(html).not.toContain('sponsored')
+    expect(html).not.toContain('target="_blank"')
+  })
+
   it('rejects non-http link schemes (no anchor emitted)', () => {
     const html = renderDescription('[x](javascript:alert)')
     expect(html).not.toContain('<a ')

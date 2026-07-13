@@ -19,6 +19,7 @@ const schema = z.discriminatedUnion('kind', [
     seoTitle: z.string().max(200).optional(),
     seoDescription: z.string().max(400).optional(),
     typeFishing: z.string().max(40).optional(),
+    imageCount: z.number().int().min(0).max(12).optional(),
   }),
   z.object({
     kind: z.literal('guide'),

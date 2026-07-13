@@ -247,6 +247,7 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
     setAiNote('')
     setError('')
     try {
+      const imageCount = form.images.filter((r) => r.url.trim()).length
       const res = await fetch('/api/admin/rewrite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -257,21 +258,33 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
           seoTitle: form.seoTitle,
           seoDescription: form.seoDescription,
           typeFishing: form.typeFishing,
+          imageCount,
         }),
       })
       const data = await res.json()
       if (data.success) {
         const d = data.draft
-        setForm((f) => ({
-          ...f,
-          title: d.title ?? f.title,
-          seoTitle: d.seoTitle ?? f.seoTitle,
-          description: d.description ?? f.description,
-          seoDescription: d.seoDescription ?? f.seoDescription,
-        }))
+        setForm((f) => {
+          // Map the returned alts onto the image rows that have a URL, in order.
+          let altIdx = 0
+          const images = f.images.map((r) => {
+            if (!r.url.trim()) return r
+            const alt = d.imageAlts?.[altIdx]
+            altIdx += 1
+            return alt ? { ...r, alt } : r
+          })
+          return {
+            ...f,
+            title: d.title ?? f.title,
+            seoTitle: d.seoTitle ?? f.seoTitle,
+            description: d.description ?? f.description,
+            seoDescription: d.seoDescription ?? f.seoDescription,
+            images,
+          }
+        })
         setAiNote(
           d.generatedBy === 'nvidia'
-            ? '✨ Ficha pulida para SEO: título limpio (sin vendedores), descripción y metadatos optimizados. Revisa antes de guardar.'
+            ? '✨ Ficha pulida para SEO: título limpio, descripción con enlace interno a su categoría, metadatos y alt de imágenes optimizados. Revisa antes de guardar.'
             : 'Configura NVIDIA para pulir con IA (no se ha cambiado nada).',
         )
       } else setError(data.error || 'No se pudo pulir la ficha')
