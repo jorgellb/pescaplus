@@ -1,25 +1,46 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Layout from '@/components/Layout'
-import FishRating from '@/components/FishRating'
-import { FISHING_SPOTS } from '@/lib/fishing-spots'
-import { solunarDay } from '@/lib/solunar'
-import { fmtTime, todayMadridISO, fmtDateLong } from '@/lib/solunar-format'
+import { FISHING_SPOTS, type FishingSpot } from '@/lib/fishing-spots'
+import { lunarInfo, phaseEmoji } from '@/lib/solunar'
+import { todayMadridISO, fmtDateLong } from '@/lib/solunar-format'
 
-export const revalidate = 1800
+export const revalidate = 3600
 
 export const metadata: Metadata = {
   title: 'Mejores horas de pesca hoy · calendario solunar por localidad',
   description:
-    'Descubre las mejores horas para pescar hoy en las principales zonas de España: periodos solunares, sol y luna, y meteo de pesca. Elige tu localidad de mar o de agua dulce.',
+    'Descubre las mejores horas para pescar hoy en toda la costa de España y en los principales embalses: periodos solunares, sol y luna, y meteo de pesca. Elige tu localidad.',
   alternates: { canonical: '/mejores-horas' },
+}
+
+// Display order for the coastal regions (north → south → islands).
+const REGION_ORDER = [
+  'Galicia', 'Asturias', 'Cantabria', 'País Vasco', 'Andalucía', 'Murcia',
+  'Comunidad Valenciana', 'Cataluña', 'Baleares', 'Canarias', 'Ceuta', 'Melilla',
+]
+
+function groupByRegion(spots: FishingSpot[], order: string[]): [string, FishingSpot[]][] {
+  const map = new Map<string, FishingSpot[]>()
+  for (const s of spots) {
+    const list = map.get(s.region)
+    if (list) list.push(s)
+    else map.set(s.region, [s])
+  }
+  const keys = [...map.keys()].sort((a, b) => {
+    const ia = order.indexOf(a)
+    const ib = order.indexOf(b)
+    return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib)
+  })
+  return keys.map((k) => [k, map.get(k)!])
 }
 
 export default function MejoresHorasHub() {
   const today = todayMadridISO()
-  const rows = FISHING_SPOTS.map((s) => ({ spot: s, sol: solunarDay(s.lat, s.lon, today) }))
-  const mar = rows.filter((r) => r.spot.type === 'mar')
-  const interior = rows.filter((r) => r.spot.type === 'interior')
+  const moon = lunarInfo(today)
+  const coastal = groupByRegion(FISHING_SPOTS.filter((s) => s.type === 'mar'), REGION_ORDER)
+  const inland = FISHING_SPOTS.filter((s) => s.type === 'interior')
+  const coastalCount = FISHING_SPOTS.filter((s) => s.type === 'mar').length
 
   return (
     <Layout>
@@ -28,18 +49,61 @@ export default function MejoresHorasHub() {
           <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3">● Herramienta de pescador</p>
           <h1 className="font-display uppercase text-4xl sm:text-5xl md:text-6xl leading-[1.02] text-ink">Mejores horas de pesca</h1>
           <p className="text-ink/60 text-sm max-w-2xl mt-3">
-            Calendario solunar y meteo para elegir el mejor momento de tu próxima salida. Elige tu zona para ver los
-            periodos de máxima actividad, la fase lunar y las condiciones. {fmtDateLong(today)}.
+            Calendario solunar y meteo para elegir el mejor momento de tu próxima salida. Elige tu localidad entre{' '}
+            {coastalCount} puntos de toda la costa española y los principales embalses. {fmtDateLong(today)}.
           </p>
-          <Link href="/calendario" className="inline-flex items-center gap-2 mt-4 bg-ink text-paper px-4 py-2.5 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift hover:bg-accent hover:border-accent">
-            🌙 Ver calendario del pescador
-          </Link>
+          <div className="flex flex-wrap items-center gap-3 mt-5">
+            <span className="inline-flex items-center gap-2 border border-ink/15 rounded-xl px-3 py-2 bg-paper text-sm">
+              <span className="text-lg" aria-hidden>{phaseEmoji(moon.phase)}</span>
+              <span className="font-bold text-ink">{moon.name}</span>
+              <span className="font-mono text-[11px] uppercase tracking-widest text-ink/50">{Math.round(moon.illumination * 100)}%</span>
+            </span>
+            <Link href="/calendario" className="inline-flex items-center gap-2 bg-ink text-paper px-4 py-2.5 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift hover:bg-accent hover:border-accent">
+              🌙 Calendario del pescador
+            </Link>
+          </div>
         </div>
       </section>
 
       <section className="max-w-6xl mx-auto px-4 py-10 sm:px-6 lg:px-8 space-y-10">
-        <SpotGroup title="Pesca en el mar" icon="🌊" rows={mar} />
-        <SpotGroup title="Pesca en agua dulce" icon="🎣" rows={interior} />
+        <div className="space-y-6">
+          <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3 flex items-center gap-2">
+            <span aria-hidden>🌊</span> Pesca en el mar
+          </h2>
+          {coastal.map(([region, spots]) => (
+            <div key={region} className="space-y-2">
+              <h3 className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50">{region}</h3>
+              <div className="flex flex-wrap gap-2">
+                {spots.map((s) => (
+                  <Link
+                    key={s.slug}
+                    href={`/mejores-horas/${s.slug}`}
+                    className="px-3 py-1.5 text-sm font-semibold text-ink border border-ink/15 rounded-full hover:bg-ink hover:text-paper transition-colors"
+                  >
+                    {s.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="space-y-3">
+          <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3 flex items-center gap-2">
+            <span aria-hidden>🎣</span> Pesca en agua dulce
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {inland.map((s) => (
+              <Link
+                key={s.slug}
+                href={`/mejores-horas/${s.slug}`}
+                className="px-3 py-1.5 text-sm font-semibold text-ink border border-ink/15 rounded-full hover:bg-ink hover:text-paper transition-colors"
+              >
+                {s.name}
+              </Link>
+            ))}
+          </div>
+        </div>
 
         <div className="border-t border-ink/12 pt-8 space-y-3 text-[15px] text-ink/80 leading-relaxed">
           <h2 className="font-display uppercase text-2xl text-ink">¿Qué son las mejores horas de pesca?</h2>
@@ -54,42 +118,5 @@ export default function MejoresHorasHub() {
         </div>
       </section>
     </Layout>
-  )
-}
-
-function SpotGroup({
-  title,
-  icon,
-  rows,
-}: {
-  title: string
-  icon: string
-  rows: { spot: (typeof FISHING_SPOTS)[number]; sol: ReturnType<typeof solunarDay> }[]
-}) {
-  return (
-    <div className="space-y-4">
-      <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3 flex items-center gap-2">
-        <span aria-hidden>{icon}</span> {title}
-      </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {rows.map(({ spot, sol }) => {
-          const major = sol.periods.find((p) => p.kind === 'mayor')
-          return (
-            <Link
-              key={spot.slug}
-              href={`/mejores-horas/${spot.slug}`}
-              className="group border border-ink/12 rounded-xl bg-paper p-4 hover-shift hover:border-ink/25 transition-all flex items-center justify-between gap-3"
-            >
-              <div className="min-w-0">
-                <p className="font-bold text-ink group-hover:text-accent transition-colors truncate">{spot.name}</p>
-                <p className="font-mono text-[11px] uppercase tracking-widest text-ink/50">{spot.region}</p>
-                {major && <p className="text-xs text-ink/60 mt-1">Mejor hora hoy: <span className="font-bold text-ink">{fmtTime(major.start)}</span></p>}
-              </div>
-              <FishRating value={sol.rating} className="flex-shrink-0" />
-            </Link>
-          )
-        })}
-      </div>
-    </div>
   )
 }

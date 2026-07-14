@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import Layout from '@/components/Layout'
 import FishRating from '@/components/FishRating'
-import { FISHING_SPOTS, getSpot } from '@/lib/fishing-spots'
+import { FISHING_SPOTS, FEATURED_SPOT_SLUGS, getSpot } from '@/lib/fishing-spots'
 import { solunarDay } from '@/lib/solunar'
 import { getFishingWeather } from '@/lib/fishing-weather'
 import { fmtTime, fmtDayLabel, fmtDateLong, todayMadridISO, addDaysISO, ratingLabel } from '@/lib/solunar-format'
@@ -13,8 +13,9 @@ export const revalidate = 1800
 
 type Params = { params: Promise<{ spot: string }> }
 
+// Prerender the popular spots; the rest render on-demand and cache (ISR).
 export function generateStaticParams() {
-  return FISHING_SPOTS.map((s) => ({ spot: s.slug }))
+  return FEATURED_SPOT_SLUGS.map((spot) => ({ spot }))
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
