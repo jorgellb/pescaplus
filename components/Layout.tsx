@@ -48,6 +48,7 @@ export default function Layout({ children }: LayoutProps) {
               <h4 className="font-mono text-[11px] font-bold uppercase tracking-widest text-paper/50 mb-4">Ayuda</h4>
               <ul className="space-y-2 text-sm font-bold uppercase tracking-tight">
                 <li><Link href="/contacto" className="hover:text-accent transition-colors">Contacto</Link></li>
+                <li><Link href="/mejores-horas" className="hover:text-accent transition-colors">Cuándo pescar</Link></li>
                 <li><Link href="/guias" className="hover:text-accent transition-colors">Guías</Link></li>
                 <li><Link href="/advice" className="hover:text-accent transition-colors">Asesor de pesca</Link></li>
               </ul>

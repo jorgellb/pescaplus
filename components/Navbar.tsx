@@ -96,7 +96,8 @@ export default function Navbar() {
                 )}
               </div>
 
-              <Link href="/mejores" className={navLink(pathname.startsWith('/mejores'))}>Mejores</Link>
+              <Link href="/mejores" className={navLink(pathname === '/mejores' || pathname.startsWith('/mejores/'))}>Mejores</Link>
+              <Link href="/mejores-horas" className={navLink(pathname.startsWith('/mejores-horas'))}>Cuándo pescar</Link>
               <Link href="/guias" className={navLink(pathname.startsWith('/guias'))}>Guías</Link>
               <Link href="/advice" className={navLink(isActive('/advice'))}>Consejos</Link>
             </div>
@@ -180,8 +181,9 @@ export default function Navbar() {
               </Link>
             ))}
           </div>
-          <div className="grid grid-cols-3 gap-2 pt-3">
+          <div className="grid grid-cols-2 gap-2 pt-3">
             <Link href="/mejores" onClick={() => setMobileMenuOpen(false)} className="text-center px-3 py-2.5 text-sm font-bold uppercase border border-ink/15 rounded-xl text-ink">Mejores</Link>
+            <Link href="/mejores-horas" onClick={() => setMobileMenuOpen(false)} className="text-center px-3 py-2.5 text-sm font-bold uppercase border border-ink/15 rounded-xl text-ink">Cuándo pescar</Link>
             <Link href="/guias" onClick={() => setMobileMenuOpen(false)} className="text-center px-3 py-2.5 text-sm font-bold uppercase border border-ink/15 rounded-xl text-ink">Guías</Link>
             <Link href="/favoritos" onClick={() => setMobileMenuOpen(false)} className="text-center px-3 py-2.5 text-sm font-bold uppercase border border-ink/15 rounded-xl text-ink">
               Favoritos{favCount > 0 ? ` (${favCount})` : ''}

@@ -3,6 +3,7 @@ import { FISHING_TYPES, isValidSubcategory } from '@/lib/fishing'
 import { listProducts } from '@/lib/products-store'
 import { listGuides } from '@/lib/guides-store'
 import { roundupSlugs } from '@/lib/roundups'
+import { FISHING_SPOTS } from '@/lib/fishing-spots'
 
 const base = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
@@ -12,6 +13,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${base}/`, lastModified: now, changeFrequency: 'weekly', priority: 1 },
     { url: `${base}/mejores`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${base}/mejores-horas`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     { url: `${base}/guias`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${base}/advice`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${base}/contacto`, lastModified: now, changeFrequency: 'yearly', priority: 0.4 },
@@ -25,6 +27,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: now,
     changeFrequency: 'weekly',
     priority: 0.8,
+  }))
+
+  const spotRoutes: MetadataRoute.Sitemap = FISHING_SPOTS.map((s) => ({
+    url: `${base}/mejores-horas/${s.slug}`,
+    lastModified: now,
+    changeFrequency: 'daily',
+    priority: 0.6,
   }))
 
   let roundupRoutes: MetadataRoute.Sitemap = []
@@ -84,5 +93,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     /* guides store unavailable */
   }
 
-  return [...staticRoutes, ...categoryRoutes, ...subcategoryRoutes, ...roundupRoutes, ...productRoutes, ...guideRoutes]
+  return [...staticRoutes, ...categoryRoutes, ...spotRoutes, ...subcategoryRoutes, ...roundupRoutes, ...productRoutes, ...guideRoutes]
 }
