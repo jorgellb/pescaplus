@@ -31,6 +31,9 @@ export default function MejoresHorasHub() {
             Calendario solunar y meteo para elegir el mejor momento de tu próxima salida. Elige tu zona para ver los
             periodos de máxima actividad, la fase lunar y las condiciones. {fmtDateLong(today)}.
           </p>
+          <Link href="/calendario" className="inline-flex items-center gap-2 mt-4 bg-ink text-paper px-4 py-2.5 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift hover:bg-accent hover:border-accent">
+            🌙 Ver calendario del pescador
+          </Link>
         </div>
       </section>
 

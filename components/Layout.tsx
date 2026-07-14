@@ -49,6 +49,7 @@ export default function Layout({ children }: LayoutProps) {
               <ul className="space-y-2 text-sm font-bold uppercase tracking-tight">
                 <li><Link href="/contacto" className="hover:text-accent transition-colors">Contacto</Link></li>
                 <li><Link href="/mejores-horas" className="hover:text-accent transition-colors">Cuándo pescar</Link></li>
+                <li><Link href="/calendario" className="hover:text-accent transition-colors">Calendario</Link></li>
                 <li><Link href="/guias" className="hover:text-accent transition-colors">Guías</Link></li>
                 <li><Link href="/advice" className="hover:text-accent transition-colors">Asesor de pesca</Link></li>
               </ul>

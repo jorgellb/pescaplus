@@ -239,3 +239,33 @@ function eq(fn: (jd: number) => { ra: number; dec: number }, ms: number): [numbe
   const { ra, dec } = fn(julianDay(ms))
   return [ra, dec]
 }
+
+export interface LunarInfo {
+  phase: number
+  illumination: number
+  name: string
+  isNew: boolean
+  isFull: boolean
+}
+
+/** Cheap moon phase/illumination for a date (no rise/set scan) — for calendars. */
+export function lunarInfo(dateISO: string, tz = 'Europe/Madrid'): LunarInfo {
+  const [y, m, d] = dateISO.split('-').map(Number)
+  const noon = localMidnightUtc(y, m, d, tz) + 12 * 3600000
+  const jd = julianDay(noon)
+  const elong = norm360(moonEquatorial(jd).lon - sunEquatorial(jd).lon)
+  const phase = elong / 360
+  return {
+    phase,
+    illumination: (1 - cos(elong)) / 2,
+    name: phaseName(phase),
+    isNew: phase < 0.02 || phase > 0.98,
+    isFull: Math.abs(phase - 0.5) < 0.02,
+  }
+}
+
+/** Waxing/waning moon emoji for a phase in [0,1). */
+export function phaseEmoji(phase: number): string {
+  const icons = ['🌑', '🌒', '🌓', '🌔', '🌕', '🌖', '🌗', '🌘']
+  return icons[Math.round(phase * 8) % 8]
+}
