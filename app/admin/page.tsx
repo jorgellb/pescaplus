@@ -15,6 +15,7 @@ export default function AdminProductsPage() {
   const [backend, setBackend] = useState<string>('')
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [bulk, setBulk] = useState<{ done: number; total: number; ok: number; fail: number } | null>(null)
+  const [optFilter, setOptFilter] = useState<'all' | 'yes' | 'no'>('all')
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -51,9 +52,13 @@ export default function AdminProductsPage() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
-    if (!q) return products
-    return products.filter((p) => p.title.toLowerCase().includes(q))
-  }, [products, query])
+    return products.filter((p) => {
+      if (q && !p.title.toLowerCase().includes(q)) return false
+      if (optFilter === 'yes' && !p.aiOptimized) return false
+      if (optFilter === 'no' && p.aiOptimized) return false
+      return true
+    })
+  }, [products, query, optFilter])
 
   const toggleSel = (id: string) =>
     setSelected((prev) => {
@@ -111,6 +116,7 @@ export default function AdminProductsPage() {
               description: d.description,
               seoDescription: d.seoDescription,
               imageAlts,
+              aiOptimized: true,
             }),
           })
           if (patch.ok) ok++
@@ -131,12 +137,10 @@ export default function AdminProductsPage() {
 
   const stats = useMemo(() => {
     const total = products.length
-    const avgRating = total
-      ? products.reduce((sum, p) => sum + p.rating, 0) / total
-      : 0
     const categories = new Set(products.map((p) => p.typeFishing)).size
     const avgPrice = total ? products.reduce((sum, p) => sum + p.price, 0) / total : 0
-    return { total, avgRating, categories, avgPrice }
+    const optimized = products.filter((p) => p.aiOptimized).length
+    return { total, categories, avgPrice, optimized }
   }, [products])
 
   const closeEditor = () => {
@@ -170,7 +174,7 @@ export default function AdminProductsPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="Productos" value={String(stats.total)} icon="📦" />
         <StatCard label="Modalidades" value={String(stats.categories)} icon="🎯" />
-        <StatCard label="Valoración media" value={stats.avgRating.toFixed(2)} icon="⭐" />
+        <StatCard label="SEO optimizado" value={`${stats.optimized}/${stats.total}`} icon="✨" />
         <StatCard label="Precio medio" value={`${stats.avgPrice.toFixed(2)} €`} icon="💶" />
       </div>
 
@@ -183,13 +187,36 @@ export default function AdminProductsPage() {
         </p>
       )}
 
-      {/* Search */}
-      <input
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Filtrar por título…"
-        className="w-full sm:max-w-xs px-4 py-2.5 bg-paper border border-ink/15 rounded-xl text-ink placeholder-ink/40 focus:outline-none focus:border-accent text-sm transition-all"
-      />
+      {/* Search + optimization filter */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Filtrar por título…"
+          className="w-full sm:max-w-xs px-4 py-2.5 bg-paper border border-ink/15 rounded-xl text-ink placeholder-ink/40 focus:outline-none focus:border-accent text-sm transition-all"
+        />
+        <div className="inline-flex rounded-xl border border-ink/15 overflow-hidden text-xs font-bold">
+          {([
+            ['all', 'Todos'],
+            ['yes', 'Optimizados'],
+            ['no', 'Sin optimizar'],
+          ] as const).map(([key, label]) => (
+            <button
+              key={key}
+              onClick={() => setOptFilter(key)}
+              className={`px-3 py-2 transition-colors ${optFilter === key ? 'bg-ink text-paper' : 'bg-paper text-ink/70 hover:bg-ink/5'}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={() => setSelected(new Set(products.filter((p) => !p.aiOptimized).map((p) => p.id)))}
+          className="text-xs font-semibold text-accent hover:underline whitespace-nowrap"
+        >
+          Seleccionar sin optimizar ({stats.total - stats.optimized})
+        </button>
+      </div>
 
       {/* Bulk action bar */}
       {(selected.size > 0 || bulk) && (
@@ -266,7 +293,14 @@ export default function AdminProductsPage() {
                       </div>
                       <div className="min-w-0">
                         <p className="font-semibold text-ink truncate max-w-[280px]">{p.title}</p>
-                        <p className="text-[11px] text-ink/50">{p.inStock ? 'En stock' : 'Sin stock'}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          {p.aiOptimized ? (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-accent bg-accent/10 border border-accent/30 px-1.5 py-0.5 rounded">✓ Optimizado</span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-amber-700 bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 rounded">Sin optimizar</span>
+                          )}
+                          <span className="text-[11px] text-ink/50">{p.inStock ? 'En stock' : 'Sin stock'}</span>
+                        </div>
                       </div>
                     </div>
                   </td>

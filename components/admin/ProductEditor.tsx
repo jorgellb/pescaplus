@@ -36,6 +36,7 @@ type FormState = {
   seoTitle: string
   seoDescription: string
   inStock: boolean
+  aiOptimized: boolean
 }
 
 function toForm(p: Product | null): FormState {
@@ -57,6 +58,7 @@ function toForm(p: Product | null): FormState {
     seoTitle: p?.seoTitle ?? '',
     seoDescription: p?.seoDescription ?? '',
     inStock: p?.inStock ?? true,
+    aiOptimized: p?.aiOptimized ?? false,
   }
 }
 
@@ -280,6 +282,7 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
             description: d.description ?? f.description,
             seoDescription: d.seoDescription ?? f.seoDescription,
             images,
+            aiOptimized: d.generatedBy === 'nvidia' ? true : f.aiOptimized,
           }
         })
         setAiNote(
@@ -322,6 +325,7 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
       rating: parseFloat(form.rating) || 0,
       reviews: parseInt(form.reviews, 10) || 0,
       inStock: form.inStock,
+      aiOptimized: form.aiOptimized,
     }
 
     try {
@@ -470,6 +474,13 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
               <label className="flex items-center gap-2 h-[42px] px-3 bg-white border border-ink/25 rounded-lg cursor-pointer">
                 <input type="checkbox" checked={form.inStock} onChange={(e) => set('inStock', e.target.checked)} className="accent-[#0f766e]" />
                 <span className="text-sm text-ink/50">Disponible</span>
+              </label>
+            </div>
+            <div className="space-y-1">
+              <label className={labelCls}>SEO</label>
+              <label className="flex items-center gap-2 h-[42px] px-3 bg-white border border-ink/25 rounded-lg cursor-pointer">
+                <input type="checkbox" checked={form.aiOptimized} onChange={(e) => set('aiOptimized', e.target.checked)} className="accent-[#0f766e]" />
+                <span className="text-sm text-ink/50">Optimizado</span>
               </label>
             </div>
           </div>

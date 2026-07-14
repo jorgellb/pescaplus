@@ -52,6 +52,7 @@ const productPatchSchema = z.object({
   rating: z.number().min(0).max(5).optional(),
   reviews: z.number().int().min(0).optional(),
   inStock: z.boolean().optional(),
+  aiOptimized: z.boolean().optional(),
 })
 
 /** Update a product (admin only). */
