@@ -6,6 +6,7 @@ import FishRating from '@/components/FishRating'
 import { FISHING_SPOTS, FEATURED_SPOT_SLUGS, getSpot } from '@/lib/fishing-spots'
 import { solunarDay } from '@/lib/solunar'
 import { getFishingWeather } from '@/lib/fishing-weather'
+import { getTides } from '@/lib/tides'
 import { fmtTime, fmtDayLabel, fmtDateLong, todayMadridISO, addDaysISO, ratingLabel } from '@/lib/solunar-format'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
 
@@ -22,8 +23,9 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { spot } = await params
   const s = getSpot(spot)
   if (!s) return { title: 'Localidad no encontrada' }
-  const title = `Mejores horas de pesca en ${s.name} · luna, sol y meteo`
-  const description = `Consulta las mejores horas para pescar en ${s.name} (${s.region}): periodos solunares, salida y puesta de sol y luna, fase lunar y meteo de pesca. Ideal para ${s.known}.`
+  const tideBit = s.type === 'mar' ? 'mareas, ' : ''
+  const title = s.type === 'mar' ? `Mejores horas de pesca y mareas en ${s.name}` : `Mejores horas de pesca en ${s.name}`
+  const description = `Consulta las mejores horas para pescar en ${s.name} (${s.region}): ${tideBit}periodos solunares, salida y puesta de sol y luna, fase lunar y meteo de pesca. Ideal para ${s.known}.`
   return { title, description, alternates: { canonical: `/mejores-horas/${s.slug}` } }
 }
 
@@ -35,7 +37,10 @@ export default async function SpotPage({ params }: Params) {
   const today = todayMadridISO()
   const days = Array.from({ length: 7 }, (_, i) => solunarDay(s.lat, s.lon, addDaysISO(today, i)))
   const d0 = days[0]
-  const weather = await getFishingWeather(s)
+  const [weather, tides] = await Promise.all([
+    getFishingWeather(s),
+    s.type === 'mar' ? getTides(s.lat, s.lon) : Promise.resolve(null),
+  ])
 
   const breadcrumbLd = breadcrumbJsonLd([
     { name: 'Inicio', url: SITE_URL },
@@ -142,6 +147,38 @@ export default async function SpotPage({ params }: Params) {
             )}
           </div>
         </div>
+
+        {/* Tides (coastal, only when a provider key is configured) */}
+        {tides?.configured && (
+          <div className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-6 space-y-4">
+            <div className="flex items-center justify-between gap-3 border-b border-ink/12 pb-4">
+              <h2 className="font-display uppercase text-2xl text-ink leading-none flex items-center gap-2"><span aria-hidden>🌊</span> Mareas</h2>
+              {tides.risingNow !== null && (
+                <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full border border-ink/20 text-ink/60">
+                  {tides.risingNow ? 'Subiendo ↑' : 'Bajando ↓'}
+                </span>
+              )}
+            </div>
+            {tides.available ? (
+              <>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {tides.nextTides.map((t, i) => (
+                    <div key={i} className={`rounded-xl px-3 py-2.5 border ${t.type === 'alta' ? 'border-accent/30 bg-accent/[0.05]' : 'border-ink/12 bg-paper'}`}>
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/40">{t.type === 'alta' ? 'Pleamar' : 'Bajamar'}</p>
+                      <p className="font-display text-2xl text-ink leading-none mt-1">{fmtTime(t.time)}</p>
+                      <p className="font-mono text-[11px] text-ink/50 mt-0.5">{t.height.toFixed(2)} m</p>
+                    </div>
+                  ))}
+                </div>
+                {tides.smallRange && (
+                  <p className="text-[12px] text-ink/50">Marea de escaso recorrido, típica del Mediterráneo: influye poco en la actividad.</p>
+                )}
+              </>
+            ) : (
+              <p className="text-sm text-ink/50">Predicción de mareas no disponible ahora mismo. Vuelve a intentarlo en unos minutos.</p>
+            )}
+          </div>
+        )}
 
         {/* 7-day outlook */}
         <div className="space-y-4">
