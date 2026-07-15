@@ -1,5 +1,18 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
-import { getTides } from '@/lib/tides'
+import { getTides, tideCoefficient, coefficientLabel } from '@/lib/tides'
+
+describe('tideCoefficient', () => {
+  it('is highest at new/full moon (spring) and lowest at the quarters (neap)', () => {
+    const spring = tideCoefficient(0) // new moon
+    const full = tideCoefficient(0.5) // full moon
+    const neap = tideCoefficient(0.25) // first quarter
+    expect(spring).toBeGreaterThan(100)
+    expect(full).toBeGreaterThan(100)
+    expect(neap).toBeLessThan(45)
+    expect(coefficientLabel(spring)).toMatch(/viva/i)
+    expect(coefficientLabel(neap)).toMatch(/muerta/i)
+  })
+})
 
 const nowSec = Math.floor(Date.now() / 1000)
 

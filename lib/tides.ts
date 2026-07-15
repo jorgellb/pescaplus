@@ -34,13 +34,31 @@ const EMPTY = (configured: boolean): TidesInfo => ({
   smallRange: false,
 })
 
+/**
+ * Approximate tidal coefficient (20–120, Brest-style scale) derived from the
+ * spring–neap cycle: highest at new/full moon (spring), lowest at the quarters
+ * (neap). It's an orientation value based on the moon phase, not a station-exact
+ * coefficient.
+ */
+export function tideCoefficient(moonPhase: number): number {
+  const spring = Math.abs(Math.cos(2 * Math.PI * moonPhase)) // 1 = spring, 0 = neap
+  return Math.round(30 + 90 * spring)
+}
+
+export function coefficientLabel(coef: number): string {
+  if (coef >= 100) return 'Marea viva fuerte'
+  if (coef >= 70) return 'Marea viva'
+  if (coef >= 50) return 'Media'
+  return 'Marea muerta'
+}
+
 export async function getTides(lat: number, lon: number): Promise<TidesInfo> {
   const key = process.env.WORLDTIDES_API_KEY
   if (!key) return EMPTY(false)
 
   try {
-    const url = `https://www.worldtides.info/api/v3?extremes&days=2&lat=${lat}&lon=${lon}&key=${key}`
-    const res = await fetch(url, { next: { revalidate: 21600 }, signal: AbortSignal.timeout(9000) })
+    const url = `https://www.worldtides.info/api/v3?extremes&days=7&lat=${lat}&lon=${lon}&key=${key}`
+    const res = await fetch(url, { next: { revalidate: 21600 }, signal: AbortSignal.timeout(12000) })
     if (!res.ok) return EMPTY(true)
     const data = await res.json()
     if (data?.status !== 200 || !Array.isArray(data.extremes)) return EMPTY(true)

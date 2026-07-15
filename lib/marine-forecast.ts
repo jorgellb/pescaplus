@@ -38,12 +38,51 @@ export interface MarineForecast {
   hours: HourPoint[]
 }
 
+export interface FishingWindow {
+  start: number
+  end: number
+  avg: number
+}
+
+/** Best contiguous fishing window of a day (highest-scoring run of hours). */
+export function bestWindow(hours: HourPoint[]): FishingWindow | null {
+  if (hours.length === 0) return null
+  const GOOD = 55
+  let best: (FishingWindow & { span: number }) | null = null
+  let i = 0
+  while (i < hours.length) {
+    if (hours[i].score >= GOOD) {
+      let j = i
+      while (j + 1 < hours.length && hours[j + 1].score >= GOOD) j++
+      const seg = hours.slice(i, j + 1)
+      const avg = seg.reduce((s, h) => s + h.score, 0) / seg.length
+      const span = j - i + 1
+      if (!best || avg * span > best.avg * best.span) best = { start: hours[i].time, end: hours[j].time + 3600000, avg, span }
+      i = j + 1
+    } else i++
+  }
+  if (best) return { start: best.start, end: best.end, avg: Math.round(best.avg) }
+  const top = [...hours].sort((a, b) => b.score - a.score)[0]
+  return { start: top.time, end: top.time + 3600000, avg: top.score }
+}
+
+/** Group the flat hourly list by local day. */
+export function groupByDay(hours: HourPoint[]): { dateISO: string; hours: HourPoint[] }[] {
+  const out: { dateISO: string; hours: HourPoint[] }[] = []
+  for (const h of hours) {
+    const last = out[out.length - 1]
+    if (last && last.dateISO === h.dateISO) last.hours.push(h)
+    else out.push({ dateISO: h.dateISO, hours: [h] })
+  }
+  return out
+}
+
 const COMPASS = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSO', 'SO', 'OSO', 'O', 'ONO', 'NO', 'NNO']
 export const windDirLabel = (deg: number | null) => (deg == null ? null : COMPASS[Math.round(deg / 22.5) % 16])
 
 async function getJson(url: string): Promise<any | null> {
   try {
-    const res = await fetch(url, { next: { revalidate: 1800 }, signal: AbortSignal.timeout(9000) })
+    const res = await fetch(url, { next: { revalidate: 1800 }, signal: AbortSignal.timeout(12000) })
     if (!res.ok) return null
     return await res.json()
   } catch {
@@ -90,11 +129,11 @@ export async function getMarineForecast(spot: FishingSpot): Promise<MarineForeca
   const forecastUrl =
     `https://api.open-meteo.com/v1/forecast?latitude=${spot.lat}&longitude=${spot.lon}` +
     `&hourly=temperature_2m,precipitation,precipitation_probability,weather_code,cloud_cover,surface_pressure,wind_speed_10m,wind_gusts_10m,wind_direction_10m,is_day` +
-    `&timezone=Europe%2FMadrid&forecast_days=2`
+    `&timezone=Europe%2FMadrid&forecast_days=7`
   const marineUrl =
     `https://marine-api.open-meteo.com/v1/marine?latitude=${spot.lat}&longitude=${spot.lon}` +
     `&hourly=wave_height,wave_direction,wave_period,swell_wave_height,swell_wave_period,sea_surface_temperature` +
-    `&timezone=Europe%2FMadrid&forecast_days=2`
+    `&timezone=Europe%2FMadrid&forecast_days=7`
 
   const [forecast, marine] = await Promise.all([
     getJson(forecastUrl),

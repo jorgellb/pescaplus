@@ -260,12 +260,9 @@ export function getSpot(slug: string): FishingSpot | undefined {
   return FISHING_SPOTS.find((s) => s.slug === slug)
 }
 
-/** Featured spots to prerender at build; the rest generate on-demand (ISR). */
-export const FEATURED_SPOT_SLUGS = [
-  'a-coruna', 'vigo', 'gijon', 'santander', 'donostia', 'bilbao',
-  'huelva', 'cadiz', 'tarifa', 'malaga', 'almeria',
-  'cartagena', 'la-manga', 'alicante', 'valencia', 'castellon',
-  'tarragona', 'barcelona', 'roses', 'palma', 'eivissa', 'mao',
-  'las-palmas', 'santa-cruz-tenerife',
-  'mequinenza', 'orellana', 'aranjuez',
-]
+/**
+ * A small set of spots to prerender at build (kept short so the concurrent
+ * weather fetches don't burst the provider). Every other spot generates
+ * on-demand and is then cached by ISR.
+ */
+export const FEATURED_SPOT_SLUGS = ['cadiz', 'malaga', 'valencia', 'barcelona', 'a-coruna', 'las-palmas']
