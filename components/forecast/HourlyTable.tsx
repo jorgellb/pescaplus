@@ -14,8 +14,18 @@ function WindArrow({ deg }: { deg: number | null }) {
 const LABEL = 'sticky left-0 z-10 bg-paper text-left font-mono text-[10px] font-bold uppercase tracking-wide text-ink/50 px-2 py-1 whitespace-nowrap border-r border-ink/12'
 const CELL = 'text-center px-1 py-1 text-[11px] tabular-nums border-l border-ink/[0.06]'
 
-export default function HourlyTable({ hours, hasMarine }: { hours: HourPoint[]; hasMarine: boolean }) {
+export default function HourlyTable({
+  hours,
+  hasMarine,
+  tideHeights,
+}: {
+  hours: HourPoint[]
+  hasMarine: boolean
+  /** Tide height (m) aligned with `hours`, when a tide provider is configured. */
+  tideHeights?: (number | null)[]
+}) {
   if (hours.length === 0) return null
+  const hasTide = !!tideHeights && tideHeights.some((v) => v != null)
 
   // Group by day for the header.
   const groups: { date: string; span: number }[] = []
@@ -101,13 +111,35 @@ export default function HourlyTable({ hours, hasMarine }: { hours: HourPoint[]; 
                     <td key={i} className={`${CELL} text-ink/60 ${colBg(h)}`}>{h.wavePeriod != null ? Math.round(h.wavePeriod) : '–'}</td>
                   ))}
                 </tr>
+                {/* Wave direction */}
+                <tr>
+                  <td className={LABEL}>Dir. olas</td>
+                  {hours.map((h, i) => (
+                    <td key={i} className={`${CELL} text-ink/60 ${colBg(h)}`}><WindArrow deg={h.waveDir} /></td>
+                  ))}
+                </tr>
               </>
+            )}
+            {hasTide && tideHeights && (
+              <tr>
+                <td className={LABEL}>Marea m</td>
+                {hours.map((h, i) => (
+                  <td key={i} className={`${CELL} text-ink/70 ${colBg(h)}`}>{tideHeights[i] != null ? tideHeights[i]!.toFixed(1) : '–'}</td>
+                ))}
+              </tr>
             )}
             {/* Temp */}
             <tr>
               <td className={LABEL}>Temp °C</td>
               {hours.map((h, i) => (
                 <td key={i} className={`${CELL} text-ink/70 ${colBg(h)}`}>{h.temp != null ? Math.round(h.temp) : '–'}</td>
+              ))}
+            </tr>
+            {/* UV */}
+            <tr>
+              <td className={LABEL}>UV</td>
+              {hours.map((h, i) => (
+                <td key={i} className={`${CELL} ${colBg(h)} ${h.uv != null && h.uv >= 8 ? 'text-ink font-bold' : 'text-ink/40'}`}>{h.uv != null ? Math.round(h.uv) : '–'}</td>
               ))}
             </tr>
             {/* Precip */}

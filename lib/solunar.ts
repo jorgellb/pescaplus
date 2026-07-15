@@ -125,10 +125,13 @@ export interface SolunarDay {
   moonPhaseName: string
   periods: SolunarPeriod[]
   rating: number // 1..5 fishing-activity rating for the day
+  firstLight: number | null // civil dawn (sun at -6°)
+  lastLight: number | null // civil dusk (sun at -6°)
 }
 
 const SUN_H0 = -0.833
 const MOON_H0 = 0.125
+const CIVIL_H0 = -6 // civil twilight
 
 function phaseName(phase: number): string {
   if (phase < 0.03 || phase > 0.97) return 'Luna nueva'
@@ -155,6 +158,8 @@ export function solunarDay(lat: number, lon: number, dateISO: string, tz = 'Euro
 
   let sunrise: number | null = null
   let sunset: number | null = null
+  let firstLight: number | null = null
+  let lastLight: number | null = null
   let moonrise: number | null = null
   let moonset: number | null = null
   let moonUpper: number | null = null
@@ -175,6 +180,8 @@ export function solunarDay(lat: number, lon: number, dateISO: string, tz = 'Euro
 
     if (sunrise === null && prevSun < SUN_H0 && sunAlt >= SUN_H0) sunrise = t
     if (sunset === null && prevSun >= SUN_H0 && sunAlt < SUN_H0) sunset = t
+    if (firstLight === null && prevSun < CIVIL_H0 && sunAlt >= CIVIL_H0) firstLight = t
+    if (prevSun >= CIVIL_H0 && sunAlt < CIVIL_H0) lastLight = t
     if (moonrise === null && prevMoon < MOON_H0 && moonAlt >= MOON_H0) moonrise = t
     if (moonset === null && prevMoon >= MOON_H0 && moonAlt < MOON_H0) moonset = t
     if (moonAlt > maxMoonAlt) {
@@ -231,6 +238,8 @@ export function solunarDay(lat: number, lon: number, dateISO: string, tz = 'Euro
     moonPhaseName: phaseName(phase),
     periods,
     rating,
+    firstLight,
+    lastLight,
   }
 }
 

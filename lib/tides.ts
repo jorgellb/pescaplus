@@ -52,6 +52,32 @@ export function coefficientLabel(coef: number): string {
   return 'Marea muerta'
 }
 
+/**
+ * Tide height at an arbitrary instant, cosine-interpolated between the
+ * surrounding extremes (the standard approximation between high/low water).
+ * Returns null outside the covered range or with fewer than 2 extremes.
+ */
+export function tideHeightAt(extremes: TideExtreme[], t: number): number | null {
+  if (extremes.length < 2) return null
+  const sorted = [...extremes].sort((a, b) => a.time - b.time)
+  if (t < sorted[0].time || t > sorted[sorted.length - 1].time) return null
+  for (let i = 0; i < sorted.length - 1; i++) {
+    const a = sorted[i]
+    const b = sorted[i + 1]
+    if (t >= a.time && t <= b.time) {
+      const f = (t - a.time) / (b.time - a.time)
+      return Math.round((a.height + ((b.height - a.height) * (1 - Math.cos(Math.PI * f))) / 2) * 100) / 100
+    }
+  }
+  return null
+}
+
+/** Whether the tide is rising at an instant (null when unknown). */
+export function tideRisingAt(extremes: TideExtreme[], t: number): boolean | null {
+  const next = [...extremes].sort((a, b) => a.time - b.time).find((e) => e.time > t)
+  return next ? next.type === 'alta' : null
+}
+
 export async function getTides(lat: number, lon: number): Promise<TidesInfo> {
   const key = process.env.WORLDTIDES_API_KEY
   if (!key) return EMPTY(false)

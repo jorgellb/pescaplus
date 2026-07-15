@@ -26,7 +26,13 @@ export interface HourPoint {
   wavePeriod: number | null
   waveDir: number | null
   swellM: number | null
+  swellPeriod: number | null
+  swellDir: number | null
+  currentKmh: number | null
+  currentDir: number | null
   seaTempC: number | null
+  uv: number | null
+  visibilityKm: number | null
   solunar: boolean
   twilight: boolean
   isNow: boolean
@@ -147,11 +153,11 @@ export async function getMarineForecast(spot: FishingSpot, speciesId?: string | 
   const profile = getSpecies(speciesId)
   const forecastUrl =
     `https://api.open-meteo.com/v1/forecast?latitude=${spot.lat}&longitude=${spot.lon}` +
-    `&hourly=temperature_2m,precipitation,precipitation_probability,weather_code,cloud_cover,surface_pressure,wind_speed_10m,wind_gusts_10m,wind_direction_10m,is_day` +
+    `&hourly=temperature_2m,precipitation,precipitation_probability,weather_code,cloud_cover,surface_pressure,wind_speed_10m,wind_gusts_10m,wind_direction_10m,is_day,uv_index,visibility` +
     `&timezone=Europe%2FMadrid&forecast_days=7`
   const marineUrl =
     `https://marine-api.open-meteo.com/v1/marine?latitude=${spot.lat}&longitude=${spot.lon}` +
-    `&hourly=wave_height,wave_direction,wave_period,swell_wave_height,swell_wave_period,sea_surface_temperature` +
+    `&hourly=wave_height,wave_direction,wave_period,swell_wave_height,swell_wave_period,swell_wave_direction,ocean_current_velocity,ocean_current_direction,sea_surface_temperature` +
     `&timezone=Europe%2FMadrid&forecast_days=7`
 
   const [forecast, marine] = await Promise.all([
@@ -210,7 +216,13 @@ export async function getMarineForecast(spot: FishingSpot, speciesId?: string | 
       wavePeriod: mi != null ? num(mh.wave_period?.[mi]) : null,
       waveDir: mi != null ? num(mh.wave_direction?.[mi]) : null,
       swellM: mi != null ? num(mh.swell_wave_height?.[mi]) : null,
+      swellPeriod: mi != null ? num(mh.swell_wave_period?.[mi]) : null,
+      swellDir: mi != null ? num(mh.swell_wave_direction?.[mi]) : null,
+      currentKmh: mi != null ? num(mh.ocean_current_velocity?.[mi]) : null,
+      currentDir: mi != null ? num(mh.ocean_current_direction?.[mi]) : null,
       seaTempC: mi != null ? num(mh.sea_surface_temperature?.[mi]) : null,
+      uv: num(fh.uv_index?.[i]),
+      visibilityKm: num(fh.visibility?.[i]) != null ? Math.round((fh.visibility[i] as number) / 100) / 10 : null,
       solunar: inPeriod,
       twilight,
       isNow: Math.floor(time / 3600000) === nowHour,

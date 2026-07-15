@@ -4,12 +4,15 @@ import FishRating from '@/components/FishRating'
 import HourlyTable from '@/components/forecast/HourlyTable'
 import WindChart from '@/components/forecast/WindChart'
 import TideChart from '@/components/forecast/TideChart'
+import ActivityChart from '@/components/forecast/ActivityChart'
 import DayTabs from '@/components/forecast/DayTabs'
 import { FISHING_SPOTS, type FishingSpot } from '@/lib/fishing-spots'
 import { solunarDay, type SolunarDay } from '@/lib/solunar'
 import { getMarineForecast, bestWindow, groupByDay } from '@/lib/marine-forecast'
-import { getTides, tideCoefficient, coefficientLabel } from '@/lib/tides'
+import { getTides, tideCoefficient, coefficientLabel, tideHeightAt } from '@/lib/tides'
 import { getSpecies, GENERAL, SEA_SPECIES } from '@/lib/fishing-species'
+import { douglasState, safetyAlerts, navigationWindows, dayVerdict, gearForConditions } from '@/lib/sea-state'
+import { seawardBearing, windRelation, windRelationLabel } from '@/lib/coast'
 import { scoreLabel, scoreHex, windWord, weatherEmoji } from '@/lib/forecast-format'
 import { fmtTime, fmtDayLabel, fmtDateLong, todayMadridISO, addDaysISO, ratingLabel } from '@/lib/solunar-format'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
@@ -102,6 +105,18 @@ export default async function SpotDashboard({
 
   const scoreNoun = species.id === 'general' ? 'Actividad de pesca' : `Actividad · ${species.name}`
 
+  // Safety, sea state, onshore/offshore wind and gear advice.
+  const fromNow = nowHour ? hours.slice(Math.max(0, hours.indexOf(nowHour))) : hours
+  const alerts = safetyAlerts(fromNow)
+  const seaNow = nowHour ? douglasState(nowHour.waveM) : null
+  const seaward = seawardBearing(s)
+  const windRel =
+    seaward != null && nowHour?.windDir != null && (nowHour.windKmh ?? 0) >= 5
+      ? windRelationLabel(windRelation(nowHour.windDir, seaward))
+      : null
+  const gearTips = gearForConditions(nowHour)
+  const uvMaxToday = todayHours.length ? Math.max(...todayHours.map((h) => h.uv ?? 0)) : 0
+
   return (
     <Layout>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
@@ -126,6 +141,20 @@ export default async function SpotDashboard({
       </section>
 
       <section className="max-w-6xl mx-auto px-4 py-10 sm:px-6 space-y-10">
+        {/* Safety alerts */}
+        {alerts.map((a, i) => (
+          <div
+            key={i}
+            role="alert"
+            className={`rounded-2xl border px-5 py-4 text-sm font-semibold flex items-start gap-3 ${
+              a.level === 'peligro' ? 'border-red-700/40 bg-red-700/[0.07] text-red-900' : 'border-amber-600/40 bg-amber-500/[0.08] text-amber-900'
+            }`}
+          >
+            <span className="text-xl leading-none" aria-hidden>{a.level === 'peligro' ? '🚫' : '⚠️'}</span>
+            <span>{a.text}</span>
+          </div>
+        ))}
+
         {/* Species selector (sea only) */}
         {s.type === 'mar' && (
           <div className="border border-ink/15 rounded-2xl bg-paper p-4 space-y-2">
@@ -173,14 +202,33 @@ export default async function SpotDashboard({
                 <Metric label="Viento" icon="💨" value={<span className="inline-flex items-center gap-1.5">{nowHour.windKmh ?? '–'} km/h <WindArrow deg={nowHour.windDir} /> {nowHour.windDirLabel}</span>} sub={windWord(nowHour.windKmh)} />
                 <Metric label="Rachas" icon="🌬️" value={nowHour.gustKmh != null ? `${nowHour.gustKmh} km/h` : '–'} />
                 <Metric label="Presión" icon="📊" value={nowHour.pressure != null ? `${Math.round(nowHour.pressure)} hPa` : '–'} sub={pressureTrend ?? undefined} />
-                {s.type === 'mar' && <Metric label="Oleaje" icon="🌊" value={nowHour.waveM != null ? `${nowHour.waveM.toFixed(1)} m` : '–'} sub={nowHour.wavePeriod != null ? `periodo ${Math.round(nowHour.wavePeriod)}s` : undefined} />}
+                {s.type === 'mar' && (
+                  <Metric
+                    label="Estado del mar"
+                    icon="🌊"
+                    value={seaNow ? seaNow.name : nowHour.waveM != null ? `${nowHour.waveM.toFixed(1)} m` : '–'}
+                    sub={nowHour.waveM != null ? `${nowHour.waveM.toFixed(1)} m · periodo ${nowHour.wavePeriod != null ? Math.round(nowHour.wavePeriod) : '–'}s` : undefined}
+                  />
+                )}
+                {s.type === 'mar' && nowHour.swellM != null && (
+                  <Metric label="Mar de fondo" icon="〰️" value={`${nowHour.swellM.toFixed(1)} m`} sub={nowHour.swellPeriod != null ? `periodo ${Math.round(nowHour.swellPeriod)}s` : undefined} />
+                )}
+                {s.type === 'mar' && nowHour.currentKmh != null && (
+                  <Metric label="Corriente" icon="🧭" value={<span className="inline-flex items-center gap-1.5">{(nowHour.currentKmh / 1.852).toFixed(1)} kn <WindArrow deg={nowHour.currentDir} /></span>} />
+                )}
                 {s.type === 'mar' && <Metric label="Tª del mar" icon="🐟" value={nowHour.seaTempC != null ? `${nowHour.seaTempC}°C` : '–'} />}
-                <Metric label="Temp. aire" icon="🌡️" value={nowHour.temp != null ? `${Math.round(nowHour.temp)}°C` : '–'} />
-                <Metric label="Cielo" icon={weatherEmoji(nowHour.code, nowHour.isDay)} value={nowHour.precipProb != null ? `${nowHour.precipProb}% lluvia` : '—'} />
+                <Metric label="Temp. aire" icon="🌡️" value={nowHour.temp != null ? `${Math.round(nowHour.temp)}°C` : '–'} sub={uvMaxToday >= 7 ? `UV máx ${Math.round(uvMaxToday)} · protégete` : undefined} />
+                <Metric label="Cielo" icon={weatherEmoji(nowHour.code, nowHour.isDay)} value={nowHour.precipProb != null ? `${nowHour.precipProb}% lluvia` : '—'} sub={nowHour.visibilityKm != null ? `visibilidad ${nowHour.visibilityKm} km` : undefined} />
                 {tides?.available && tides.risingNow !== null && (
                   <Metric label="Marea" icon="🌊" value={tides.risingNow ? 'Subiendo ↑' : 'Bajando ↓'} sub={tides.nextTides[0] ? `${tides.nextTides[0].type === 'alta' ? 'pleamar' : 'bajamar'} ${fmtTime(tides.nextTides[0].time)}` : undefined} />
                 )}
+                <Metric label="Primera luz" icon="🌄" value={fmtTime(d0.firstLight)} sub={`última luz ${fmtTime(d0.lastLight)}`} />
               </div>
+              {windRel && (
+                <p className="text-[13px] text-ink/70 leading-relaxed border border-ink/12 rounded-xl px-3.5 py-2.5 bg-paper">
+                  <span className="font-bold text-ink">{windRel.label}.</span> {windRel.hint}
+                </p>
+              )}
               {whyFactors.length > 0 && (
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/40">A favor ahora:</span>
@@ -218,11 +266,24 @@ export default async function SpotDashboard({
                 const sol = solByDate.get(g.dateISO)
                 const win = bestWindow(g.hours)
                 const gStart = g.hours[0].time
-                const dayExtremes = tides?.all.filter((e) => e.time >= gStart && e.time < gStart + 24 * 3600000) ?? []
+                const dayExtremes = tides?.all.filter((e) => e.time >= gStart - 8 * 3600000 && e.time < gStart + 32 * 3600000) ?? []
                 const coef = sol ? tideCoefficient(sol.moonPhase) : null
                 const showTide = !!tides?.available && dayExtremes.length >= 2
+                const tideHeights = showTide ? g.hours.map((h) => tideHeightAt(dayExtremes, h.time)) : undefined
+                const navWins = s.type === 'mar' ? navigationWindows(g.hours) : []
+                const firstHigh = dayExtremes.find((e) => e.time >= gStart && e.type === 'alta')
+                const verdict = dayVerdict({
+                  hours: g.hours,
+                  window: win,
+                  tideNote: showTide && firstHigh ? `pleamar a las ${fmtTime(firstHigh.time)}${coef != null ? ` (coef ${coef})` : ''}` : null,
+                })
                 return (
                   <div key={g.dateISO} className="space-y-5">
+                    {verdict && (
+                      <p className="text-[15px] text-ink/85 leading-relaxed border-l-4 border-accent bg-accent/[0.05] rounded-r-xl px-4 py-3">
+                        <span className="font-bold">📋 Veredicto:</span> {verdict}
+                      </p>
+                    )}
                     <div className="flex flex-wrap items-center gap-3">
                       {win && (
                         <span className="inline-flex items-center gap-2 rounded-xl border border-accent/30 bg-accent/[0.06] px-3 py-2">
@@ -243,7 +304,21 @@ export default async function SpotDashboard({
                           <span className="font-mono text-[10px] uppercase tracking-widest text-ink/50">coef · {coefficientLabel(coef)}</span>
                         </span>
                       )}
+                      {navWins.map((w, i) => (
+                        <span key={i} className="inline-flex items-center gap-2 rounded-xl border border-ink/15 px-3 py-2" title="Tramo con viento y olas aptos para embarcación menor">
+                          <span aria-hidden>🚤</span>
+                          <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Navegación</span>
+                          <span className="font-display text-lg text-ink">{fmtTime(w.start)} – {fmtTime(w.end)}</span>
+                        </span>
+                      ))}
                     </div>
+
+                    <div className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-5 space-y-3">
+                      <h3 className="font-display uppercase text-lg text-ink leading-none flex items-center gap-2"><span aria-hidden>📈</span> Actividad de pesca del día</h3>
+                      <ActivityChart hours={g.hours} window={win} now={now} />
+                      <p className="text-[11px] text-ink/40">Curva de puntuación 0-100 · banda verde: mejor ventana · punto: pico del día.</p>
+                    </div>
+
                     <div className={`grid grid-cols-1 ${showTide ? 'lg:grid-cols-2' : ''} gap-6`}>
                       <div className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-5 space-y-3">
                         <h3 className="font-display uppercase text-lg text-ink leading-none flex items-center gap-2"><span aria-hidden>💨</span> Viento (km/h)</h3>
@@ -257,11 +332,30 @@ export default async function SpotDashboard({
                         </div>
                       )}
                     </div>
-                    <HourlyTable hours={g.hours} hasMarine={forecast.hasMarine} />
+                    <HourlyTable hours={g.hours} hasMarine={forecast.hasMarine} tideHeights={tideHeights} />
                   </div>
                 )
               })}
             </DayTabs>
+          </div>
+        )}
+
+        {/* Gear for current conditions */}
+        {gearTips.length > 0 && (
+          <div className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-6 space-y-4">
+            <h2 className="font-display uppercase text-2xl text-ink leading-none border-b border-ink/12 pb-4 flex items-center gap-2">
+              <span aria-hidden>🎒</span> Equipo para estas condiciones
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {gearTips.map((t) => (
+                <div key={t.text} className="border border-ink/12 rounded-xl bg-paper p-4 flex flex-col justify-between gap-3">
+                  <p className="text-sm text-ink/75 leading-relaxed">{t.text}</p>
+                  <Link href={t.href} className="self-start inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-paper bg-ink hover:bg-accent px-3.5 py-2 rounded-lg transition-colors">
+                    {t.label} →
+                  </Link>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
