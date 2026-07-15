@@ -1,5 +1,6 @@
 import type { FishingSpot } from '@/lib/fishing-spots'
 import { solunarDay, type SolunarDay } from '@/lib/solunar'
+import { getSpecies, type SpeciesProfile } from '@/lib/fishing-species'
 
 /**
  * Hourly angling forecast (Windguru-style) built from Open-Meteo's free forecast
@@ -95,24 +96,26 @@ const num = (v: unknown): number | null => (typeof v === 'number' && Number.isFi
 function scoreHour(
   h: Omit<HourPoint, 'score'>,
   pressure3hAgo: number | null,
+  p: SpeciesProfile,
 ): number {
   let s = 40
-  if (h.solunar) s += 30
-  if (h.twilight) s += 18
+  if (h.solunar) s += p.solunar
+  if (h.twilight) s += p.dawnDusk
+  else if (!h.isDay) s += p.night
 
   const w = h.windKmh
   if (w != null) {
-    if (w >= 8 && w <= 25) s += 14
-    else if (w < 5) s += 2
-    else if (w <= 35) s += 6
-    else if (w <= 45) s -= 8
-    else s -= 18
+    const [lo, hi] = p.windSweet
+    if (w >= lo && w <= hi) s += p.windBonus
+    else if (w < lo) s += Math.round(p.windBonus * 0.15)
+    else if (w <= p.windStrongAt) s += 4
+    else s -= 16
   }
-  if (h.gustKmh != null && h.gustKmh > 55) s -= 10
+  if (h.gustKmh != null && h.gustKmh > 60) s -= 10
 
   if (h.pressure != null && pressure3hAgo != null) {
     const d = h.pressure - pressure3hAgo
-    if (d < -0.6) s += 14
+    if (d < -0.6) s += p.pressureFall
     else if (d > 0.6) s -= 8
   }
 
@@ -120,12 +123,28 @@ function scoreHour(
     if (h.precipProb > 70) s -= 10
     else if (h.precipProb >= 40) s -= 4
   }
-  if (h.waveM != null && h.waveM > 2.5) s -= 8
+
+  if (h.waveM != null) {
+    const m = h.waveM
+    if (p.wavePref === 'rough') {
+      if (m >= 0.75 && m <= 2.5) s += 8
+      else if (m < 0.4) s -= 4
+      else if (m > 3.5) s -= 8
+    } else if (p.wavePref === 'calm') {
+      if (m < 0.75) s += 8
+      else if (m > 2.5) s -= 14
+      else if (m > 1.5) s -= 8
+    } else {
+      if (m >= 0.5 && m <= 1.5) s += 6
+      else if (m > 3) s -= 8
+    }
+  }
 
   return Math.max(0, Math.min(100, Math.round(s)))
 }
 
-export async function getMarineForecast(spot: FishingSpot): Promise<MarineForecast> {
+export async function getMarineForecast(spot: FishingSpot, speciesId?: string | null): Promise<MarineForecast> {
+  const profile = getSpecies(speciesId)
   const forecastUrl =
     `https://api.open-meteo.com/v1/forecast?latitude=${spot.lat}&longitude=${spot.lon}` +
     `&hourly=temperature_2m,precipitation,precipitation_probability,weather_code,cloud_cover,surface_pressure,wind_speed_10m,wind_gusts_10m,wind_direction_10m,is_day` +
@@ -200,7 +219,7 @@ export async function getMarineForecast(spot: FishingSpot): Promise<MarineForeca
 
   const hours: HourPoint[] = points.map((p, i) => ({
     ...p,
-    score: scoreHour(p, i >= 3 ? points[i - 3].pressure : null),
+    score: scoreHour(p, i >= 3 ? points[i - 3].pressure : null, profile),
   }))
 
   return { available: hours.length > 0, hasMarine: !!mh, hours }

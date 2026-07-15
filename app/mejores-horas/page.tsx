@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Layout from '@/components/Layout'
+import UseMyLocation from '@/components/forecast/UseMyLocation'
 import { FISHING_SPOTS, type FishingSpot } from '@/lib/fishing-spots'
 import { lunarInfo, phaseEmoji } from '@/lib/solunar'
 import { todayMadridISO, fmtDateLong } from '@/lib/solunar-format'
@@ -53,6 +54,7 @@ export default function MejoresHorasHub() {
             {coastalCount} puntos de toda la costa española y los principales embalses. {fmtDateLong(today)}.
           </p>
           <div className="flex flex-wrap items-center gap-3 mt-5">
+            <UseMyLocation />
             <span className="inline-flex items-center gap-2 border border-ink/15 rounded-xl px-3 py-2 bg-paper text-sm">
               <span className="text-lg" aria-hidden>{phaseEmoji(moon.phase)}</span>
               <span className="font-bold text-ink">{moon.name}</span>

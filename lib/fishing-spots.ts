@@ -260,6 +260,22 @@ export function getSpot(slug: string): FishingSpot | undefined {
   return FISHING_SPOTS.find((s) => s.slug === slug)
 }
 
+/** Nearest preset spot to a coordinate (equirectangular approximation). */
+export function nearestSpot(lat: number, lon: number): FishingSpot {
+  let best = FISHING_SPOTS[0]
+  let bestD = Infinity
+  for (const s of FISHING_SPOTS) {
+    const dLat = s.lat - lat
+    const dLon = (s.lon - lon) * Math.cos((lat * Math.PI) / 180)
+    const d = dLat * dLat + dLon * dLon
+    if (d < bestD) {
+      bestD = d
+      best = s
+    }
+  }
+  return best
+}
+
 /**
  * A small set of spots to prerender at build (kept short so the concurrent
  * weather fetches don't burst the provider). Every other spot generates
