@@ -3,10 +3,14 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import Layout from '@/components/Layout'
 import FishRating from '@/components/FishRating'
+import HourlyTable from '@/components/forecast/HourlyTable'
+import WindChart from '@/components/forecast/WindChart'
+import TideChart from '@/components/forecast/TideChart'
 import { FISHING_SPOTS, FEATURED_SPOT_SLUGS, getSpot } from '@/lib/fishing-spots'
 import { solunarDay } from '@/lib/solunar'
-import { getFishingWeather } from '@/lib/fishing-weather'
+import { getMarineForecast } from '@/lib/marine-forecast'
 import { getTides } from '@/lib/tides'
+import { scoreLabel, scoreHex, windWord, weatherEmoji } from '@/lib/forecast-format'
 import { fmtTime, fmtDayLabel, fmtDateLong, todayMadridISO, addDaysISO, ratingLabel } from '@/lib/solunar-format'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
 
@@ -14,7 +18,6 @@ export const revalidate = 1800
 
 type Params = { params: Promise<{ spot: string }> }
 
-// Prerender the popular spots; the rest render on-demand and cache (ISR).
 export function generateStaticParams() {
   return FEATURED_SPOT_SLUGS.map((spot) => ({ spot }))
 }
@@ -23,10 +26,31 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { spot } = await params
   const s = getSpot(spot)
   if (!s) return { title: 'Localidad no encontrada' }
-  const tideBit = s.type === 'mar' ? 'mareas, ' : ''
-  const title = s.type === 'mar' ? `Mejores horas de pesca y mareas en ${s.name}` : `Mejores horas de pesca en ${s.name}`
-  const description = `Consulta las mejores horas para pescar en ${s.name} (${s.region}): ${tideBit}periodos solunares, salida y puesta de sol y luna, fase lunar y meteo de pesca. Ideal para ${s.known}.`
+  const extra = s.type === 'mar' ? 'mareas, viento, oleaje, ' : 'viento, '
+  const title = s.type === 'mar' ? `Pesca en ${s.name}: mareas, viento, oleaje y mejores horas` : `Pesca en ${s.name}: viento y mejores horas`
+  const description = `Previsión profesional de pesca en ${s.name} (${s.region}): ${extra}presión, temperatura del agua, periodos solunares y las mejores horas hora a hora. Ideal para ${s.known}.`
   return { title, description, alternates: { canonical: `/mejores-horas/${s.slug}` } }
+}
+
+function WindArrow({ deg }: { deg: number | null }) {
+  if (deg == null) return <span className="text-ink/30">–</span>
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{ transform: `rotate(${deg + 180}deg)` }} className="inline-block">
+      <path d="M12 2l5 10h-3.2v10h-3.6V12H7z" />
+    </svg>
+  )
+}
+
+function Metric({ label, value, icon, sub }: { label: string; value: React.ReactNode; icon: React.ReactNode; sub?: string }) {
+  return (
+    <div className="border border-ink/12 rounded-xl bg-paper px-3 py-2.5">
+      <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/40 flex items-center gap-1">
+        <span aria-hidden>{icon}</span> {label}
+      </p>
+      <p className="text-sm font-bold text-ink mt-1 leading-tight">{value}</p>
+      {sub && <p className="font-mono text-[10px] uppercase tracking-wide text-ink/40 capitalize">{sub}</p>}
+    </div>
+  )
 }
 
 export default async function SpotPage({ params }: Params) {
@@ -37,10 +61,37 @@ export default async function SpotPage({ params }: Params) {
   const today = todayMadridISO()
   const days = Array.from({ length: 7 }, (_, i) => solunarDay(s.lat, s.lon, addDaysISO(today, i)))
   const d0 = days[0]
-  const [weather, tides] = await Promise.all([
-    getFishingWeather(s),
+  const [forecast, tides] = await Promise.all([
+    getMarineForecast(s),
     s.type === 'mar' ? getTides(s.lat, s.lon) : Promise.resolve(null),
   ])
+
+  const hours = forecast.hours
+  const nowHour = hours.find((h) => h.isNow) ?? hours[0] ?? null
+  // Derive "now" from the forecast's current hour (avoids an impure Date.now()
+  // in render; the forecast marks the current hour when it's generated).
+  const now = nowHour?.time ?? hours[0]?.time ?? 0
+  const todayHours = hours.filter((h) => h.dateISO === today)
+  const dayStart = todayHours[0]?.time ?? null
+
+  let pressureTrend: string | null = null
+  if (nowHour?.pressure != null) {
+    const idx = hours.indexOf(nowHour)
+    const past = idx >= 3 ? hours[idx - 3] : null
+    if (past?.pressure != null) {
+      const diff = nowHour.pressure - past.pressure
+      pressureTrend = diff > 0.6 ? 'subiendo' : diff < -0.6 ? 'bajando' : 'estable'
+    }
+  }
+
+  const bestToday = [...todayHours]
+    .filter((h) => h.time >= now - 3600000)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3)
+    .sort((a, b) => a.time - b.time)
+
+  const majors = d0.periods.filter((p) => p.kind === 'mayor')
+  const minors = d0.periods.filter((p) => p.kind === 'menor')
 
   const breadcrumbLd = breadcrumbJsonLd([
     { name: 'Inicio', url: SITE_URL },
@@ -48,15 +99,12 @@ export default async function SpotPage({ params }: Params) {
     { name: s.name },
   ])
 
-  const majors = d0.periods.filter((p) => p.kind === 'mayor')
-  const minors = d0.periods.filter((p) => p.kind === 'menor')
-
   return (
     <Layout>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
 
       <section className="bg-paper border-b border-ink/12">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
           <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-5">
             <Link href="/" className="hover:text-accent">Inicio</Link> <span className="mx-1">/</span>{' '}
             <Link href="/mejores-horas" className="hover:text-accent">Mejores horas</Link> <span className="mx-1">/</span>{' '}
@@ -66,26 +114,106 @@ export default async function SpotPage({ params }: Params) {
             {s.type === 'mar' ? '● Pesca en el mar' : '● Pesca en agua dulce'} · {s.region}
           </p>
           <h1 className="font-display uppercase text-3xl sm:text-4xl md:text-5xl leading-[1.02] text-ink break-words">
-            Mejores horas de pesca en {s.name}
+            Pesca en {s.name}
           </h1>
           <p className="text-ink/60 text-sm max-w-2xl mt-3">
-            Previsión solunar y meteo para acertar con tus salidas. Zona conocida por {s.known}. {fmtDateLong(today)}.
+            Previsión completa para el pescador: viento, {s.type === 'mar' ? 'mareas, oleaje, ' : ''}presión, solunar y las mejores horas. Zona conocida por {s.known}. {fmtDateLong(today)}.
           </p>
         </div>
       </section>
 
-      <section className="max-w-5xl mx-auto px-4 py-10 sm:px-6 space-y-10">
-        {/* Today */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 border border-ink/15 rounded-2xl bg-paper shadow-hard p-6 space-y-5">
-            <div className="flex items-center justify-between gap-4 border-b border-ink/12 pb-4">
-              <h2 className="font-display uppercase text-2xl text-ink leading-none">Hoy</h2>
-              <div className="text-right">
-                <FishRating value={d0.rating} />
-                <p className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mt-1">{ratingLabel(d0.rating)}</p>
+      <section className="max-w-6xl mx-auto px-4 py-10 sm:px-6 space-y-10">
+        {/* NOW dashboard */}
+        {nowHour ? (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-6 flex flex-col justify-between">
+              <div className="flex items-center justify-between gap-3 border-b border-ink/12 pb-4">
+                <h2 className="font-display uppercase text-2xl text-ink leading-none">Ahora</h2>
+                <span className="font-mono text-[11px] uppercase tracking-widest text-ink/50">{nowHour.hourLabel}</span>
+              </div>
+              <div className="text-center py-5">
+                <div className="text-6xl font-display leading-none" style={{ color: scoreHex(nowHour.score) }}>{nowHour.score}</div>
+                <p className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mt-2">Actividad de pesca · {scoreLabel(nowHour.score)}</p>
+              </div>
+              <div className="flex items-center justify-between border-t border-ink/12 pt-4">
+                <span className="font-mono text-[11px] uppercase tracking-widest text-ink/50">Solunar hoy</span>
+                <div className="text-right"><FishRating value={d0.rating} /><p className="font-mono text-[10px] uppercase tracking-widest text-ink/40 mt-1">{ratingLabel(d0.rating)}</p></div>
               </div>
             </div>
 
+            <div className="lg:col-span-2 border border-ink/15 rounded-2xl bg-paper shadow-hard p-6 space-y-4">
+              <h2 className="font-display uppercase text-2xl text-ink leading-none border-b border-ink/12 pb-4">Condiciones actuales</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <Metric label="Viento" icon="💨" value={<span className="inline-flex items-center gap-1.5">{nowHour.windKmh ?? '–'} km/h <WindArrow deg={nowHour.windDir} /> {nowHour.windDirLabel}</span>} sub={windWord(nowHour.windKmh)} />
+                <Metric label="Rachas" icon="🌬️" value={nowHour.gustKmh != null ? `${nowHour.gustKmh} km/h` : '–'} />
+                <Metric label="Presión" icon="📊" value={nowHour.pressure != null ? `${Math.round(nowHour.pressure)} hPa` : '–'} sub={pressureTrend ?? undefined} />
+                {s.type === 'mar' && <Metric label="Oleaje" icon="🌊" value={nowHour.waveM != null ? `${nowHour.waveM.toFixed(1)} m` : '–'} sub={nowHour.wavePeriod != null ? `periodo ${Math.round(nowHour.wavePeriod)}s` : undefined} />}
+                {s.type === 'mar' && <Metric label="Tª del mar" icon="🐟" value={nowHour.seaTempC != null ? `${nowHour.seaTempC}°C` : '–'} />}
+                <Metric label="Temp. aire" icon="🌡️" value={nowHour.temp != null ? `${Math.round(nowHour.temp)}°C` : '–'} />
+                <Metric label="Cielo" icon={weatherEmoji(nowHour.code, nowHour.isDay)} value={nowHour.precipProb != null ? `${nowHour.precipProb}% lluvia` : '—'} />
+                {tides?.available && tides.risingNow !== null && (
+                  <Metric label="Marea" icon="🌊" value={tides.risingNow ? 'Subiendo ↑' : 'Bajando ↓'} sub={tides.nextTides[0] ? `${tides.nextTides[0].type === 'alta' ? 'pleamar' : 'bajamar'} ${fmtTime(tides.nextTides[0].time)}` : undefined} />
+                )}
+              </div>
+              {bestToday.length > 0 && (
+                <div className="pt-1">
+                  <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50 mb-2">Mejores horas hoy</p>
+                  <div className="flex flex-wrap gap-2">
+                    {bestToday.map((h) => (
+                      <span key={h.time} className="inline-flex items-center gap-2 border border-ink/15 rounded-full px-3 py-1.5">
+                        <span className="font-display text-lg text-ink">{h.hourLabel}</span>
+                        <span className="text-paper text-[11px] font-bold rounded px-1.5 py-0.5" style={{ background: scoreHex(h.score) }}>{h.score}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="border border-ink/15 rounded-2xl bg-paper p-6 text-sm text-ink/50">La previsión meteorológica no está disponible ahora mismo. Vuelve a intentarlo en unos minutos.</div>
+        )}
+
+        {/* Charts */}
+        {dayStart != null && (
+          <div className={`grid grid-cols-1 ${tides?.available ? 'lg:grid-cols-2' : ''} gap-6`}>
+            <div className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-5 space-y-3">
+              <h2 className="font-display uppercase text-xl text-ink leading-none flex items-center gap-2"><span aria-hidden>💨</span> Viento hoy (km/h)</h2>
+              <WindChart hours={todayHours} sunrise={d0.sunrise} sunset={d0.sunset} periods={d0.periods} now={now} />
+              <p className="text-[11px] text-ink/40">Barras: viento medio · línea: rachas · franjas verdes: periodos solunares · zona sombreada: noche.</p>
+            </div>
+            {tides?.available && dayStart != null && (
+              <div className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-5 space-y-3">
+                <h2 className="font-display uppercase text-xl text-ink leading-none flex items-center gap-2"><span aria-hidden>🌊</span> Marea hoy</h2>
+                <TideChart extremes={tides.all} dayStart={dayStart} now={now} />
+                <div className="flex flex-wrap gap-2">
+                  {tides.nextTides.map((t, i) => (
+                    <span key={i} className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs border ${t.type === 'alta' ? 'border-accent/30 bg-accent/[0.05]' : 'border-ink/15'}`}>
+                      <span className="font-bold text-ink">{t.type === 'alta' ? 'Pleamar' : 'Bajamar'}</span>
+                      <span className="font-display text-ink">{fmtTime(t.time)}</span>
+                      <span className="font-mono text-[10px] text-ink/50">{t.height.toFixed(1)}m</span>
+                    </span>
+                  ))}
+                </div>
+                {tides.smallRange && <p className="text-[11px] text-ink/40">Marea de escaso recorrido, típica del Mediterráneo.</p>}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Hourly forecast table */}
+        {hours.length > 0 && (
+          <div className="space-y-3">
+            <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3">Previsión hora a hora · 48 h</h2>
+            <p className="text-[12px] text-ink/50">Desliza la tabla para ver todas las horas. La fila «Pesca» es la puntuación combinada (solunar, viento, presión y luz); verde = mejor.</p>
+            <HourlyTable hours={hours} hasMarine={forecast.hasMarine} />
+          </div>
+        )}
+
+        {/* Sun & moon */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 border border-ink/15 rounded-2xl bg-paper shadow-hard p-6 space-y-4">
+            <h2 className="font-display uppercase text-2xl text-ink leading-none border-b border-ink/12 pb-4">Sol, luna y solunar</h2>
             <div>
               <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50 mb-2">Periodos de máxima actividad</p>
               <div className="space-y-2">
@@ -102,83 +230,21 @@ export default async function SpotPage({ params }: Params) {
                   </div>
                 ))}
               </div>
-              <p className="text-[12px] text-ink/50 mt-3">Los periodos «mayores» (luna en su punto más alto y más bajo) suelen dar la mejor actividad; los «menores» coinciden con la salida y puesta de la luna.</p>
             </div>
-
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
-              <Fact label="Amanecer" value={fmtTime(d0.sunrise)} icon="🌅" />
-              <Fact label="Atardecer" value={fmtTime(d0.sunset)} icon="🌇" />
-              <Fact label="Sale la luna" value={fmtTime(d0.moonrise)} icon="🌘" />
-              <Fact label="Se pone la luna" value={fmtTime(d0.moonset)} icon="🌒" />
-            </div>
-            <div className="flex items-center gap-3 pt-1">
-              <span className="text-2xl">🌙</span>
-              <div>
-                <p className="text-sm font-bold text-ink">{d0.moonPhaseName}</p>
-                <p className="font-mono text-[11px] uppercase tracking-widest text-ink/50">{Math.round(d0.moonIllumination * 100)}% iluminada</p>
-              </div>
+              <Metric label="Amanecer" icon="🌅" value={fmtTime(d0.sunrise)} />
+              <Metric label="Atardecer" icon="🌇" value={fmtTime(d0.sunset)} />
+              <Metric label="Sale la luna" icon="🌘" value={fmtTime(d0.moonrise)} />
+              <Metric label="Se pone la luna" icon="🌒" value={fmtTime(d0.moonset)} />
             </div>
           </div>
-
-          {/* Weather */}
-          <div className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-6 space-y-4">
-            <div className="flex items-center justify-between gap-2 border-b border-ink/12 pb-4">
-              <h2 className="font-display uppercase text-2xl text-ink leading-none">Meteo</h2>
-              <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full ${weather.activity.score >= 4 ? 'bg-accent/10 text-accent border border-accent/30' : weather.activity.score <= 2 ? 'bg-amber-500/10 text-amber-700 border border-amber-500/30' : 'border border-ink/20 text-ink/60'}`}>
-                {weather.activity.label}
-              </span>
-            </div>
-            {weather.available ? (
-              <>
-                <div className="grid grid-cols-2 gap-3">
-                  <Fact label="Temperatura" value={weather.tempC != null ? `${weather.tempC}°C` : '—'} icon="🌡️" />
-                  <Fact label="Viento" value={weather.windKmh != null ? `${weather.windKmh} km/h ${weather.windDir ?? ''}` : '—'} icon="💨" />
-                  <Fact label="Presión" value={weather.pressureHpa != null ? `${weather.pressureHpa} hPa` : '—'} icon="📊" sub={weather.pressureTrend ?? undefined} />
-                  {s.type === 'mar' ? (
-                    <Fact label="Oleaje" value={weather.waveM != null ? `${weather.waveM} m` : '—'} icon="🌊" sub={weather.seaTempC != null ? `mar ${weather.seaTempC}°C` : undefined} />
-                  ) : (
-                    <Fact label="Actividad" value={`${weather.activity.score}/5`} icon="🎣" />
-                  )}
-                </div>
-                <p className="text-[12px] text-ink/60 leading-relaxed">{weather.activity.reason}</p>
-              </>
-            ) : (
-              <p className="text-sm text-ink/50">La previsión meteorológica no está disponible ahora mismo. Vuelve a intentarlo en unos minutos.</p>
-            )}
+          <div className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-6 flex flex-col items-center justify-center text-center gap-2">
+            <span className="text-5xl">🌙</span>
+            <p className="font-bold text-ink text-lg">{d0.moonPhaseName}</p>
+            <p className="font-mono text-[11px] uppercase tracking-widest text-ink/50">{Math.round(d0.moonIllumination * 100)}% iluminada</p>
+            <Link href="/calendario" className="mt-2 font-mono text-xs font-bold uppercase tracking-widest text-accent hover:underline">Ver calendario →</Link>
           </div>
         </div>
-
-        {/* Tides (coastal, only when a provider key is configured) */}
-        {tides?.configured && (
-          <div className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-6 space-y-4">
-            <div className="flex items-center justify-between gap-3 border-b border-ink/12 pb-4">
-              <h2 className="font-display uppercase text-2xl text-ink leading-none flex items-center gap-2"><span aria-hidden>🌊</span> Mareas</h2>
-              {tides.risingNow !== null && (
-                <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full border border-ink/20 text-ink/60">
-                  {tides.risingNow ? 'Subiendo ↑' : 'Bajando ↓'}
-                </span>
-              )}
-            </div>
-            {tides.available ? (
-              <>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {tides.nextTides.map((t, i) => (
-                    <div key={i} className={`rounded-xl px-3 py-2.5 border ${t.type === 'alta' ? 'border-accent/30 bg-accent/[0.05]' : 'border-ink/12 bg-paper'}`}>
-                      <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/40">{t.type === 'alta' ? 'Pleamar' : 'Bajamar'}</p>
-                      <p className="font-display text-2xl text-ink leading-none mt-1">{fmtTime(t.time)}</p>
-                      <p className="font-mono text-[11px] text-ink/50 mt-0.5">{t.height.toFixed(2)} m</p>
-                    </div>
-                  ))}
-                </div>
-                {tides.smallRange && (
-                  <p className="text-[12px] text-ink/50">Marea de escaso recorrido, típica del Mediterráneo: influye poco en la actividad.</p>
-                )}
-              </>
-            ) : (
-              <p className="text-sm text-ink/50">Predicción de mareas no disponible ahora mismo. Vuelve a intentarlo en unos minutos.</p>
-            )}
-          </div>
-        )}
 
         {/* 7-day outlook */}
         <div className="space-y-4">
@@ -203,18 +269,17 @@ export default async function SpotPage({ params }: Params) {
 
         {/* SEO copy + internal links */}
         <div className="border-t border-ink/12 pt-8 space-y-3 text-[15px] text-ink/80 leading-relaxed">
-          <h2 className="font-display uppercase text-2xl text-ink">Cómo aprovechar las mejores horas en {s.name}</h2>
+          <h2 className="font-display uppercase text-2xl text-ink">Cómo leer la previsión de pesca de {s.name}</h2>
           <p>
-            La teoría solunar sostiene que los peces se alimentan con más intensidad cuando la luna está en su punto más alto o
-            más bajo (periodos mayores) y al salir y ponerse (periodos menores). Si además coinciden con el amanecer o el
-            atardecer y con una presión atmosférica en descenso, tienes la ventana perfecta.
+            La <strong>puntuación de pesca</strong> combina la teoría solunar (posición de la luna), el viento, la tendencia de
+            la presión atmosférica{s.type === 'mar' ? ', el oleaje' : ''} y la luz del amanecer y el atardecer. Busca las horas
+            en verde: suelen coincidir con periodos solunares y bajadas de presión con viento moderado que riza el agua.
           </p>
           <p>
-            Prepara tu jornada con el equipo adecuado: revisa nuestras{' '}
-            <Link href="/categories/canas" className="text-accent underline">cañas de pescar</Link>,{' '}
+            Prepárate con el equipo adecuado: <Link href="/categories/canas" className="text-accent underline">cañas</Link>,{' '}
             <Link href="/categories/carretes" className="text-accent underline">carretes</Link> y{' '}
-            <Link href="/categories/senuelos" className="text-accent underline">señuelos</Link>, echa un vistazo a nuestras{' '}
-            <Link href="/guias" className="text-accent underline">guías de pesca</Link> o pregunta directamente a nuestro{' '}
+            <Link href="/categories/senuelos" className="text-accent underline">señuelos</Link>, revisa nuestras{' '}
+            <Link href="/guias" className="text-accent underline">guías</Link> o pregunta a nuestro{' '}
             <Link href="/advice" className="text-accent underline">asesor</Link>.
           </p>
         </div>
@@ -223,7 +288,7 @@ export default async function SpotPage({ params }: Params) {
         <div className="border-t border-ink/12 pt-8">
           <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50 mb-3">Otras zonas</p>
           <div className="flex flex-wrap gap-2">
-            {FISHING_SPOTS.filter((o) => o.slug !== s.slug).slice(0, 12).map((o) => (
+            {FISHING_SPOTS.filter((o) => o.slug !== s.slug && o.type === s.type).slice(0, 14).map((o) => (
               <Link key={o.slug} href={`/mejores-horas/${o.slug}`} className="px-3 py-1.5 text-xs font-bold text-ink border border-ink/15 rounded-full hover:bg-ink hover:text-paper transition-colors">
                 {o.name}
               </Link>
@@ -232,17 +297,5 @@ export default async function SpotPage({ params }: Params) {
         </div>
       </section>
     </Layout>
-  )
-}
-
-function Fact({ label, value, icon, sub }: { label: string; value: string; icon: string; sub?: string }) {
-  return (
-    <div className="border border-ink/12 rounded-xl bg-paper px-3 py-2.5">
-      <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/40 flex items-center gap-1">
-        <span aria-hidden>{icon}</span> {label}
-      </p>
-      <p className="text-sm font-bold text-ink mt-1 leading-tight">{value}</p>
-      {sub && <p className="font-mono text-[10px] uppercase tracking-wide text-ink/40 capitalize">{sub}</p>}
-    </div>
   )
 }

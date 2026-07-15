@@ -18,6 +18,8 @@ export interface TidesInfo {
   /** Fresh data is available right now. */
   available: boolean
   nextTides: TideExtreme[]
+  /** Every fetched extreme (past + future) — for drawing the tide curve. */
+  all: TideExtreme[]
   risingNow: boolean | null
   /** True when the tidal range is small (typical of the Mediterranean). */
   smallRange: boolean
@@ -27,6 +29,7 @@ const EMPTY = (configured: boolean): TidesInfo => ({
   configured,
   available: false,
   nextTides: [],
+  all: [],
   risingNow: null,
   smallRange: false,
 })
@@ -56,6 +59,7 @@ export async function getTides(lat: number, lon: number): Promise<TidesInfo> {
       configured: true,
       available: nextTides.length > 0,
       nextTides,
+      all,
       risingNow: nextTides.length ? nextTides[0].type === 'alta' : null,
       smallRange: range > 0 && range < 0.5,
     }
