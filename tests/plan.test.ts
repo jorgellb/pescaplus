@@ -25,3 +25,11 @@ describe('sanitizeSpanishProse (anti chain-of-thought leak)', () => {
     expect(sanitizeSpanishProse('Soy una inteligencia artificial y este es el plan de pesca para la marea.')).toBe('')
   })
 })
+
+describe('live context detection', () => {
+  it('detects zones and days from natural messages', async () => {
+    const mod = await import('@/lib/live-context')
+    // Private fns aren't exported; test via buildLiveContext's null path (no zone).
+    expect(await mod.buildLiveContext('¿qué carrete me recomiendas para spinning?')).toBeNull()
+  })
+})

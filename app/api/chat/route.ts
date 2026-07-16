@@ -5,6 +5,7 @@ import type { ChatApiResponse, ChatMessage, ChatProductRef, Product } from '@/ty
 import { fishingLabel } from '@/lib/fishing'
 import { retrieveProducts } from '@/lib/retrieval'
 import { rateLimit, clientIp, tooManyRequests } from '@/lib/rate-limit'
+import { buildLiveContext } from '@/lib/live-context'
 
 /** Trim retrieved products to the light shape sent to the chat UI (max 3). */
 function toRefs(products: Product[]): ChatProductRef[] {
@@ -92,13 +93,20 @@ export async function POST(request: NextRequest): Promise<Response> {
     )
 
     const lastUser = lastUserIndex >= 0 ? messages[lastUserIndex].content : ''
-    const relevant = await retrieveProducts(lastUser, typeFishing)
+    // Live forecast context (when the user names one of our zones) + product RAG.
+    const [liveContext, relevant] = await Promise.all([
+      buildLiveContext(lastUser),
+      retrieveProducts(lastUser, typeFishing),
+    ])
+    const finalMessages = liveContext
+      ? [{ role: 'system' as const, content: liveContext }, ...formattedMessages]
+      : formattedMessages
 
     if (stream) {
-      return streamChatResponse(formattedMessages, relevant)
+      return streamChatResponse(finalMessages, relevant)
     }
 
-    const response = await chatWithFishingExpert(formattedMessages, relevant)
+    const response = await chatWithFishingExpert(finalMessages, relevant)
     return NextResponse.json({ success: true, response, products: toRefs(relevant) })
   } catch (error) {
     console.error('Error in chat route:', error)
