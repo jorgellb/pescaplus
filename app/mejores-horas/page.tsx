@@ -4,7 +4,8 @@ import Layout from '@/components/Layout'
 import UseMyLocation from '@/components/forecast/UseMyLocation'
 import SpotSearch from '@/components/forecast/SpotSearch'
 import SpotMap from '@/components/forecast/SpotMap'
-import { FISHING_SPOTS, type FishingSpot } from '@/lib/fishing-spots'
+import RegionAccordion from '@/components/forecast/RegionAccordion'
+import { FISHING_SPOTS } from '@/lib/fishing-spots'
 import { lunarInfo, phaseEmoji } from '@/lib/solunar'
 import { todayMadridISO, fmtDateLong } from '@/lib/solunar-format'
 
@@ -17,32 +18,9 @@ export const metadata: Metadata = {
   alternates: { canonical: '/mejores-horas' },
 }
 
-// Display order for the coastal regions (north → south → islands).
-const REGION_ORDER = [
-  'Galicia', 'Asturias', 'Cantabria', 'País Vasco', 'Andalucía', 'Murcia',
-  'Comunidad Valenciana', 'Cataluña', 'Baleares', 'Canarias', 'Ceuta', 'Melilla',
-]
-
-function groupByRegion(spots: FishingSpot[], order: string[]): [string, FishingSpot[]][] {
-  const map = new Map<string, FishingSpot[]>()
-  for (const s of spots) {
-    const list = map.get(s.region)
-    if (list) list.push(s)
-    else map.set(s.region, [s])
-  }
-  const keys = [...map.keys()].sort((a, b) => {
-    const ia = order.indexOf(a)
-    const ib = order.indexOf(b)
-    return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib)
-  })
-  return keys.map((k) => [k, map.get(k)!])
-}
-
 export default function MejoresHorasHub() {
   const today = todayMadridISO()
   const moon = lunarInfo(today)
-  const coastal = groupByRegion(FISHING_SPOTS.filter((s) => s.type === 'mar'), REGION_ORDER)
-  const inland = FISHING_SPOTS.filter((s) => s.type === 'interior')
   const coastalCount = FISHING_SPOTS.filter((s) => s.type === 'mar').length
 
   return (
@@ -72,55 +50,26 @@ export default function MejoresHorasHub() {
         </div>
       </section>
 
-      <section className="max-w-6xl mx-auto px-4 py-10 sm:px-6 lg:px-8 space-y-10">
-        {/* Clickable map — the coastal spots themselves trace the coastline */}
-        <div className="space-y-3">
-          <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3 flex items-center gap-2">
-            <span aria-hidden>🗺️</span> Elige tu zona en el mapa
-          </h2>
-          <SpotMap />
-        </div>
+      <section className="max-w-6xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
+          {/* Map — the real IGN coastline with every spot on top */}
+          <div className="lg:col-span-3 space-y-3 lg:sticky lg:top-24">
+            <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3 flex items-center gap-2">
+              <span aria-hidden>🗺️</span> Elige tu zona en el mapa
+            </h2>
+            <SpotMap />
+          </div>
 
-        <div className="space-y-6">
-          <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3 flex items-center gap-2">
-            <span aria-hidden>🌊</span> Pesca en el mar
-          </h2>
-          {coastal.map(([region, spots]) => (
-            <div key={region} className="space-y-2">
-              <h3 className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50">{region}</h3>
-              <div className="flex flex-wrap gap-2">
-                {spots.map((s) => (
-                  <Link
-                    key={s.slug}
-                    href={`/mejores-horas/${s.slug}`}
-                    className="px-3 py-1.5 text-sm font-semibold text-ink border border-ink/15 rounded-full hover:bg-ink hover:text-paper transition-colors"
-                  >
-                    {s.name}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="space-y-3">
-          <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3 flex items-center gap-2">
-            <span aria-hidden>🎣</span> Pesca en agua dulce
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {inland.map((s) => (
-              <Link
-                key={s.slug}
-                href={`/mejores-horas/${s.slug}`}
-                className="px-3 py-1.5 text-sm font-semibold text-ink border border-ink/15 rounded-full hover:bg-ink hover:text-paper transition-colors"
-              >
-                {s.name}
-              </Link>
-            ))}
+          {/* Per-comunidad accordions */}
+          <div className="lg:col-span-2 space-y-3">
+            <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3 flex items-center gap-2">
+              <span aria-hidden>📍</span> Por comunidad
+            </h2>
+            <RegionAccordion />
           </div>
         </div>
 
-        <div className="border-t border-ink/12 pt-8 space-y-3 text-[15px] text-ink/80 leading-relaxed">
+        <div className="border-t border-ink/12 mt-12 pt-8 space-y-3 text-[15px] text-ink/80 leading-relaxed">
           <h2 className="font-display uppercase text-2xl text-ink">¿Qué son las mejores horas de pesca?</h2>
           <p>
             Según la teoría solunar, la actividad de los peces aumenta en cuatro momentos del día ligados a la posición de la
