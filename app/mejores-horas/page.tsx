@@ -5,6 +5,7 @@ import UseMyLocation from '@/components/forecast/UseMyLocation'
 import SpotSearch from '@/components/forecast/SpotSearch'
 import SpotMap from '@/components/forecast/SpotMap'
 import RegionAccordion from '@/components/forecast/RegionAccordion'
+import FavoriteZones from '@/components/forecast/FavoriteZones'
 import { FISHING_SPOTS } from '@/lib/fishing-spots'
 import { lunarInfo, phaseEmoji } from '@/lib/solunar'
 import { todayMadridISO, fmtDateLong } from '@/lib/solunar-format'
@@ -50,6 +51,7 @@ export default function MejoresHorasHub() {
               ⚖️ Comparador
             </Link>
           </div>
+          <FavoriteZones />
         </div>
       </section>
 

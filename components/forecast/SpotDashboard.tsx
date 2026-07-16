@@ -7,6 +7,8 @@ import TideChart from '@/components/forecast/TideChart'
 import ActivityChart from '@/components/forecast/ActivityChart'
 import DayTabs from '@/components/forecast/DayTabs'
 import SourceBadge from '@/components/forecast/SourceBadge'
+import SpotFavButton from '@/components/forecast/SpotFavButton'
+import AlertSignup from '@/components/forecast/AlertSignup'
 import { nearestSpots, type FishingSpot } from '@/lib/fishing-spots'
 import { rankSpeciesToday } from '@/lib/what-to-fish'
 import { solunarDay, type SolunarDay } from '@/lib/solunar'
@@ -217,6 +219,7 @@ export default async function SpotDashboard({
             >
               ⚖️ Comparar con zonas cercanas
             </Link>
+            <SpotFavButton slug={s.slug} name={s.name} />
           </div>
           {nextWin && todayHours.length > 0 && (
             <p className="inline-flex items-center gap-2 mt-4 rounded-xl border border-accent/30 bg-accent/[0.06] px-3.5 py-2">
@@ -724,6 +727,9 @@ export default async function SpotDashboard({
             <Link href="/advice" className="text-accent underline">asesor</Link>.
           </p>
         </div>
+
+        {/* Window alerts by email */}
+        <AlertSignup spotSlug={s.slug} spotName={s.name} isSea={s.type === 'mar'} />
 
         {/* Nearby zones — true nearest by distance */}
         <div className="border-t border-ink/12 pt-8">

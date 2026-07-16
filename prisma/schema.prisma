@@ -105,3 +105,15 @@ model ContactMessage {
 
   @@index([createdAt])
 }
+
+model AlertSubscription {
+  id        String   @id @default(cuid())
+  email     String
+  spotSlug  String
+  especie   String   @default("")
+  threshold Int      @default(75)
+  createdAt DateTime @default(now())
+
+  @@unique([email, spotSlug])
+  @@index([spotSlug])
+}
