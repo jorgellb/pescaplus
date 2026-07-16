@@ -260,6 +260,18 @@ export function getSpot(slug: string): FishingSpot | undefined {
   return FISHING_SPOTS.find((s) => s.slug === slug)
 }
 
+/** N nearest spots to another spot (same water type), by flat-earth distance. */
+export function nearestSpots(to: FishingSpot, n = 4): FishingSpot[] {
+  const d2 = (s: FishingSpot) => {
+    const dLat = s.lat - to.lat
+    const dLon = (s.lon - to.lon) * Math.cos((to.lat * Math.PI) / 180)
+    return dLat * dLat + dLon * dLon
+  }
+  return FISHING_SPOTS.filter((s) => s.slug !== to.slug && s.type === to.type)
+    .sort((a, b) => d2(a) - d2(b))
+    .slice(0, n)
+}
+
 /** Nearest preset spot to a coordinate (equirectangular approximation). */
 export function nearestSpot(lat: number, lon: number): FishingSpot {
   let best = FISHING_SPOTS[0]

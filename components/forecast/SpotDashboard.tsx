@@ -7,7 +7,8 @@ import TideChart from '@/components/forecast/TideChart'
 import ActivityChart from '@/components/forecast/ActivityChart'
 import DayTabs from '@/components/forecast/DayTabs'
 import SourceBadge from '@/components/forecast/SourceBadge'
-import { FISHING_SPOTS, type FishingSpot } from '@/lib/fishing-spots'
+import { nearestSpots, type FishingSpot } from '@/lib/fishing-spots'
+import { rankSpeciesToday } from '@/lib/what-to-fish'
 import { solunarDay, type SolunarDay } from '@/lib/solunar'
 import {
   getMarineForecast, bestWindow, groupByDay, pressure3hAgo,
@@ -151,6 +152,33 @@ export default async function SpotDashboard({
   const conditionsWord = (v: number) => (v >= 70 ? 'Buenas' : v >= 45 ? 'Regulares' : 'Desfavorables')
   const activityWord = (v: number) => (v >= 70 ? 'Alta' : v >= 50 ? 'Media' : 'Baja')
 
+  // "Qué buscar hoy": season + measured water temperature + sea state + solunar.
+  const currentMonth = Number(today.slice(5, 7))
+  const speciesPicks =
+    s.type === 'mar'
+      ? rankSpeciesToday({
+          month: currentMonth,
+          seaTempC: nowHour?.seaTempC ?? null,
+          waveM: nowHour?.waveM ?? null,
+          solunarRating: d0.rating,
+        }).slice(0, 3)
+      : []
+
+  // Next good window from now (hero chip).
+  const remainingToday = todayHours.filter((h) => h.time >= now)
+  const nextWin = remainingToday.length ? bestWindow(remainingToday) : null
+
+  const nearby = nearestSpots(s, 5)
+
+  const SECTIONS = [
+    { id: 'ahora', label: 'Ahora' },
+    { id: 'prevision', label: '7 días' },
+    ...(speciesPicks.length ? [{ id: 'especies', label: 'Qué buscar' }] : []),
+    { id: 'equipo', label: 'Equipo' },
+    { id: 'sol-luna', label: 'Sol y luna' },
+    ...(s.type === 'mar' && regulation ? [{ id: 'normativa', label: 'Normativa' }] : []),
+  ]
+
   return (
     <Layout>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
@@ -176,8 +204,30 @@ export default async function SpotDashboard({
               Hora local (España peninsular): {nowHour.hourLabel} · previsión actualizada {forecast.meta.fetchedAt ? fmtTime(forecast.meta.fetchedAt) : '—'}
             </p>
           )}
+          {nextWin && todayHours.length > 0 && (
+            <p className="inline-flex items-center gap-2 mt-4 rounded-xl border border-accent/30 bg-accent/[0.06] px-3.5 py-2">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">Próxima ventana hoy</span>
+              <span className="font-display text-lg text-ink">{fmtWindowRange(Math.max(nextWin.start, now), nextWin.end, todayHours[0].time)}</span>
+              <span className="text-paper text-[11px] font-bold rounded px-1.5 py-0.5" style={{ background: scoreHex(nextWin.avg) }}>{nextWin.avg}</span>
+            </p>
+          )}
         </div>
       </section>
+
+      {/* In-page sticky nav */}
+      <nav className="sticky top-16 z-40 bg-paper/95 backdrop-blur-sm border-b border-ink/10" aria-label="Secciones de la previsión">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex gap-1.5 overflow-x-auto py-2 scrollbar-none">
+          {SECTIONS.map((sec) => (
+            <a
+              key={sec.id}
+              href={`#${sec.id}`}
+              className="flex-shrink-0 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60 border border-ink/12 rounded-full hover:bg-ink hover:text-paper transition-colors"
+            >
+              {sec.label}
+            </a>
+          ))}
+        </div>
+      </nav>
 
       <section className="max-w-6xl mx-auto px-4 py-10 sm:px-6 space-y-10">
         {/* Safety alerts */}
@@ -242,7 +292,7 @@ export default async function SpotDashboard({
 
         {/* NOW dashboard */}
         {nowHour ? (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div id="ahora" className="grid grid-cols-1 lg:grid-cols-3 gap-6 scroll-mt-28">
             <div className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-6 flex flex-col justify-between">
               <div className="flex items-center justify-between gap-3 border-b border-ink/12 pb-4">
                 <h2 className="font-display uppercase text-2xl text-ink leading-none">Ahora</h2>
@@ -371,9 +421,41 @@ export default async function SpotDashboard({
           <div className="border border-ink/15 rounded-2xl bg-paper p-6 text-sm text-ink/50">La previsión meteorológica no está disponible ahora mismo. Vuelve a intentarlo en unos minutos.</div>
         )}
 
+        {/* Qué buscar hoy — species intelligence from season + live conditions */}
+        {speciesPicks.length > 0 && (
+          <div id="especies" className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-6 space-y-4 scroll-mt-28">
+            <div className="flex items-center justify-between gap-3 border-b border-ink/12 pb-4">
+              <h2 className="font-display uppercase text-2xl text-ink leading-none flex items-center gap-2"><span aria-hidden>🎯</span> Qué buscar hoy</h2>
+              <Link href="/especies" className="font-mono text-[11px] font-bold uppercase tracking-widest text-accent hover:underline whitespace-nowrap">Todas las fichas →</Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {speciesPicks.map((p, i) => (
+                <div key={p.species.id} className={`border rounded-xl p-4 flex flex-col gap-2.5 ${i === 0 ? 'border-accent/40 bg-accent/[0.04]' : 'border-ink/12 bg-paper'}`}>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-display uppercase text-xl text-ink leading-none">{i === 0 && '⭐ '}{p.species.name}</p>
+                    <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/40">#{i + 1}</span>
+                  </div>
+                  <p className="text-[13px] text-ink/65 leading-relaxed flex-1">
+                    {p.reasons.length ? `${p.reasons.join(', ')}.` : 'Opción secundaria en estas condiciones.'}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <Link href={buildHref({ especie: p.species.id, modo })} scroll={false} className="inline-flex items-center text-[11px] font-bold uppercase tracking-wide text-paper bg-ink hover:bg-accent px-3 py-1.5 rounded-lg transition-colors">
+                      Puntuar para {p.species.name} →
+                    </Link>
+                    <Link href={`/especies/${p.species.id}`} className="inline-flex items-center text-[11px] font-bold uppercase tracking-wide text-ink border border-ink/15 px-3 py-1.5 rounded-lg hover:bg-ink hover:text-paper transition-colors">
+                      Ficha
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="font-mono text-[10px] uppercase tracking-wide text-ink/35">Basado en temporada, Tª del agua medida, estado del mar y solunar de hoy · orientativo.</p>
+          </div>
+        )}
+
         {/* 7-day hourly forecast with day selector */}
         {byDay.length > 0 && (
-          <div className="space-y-3">
+          <div id="prevision" className="space-y-3 scroll-mt-28">
             <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3">Previsión hora a hora · 7 días</h2>
             <p className="text-[12px] text-ink/50">Elige el día. «Activ.» es la actividad prevista de los peces{species.id !== 'general' ? ` (adaptada a ${species.name})` : ''} y «Cond.» las condiciones para {modality.name.toLowerCase()}; verde = mejor. Desliza la tabla para ver todas las horas.</p>
             <DayTabs labels={byDay.map((g, i) => `${i === bestDayIdx ? '⭐ ' : ''}${dayLabel(g.dateISO, i)}`)}>
@@ -493,7 +575,7 @@ export default async function SpotDashboard({
 
         {/* Gear for current conditions */}
         {gearTips.length > 0 && (
-          <div className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-6 space-y-4">
+          <div id="equipo" className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-6 space-y-4 scroll-mt-28">
             <h2 className="font-display uppercase text-2xl text-ink leading-none border-b border-ink/12 pb-4 flex items-center gap-2">
               <span aria-hidden>🎒</span> Equipo para estas condiciones
             </h2>
@@ -512,7 +594,7 @@ export default async function SpotDashboard({
 
         {/* Regulations — honest: official links, never invented bylaws */}
         {s.type === 'mar' && regulation && (
-          <div className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-6 space-y-4">
+          <div id="normativa" className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-6 space-y-4 scroll-mt-28">
             <h2 className="font-display uppercase text-2xl text-ink leading-none border-b border-ink/12 pb-4 flex items-center gap-2">
               <span aria-hidden>📜</span> ¿Puedo pescar aquí? Normativa en {s.region}
             </h2>
@@ -553,7 +635,7 @@ export default async function SpotDashboard({
         )}
 
         {/* Sun & moon */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div id="sol-luna" className="grid grid-cols-1 lg:grid-cols-3 gap-6 scroll-mt-28">
           <div className="lg:col-span-2 border border-ink/15 rounded-2xl bg-paper shadow-hard p-6 space-y-4">
             <h2 className="font-display uppercase text-2xl text-ink leading-none border-b border-ink/12 pb-4">Sol, luna y solunar</h2>
             <div>
@@ -629,15 +711,18 @@ export default async function SpotDashboard({
           </p>
         </div>
 
-        {/* Other spots */}
+        {/* Nearby zones — true nearest by distance */}
         <div className="border-t border-ink/12 pt-8">
-          <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50 mb-3">Otras zonas</p>
+          <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50 mb-3">Zonas cercanas</p>
           <div className="flex flex-wrap gap-2">
-            {FISHING_SPOTS.filter((o) => o.slug !== s.slug && o.type === s.type).slice(0, 14).map((o) => (
-              <Link key={o.slug} href={`/mejores-horas/${o.slug}`} className="px-3 py-1.5 text-xs font-bold text-ink border border-ink/15 rounded-full hover:bg-ink hover:text-paper transition-colors">
-                {o.name}
+            {nearby.map((o) => (
+              <Link key={o.slug} href={`/mejores-horas/${o.slug}`} className="px-3 py-1.5 text-sm font-semibold text-ink border border-ink/15 rounded-full hover:bg-ink hover:text-paper transition-colors">
+                {o.name} <span className="font-mono text-[10px] uppercase tracking-widest opacity-50">{o.region}</span>
               </Link>
             ))}
+            <Link href="/mejores-horas" className="px-3 py-1.5 text-sm font-semibold text-accent border border-accent/30 rounded-full hover:bg-accent hover:text-paper transition-colors">
+              Ver mapa completo →
+            </Link>
           </div>
         </div>
       </section>
