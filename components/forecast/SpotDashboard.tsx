@@ -6,15 +6,24 @@ import WindChart from '@/components/forecast/WindChart'
 import TideChart from '@/components/forecast/TideChart'
 import ActivityChart from '@/components/forecast/ActivityChart'
 import DayTabs from '@/components/forecast/DayTabs'
+import SourceBadge from '@/components/forecast/SourceBadge'
 import { FISHING_SPOTS, type FishingSpot } from '@/lib/fishing-spots'
 import { solunarDay, type SolunarDay } from '@/lib/solunar'
-import { getMarineForecast, bestWindow, groupByDay } from '@/lib/marine-forecast'
-import { getTides, tideCoefficient, coefficientLabel, tideHeightAt } from '@/lib/tides'
+import {
+  getMarineForecast, bestWindow, groupByDay, pressure3hAgo,
+  getModality, MODALITIES, activityFactors, conditionsFactors,
+  FORECAST_REVALIDATE_S, type ScoreFactor,
+} from '@/lib/marine-forecast'
+import {
+  getTides, tideCoefficient, coefficientLabel, tideHeightAt,
+  nextExtremes, tideRisingAt, TIDE_DATUM_NOTE, TIDES_REVALIDATE_S,
+} from '@/lib/tides'
 import { getSpecies, GENERAL, SEA_SPECIES } from '@/lib/fishing-species'
-import { douglasState, safetyAlerts, navigationWindows, dayVerdict, gearForConditions } from '@/lib/sea-state'
+import { douglasState, safetyAlerts, navigationWindows, outAndBack, dayVerdict, gearForConditions } from '@/lib/sea-state'
 import { seawardBearing, windRelation, windRelationLabel } from '@/lib/coast'
+import { getRegulation, REGULATIONS_REVIEWED, NATIONAL_SIZES_URL } from '@/lib/fishing-regulations'
 import { scoreLabel, scoreHex, windWord, weatherEmoji } from '@/lib/forecast-format'
-import { fmtTime, fmtDayLabel, fmtDateLong, todayMadridISO, addDaysISO, ratingLabel } from '@/lib/solunar-format'
+import { fmtTime, fmtDayLabel, fmtDateLong, fmtWindowRange, todayMadridISO, addDaysISO, ratingLabel } from '@/lib/solunar-format'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
 
 function WindArrow({ deg }: { deg: number | null }) {
@@ -41,22 +50,25 @@ function Metric({ label, value, icon, sub }: { label: string; value: React.React
 export default async function SpotDashboard({
   spot: s,
   especie,
-  speciesHref,
+  modo,
+  buildHref,
   subtitle,
 }: {
   spot: FishingSpot
   especie: string | null
-  /** Builds the URL for a species chip (null = general). */
-  speciesHref: (id: string | null) => string
+  modo: string | null
+  /** Builds the URL for species/modality chips (null clears the param). */
+  buildHref: (params: { especie: string | null; modo: string | null }) => string
   /** Small line under the title (e.g. "Cerca de Cádiz"). */
   subtitle?: string
 }) {
   const species = getSpecies(especie)
+  const modality = getModality(s.type === 'mar' ? modo : 'tierra')
   const today = todayMadridISO()
   const days = Array.from({ length: 7 }, (_, i) => solunarDay(s.lat, s.lon, addDaysISO(today, i)))
   const d0 = days[0]
   const [forecast, tides] = await Promise.all([
-    getMarineForecast(s, species.id === 'general' ? null : species.id),
+    getMarineForecast(s, species.id === 'general' ? null : species.id, modality.id),
     s.type === 'mar' ? getTides(s.lat, s.lon) : Promise.resolve(null),
   ])
 
@@ -88,22 +100,16 @@ export default async function SpotDashboard({
   const solByDate = new Map<string, SolunarDay>(days.map((d) => [d.date, d]))
   const dayLabel = (dateISO: string, i: number) => (i === 0 ? 'Hoy' : i === 1 ? 'Mañana' : fmtDayLabel(dateISO))
 
-  const whyFactors = nowHour
-    ? ([
-        nowHour.solunar && 'Periodo solunar',
-        nowHour.twilight && 'Amanecer / atardecer',
-        pressureTrend === 'bajando' && 'Presión bajando',
-        nowHour.windKmh != null && nowHour.windKmh >= species.windSweet[0] && nowHour.windKmh <= species.windSweet[1] && 'Viento ideal',
-      ].filter(Boolean) as string[])
-    : []
-
   const breadcrumbLd = breadcrumbJsonLd([
     { name: 'Inicio', url: SITE_URL },
     { name: 'Mejores horas de pesca', url: `${SITE_URL}/mejores-horas` },
     { name: s.name },
   ])
 
-  const scoreNoun = species.id === 'general' ? 'Actividad de pesca' : `Actividad · ${species.name}`
+  const scoreNoun =
+    species.id === 'general'
+      ? `Índice combinado · ${modality.name.toLowerCase()}`
+      : `Índice combinado · ${species.name} · ${modality.name.toLowerCase()}`
 
   // Safety, sea state, onshore/offshore wind and gear advice.
   const fromNow = nowHour ? hours.slice(Math.max(0, hours.indexOf(nowHour))) : hours
@@ -116,6 +122,34 @@ export default async function SpotDashboard({
       : null
   const gearTips = gearForConditions(nowHour)
   const uvMaxToday = todayHours.length ? Math.max(...todayHours.map((h) => h.uv ?? 0)) : 0
+
+  // Transparent score breakdown for the current hour (physical model data vs
+  // PescaPlus' own calculation, each factor with its contribution).
+  const nowActivityFactors: ScoreFactor[] = nowHour ? activityFactors(nowHour, pressure3hAgo(hours, nowHour), species) : []
+  const nowConditionsFactors: ScoreFactor[] = nowHour ? conditionsFactors(nowHour, modality) : []
+
+  // Per-modality condition snapshot for the verdict card (never one sign for all).
+  const modalitySnapshot = nowHour
+    ? MODALITIES.filter((m) => s.type === 'mar' || m.id === 'tierra').map((m) => {
+        const score = Math.max(0, Math.min(100, 90 + conditionsFactors(nowHour, m).reduce((sum, x) => sum + x.pts, 0)))
+        return { m, score }
+      })
+    : []
+  const worstFactorNow = [...nowConditionsFactors].sort((a, b) => a.pts - b.pts)[0] ?? null
+
+  // Tides derived AT RENDER from the validated dataset + this page's "now" —
+  // never from fetch-time snapshots (they'd contradict the charts under ISR).
+  const tidesAll = tides?.available ? tides.all : []
+  const upcomingTides = nextExtremes(tidesAll, now)
+  const risingNow = tideRisingAt(tidesAll, now)
+
+  // Best of the 7 days (to plan the weekend at a glance).
+  const dayAverages = byDay.map((g) => Math.round(g.hours.reduce((sum, h) => sum + h.score, 0) / g.hours.length))
+  const bestDayIdx = dayAverages.length ? dayAverages.indexOf(Math.max(...dayAverages)) : -1
+
+  const regulation = getRegulation(s.region)
+  const conditionsWord = (v: number) => (v >= 70 ? 'Buenas' : v >= 45 ? 'Regulares' : 'Desfavorables')
+  const activityWord = (v: number) => (v >= 70 ? 'Alta' : v >= 50 ? 'Media' : 'Baja')
 
   return (
     <Layout>
@@ -137,6 +171,11 @@ export default async function SpotDashboard({
           <p className="text-ink/60 text-sm max-w-2xl mt-3">
             {subtitle ? `${subtitle}. ` : ''}Previsión completa para el pescador: viento, {s.type === 'mar' ? 'mareas, oleaje, ' : ''}presión, solunar y las mejores horas. {fmtDateLong(today)}.
           </p>
+          {nowHour && (
+            <p className="font-mono text-[11px] uppercase tracking-widest text-ink/40 mt-2">
+              Hora local (España peninsular): {nowHour.hourLabel} · previsión actualizada {forecast.meta.fetchedAt ? fmtTime(forecast.meta.fetchedAt) : '—'}
+            </p>
+          )}
         </div>
       </section>
 
@@ -155,26 +194,49 @@ export default async function SpotDashboard({
           </div>
         ))}
 
-        {/* Species selector (sea only) */}
+        {/* Modality + species selectors (sea only) */}
         {s.type === 'mar' && (
-          <div className="border border-ink/15 rounded-2xl bg-paper p-4 space-y-2">
-            <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50">Puntuación para especie</p>
-            <div className="flex flex-wrap gap-2">
-              {[GENERAL, ...SEA_SPECIES].map((sp) => {
-                const active = sp.id === species.id
-                return (
-                  <Link
-                    key={sp.id}
-                    href={speciesHref(sp.id === 'general' ? null : sp.id)}
-                    scroll={false}
-                    className={`px-3 py-1.5 text-sm font-bold rounded-full border transition-colors ${active ? 'bg-ink text-paper border-ink' : 'bg-paper text-ink/80 border-ink/15 hover:bg-ink/5'}`}
-                  >
-                    {sp.name}
-                  </Link>
-                )
-              })}
+          <div className="border border-ink/15 rounded-2xl bg-paper p-4 space-y-4">
+            <div className="space-y-2">
+              <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50">¿Desde dónde pescas?</p>
+              <div className="flex flex-wrap gap-2">
+                {MODALITIES.map((m) => {
+                  const active = m.id === modality.id
+                  return (
+                    <Link
+                      key={m.id}
+                      href={buildHref({ especie, modo: m.id === 'tierra' ? null : m.id })}
+                      scroll={false}
+                      className={`px-3.5 py-2 text-sm font-bold rounded-xl border transition-colors ${active ? 'bg-accent text-paper border-accent' : 'bg-paper text-ink/80 border-ink/15 hover:bg-ink/5'}`}
+                    >
+                      {m.emoji} {m.name}
+                    </Link>
+                  )
+                })}
+              </div>
+              <p className="text-[12px] text-ink/50">
+                Cada modalidad tiene sus propios umbrales: el mismo viento que activa la orilla puede ser peligroso en kayak.
+              </p>
             </div>
-            <p className="text-[12px] text-ink/50">{species.tagline}. La puntuación de abajo se adapta a la especie elegida.</p>
+            <div className="space-y-2 border-t border-ink/10 pt-3">
+              <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50">Especie objetivo</p>
+              <div className="flex flex-wrap gap-2">
+                {[GENERAL, ...SEA_SPECIES].map((sp) => {
+                  const active = sp.id === species.id
+                  return (
+                    <Link
+                      key={sp.id}
+                      href={buildHref({ especie: sp.id === 'general' ? null : sp.id, modo })}
+                      scroll={false}
+                      className={`px-3 py-1.5 text-sm font-bold rounded-full border transition-colors ${active ? 'bg-ink text-paper border-ink' : 'bg-paper text-ink/80 border-ink/15 hover:bg-ink/5'}`}
+                    >
+                      {sp.name}
+                    </Link>
+                  )
+                })}
+              </div>
+              <p className="text-[12px] text-ink/50">{species.tagline}.</p>
+            </div>
           </div>
         )}
 
@@ -190,6 +252,24 @@ export default async function SpotDashboard({
                 <div className="text-6xl font-display leading-none" style={{ color: scoreHex(nowHour.score) }}>{nowHour.score}</div>
                 <p className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mt-2">{scoreNoun} · {scoreLabel(nowHour.score)}</p>
               </div>
+
+              {/* Verdict per modality — activity vs conditions, never one sign for all */}
+              <div className="space-y-1.5 border-t border-ink/12 pt-4">
+                <div className="flex items-center justify-between text-[13px]">
+                  <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/45">Actividad</span>
+                  <span className="font-bold" style={{ color: scoreHex(nowHour.activity) }}>{activityWord(nowHour.activity)} ({nowHour.activity})</span>
+                </div>
+                {modalitySnapshot.map(({ m, score: cs }) => (
+                  <div key={m.id} className="flex items-center justify-between text-[13px]">
+                    <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/45">{m.emoji} {m.name}</span>
+                    <span className="font-bold" style={{ color: scoreHex(cs) }}>{conditionsWord(cs)} ({Math.round(cs)})</span>
+                  </div>
+                ))}
+                {worstFactorNow && worstFactorNow.pts <= -15 && (
+                  <p className="text-[11px] text-ink/55 pt-1">Motivo: {worstFactorNow.label.toLowerCase()}.</p>
+                )}
+              </div>
+
               <div className="flex items-center justify-between border-t border-ink/12 pt-4">
                 <span className="font-mono text-[11px] uppercase tracking-widest text-ink/50">Solunar hoy</span>
                 <div className="text-right"><FishRating value={d0.rating} /><p className="font-mono text-[10px] uppercase tracking-widest text-ink/40 mt-1">{ratingLabel(d0.rating)}</p></div>
@@ -219,23 +299,51 @@ export default async function SpotDashboard({
                 {s.type === 'mar' && <Metric label="Tª del mar" icon="🐟" value={nowHour.seaTempC != null ? `${nowHour.seaTempC}°C` : '–'} />}
                 <Metric label="Temp. aire" icon="🌡️" value={nowHour.temp != null ? `${Math.round(nowHour.temp)}°C` : '–'} sub={uvMaxToday >= 7 ? `UV máx ${Math.round(uvMaxToday)} · protégete` : undefined} />
                 <Metric label="Cielo" icon={weatherEmoji(nowHour.code, nowHour.isDay)} value={nowHour.precipProb != null ? `${nowHour.precipProb}% lluvia` : '—'} sub={nowHour.visibilityKm != null ? `visibilidad ${nowHour.visibilityKm} km` : undefined} />
-                {tides?.available && tides.risingNow !== null && (
-                  <Metric label="Marea" icon="🌊" value={tides.risingNow ? 'Subiendo ↑' : 'Bajando ↓'} sub={tides.nextTides[0] ? `${tides.nextTides[0].type === 'alta' ? 'pleamar' : 'bajamar'} ${fmtTime(tides.nextTides[0].time)}` : undefined} />
+                {risingNow !== null && (
+                  <Metric label="Marea" icon="🌊" value={risingNow ? 'Subiendo ↑' : 'Bajando ↓'} sub={upcomingTides[0] ? `${upcomingTides[0].type === 'alta' ? 'pleamar' : 'bajamar'} ${fmtTime(upcomingTides[0].time)}` : undefined} />
                 )}
                 <Metric label="Primera luz" icon="🌄" value={fmtTime(d0.firstLight)} sub={`última luz ${fmtTime(d0.lastLight)}`} />
               </div>
               {windRel && (
                 <p className="text-[13px] text-ink/70 leading-relaxed border border-ink/12 rounded-xl px-3.5 py-2.5 bg-paper">
                   <span className="font-bold text-ink">{windRel.label}.</span> {windRel.hint}
+                  {modality.id !== 'tierra' && windRel.label.startsWith('Viento de mar') && (
+                    <span className="text-ink/60"> Ojo: en {modality.name.toLowerCase()} este mismo viento incomoda la navegación.</span>
+                  )}
                 </p>
               )}
-              {whyFactors.length > 0 && (
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/40">A favor ahora:</span>
-                  {whyFactors.map((f) => (
-                    <span key={f} className="inline-flex items-center gap-1 text-[11px] font-bold text-accent bg-accent/10 border border-accent/30 rounded-full px-2.5 py-1">✓ {f}</span>
-                  ))}
-                </div>
+
+              {/* Transparent breakdown: why this score, factor by factor */}
+              {(nowActivityFactors.length > 0 || nowConditionsFactors.length > 0) && (
+                <details className="group border border-ink/12 rounded-xl bg-paper px-4 py-3 [&_summary]:list-none">
+                  <summary className="flex items-center justify-between gap-3 cursor-pointer text-sm font-bold text-ink">
+                    ¿Por qué esta puntuación?
+                    <span className="flex-shrink-0 text-accent transition-transform group-open:rotate-45 text-lg leading-none">+</span>
+                  </summary>
+                  <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4 text-[13px]">
+                    <div>
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/45 mb-1.5">Actividad (base 40)</p>
+                      {nowActivityFactors.length === 0 && <p className="text-ink/50">Sin factores destacados a esta hora.</p>}
+                      {nowActivityFactors.map((f) => (
+                        <p key={f.label} className="flex justify-between gap-2 py-0.5">
+                          <span className="text-ink/70">{f.label} <span className="text-ink/35">({f.kind === 'propio' ? 'cálculo PescaPlus' : 'dato físico'})</span></span>
+                          <span className={`font-bold tabular-nums ${f.pts >= 0 ? 'text-accent' : 'text-red-800'}`}>{f.pts >= 0 ? '+' : ''}{f.pts}</span>
+                        </p>
+                      ))}
+                    </div>
+                    <div>
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/45 mb-1.5">Condiciones · {modality.name} (base 90)</p>
+                      {nowConditionsFactors.length === 0 && <p className="text-ink/50">Sin penalizaciones: condiciones limpias.</p>}
+                      {nowConditionsFactors.map((f) => (
+                        <p key={f.label} className="flex justify-between gap-2 py-0.5">
+                          <span className="text-ink/70">{f.label} <span className="text-ink/35">(dato físico)</span></span>
+                          <span className={`font-bold tabular-nums ${f.pts >= 0 ? 'text-accent' : 'text-red-800'}`}>{f.pts >= 0 ? '+' : ''}{f.pts}</span>
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                  <p className="mt-3 font-mono text-[10px] uppercase tracking-wide text-ink/35">Datos físicos: Open-Meteo (modelo) · Solunar y ponderación: modelo propio de PescaPlus.</p>
+                </details>
               )}
               {bestToday.length > 0 && (
                 <div className="pt-1">
@@ -250,6 +358,13 @@ export default async function SpotDashboard({
                   </div>
                 </div>
               )}
+              <SourceBadge
+                source={s.type === 'mar' ? 'Open-Meteo (meteo + marino)' : 'Open-Meteo'}
+                kind="previsto"
+                fetchedAt={forecast.meta.fetchedAt}
+                revalidateS={FORECAST_REVALIDATE_S}
+                distanceKm={s.type === 'mar' ? forecast.meta.marineGridKm ?? forecast.meta.gridKm : forecast.meta.gridKm}
+              />
             </div>
           </div>
         ) : (
@@ -260,17 +375,18 @@ export default async function SpotDashboard({
         {byDay.length > 0 && (
           <div className="space-y-3">
             <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3">Previsión hora a hora · 7 días</h2>
-            <p className="text-[12px] text-ink/50">Elige el día. La fila «Pesca» es la puntuación combinada (solunar, viento, presión, luz{s.type === 'mar' ? ', oleaje' : ''}){species.id !== 'general' ? `, adaptada a ${species.name}` : ''}; verde = mejor. Desliza la tabla para ver todas las horas.</p>
-            <DayTabs labels={byDay.map((g, i) => dayLabel(g.dateISO, i))}>
+            <p className="text-[12px] text-ink/50">Elige el día. «Activ.» es la actividad prevista de los peces{species.id !== 'general' ? ` (adaptada a ${species.name})` : ''} y «Cond.» las condiciones para {modality.name.toLowerCase()}; verde = mejor. Desliza la tabla para ver todas las horas.</p>
+            <DayTabs labels={byDay.map((g, i) => `${i === bestDayIdx ? '⭐ ' : ''}${dayLabel(g.dateISO, i)}`)}>
               {byDay.map((g) => {
                 const sol = solByDate.get(g.dateISO)
                 const win = bestWindow(g.hours)
                 const gStart = g.hours[0].time
-                const dayExtremes = tides?.all.filter((e) => e.time >= gStart - 8 * 3600000 && e.time < gStart + 32 * 3600000) ?? []
+                const dayExtremes = tidesAll.filter((e) => e.time >= gStart - 8 * 3600000 && e.time < gStart + 32 * 3600000)
                 const coef = sol ? tideCoefficient(sol.moonPhase) : null
-                const showTide = !!tides?.available && dayExtremes.length >= 2
+                const showTide = dayExtremes.length >= 2
                 const tideHeights = showTide ? g.hours.map((h) => tideHeightAt(dayExtremes, h.time)) : undefined
-                const navWins = s.type === 'mar' ? navigationWindows(g.hours) : []
+                const outing = s.type === 'mar' && modality.id !== 'tierra' ? outAndBack(g.hours, modality) : null
+                const navWins = s.type === 'mar' && modality.id === 'tierra' ? navigationWindows(g.hours, getModality('barco')) : []
                 const firstHigh = dayExtremes.find((e) => e.time >= gStart && e.type === 'alta')
                 const verdict = dayVerdict({
                   hours: g.hours,
@@ -285,33 +401,59 @@ export default async function SpotDashboard({
                       </p>
                     )}
                     <div className="flex flex-wrap items-center gap-3">
-                      {win && (
-                        <span className="inline-flex items-center gap-2 rounded-xl border border-accent/30 bg-accent/[0.06] px-3 py-2">
-                          <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">Mejor ventana</span>
-                          <span className="font-display text-lg text-ink">{fmtTime(win.start)} – {fmtTime(win.end)}</span>
-                          <span className="text-paper text-[11px] font-bold rounded px-1.5 py-0.5" style={{ background: scoreHex(win.avg) }}>{win.avg}</span>
-                        </span>
-                      )}
+                      <span className="inline-flex items-center gap-2 rounded-xl border border-accent/30 bg-accent/[0.06] px-3 py-2">
+                        <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">Mejor ventana</span>
+                        {win ? (
+                          <>
+                            <span className="font-display text-lg text-ink">{fmtWindowRange(win.start, win.end, gStart)}</span>
+                            <span className="text-paper text-[11px] font-bold rounded px-1.5 py-0.5" style={{ background: scoreHex(win.avg) }}>{win.avg}</span>
+                          </>
+                        ) : (
+                          <span className="text-sm text-ink/50">dato no disponible</span>
+                        )}
+                      </span>
                       {sol && (
-                        <span className="inline-flex items-center gap-2 rounded-xl border border-ink/15 px-3 py-2">
+                        <span className="inline-flex items-center gap-2 rounded-xl border border-ink/15 px-3 py-2" title="Cálculo astronómico propio de PescaPlus">
                           <FishRating value={sol.rating} />
-                          <span className="font-mono text-[10px] uppercase tracking-widest text-ink/50">solunar</span>
+                          <span className="font-mono text-[10px] uppercase tracking-widest text-ink/50">solunar (calculado)</span>
                         </span>
                       )}
                       {showTide && coef != null && (
-                        <span className="inline-flex items-center gap-2 rounded-xl border border-ink/15 px-3 py-2">
+                        <span className="inline-flex items-center gap-2 rounded-xl border border-ink/15 px-3 py-2" title="Estimado del ciclo lunar (viva/muerta), no es el coeficiente oficial de la estación">
                           <span className="font-display text-lg text-ink">{coef}</span>
-                          <span className="font-mono text-[10px] uppercase tracking-widest text-ink/50">coef · {coefficientLabel(coef)}</span>
+                          <span className="font-mono text-[10px] uppercase tracking-widest text-ink/50">coef estimado · {coefficientLabel(coef)}</span>
                         </span>
                       )}
                       {navWins.map((w, i) => (
                         <span key={i} className="inline-flex items-center gap-2 rounded-xl border border-ink/15 px-3 py-2" title="Tramo con viento y olas aptos para embarcación menor">
                           <span aria-hidden>🚤</span>
                           <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Navegación</span>
-                          <span className="font-display text-lg text-ink">{fmtTime(w.start)} – {fmtTime(w.end)}</span>
+                          <span className="font-display text-lg text-ink">{fmtWindowRange(w.start, w.end, gStart)}</span>
                         </span>
                       ))}
                     </div>
+
+                    {/* Salida y regreso — the return leg is where trouble happens */}
+                    {s.type === 'mar' && modality.id !== 'tierra' && (
+                      outing ? (
+                        <div className="border border-ink/15 rounded-2xl bg-paper p-4 flex flex-wrap items-center gap-x-6 gap-y-2">
+                          <span className="inline-flex items-center gap-2">
+                            <span aria-hidden>{modality.emoji}</span>
+                            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Salida</span>
+                            <span className="font-display text-xl text-ink">{outing.departure <= gStart ? '00:00' : fmtTime(outing.departure)}</span>
+                          </span>
+                          <span className="inline-flex items-center gap-2">
+                            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Regreso antes de</span>
+                            <span className="font-display text-xl text-ink">{outing.returnBy >= gStart + 24 * 3600000 ? '24:00' : fmtTime(outing.returnBy)}</span>
+                          </span>
+                          {outing.returnNote && <span className="text-[13px] text-ink/60">Motivo: {outing.returnNote}.</span>}
+                        </div>
+                      ) : (
+                        <div className="border border-amber-600/40 bg-amber-500/[0.07] rounded-2xl p-4 text-sm font-semibold text-amber-900">
+                          {modality.emoji} Sin ventana segura para {modality.name.toLowerCase()} este día (viento u olas por encima del umbral). Considera pescar desde tierra.
+                        </div>
+                      )
+                    )}
 
                     <div className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-5 space-y-3">
                       <h3 className="font-display uppercase text-lg text-ink leading-none flex items-center gap-2"><span aria-hidden>📈</span> Actividad de pesca del día</h3>
@@ -324,11 +466,20 @@ export default async function SpotDashboard({
                         <h3 className="font-display uppercase text-lg text-ink leading-none flex items-center gap-2"><span aria-hidden>💨</span> Viento (km/h)</h3>
                         <WindChart hours={g.hours} sunrise={sol?.sunrise ?? null} sunset={sol?.sunset ?? null} periods={sol?.periods ?? []} now={now} />
                         <p className="text-[11px] text-ink/40">Barras: viento medio · línea: rachas · franjas verdes: periodos solunares · sombreado: noche.</p>
+                        <SourceBadge source="Open-Meteo" kind="previsto" fetchedAt={forecast.meta.fetchedAt} revalidateS={FORECAST_REVALIDATE_S} distanceKm={forecast.meta.gridKm} />
                       </div>
                       {showTide && (
                         <div className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-5 space-y-3">
                           <h3 className="font-display uppercase text-lg text-ink leading-none flex items-center gap-2"><span aria-hidden>🌊</span> Marea</h3>
                           <TideChart extremes={dayExtremes} dayStart={gStart} now={now} />
+                          <p className="text-[11px] text-ink/40">{TIDE_DATUM_NOTE}</p>
+                          <SourceBadge
+                            source="WorldTides"
+                            kind="predicción armónica"
+                            fetchedAt={tides?.fetchedAt}
+                            revalidateS={TIDES_REVALIDATE_S}
+                            extra={tides?.station ? `estación ${tides.station}` : 'validada automáticamente (alternancia y espaciado)'}
+                          />
                         </div>
                       )}
                     </div>
@@ -359,6 +510,48 @@ export default async function SpotDashboard({
           </div>
         )}
 
+        {/* Regulations — honest: official links, never invented bylaws */}
+        {s.type === 'mar' && regulation && (
+          <div className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-6 space-y-4">
+            <h2 className="font-display uppercase text-2xl text-ink leading-none border-b border-ink/12 pb-4 flex items-center gap-2">
+              <span aria-hidden>📜</span> ¿Puedo pescar aquí? Normativa en {s.region}
+            </h2>
+            <ul className="space-y-2 text-[14px] text-ink/80 leading-relaxed">
+              <li className="flex gap-2">
+                <span className="text-accent font-bold">1.</span>
+                <span>
+                  <strong>Licencia de pesca marítima recreativa de {s.region}</strong> en vigor (desde tierra y desde embarcación son
+                  licencias distintas en la mayoría de comunidades). Trámites:{' '}
+                  <a href={regulation.licenseUrl} target="_blank" rel="noopener noreferrer" className="text-accent underline">{regulation.authority}</a>.
+                </span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-accent font-bold">2.</span>
+                <span>
+                  <strong>Tallas mínimas y cupos</strong>: los regula la normativa estatal y autonómica y cambian por especie.
+                  Consulta la referencia oficial en el{' '}
+                  <a href={NATIONAL_SIZES_URL} target="_blank" rel="noopener noreferrer" className="text-accent underline">Ministerio (MAPA)</a>{' '}
+                  y la web de tu comunidad.
+                </span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-accent font-bold">3.</span>
+                <span>
+                  <strong>Playas y puertos</strong>: en temporada de baño muchos municipios prohíben pescar en zonas balizadas
+                  durante el horario de baño (bandos municipales). Confirma el bando del ayuntamiento antes de ir.
+                </span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-accent font-bold">4.</span>
+                <span><strong>Reservas marinas y zonas protegidas</strong> tienen restricciones propias o prohibición total.</span>
+              </li>
+            </ul>
+            <p className="font-mono text-[10px] uppercase tracking-wide text-ink/35">
+              Revisado: {REGULATIONS_REVIEWED} · Esta tarjeta es orientativa y no sustituye a la normativa oficial — confirma siempre en los enlaces.
+            </p>
+          </div>
+        )}
+
         {/* Sun & moon */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 border border-ink/15 rounded-2xl bg-paper shadow-hard p-6 space-y-4">
@@ -386,6 +579,7 @@ export default async function SpotDashboard({
               <Metric label="Sale la luna" icon="🌘" value={fmtTime(d0.moonrise)} />
               <Metric label="Se pone la luna" icon="🌒" value={fmtTime(d0.moonset)} />
             </div>
+            <SourceBadge source="PescaPlus (astronomía propia)" kind="calculado" extra="precisión ±2 min en salidas y puestas" />
           </div>
           <div className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-6 flex flex-col items-center justify-center text-center gap-2">
             <span className="text-5xl">🌙</span>
@@ -399,17 +593,19 @@ export default async function SpotDashboard({
         <div className="space-y-4">
           <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3">Próximos 7 días</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
-            {days.map((d) => {
+            {days.map((d, di) => {
               const dmajors = d.periods.filter((p) => p.kind === 'mayor')
+              const isBest = di === bestDayIdx
               return (
-                <div key={d.date} className="border border-ink/12 rounded-xl bg-paper p-3 space-y-2 text-center">
-                  <p className="font-mono text-[11px] font-bold uppercase tracking-wide text-ink/60 capitalize">{fmtDayLabel(d.date)}</p>
+                <div key={d.date} className={`border rounded-xl p-3 space-y-2 text-center ${isBest ? 'border-accent bg-accent/[0.06]' : 'border-ink/12 bg-paper'}`}>
+                  <p className="font-mono text-[11px] font-bold uppercase tracking-wide text-ink/60 capitalize">{isBest && '⭐ '}{fmtDayLabel(d.date)}</p>
                   <FishRating value={d.rating} className="justify-center" />
                   <div className="font-mono text-[11px] text-ink/60 space-y-0.5">
                     {dmajors.map((p, i) => (
                       <div key={i}>{fmtTime(p.start)}</div>
                     ))}
                   </div>
+                  {isBest && <p className="font-mono text-[9px] uppercase tracking-widest text-accent">Mejor día</p>}
                 </div>
               )
             })}

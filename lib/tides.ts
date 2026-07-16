@@ -5,6 +5,10 @@
  * (tide extremes are deterministic predictions, so we only refetch every 6 h to
  * stay within the provider's quota). Requires WORLDTIDES_API_KEY; without it the
  * tide section is simply hidden — we never fabricate tide data.
+ *
+ * IMPORTANT: everything time-sensitive (next tide, rising/falling) must be
+ * derived AT RENDER from `all` + the page's own "now", never from fetch-time
+ * snapshots — with ISR the fetch may be hours old and the two would contradict.
  */
 export interface TideExtreme {
   time: number // UTC ms
@@ -15,23 +19,32 @@ export interface TideExtreme {
 export interface TidesInfo {
   /** A key is configured (so the feature is enabled for this site). */
   configured: boolean
-  /** Fresh data is available right now. */
+  /** Validated data is available. */
   available: boolean
-  nextTides: TideExtreme[]
-  /** Every fetched extreme (past + future) — for drawing the tide curve. */
+  /** Every fetched extreme (past + future), validated — derive views from this. */
   all: TideExtreme[]
-  risingNow: boolean | null
   /** True when the tidal range is small (typical of the Mediterranean). */
   smallRange: boolean
+  /** Epoch ms when this data was fetched from the provider. */
+  fetchedAt: number | null
+  /** Nearest tide station reported by the provider, when available. */
+  station: string | null
 }
+
+/** Datum note shown wherever heights appear (they can be negative vs MSL). */
+export const TIDE_DATUM_NOTE =
+  'Alturas respecto al nivel medio del mar (MSL): en mareas vivas pueden ser negativas.'
+
+/** Seconds between refetches — drives the "próxima actualización" metadata. */
+export const TIDES_REVALIDATE_S = 21600
 
 const EMPTY = (configured: boolean): TidesInfo => ({
   configured,
   available: false,
-  nextTides: [],
   all: [],
-  risingNow: null,
   smallRange: false,
+  fetchedAt: null,
+  station: null,
 })
 
 /**
@@ -50,6 +63,25 @@ export function coefficientLabel(coef: number): string {
   if (coef >= 70) return 'Marea viva'
   if (coef >= 50) return 'Media'
   return 'Marea muerta'
+}
+
+/**
+ * Automatic consistency check before anything is shown to the user: extremes
+ * must alternate high/low and be spaced plausibly for semidiurnal/diurnal tides
+ * (2–15 h apart). Returns the sorted list when valid, or null when the data
+ * contradicts itself (two incompatible high waters, missing lows…).
+ */
+export function validateExtremes(extremes: TideExtreme[]): TideExtreme[] | null {
+  if (extremes.length < 2) return null
+  const sorted = [...extremes].sort((a, b) => a.time - b.time)
+  for (let i = 1; i < sorted.length; i++) {
+    const gapH = (sorted[i].time - sorted[i - 1].time) / 3600000
+    if (sorted[i].type === sorted[i - 1].type) return null // two highs (or lows) in a row
+    if (gapH < 2 || gapH > 15) return null // implausible spacing
+    if (sorted[i].type === 'alta' && sorted[i].height < sorted[i - 1].height) return null
+    if (sorted[i].type === 'baja' && sorted[i].height > sorted[i - 1].height) return null
+  }
+  return sorted
 }
 
 /**
@@ -78,34 +110,41 @@ export function tideRisingAt(extremes: TideExtreme[], t: number): boolean | null
   return next ? next.type === 'alta' : null
 }
 
+/** Upcoming extremes from an instant — the render-time replacement for fetch-time "nextTides". */
+export function nextExtremes(extremes: TideExtreme[], t: number, count = 4): TideExtreme[] {
+  return [...extremes].sort((a, b) => a.time - b.time).filter((e) => e.time > t).slice(0, count)
+}
+
 export async function getTides(lat: number, lon: number): Promise<TidesInfo> {
   const key = process.env.WORLDTIDES_API_KEY
   if (!key) return EMPTY(false)
 
   try {
     const url = `https://www.worldtides.info/api/v3?extremes&days=7&lat=${lat}&lon=${lon}&key=${key}`
-    const res = await fetch(url, { next: { revalidate: 21600 }, signal: AbortSignal.timeout(12000) })
+    const res = await fetch(url, { next: { revalidate: TIDES_REVALIDATE_S }, signal: AbortSignal.timeout(12000) })
     if (!res.ok) return EMPTY(true)
     const data = await res.json()
     if (data?.status !== 200 || !Array.isArray(data.extremes)) return EMPTY(true)
 
-    const now = Date.now()
-    const all: TideExtreme[] = data.extremes.map((e: { dt: number; height: number; type: string }) => ({
+    const raw: TideExtreme[] = data.extremes.map((e: { dt: number; height: number; type: string }) => ({
       time: e.dt * 1000,
       height: Math.round(e.height * 100) / 100,
       type: e.type === 'High' ? 'alta' : 'baja',
     }))
+    // Never show contradictory tide data: validate or hide.
+    const all = validateExtremes(raw)
+    if (!all) return EMPTY(true)
+
     const heights = all.map((e) => e.height)
-    const range = heights.length ? Math.max(...heights) - Math.min(...heights) : 0
-    const nextTides = all.filter((e) => e.time >= now).slice(0, 4)
+    const range = Math.max(...heights) - Math.min(...heights)
 
     return {
       configured: true,
-      available: nextTides.length > 0,
-      nextTides,
+      available: true,
       all,
-      risingNow: nextTides.length ? nextTides[0].type === 'alta' : null,
       smallRange: range > 0 && range < 0.5,
+      fetchedAt: Date.now(),
+      station: typeof data.station === 'string' && data.station ? data.station : null,
     }
   } catch {
     return EMPTY(true)

@@ -22,3 +22,15 @@ export const addDaysISO = (iso: string, days: number): string => {
 
 export const ratingLabel = (r: number): string =>
   r >= 5 ? 'Excelente' : r === 4 ? 'Muy buena' : r === 3 ? 'Buena' : r === 2 ? 'Regular' : 'Floja'
+
+/**
+ * Format a time window inside a local day without the confusing "00:00–00:00":
+ * an end at day close renders as 24:00, and a window covering the whole day
+ * says so explicitly.
+ */
+export const fmtWindowRange = (start: number, end: number, dayStart: number): string => {
+  const dayEnd = dayStart + 24 * 3600000
+  if (start <= dayStart && end >= dayEnd) return 'Todo el día'
+  const endLabel = end >= dayEnd ? '24:00' : fmtTime(end)
+  return `${fmtTime(start)} – ${endLabel}`
+}

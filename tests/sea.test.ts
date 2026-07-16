@@ -1,8 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { douglasState, navigationWindows, safetyAlerts } from '@/lib/sea-state'
+import { douglasState, navigationWindows, safetyAlerts, outAndBack } from '@/lib/sea-state'
 import { seawardBearing, windRelation } from '@/lib/coast'
-import { tideHeightAt, tideRisingAt, type TideExtreme } from '@/lib/tides'
+import { tideHeightAt, tideRisingAt, validateExtremes, type TideExtreme } from '@/lib/tides'
 import { getSpot } from '@/lib/fishing-spots'
+import { getModality } from '@/lib/marine-forecast'
 import type { HourPoint } from '@/lib/marine-forecast'
 
 const angDiff = (a: number, b: number) => Math.abs(((a - b + 540) % 360) - 180)
@@ -14,7 +15,7 @@ function hour(over: Partial<HourPoint>): HourPoint {
     pressure: 1015, precipProb: 0, precipMm: 0, cloud: 0, code: 0,
     waveM: 0.5, wavePeriod: 5, waveDir: 270, swellM: 0.3, swellPeriod: 6, swellDir: 270,
     currentKmh: 0.5, currentDir: 90, seaTempC: 20, uv: 5, visibilityKm: 20,
-    solunar: false, twilight: false, isNow: false, score: 50,
+    solunar: false, twilight: false, isNow: false, activity: 50, conditions: 70, score: 50,
     ...over,
   }
 }
@@ -40,16 +41,75 @@ describe('safetyAlerts', () => {
 })
 
 describe('navigationWindows', () => {
-  it('finds contiguous safe runs of at least 3 hours', () => {
+  it('finds contiguous safe runs of at least 3 hours (per modality)', () => {
     const hours = [
       ...Array.from({ length: 4 }, (_, i) => hour({ time: i * 3600000, windKmh: 12, waveM: 0.6 })),
       hour({ time: 4 * 3600000, windKmh: 50, waveM: 2 }),
       hour({ time: 5 * 3600000, windKmh: 12, waveM: 0.5 }),
     ]
-    const wins = navigationWindows(hours)
+    const wins = navigationWindows(hours, getModality('barco'))
     expect(wins).toHaveLength(1)
     expect(wins[0].start).toBe(0)
     expect(wins[0].end).toBe(4 * 3600000)
+    // A kayak is NOT a small boat: 0.6 m waves + 12 km/h are fine, but the same
+    // run must vanish when the waves exceed the kayak threshold.
+    expect(navigationWindows(hours, getModality('kayak'))).toHaveLength(1)
+    const rough = hours.map((h) => ({ ...h, waveM: 1.0 }))
+    expect(navigationWindows(rough, getModality('kayak'))).toHaveLength(0)
+    expect(navigationWindows(rough, getModality('barco')).length).toBeGreaterThan(0)
+  })
+})
+
+describe('outAndBack', () => {
+  it('reports departure/return-by and why the window closes', () => {
+    const hours = [
+      ...Array.from({ length: 6 }, (_, i) => hour({ time: i * 3600000, windKmh: 10, waveM: 0.4 })),
+      ...Array.from({ length: 4 }, (_, i) => hour({ time: (6 + i) * 3600000, windKmh: 45, waveM: 1.8 })),
+    ]
+    const ob = outAndBack(hours, getModality('barco'))
+    expect(ob).not.toBeNull()
+    expect(ob!.departure).toBe(0)
+    expect(ob!.returnBy).toBe(6 * 3600000)
+    expect(ob!.returnNote).toBeTruthy()
+  })
+  it('returns null when no safe window exists', () => {
+    const hours = Array.from({ length: 8 }, (_, i) => hour({ time: i * 3600000, windKmh: 45, waveM: 2 }))
+    expect(outAndBack(hours, getModality('kayak'))).toBeNull()
+  })
+})
+
+describe('fmtWindowRange', () => {
+  const H = 3600000
+  const dayStart = Date.UTC(2026, 6, 15) // any midnight works: offsets are relative
+  it('never renders the confusing 00:00–00:00', async () => {
+    const { fmtWindowRange } = await import('@/lib/solunar-format')
+    expect(fmtWindowRange(dayStart, dayStart + 24 * H, dayStart)).toBe('Todo el día')
+    expect(fmtWindowRange(dayStart + 14 * H, dayStart + 24 * H, dayStart)).toMatch(/– 24:00$/)
+    expect(fmtWindowRange(dayStart + 6 * H, dayStart + 9 * H, dayStart)).not.toContain('24:00')
+  })
+})
+
+describe('validateExtremes', () => {
+  const H = 3600000
+  it('accepts a plausible alternating series', () => {
+    const ok: TideExtreme[] = [
+      { time: 0, height: 0.4, type: 'baja' },
+      { time: 6 * H, height: 3.2, type: 'alta' },
+      { time: 12 * H, height: 0.5, type: 'baja' },
+    ]
+    expect(validateExtremes(ok)).not.toBeNull()
+  })
+  it('rejects two consecutive high waters and implausible spacing', () => {
+    const doubleHigh: TideExtreme[] = [
+      { time: 0, height: 3.0, type: 'alta' },
+      { time: 6 * H, height: 3.2, type: 'alta' },
+    ]
+    expect(validateExtremes(doubleHigh)).toBeNull()
+    const tooClose: TideExtreme[] = [
+      { time: 0, height: 3.0, type: 'alta' },
+      { time: 0.5 * H, height: 0.4, type: 'baja' },
+    ]
+    expect(validateExtremes(tooClose)).toBeNull()
   })
 })
 

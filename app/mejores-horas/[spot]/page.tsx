@@ -5,7 +5,7 @@ import { FEATURED_SPOT_SLUGS, getSpot } from '@/lib/fishing-spots'
 
 export const revalidate = 1800
 
-type Params = { params: Promise<{ spot: string }>; searchParams: Promise<{ especie?: string }> }
+type Params = { params: Promise<{ spot: string }>; searchParams: Promise<{ especie?: string; modo?: string }> }
 
 export function generateStaticParams() {
   return FEATURED_SPOT_SLUGS.map((spot) => ({ spot }))
@@ -23,11 +23,17 @@ export async function generateMetadata({ params }: { params: Promise<{ spot: str
 
 export default async function SpotPage({ params, searchParams }: Params) {
   const { spot } = await params
-  const { especie } = await searchParams
+  const { especie, modo } = await searchParams
   const s = getSpot(spot)
   if (!s) notFound()
 
-  const speciesHref = (id: string | null) => (id ? `/mejores-horas/${s.slug}?especie=${id}` : `/mejores-horas/${s.slug}`)
+  const buildHref = (p: { especie: string | null; modo: string | null }) => {
+    const q = new URLSearchParams()
+    if (p.especie) q.set('especie', p.especie)
+    if (p.modo) q.set('modo', p.modo)
+    const qs = q.toString()
+    return `/mejores-horas/${s.slug}${qs ? `?${qs}` : ''}`
+  }
 
-  return <SpotDashboard spot={s} especie={especie ?? null} speciesHref={speciesHref} />
+  return <SpotDashboard spot={s} especie={especie ?? null} modo={modo ?? null} buildHref={buildHref} />
 }

@@ -1,4 +1,4 @@
-import type { HourPoint, FishingWindow } from '@/lib/marine-forecast'
+import type { HourPoint, FishingWindow, ModalityProfile } from '@/lib/marine-forecast'
 import { fmtTime } from '@/lib/solunar-format'
 import { windWord } from '@/lib/forecast-format'
 
@@ -41,10 +41,10 @@ export interface NavWindow {
   end: number
 }
 
-/** Contiguous daylight-ish hours safe for a small fishing boat. */
-export function navigationWindows(hours: HourPoint[]): NavWindow[] {
+/** Contiguous hours within this modality's safe-outing thresholds. */
+export function navigationWindows(hours: HourPoint[], m: ModalityProfile): NavWindow[] {
   const ok = (h: HourPoint) =>
-    (h.windKmh ?? 99) <= 30 && (h.gustKmh ?? 99) <= 45 && (h.waveM ?? 0) <= 1.25
+    (h.windKmh ?? 99) <= m.navWind && (h.gustKmh ?? 99) <= m.navGust && (h.waveM ?? 0) <= m.navWave
   const windows: NavWindow[] = []
   let i = 0
   while (i < hours.length) {
@@ -56,6 +56,56 @@ export function navigationWindows(hours: HourPoint[]): NavWindow[] {
     } else i++
   }
   return windows.slice(0, 2)
+}
+
+export interface OutAndBack {
+  departure: number
+  returnBy: number
+  /** How conditions evolve towards the return leg. */
+  returnNote: string | null
+}
+
+/**
+ * Salida y regreso for boat/kayak: the usable outing inside the day's safest
+ * window, with an explicit "return by" time — the return leg is where trouble
+ * happens, so we flag deterioration towards the end.
+ */
+export function outAndBack(hours: HourPoint[], m: ModalityProfile): OutAndBack | null {
+  const wins = navigationWindows(hours, m)
+  if (wins.length === 0) return null
+  const win = wins.reduce((a, b) => (b.end - b.start > a.end - a.start ? b : a))
+  const inWin = hours.filter((h) => h.time >= win.start && h.time < win.end)
+  if (inWin.length < 3) return null
+
+  // Compare the first and last thirds of the window.
+  const third = Math.max(1, Math.floor(inWin.length / 3))
+  const head = inWin.slice(0, third)
+  const tail = inWin.slice(-third)
+  const avg = (xs: (number | null)[]) => {
+    const v = xs.filter((x): x is number => x != null)
+    return v.length ? v.reduce((s, x) => s + x, 0) / v.length : null
+  }
+  const windHead = avg(head.map((h) => h.windKmh))
+  const windTail = avg(tail.map((h) => h.windKmh))
+  const waveHead = avg(head.map((h) => h.waveM))
+  const waveTail = avg(tail.map((h) => h.waveM))
+
+  let returnNote: string | null = null
+  if (windHead != null && windTail != null && windTail - windHead >= 8) {
+    returnNote = `el viento sube a ~${Math.round(windTail)} km/h hacia el regreso`
+  } else if (waveHead != null && waveTail != null && waveTail - waveHead >= 0.4) {
+    returnNote = `la mar crece a ~${waveTail.toFixed(1)} m hacia el regreso`
+  }
+
+  // After the window closes, conditions exceed the thresholds — that IS the
+  // reason to be back by then.
+  const after = hours.find((h) => h.time >= win.end)
+  if (!returnNote && after) {
+    if ((after.windKmh ?? 0) > m.navWind) returnNote = `después el viento supera los ${m.navWind} km/h`
+    else if ((after.waveM ?? 0) > m.navWave) returnNote = `después la mar supera ${m.navWave} m`
+  }
+
+  return { departure: win.start, returnBy: win.end, returnNote }
 }
 
 /** Deterministic plain-language verdict for a day. */

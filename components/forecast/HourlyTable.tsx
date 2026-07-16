@@ -65,12 +65,21 @@ export default function HourlyTable({
                 <td key={i} className={`${CELL} ${colBg(h)}`}>{weatherEmoji(h.code, h.isDay)}</td>
               ))}
             </tr>
-            {/* Score */}
+            {/* Fish activity */}
             <tr>
-              <td className={LABEL}>Pesca</td>
+              <td className={LABEL} title="Actividad prevista de los peces (solunar, luz, presión, especie)">Activ.</td>
               {hours.map((h, i) => (
                 <td key={i} className={`${CELL} ${colBg(h)}`}>
-                  <span className="inline-block min-w-[22px] rounded text-paper font-bold text-[11px] px-1 py-0.5" style={{ background: scoreHex(h.score) }}>{h.score}</span>
+                  <span className="inline-block min-w-[22px] rounded text-paper font-bold text-[11px] px-1 py-0.5" style={{ background: scoreHex(h.activity) }}>{h.activity}</span>
+                </td>
+              ))}
+            </tr>
+            {/* Modality conditions */}
+            <tr>
+              <td className={LABEL} title="Condiciones para tu modalidad (viento, rachas, olas)">Cond.</td>
+              {hours.map((h, i) => (
+                <td key={i} className={`${CELL} ${colBg(h)}`}>
+                  <span className="inline-block min-w-[22px] rounded text-paper font-bold text-[11px] px-1 py-0.5" style={{ background: scoreHex(h.conditions) }}>{h.conditions}</span>
                 </td>
               ))}
             </tr>

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
-import { getTides, tideCoefficient, coefficientLabel } from '@/lib/tides'
+import { getTides, tideCoefficient, coefficientLabel, nextExtremes, tideRisingAt } from '@/lib/tides'
 
 describe('tideCoefficient', () => {
   it('is highest at new/full moon (spring) and lowest at the quarters (neap)', () => {
@@ -30,7 +30,7 @@ describe('getTides', () => {
     const t = await getTides(36.53, -6.29)
     expect(t.configured).toBe(false)
     expect(t.available).toBe(false)
-    expect(t.nextTides).toEqual([])
+    expect(t.all).toEqual([])
   })
 
   describe('with an API key', () => {
@@ -38,26 +38,31 @@ describe('getTides', () => {
       process.env.WORLDTIDES_API_KEY = 'test-key'
     })
 
-    it('parses upcoming extremes and detects falling tide', async () => {
+    it('parses/validates extremes; views derive at render (falling tide now)', async () => {
       vi.stubGlobal(
         'fetch',
         mockFetch({
           status: 200,
+          station: 'Cadiz',
           extremes: [
-            { dt: nowSec - 3600, height: 3.1, type: 'High' },
-            { dt: nowSec + 3600, height: 0.42, type: 'Low' },
-            { dt: nowSec + 7200, height: 3.24, type: 'High' },
-            { dt: nowSec + 14400, height: 0.5, type: 'Low' },
+            { dt: nowSec - 3 * 3600, height: 3.1, type: 'High' },
+            { dt: nowSec + 3 * 3600, height: 0.42, type: 'Low' },
+            { dt: nowSec + 9 * 3600, height: 3.24, type: 'High' },
+            { dt: nowSec + 15 * 3600, height: 0.5, type: 'Low' },
           ],
         }),
       )
       const t = await getTides(36.53, -6.29)
       expect(t.configured).toBe(true)
       expect(t.available).toBe(true)
-      expect(t.nextTides).toHaveLength(3) // only the three future extremes
-      expect(t.nextTides[0].type).toBe('baja')
-      expect(t.nextTides[0].height).toBe(0.42)
-      expect(t.risingNow).toBe(false) // next extreme is a low → tide is falling
+      expect(t.station).toBe('Cadiz')
+      expect(t.fetchedAt).not.toBeNull()
+      const now = Date.now()
+      const upcoming = nextExtremes(t.all, now)
+      expect(upcoming).toHaveLength(3) // only the three future extremes
+      expect(upcoming[0].type).toBe('baja')
+      expect(upcoming[0].height).toBe(0.42)
+      expect(tideRisingAt(t.all, now)).toBe(false) // next extreme is a low → falling
       expect(t.smallRange).toBe(false) // Atlantic range ~2.8 m
     })
 
@@ -68,14 +73,31 @@ describe('getTides', () => {
           status: 200,
           extremes: [
             { dt: nowSec + 1800, height: 0.35, type: 'High' },
-            { dt: nowSec + 9000, height: 0.12, type: 'Low' },
+            { dt: nowSec + 1800 + 6 * 3600, height: 0.12, type: 'Low' },
           ],
         }),
       )
       const t = await getTides(41.35, 2.17)
       expect(t.available).toBe(true)
       expect(t.smallRange).toBe(true)
-      expect(t.risingNow).toBe(true)
+      expect(tideRisingAt(t.all, Date.now())).toBe(true)
+    })
+
+    it('hides contradictory data (two consecutive high waters) instead of showing it', async () => {
+      vi.stubGlobal(
+        'fetch',
+        mockFetch({
+          status: 200,
+          extremes: [
+            { dt: nowSec + 3600, height: 3.0, type: 'High' },
+            { dt: nowSec + 6 * 3600, height: 3.2, type: 'High' },
+          ],
+        }),
+      )
+      const t = await getTides(36.53, -6.29)
+      expect(t.configured).toBe(true)
+      expect(t.available).toBe(false)
+      expect(t.all).toEqual([])
     })
 
     it('degrades gracefully on a provider error', async () => {

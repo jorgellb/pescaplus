@@ -9,10 +9,10 @@ export const metadata: Metadata = {
   robots: { index: false, follow: true },
 }
 
-type SP = { searchParams: Promise<{ lat?: string; lon?: string; especie?: string }> }
+type SP = { searchParams: Promise<{ lat?: string; lon?: string; especie?: string; modo?: string }> }
 
 export default async function UbicacionPage({ searchParams }: SP) {
-  const { lat, lon, especie } = await searchParams
+  const { lat, lon, especie, modo } = await searchParams
   const la = Number.parseFloat(lat ?? '')
   const lo = Number.parseFloat(lon ?? '')
   if (!Number.isFinite(la) || !Number.isFinite(lo) || la < -90 || la > 90 || lo < -180 || lo > 180) {
@@ -30,8 +30,12 @@ export default async function UbicacionPage({ searchParams }: SP) {
     known: near.known,
   }
 
-  const base = `/mejores-horas/ubicacion?lat=${spot.lat}&lon=${spot.lon}`
-  const speciesHref = (id: string | null) => (id ? `${base}&especie=${id}` : base)
+  const buildHref = (p: { especie: string | null; modo: string | null }) => {
+    const q = new URLSearchParams({ lat: String(spot.lat), lon: String(spot.lon) })
+    if (p.especie) q.set('especie', p.especie)
+    if (p.modo) q.set('modo', p.modo)
+    return `/mejores-horas/ubicacion?${q.toString()}`
+  }
 
-  return <SpotDashboard spot={spot} especie={especie ?? null} speciesHref={speciesHref} subtitle={`Cerca de ${near.name}`} />
+  return <SpotDashboard spot={spot} especie={especie ?? null} modo={modo ?? null} buildHref={buildHref} subtitle={`Cerca de ${near.name}`} />
 }
