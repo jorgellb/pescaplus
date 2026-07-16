@@ -211,6 +211,12 @@ export default async function SpotDashboard({
             >
               🧾 Genera mi plan de pesca
             </Link>
+            <Link
+              href={`/mejores-horas/comparar?zonas=${[s.slug, ...nearby.slice(0, 2).map((n) => n.slug)].join(',')}`}
+              className="inline-flex items-center gap-2 bg-paper text-ink px-4 py-2.5 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift hover:bg-ink hover:text-paper"
+            >
+              ⚖️ Comparar con zonas cercanas
+            </Link>
           </div>
           {nextWin && todayHours.length > 0 && (
             <p className="inline-flex items-center gap-2 mt-4 rounded-xl border border-accent/30 bg-accent/[0.06] px-3.5 py-2">

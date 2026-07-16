@@ -46,6 +46,9 @@ export default function MejoresHorasHub() {
             <Link href="/calendario" className="inline-flex items-center gap-2 bg-ink text-paper px-4 py-2.5 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift hover:bg-accent hover:border-accent">
               🌙 Calendario del pescador
             </Link>
+            <Link href="/mejores-horas/comparar" className="inline-flex items-center gap-2 bg-paper text-ink px-4 py-2.5 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift hover:bg-ink hover:text-paper">
+              ⚖️ Comparador
+            </Link>
           </div>
         </div>
       </section>
