@@ -17,10 +17,10 @@ export default function Layout({ children }: LayoutProps) {
 
       <main id="contenido" className="flex-1 w-full">{children}</main>
 
-      <ChatWidget />
+      <div className="print:hidden"><ChatWidget /></div>
 
       {/* Footer */}
-      <footer className="bg-ink text-paper border-t border-ink/12 mt-24">
+      <footer className="bg-ink text-paper border-t border-ink/12 mt-24 print:hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
             <div className="lg:col-span-5 space-y-4">

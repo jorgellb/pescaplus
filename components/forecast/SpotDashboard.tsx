@@ -204,6 +204,14 @@ export default async function SpotDashboard({
               Hora local (España peninsular): {nowHour.hourLabel} · previsión actualizada {forecast.meta.fetchedAt ? fmtTime(forecast.meta.fetchedAt) : '—'}
             </p>
           )}
+          <div className="flex flex-wrap items-center gap-3 mt-4">
+            <Link
+              href={`/mejores-horas/${s.slug}/plan${especie || modo ? `?${new URLSearchParams({ ...(especie ? { especie } : {}), ...(modo ? { modo } : {}) })}` : ''}`}
+              className="inline-flex items-center gap-2 bg-ink text-paper px-4 py-2.5 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift hover:bg-accent hover:border-accent"
+            >
+              🧾 Genera mi plan de pesca
+            </Link>
+          </div>
           {nextWin && todayHours.length > 0 && (
             <p className="inline-flex items-center gap-2 mt-4 rounded-xl border border-accent/30 bg-accent/[0.06] px-3.5 py-2">
               <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">Próxima ventana hoy</span>

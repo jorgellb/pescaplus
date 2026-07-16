@@ -1,5 +1,5 @@
 import type { HourPoint, FishingWindow, ModalityProfile } from '@/lib/marine-forecast'
-import { fmtTime } from '@/lib/solunar-format'
+import { fmtTime, fmtWindowRange } from '@/lib/solunar-format'
 import { windWord } from '@/lib/forecast-format'
 
 /** Douglas sea-state scale (the one used by Spanish marine bulletins). */
@@ -123,7 +123,7 @@ export function dayVerdict(opts: {
   const windBit = midday.windKmh != null ? `viento ${windWord(midday.windKmh).toLowerCase()}${midday.windDirLabel ? ` del ${midday.windDirLabel}` : ''}` : ''
   const sea = douglasState(midday.waveM)
   const seaBit = sea ? sea.name.toLowerCase() : ''
-  const winBit = win ? `mejor ventana de ${fmtTime(win.start)} a ${fmtTime(win.end)}` : ''
+  const winBit = win ? `mejor ventana ${fmtWindowRange(win.start, win.end, hours[0].time).toLowerCase()}` : ''
 
   const parts = [winBit, windBit, seaBit, tideNote ?? ''].filter(Boolean)
   return `${head}: ${parts.join(', ')}.`

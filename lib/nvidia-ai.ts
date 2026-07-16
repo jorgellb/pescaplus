@@ -837,3 +837,51 @@ Devuelve SOLO JSON válido: {"title": string, "seoTitle": string, "description":
     generatedBy: 'nvidia',
   }
 }
+
+/**
+ * Short tactical narrative for the fishing plan. Receives ONLY computed facts
+ * and must not invent numbers — it rephrases and adds technique advice.
+ * Returns '' when the AI is unavailable (the plan is complete without it).
+ */
+export async function generatePlanAdvice(input: {
+  spotName: string
+  dateLong: string
+  modality: string
+  speciesName: string
+  facts: string[]
+}): Promise<string> {
+  if (!isApiConfigured()) return ''
+
+  const prompt = `Eres el asesor de pesca de PescaPlus. Escribe un consejo táctico BREVE (2 párrafos, máximo 110 palabras en total) para este plan de pesca.
+
+PLAN: ${input.spotName}, ${input.dateLong}. Modalidad: ${input.modality}. Especie objetivo: ${input.speciesName}.
+DATOS CALCULADOS (usa SOLO estos, no inventes cifras ni horarios):
+${input.facts.map((f) => `- ${f}`).join('\n')}
+
+${BRAND_RULE}
+Tono: pescador veterano, cercano y concreto. Nada de listas: prosa. Empieza DIRECTAMENTE con el consejo, sin títulos, sin notas y sin mostrar tu razonamiento. Todo en español.`
+
+  const content = await callNvidia(
+    [
+      { role: 'system', content: 'Eres un pescador experto español. Respondes solo en español, breve y concreto, sin mostrar razonamiento.' },
+      { role: 'user', content: prompt },
+    ],
+    { maxTokens: 400, temperature: 0.6 },
+  )
+  return sanitizeSpanishProse(content ?? '')
+}
+
+/**
+ * Reasoning models sometimes leak chain-of-thought (often in English) instead
+ * of the answer. Strip <think> blocks and discard anything that reads as
+ * English planning text — the plan is complete without the narrative, and a
+ * leak would break the human-advisor identity.
+ */
+export function sanitizeSpanishProse(text: string): string {
+  let t = text.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/^[\s\S]*?<\/think>/i, '').trim()
+  const english = (t.match(/\b(the|we|let's|lets|must|should|paragraph|words|advice|craft|user|tone)\b/gi) ?? []).length
+  const spanish = (t.match(/\b(el|la|los|las|de|con|para|que|una|pesca|marea|viento|agua|hora)\b/gi) ?? []).length
+  if (english > 2 && english >= spanish) return ''
+  if (/\b(AI|IA|inteligencia artificial|prompt|modelo de lenguaje)\b/i.test(t)) return ''
+  return t.slice(0, 900).trim()
+}
