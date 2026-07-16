@@ -23,7 +23,17 @@ const KNOWN_TERMS: Record<string, string[]> = {
   sargo: ['sargo'],
   corvina: ['corvina'],
   denton: ['dentón'],
-  pelagicos: ['bonito', 'lampuga', 'llampuga', 'atún'],
+  pelagicos: ['bonito', 'lampuga', 'llampuga'],
+  atun: ['atún', 'marlin'],
+  calamares: ['calamar', 'sepia'],
+  potas: ['pota', 'volador'],
+  galanes: ['galán', 'raor'],
+  pargos: ['pargo'],
+  brecas: ['breca'],
+  meros: ['mero'],
+  lechas: ['lecha', 'serviola', 'pez limón', 'verderol'],
+  'gallo-pedro': ['gallo'],
+  gallineta: ['gallineta', 'cabracho'],
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
