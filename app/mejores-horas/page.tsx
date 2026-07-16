@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Layout from '@/components/Layout'
 import UseMyLocation from '@/components/forecast/UseMyLocation'
+import SpotSearch from '@/components/forecast/SpotSearch'
+import SpotMap from '@/components/forecast/SpotMap'
 import { FISHING_SPOTS, type FishingSpot } from '@/lib/fishing-spots'
 import { lunarInfo, phaseEmoji } from '@/lib/solunar'
 import { todayMadridISO, fmtDateLong } from '@/lib/solunar-format'
@@ -53,7 +55,10 @@ export default function MejoresHorasHub() {
             Calendario solunar y meteo para elegir el mejor momento de tu próxima salida. Elige tu localidad entre{' '}
             {coastalCount} puntos de toda la costa española y los principales embalses. {fmtDateLong(today)}.
           </p>
-          <div className="flex flex-wrap items-center gap-3 mt-5">
+          <div className="mt-6">
+            <SpotSearch />
+          </div>
+          <div className="flex flex-wrap items-center gap-3 mt-4">
             <UseMyLocation />
             <span className="inline-flex items-center gap-2 border border-ink/15 rounded-xl px-3 py-2 bg-paper text-sm">
               <span className="text-lg" aria-hidden>{phaseEmoji(moon.phase)}</span>
@@ -68,6 +73,14 @@ export default function MejoresHorasHub() {
       </section>
 
       <section className="max-w-6xl mx-auto px-4 py-10 sm:px-6 lg:px-8 space-y-10">
+        {/* Clickable map — the coastal spots themselves trace the coastline */}
+        <div className="space-y-3">
+          <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3 flex items-center gap-2">
+            <span aria-hidden>🗺️</span> Elige tu zona en el mapa
+          </h2>
+          <SpotMap />
+        </div>
+
         <div className="space-y-6">
           <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3 flex items-center gap-2">
             <span aria-hidden>🌊</span> Pesca en el mar
