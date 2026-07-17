@@ -44,6 +44,9 @@ export default function MejoresHorasHub() {
               <span className="font-bold text-ink">{moon.name}</span>
               <span className="font-mono text-[11px] uppercase tracking-widest text-ink/50">{Math.round(moon.illumination * 100)}%</span>
             </span>
+            <Link href="/donde-pescar" className="inline-flex items-center gap-2 bg-ink text-paper px-4 py-2.5 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift hover:bg-accent hover:border-accent">
+              🗺️ ¿Dónde pescar? · Mapa del día
+            </Link>
             <Link href="/calendario" className="inline-flex items-center gap-2 bg-ink text-paper px-4 py-2.5 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift hover:bg-accent hover:border-accent">
               🌙 Calendario del pescador
             </Link>
