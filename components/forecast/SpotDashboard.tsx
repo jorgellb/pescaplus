@@ -237,6 +237,18 @@ export default async function SpotDashboard({
             >
               ⚖️ Comparar con zonas cercanas
             </Link>
+            <Link
+              href={`/mejores-horas/${s.slug}/planificador`}
+              className="inline-flex items-center gap-2 bg-paper text-ink px-4 py-2.5 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift hover:bg-ink hover:text-paper"
+            >
+              📅 Planificador de 12 meses
+            </Link>
+            <Link
+              href={`/diario?zona=${s.slug}`}
+              className="inline-flex items-center gap-2 bg-paper text-ink px-4 py-2.5 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift hover:bg-ink hover:text-paper"
+            >
+              🎣 Apunta tu captura
+            </Link>
             <SpotFavButton slug={s.slug} name={s.name} />
           </div>
           {nextWin && todayHours.length > 0 && (
