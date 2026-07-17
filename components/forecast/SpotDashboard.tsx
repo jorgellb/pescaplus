@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import Link from 'next/link'
 import Layout from '@/components/Layout'
 import FishRating from '@/components/FishRating'
@@ -28,13 +29,112 @@ import { getRegulation, REGULATIONS_REVIEWED, NATIONAL_SIZES_URL } from '@/lib/f
 import { getZoneGuide } from '@/lib/zone-guides'
 import { getAemetBulletin, AEMET_REVALIDATE_S, type AemetBulletin } from '@/lib/aemet'
 import { aemetZoneFor } from '@/lib/aemet-zones'
-import { getAemetObservation, AEMET_OBS_REVALIDATE_S, observationAgeMin, isObservationFresh, type AemetObservation } from '@/lib/aemet-obs'
+import { getAemetObservation, observationAgeMin, isObservationFresh, type AemetObservation } from '@/lib/aemet-obs'
 import { AEMET_STATIONS } from '@/lib/aemet-stations'
 import { getSpotAccuracy, type SpotAccuracy } from '@/lib/verification-store'
 import { getModelAgreement, AGREEMENT_LABEL } from '@/lib/model-agreement'
 import { scoreLabel, scoreHex, windWord, weatherEmoji } from '@/lib/forecast-format'
 import { fmtTime, fmtDayLabel, fmtDateLong, fmtWindowRange, todayMadridISO, addDaysISO, ratingLabel } from '@/lib/solunar-format'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
+
+interface StationData {
+  obs: AemetObservation | null
+  accuracy: SpotAccuracy | null
+}
+
+/** Streamed: the live AEMET station read + public verification, resolved from a
+ * promise so its slow 2-step API never blocks the dashboard's first paint. */
+async function StationPanel({
+  promise,
+  station,
+  now,
+  nowWindKmh,
+}: {
+  promise: Promise<StationData>
+  station: { idema: string; name: string; km: number }
+  now: number
+  nowWindKmh: number | null
+}) {
+  const { obs, accuracy } = await promise
+  const obsAgeMin = observationAgeMin(obs?.time ?? null, now)
+  const obsFresh = isObservationFresh(obsAgeMin)
+  return (
+    <>
+      {obs?.available && (
+        <div className={`border rounded-xl p-3.5 space-y-2 ${obsFresh ? 'border-accent/30 bg-accent/[0.04]' : 'border-ink/15 bg-ink/[0.02]'}`}>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className={`font-mono text-[10px] font-bold uppercase tracking-widest ${obsFresh ? 'text-accent' : 'text-ink/55'}`}>
+              📡 {obsFresh ? 'Observado ahora' : 'Última medición'} · estación {obs.stationName} (a {station.km} km)
+            </p>
+            {obs.time && (
+              <span className="font-mono text-[10px] uppercase tracking-widest text-ink/40">
+                {obs.time.slice(11, 16)} UTC{!obsFresh && obsAgeMin != null ? ` · hace ${obsAgeMin >= 120 ? `${Math.round(obsAgeMin / 60)} h` : `${obsAgeMin} min`}` : ''}
+              </span>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-x-5 gap-y-1 text-[13px] text-ink/85">
+            {obs.windKmh != null && (
+              <span>
+                <strong>Viento medido: {obs.windKmh} km/h</strong>
+                {obs.gustKmh != null && ` (rachas ${obs.gustKmh})`}
+                {obsFresh && nowWindKmh != null && (
+                  <span className={Math.abs(obs.windKmh - nowWindKmh) <= 5 ? 'text-accent' : 'text-amber-700'}>
+                    {' '}· modelo {Math.round(nowWindKmh)} {Math.abs(obs.windKmh - nowWindKmh) <= 5 ? '✓' : `(Δ${Math.abs(Math.round(obs.windKmh - nowWindKmh))})`}
+                  </span>
+                )}
+              </span>
+            )}
+            {obs.tempC != null && <span>Temp: {Math.round(obs.tempC)}°C</span>}
+            {obs.pressureHpa != null && <span>Presión: {Math.round(obs.pressureHpa)} hPa</span>}
+          </div>
+          <p className="font-mono text-[9px] uppercase tracking-wide text-ink/35">
+            Dato OBSERVADO (red oficial de estaciones de AEMET) — no es una previsión.
+            {!obsFresh && ' La estación no ha reportado en la última hora; no lo comparamos con el modelo.'}
+          </p>
+        </div>
+      )}
+      {station.km <= 15 && (
+        <p className="font-mono text-[10px] uppercase tracking-wide text-ink/45 leading-relaxed">
+          🎯 Fiabilidad verificada:{' '}
+          {accuracy
+            ? `error medio del viento ±${accuracy.maeKmh} km/h · ${Math.round(accuracy.within5 * 100)}% de días dentro de ±5 (últimas ${accuracy.n} verificaciones contra la estación oficial)`
+            : 'comparamos a diario nuestra previsión con la estación oficial de AEMET; primeras cifras públicas en cuanto acumulemos 3 días.'}
+        </p>
+      )}
+    </>
+  )
+}
+
+function StationSkeleton({ km }: { km: number }) {
+  return (
+    <div className="border border-ink/12 rounded-xl bg-ink/[0.02] p-3.5 space-y-2 animate-pulse" aria-hidden>
+      <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/30">📡 Consultando estación oficial (a {km} km)…</p>
+      <div className="h-3 w-2/3 rounded bg-ink/10" />
+    </div>
+  )
+}
+
+/** Streamed: the multi-model confidence chip for one day, from the shared
+ * agreement promise (awaited once, distributed to every day's Suspense). */
+async function DayAgreementChip({ promise, dateISO }: { promise: ReturnType<typeof getModelAgreement>; dateISO: string }) {
+  const agreement = await promise
+  const agr = agreement.available ? agreement.days.find((d) => d.dateISO === dateISO) : undefined
+  if (!agr) return null
+  return (
+    <span
+      className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 ${
+        agr.level === 'alta' ? 'text-accent border-accent/35' : agr.level === 'media' ? 'text-amber-700 border-amber-700/35' : 'text-red-800 border-red-800/35'
+      }`}
+      title={`Dispersión media del viento entre los modelos ECMWF (europeo), GFS (americano) e ICON (alemán) para este día: ±${agr.spreadKmh} km/h. Cuanto más coinciden, más fiable es la previsión.`}
+    >
+      <span aria-hidden>🧭</span>
+      <span className="font-mono text-[10px] font-bold uppercase tracking-widest">
+        Confianza {agr.level} · ±{agr.spreadKmh} km/h
+      </span>
+      <span className="font-mono text-[10px] uppercase tracking-wide text-ink/45 hidden sm:inline">{AGREEMENT_LABEL[agr.level]}</span>
+    </span>
+  )
+}
 
 function WindArrow({ deg }: { deg: number | null }) {
   if (deg == null) return <span className="text-ink/30">–</span>
@@ -79,26 +179,28 @@ export default async function SpotDashboard({
   const d0 = days[0]
   const aemetZone = aemetZoneFor(s)
   const station = AEMET_STATIONS[s.slug]
-  const [forecast, tides, aemet, obs, accuracy, agreement] = await Promise.all([
+  // Block only on what shapes the page: the forecast (and tides for the sea).
+  // The two secondary layers — the live AEMET station read and the multi-model
+  // confidence — are kicked off here but NOT awaited; they stream in via their
+  // own Suspense boundaries so the dashboard paints as soon as the forecast is
+  // ready instead of waiting for the slowest of six requests.
+  const [forecast, tides, aemet] = await Promise.all([
     getMarineForecast(s, species.id === 'general' ? null : species.id, modality.id),
     s.type === 'mar' ? getTides(s.lat, s.lon) : Promise.resolve(null),
     aemetZone ? getAemetBulletin(aemetZone.costa, aemetZone.keyword) : Promise.resolve(null as AemetBulletin | null),
-    station ? getAemetObservation(station.idema) : Promise.resolve(null as AemetObservation | null),
-    getSpotAccuracy(s.slug).catch(() => null as SpotAccuracy | null),
-    getModelAgreement(s.lat, s.lon),
   ])
-  const agreementByDate = new Map(agreement.available ? agreement.days.map((d) => [d.dateISO, d]) : [])
+  const agreementPromise = getModelAgreement(s.lat, s.lon)
+  const stationPromise: Promise<StationData> = station
+    ? Promise.all([
+        getAemetObservation(station.idema),
+        getSpotAccuracy(s.slug).catch(() => null as SpotAccuracy | null),
+      ]).then(([obs, accuracy]) => ({ obs, accuracy }))
+    : Promise.resolve({ obs: null, accuracy: null })
 
   const hours = forecast.hours
   const nowHour = hours.find((h) => h.isNow) ?? hours[0] ?? null
   const now = nowHour?.time ?? hours[0]?.time ?? 0
   const todayHours = hours.filter((h) => h.dateISO === today)
-
-  // AEMET stations report hourly but some have multi-hour gaps. A stale reading
-  // must NOT be shown as "ahora", and its wind must NOT be diffed against the
-  // current model hour (apples to oranges).
-  const obsAgeMin = observationAgeMin(obs?.time ?? null, now)
-  const obsFresh = isObservationFresh(obsAgeMin)
 
   let pressureTrend: string | null = null
   if (nowHour?.pressure != null) {
@@ -427,49 +529,12 @@ export default async function SpotDashboard({
                 </p>
               )}
 
-              {/* OBSERVED — real measurement vs the model, only "ahora" if fresh */}
-              {obs?.available && (
-                <div className={`border rounded-xl p-3.5 space-y-2 ${obsFresh ? 'border-accent/30 bg-accent/[0.04]' : 'border-ink/15 bg-ink/[0.02]'}`}>
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className={`font-mono text-[10px] font-bold uppercase tracking-widest ${obsFresh ? 'text-accent' : 'text-ink/55'}`}>
-                      📡 {obsFresh ? 'Observado ahora' : 'Última medición'} · estación {obs.stationName}{station ? ` (a ${station.km} km)` : ''}
-                    </p>
-                    {obs.time && (
-                      <span className="font-mono text-[10px] uppercase tracking-widest text-ink/40">
-                        {obs.time.slice(11, 16)} UTC{!obsFresh && obsAgeMin != null ? ` · hace ${obsAgeMin >= 120 ? `${Math.round(obsAgeMin / 60)} h` : `${obsAgeMin} min`}` : ''}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap gap-x-5 gap-y-1 text-[13px] text-ink/85">
-                    {obs.windKmh != null && (
-                      <span>
-                        <strong>Viento medido: {obs.windKmh} km/h</strong>
-                        {obs.gustKmh != null && ` (rachas ${obs.gustKmh})`}
-                        {obsFresh && nowHour.windKmh != null && (
-                          <span className={Math.abs(obs.windKmh - nowHour.windKmh) <= 5 ? 'text-accent' : 'text-amber-700'}>
-                            {' '}· modelo {Math.round(nowHour.windKmh)} {Math.abs(obs.windKmh - nowHour.windKmh) <= 5 ? '✓' : `(Δ${Math.abs(Math.round(obs.windKmh - nowHour.windKmh))})`}
-                          </span>
-                        )}
-                      </span>
-                    )}
-                    {obs.tempC != null && <span>Temp: {Math.round(obs.tempC)}°C</span>}
-                    {obs.pressureHpa != null && <span>Presión: {Math.round(obs.pressureHpa)} hPa</span>}
-                  </div>
-                  <p className="font-mono text-[9px] uppercase tracking-wide text-ink/35">
-                    Dato OBSERVADO (red oficial de estaciones de AEMET) — no es una previsión.
-                    {!obsFresh && ' La estación no ha reportado en la última hora; no lo comparamos con el modelo.'}
-                  </p>
-                </div>
-              )}
-
-              {/* Public verification badge */}
-              {station && station.km <= 15 && (
-                <p className="font-mono text-[10px] uppercase tracking-wide text-ink/45 leading-relaxed">
-                  🎯 Fiabilidad verificada:{' '}
-                  {accuracy
-                    ? `error medio del viento ±${accuracy.maeKmh} km/h · ${Math.round(accuracy.within5 * 100)}% de días dentro de ±5 (últimas ${accuracy.n} verificaciones contra la estación oficial)`
-                    : 'comparamos a diario nuestra previsión con la estación oficial de AEMET; primeras cifras públicas en cuanto acumulemos 3 días.'}
-                </p>
+              {/* Live station read + public verification — streamed in so the
+                  slower AEMET 2-step API never holds the whole dashboard. */}
+              {station && (
+                <Suspense fallback={<StationSkeleton km={station.km} />}>
+                  <StationPanel promise={stationPromise} station={station} now={now} nowWindKmh={nowHour.windKmh} />
+                </Suspense>
               )}
 
               {/* Transparent breakdown: why this score, factor by factor */}
@@ -570,7 +635,6 @@ export default async function SpotDashboard({
             <DayTabs labels={byDay.map((g, i) => `${i === bestDayIdx ? '⭐ ' : ''}${dayLabel(g.dateISO, i)}`)}>
               {byDay.map((g) => {
                 const sol = solByDate.get(g.dateISO)
-                const agr = agreementByDate.get(g.dateISO)
                 const win = bestWindow(g.hours)
                 const gStart = g.hours[0].time
                 const dayExtremes = tidesAll.filter((e) => e.time >= gStart - 8 * 3600000 && e.time < gStart + 32 * 3600000)
@@ -616,20 +680,9 @@ export default async function SpotDashboard({
                           <span className="font-mono text-[10px] uppercase tracking-widest text-ink/50">coef estimado · {coefficientLabel(coef)}</span>
                         </span>
                       )}
-                      {agr && (
-                        <span
-                          className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 ${
-                            agr.level === 'alta' ? 'text-accent border-accent/35' : agr.level === 'media' ? 'text-amber-700 border-amber-700/35' : 'text-red-800 border-red-800/35'
-                          }`}
-                          title={`Dispersión media del viento entre los modelos ECMWF (europeo), GFS (americano) e ICON (alemán) para este día: ±${agr.spreadKmh} km/h. Cuanto más coinciden, más fiable es la previsión.`}
-                        >
-                          <span aria-hidden>🧭</span>
-                          <span className="font-mono text-[10px] font-bold uppercase tracking-widest">
-                            Confianza {agr.level} · ±{agr.spreadKmh} km/h
-                          </span>
-                          <span className="font-mono text-[10px] uppercase tracking-wide text-ink/45 hidden sm:inline">{AGREEMENT_LABEL[agr.level]}</span>
-                        </span>
-                      )}
+                      <Suspense fallback={null}>
+                        <DayAgreementChip promise={agreementPromise} dateISO={g.dateISO} />
+                      </Suspense>
                       {navWins.map((w, i) => (
                         <span key={i} className="inline-flex items-center gap-2 rounded-xl border border-ink/15 px-3 py-2" title="Tramo con viento y olas aptos para embarcación menor">
                           <span aria-hidden>🚤</span>
@@ -678,7 +731,6 @@ export default async function SpotDashboard({
                           fetchedAt={forecast.meta.fetchedAt}
                           revalidateS={FORECAST_REVALIDATE_S}
                           distanceKm={forecast.meta.gridKm}
-                          extra={agr ? `acuerdo ECMWF/GFS/ICON ±${agr.spreadKmh} km/h (${agr.level})` : undefined}
                         />
                       </div>
                       {showTide && (
