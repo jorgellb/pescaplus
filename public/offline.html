@@ -9,9 +9,9 @@
       * { box-sizing: border-box; }
       body {
         margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
-        background: #f2efe6; color: #111; font-family: system-ui, -apple-system, sans-serif; padding: 24px; text-align: center;
+        background: #f2efe6; color: #111; font-family: system-ui, -apple-system, sans-serif; padding: 24px;
       }
-      .card { max-width: 420px; }
+      .card { max-width: 460px; text-align: center; }
       .kicker { letter-spacing: 3px; text-transform: uppercase; color: #0f766e; font-weight: 700; font-size: 12px; margin: 0 0 12px; }
       h1 { font-size: 40px; line-height: 1.05; margin: 0 0 12px; text-transform: uppercase; font-weight: 800; }
       p { color: #555; font-size: 15px; margin: 0 0 24px; }
@@ -19,14 +19,60 @@
         background: #111; color: #f2efe6; border: none; padding: 12px 24px; font-weight: 700;
         text-transform: uppercase; font-size: 14px; cursor: pointer; border-radius: 12px;
       }
+      #saved { text-align: left; margin: 0 0 24px; display: none; }
+      #saved h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 2px; color: #0f766e; margin: 0 0 10px; }
+      #saved a {
+        display: block; color: #111; text-decoration: none; font-weight: 700; font-size: 15px;
+        border: 1px solid #11111126; border-radius: 12px; padding: 10px 14px; margin-bottom: 8px; background: #fff8;
+      }
+      #saved a:active { border-color: #0f766e; }
+      #saved small { display: block; color: #777; font-weight: 400; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
     </style>
   </head>
   <body>
     <div class="card">
       <p class="kicker">🎣 PescaPlus</p>
       <h1>Sin conexión</h1>
-      <p>No hay conexión a internet ahora mismo. Comprueba tu red y vuelve a intentarlo.</p>
-      <button onclick="location.reload()">Reintentar</button>
+      <p>No hay red ahora mismo. Estas son las previsiones que guardamos de tus últimas consultas — se abren sin cobertura:</p>
+      <div id="saved">
+        <h2>📡 Guardado en este dispositivo</h2>
+        <div id="saved-list"></div>
+      </div>
+      <button onclick="location.reload()">Reintentar con red</button>
     </div>
+    <script>
+      (async () => {
+        try {
+          const cache = await caches.open('pescaplus-pages-v2')
+          const keys = await cache.keys()
+          const seen = new Set()
+          const items = []
+          for (const req of keys.reverse()) {
+            const u = new URL(req.url)
+            const path = u.pathname + u.search
+            if (seen.has(path)) continue
+            seen.add(path)
+            let label = decodeURIComponent(u.pathname)
+            if (label.startsWith('/mejores-horas/')) label = '🌊 ' + label.replace('/mejores-horas/', '').replace(/\//g, ' · ').replace(/-/g, ' ')
+            else if (label === '/mejores-horas') label = '🗺️ Mejores horas'
+            else if (label === '/donde-pescar') label = '🗺️ ¿Dónde pescar?'
+            else if (label === '/diario') label = '🎣 Diario de capturas'
+            else if (label === '/calendario') label = '🌙 Calendario'
+            else if (label.startsWith('/especies')) label = '🐟 ' + label.replace('/especies/', '').replace('/especies', 'Especies').replace(/-/g, ' ')
+            items.push({ path, label })
+            if (items.length >= 12) break
+          }
+          if (items.length) {
+            const esc = (t) => t.replace(/[<>"'&]/g, '')
+            document.getElementById('saved').style.display = 'block'
+            document.getElementById('saved-list').innerHTML = items
+              .map((i) => '<a href="' + esc(i.path) + '">' + esc(i.label) + '<small>última versión guardada</small></a>')
+              .join('')
+          }
+        } catch (e) {
+          /* sin Cache API no hay listado, solo el reintento */
+        }
+      })()
+    </script>
   </body>
 </html>
