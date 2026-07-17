@@ -50,7 +50,12 @@ function load(): CatchEntry[] {
   try {
     const raw = localStorage.getItem(KEY)
     const list = raw ? (JSON.parse(raw) as CatchEntry[]) : []
-    return Array.isArray(list) ? list.filter((e) => e && e.id && e.dateISO && e.spotSlug) : []
+    if (!Array.isArray(list)) return []
+    // Sanitise: a hand-edited or imported file must not break the pattern maths
+    // (e.g. a huge qty skewing the sums), so clamp qty to a sane 1..99.
+    return list
+      .filter((e) => e && e.id && e.dateISO && e.spotSlug)
+      .map((e) => ({ ...e, qty: Math.min(99, Math.max(1, Math.round(Number(e.qty) || 1))) }))
   } catch {
     return []
   }

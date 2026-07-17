@@ -22,6 +22,7 @@ const LEGEND = [
 
 export default function DayScoreMap({ spots, showNav }: { spots: SpotDayScore[]; showNav: boolean }) {
   const ordered = [...spots].sort((a, b) => a.score - b.score)
+  const hasUnknown = spots.some((s) => s.waveUnknown)
   return (
     <div className="border border-ink/15 rounded-2xl bg-paper shadow-hard overflow-hidden">
       <div className="p-4 sm:p-6">
@@ -45,11 +46,12 @@ export default function DayScoreMap({ spots, showNav }: { spots: SpotDayScore[];
           {ordered.map((s) => {
             const { x, y } = project(s)
             const labelLeft = x > MAP_W - 130
-            const fill = scoreHex(s.score)
-            const noNav = showNav && !s.navegable
+            const fill = s.waveUnknown ? '#9c9484' : scoreHex(s.score)
+            const noNav = showNav && s.navegabilidad === 'no'
+            const titleSuffix = s.waveUnknown ? ' · sin dato de oleaje' : noNav ? ' · no navegable' : ''
             return (
               <a key={s.slug} href={`/mejores-horas/${s.slug}`} className="day-spot" aria-label={`${s.name}: puntuación ${s.score}`}>
-                <title>{`${s.name} · ${s.score}/100${noNav ? ' · no navegable' : ''}`}</title>
+                <title>{`${s.name} · ${s.score}/100${titleSuffix}`}</title>
                 <circle cx={x} cy={y} r={9} fill="transparent" />
                 {s.type === 'mar' ? (
                   <circle className="dot" cx={x} cy={y} r={4} fill={fill} stroke={noNav ? '#b23b2e' : '#f2efe6'} strokeWidth={noNav ? 1.8 : 1.1} />
@@ -74,6 +76,11 @@ export default function DayScoreMap({ spots, showNav }: { spots: SpotDayScore[];
           {showNav && (
             <span className="inline-flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full inline-block border-2 border-[#b23b2e]" /> No navegable
+            </span>
+          )}
+          {hasUnknown && (
+            <span className="inline-flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full inline-block border border-paper" style={{ backgroundColor: '#9c9484' }} /> Sin dato de oleaje
             </span>
           )}
         </div>

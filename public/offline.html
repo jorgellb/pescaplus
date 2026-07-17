@@ -43,7 +43,13 @@
     <script>
       (async () => {
         try {
-          const cache = await caches.open('pescaplus-pages-v2')
+          // Find the pages cache without hardcoding the SW version: match the
+          // 'pescaplus-pages-*' bucket the service worker actually created, so
+          // bumping the SW version never silently empties this list.
+          const names = await caches.keys()
+          const pagesName = names.filter((n) => n.startsWith('pescaplus-pages')).sort().pop()
+          if (!pagesName) return
+          const cache = await caches.open(pagesName)
           const keys = await cache.keys()
           const seen = new Set()
           const items = []

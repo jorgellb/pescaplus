@@ -59,13 +59,14 @@ export default function NearMeDay({ spots, showNav }: { spots: SpotDayScore[]; s
     )
   }
 
-  const ranked = pos
+  const nearby = pos
     ? spots
         .map((s) => ({ ...s, km: haversineKm(pos.lat, pos.lon, s.lat, s.lon) }))
         .filter((s) => s.km <= 200)
         .sort((a, b) => b.score - a.score || a.km - b.km || (a.windMax ?? 99) - (b.windMax ?? 99))
-        .slice(0, 10)
     : []
+  const rankedMar = nearby.filter((s) => s.type === 'mar').slice(0, 10)
+  const rankedInterior = nearby.filter((s) => s.type === 'interior').slice(0, 4)
 
   return (
     <div className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-4 sm:p-5 space-y-3">
@@ -90,37 +91,63 @@ export default function NearMeDay({ spots, showNav }: { spots: SpotDayScore[]; s
         </p>
       )}
 
-      {pos && ranked.length === 0 && (
+      {pos && rankedMar.length === 0 && rankedInterior.length === 0 && (
         <p className="text-sm text-ink/60">No hay zonas a menos de 200 km de tu posición.</p>
       )}
 
-      {ranked.length > 0 && (
-        <ol className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {ranked.map((s, i) => (
-            <li key={s.slug}>
-              <Link
-                href={`/mejores-horas/${s.slug}`}
-                className="flex items-center gap-3 border border-ink/12 rounded-xl px-3 py-2.5 bg-paper hover:border-accent transition-colors"
-              >
-                <span className="font-mono text-[11px] font-bold text-ink/40 w-5 text-right shrink-0">{i + 1}</span>
-                <span
-                  className="font-mono text-sm font-bold text-paper rounded-lg px-2 py-1 shrink-0"
-                  style={{ backgroundColor: scoreHex(s.score) }}
-                >
-                  {s.score}
-                </span>
-                <span className="min-w-0">
-                  <span className="block font-bold text-ink text-sm truncate">{s.name}</span>
-                  <span className="block font-mono text-[10px] uppercase tracking-widest text-ink/45 truncate">
-                    a {Math.round(s.km)} km · {scoreLabel(s.score)}
-                    {showNav && !s.navegable ? ' · no navegable' : ''}
-                  </span>
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ol>
+      {rankedMar.length > 0 && (
+        <div className="space-y-2">
+          {rankedInterior.length > 0 && <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">🌊 Costa</p>}
+          <ol className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {rankedMar.map((s, i) => (
+              <NearRow key={s.slug} s={s} i={i} showNav={showNav} />
+            ))}
+          </ol>
+        </div>
+      )}
+
+      {rankedInterior.length > 0 && (
+        <div className="space-y-2">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">🎣 Embalses y ríos</p>
+          <ol className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {rankedInterior.map((s, i) => (
+              <NearRow key={s.slug} s={s} i={i} showNav={showNav} />
+            ))}
+          </ol>
+        </div>
       )}
     </div>
+  )
+}
+
+function NearRow({ s, i, showNav }: { s: SpotDayScore & { km: number }; i: number; showNav: boolean }) {
+  const note = s.waveUnknown
+    ? '· sin dato de oleaje'
+    : showNav && s.navegabilidad === 'no'
+      ? '· no navegable'
+      : showNav && s.navegabilidad === 'unknown'
+        ? '· navegación sin confirmar'
+        : ''
+  return (
+    <li>
+      <Link
+        href={`/mejores-horas/${s.slug}`}
+        className="flex items-center gap-3 border border-ink/12 rounded-xl px-3 py-2.5 bg-paper hover:border-accent transition-colors"
+      >
+        <span className="font-mono text-[11px] font-bold text-ink/40 w-5 text-right shrink-0">{i + 1}</span>
+        <span
+          className="font-mono text-sm font-bold text-paper rounded-lg px-2 py-1 shrink-0"
+          style={{ backgroundColor: s.waveUnknown ? '#9c9484' : scoreHex(s.score) }}
+        >
+          {s.score}
+        </span>
+        <span className="min-w-0">
+          <span className="block font-bold text-ink text-sm truncate">{s.name}</span>
+          <span className="block font-mono text-[10px] uppercase tracking-widest text-ink/45 truncate">
+            a {Math.round(s.km)} km · {scoreLabel(s.score)} {note}
+          </span>
+        </span>
+      </Link>
+    </li>
   )
 }

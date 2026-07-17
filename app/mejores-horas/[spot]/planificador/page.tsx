@@ -131,7 +131,7 @@ export default async function PlanificadorPage({ params }: { params: Promise<{ s
                   <h2 className="font-display uppercase text-xl text-ink leading-none">
                     {MONTH_NAMES[monthIdx]} <span className="text-ink/40">{year}</span>
                   </h2>
-                  {clim && (
+                  {clim && clim.w > 0 && (
                     <span
                       className="font-mono text-[9.5px] uppercase tracking-wide text-ink/45 text-right"
                       title={`Histórico ${CLIMATE_YEARS}: media del viento máximo diario y porcentaje de días con máxima ≤ 20 km/h`}

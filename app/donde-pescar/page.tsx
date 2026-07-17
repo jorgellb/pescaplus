@@ -89,6 +89,14 @@ export default async function DondePescarPage({ searchParams }: Params) {
           </div>
         )}
 
+        {board.available && !board.marineAvailable && (
+          <div className="border border-amber-700/30 rounded-2xl bg-amber-700/[0.06] p-4 text-sm text-ink/75">
+            ⚠️ El servicio de oleaje no responde ahora mismo, así que el estado del mar de las zonas de costa no está
+            confirmado. Las puntuaciones que ves abajo se basan solo en el viento y la actividad: úsalas con cautela y
+            confirma el oleaje en la ficha de la zona antes de salir.
+          </div>
+        )}
+
         {board.available && (
           <>
             <NearMeDay spots={board.spots} showNav={showNav} />
@@ -130,7 +138,7 @@ export default async function DondePescarPage({ searchParams }: Params) {
                           <span className="block font-bold text-ink truncate">{s.name}</span>
                           <span className="block font-mono text-[10px] uppercase tracking-widest text-ink/45 truncate">
                             {s.region} · {scoreLabel(s.score)}
-                            {showNav && !s.navegable ? ' · ⚠️ no navegable' : ''}
+                            {s.waveUnknown ? ' · ⚠️ sin dato de oleaje' : showNav && s.navegabilidad === 'no' ? ' · ⚠️ no navegable' : showNav && s.navegabilidad === 'unknown' ? ' · navegación sin confirmar' : ''}
                           </span>
                         </span>
                         <span className="hidden sm:block text-right shrink-0 font-mono text-[11px] text-ink/55 leading-relaxed">
@@ -206,9 +214,12 @@ export default async function DondePescarPage({ searchParams }: Params) {
             Cada punto es una zona con su <strong>puntuación de 0 a 100</strong> para el día elegido: combinamos las
             máximas diarias de viento, rachas y oleaje del modelo con la actividad solunar prevista. En modalidad{' '}
             <strong>embarcación o kayak</strong>, las zonas que superan los límites de navegación seguros aparecen
-            marcadas como no navegables. Es un ranking para decidir el destino: una vez elegida la zona, entra en su
-            ficha para ver la <Link href="/mejores-horas" className="text-accent underline">previsión hora a hora</Link>,
-            las mareas y tu <strong>plan de pesca</strong> completo.
+            marcadas como no navegables. Cuando el modelo no tiene dato de oleaje de una zona (rías y estuarios muy
+            resguardados), la marcamos <strong>«sin dato de oleaje»</strong> en gris en lugar de suponer que el mar está
+            en calma: preferimos avisar antes que dar por bueno lo que no sabemos. Es un ranking para decidir el destino:
+            una vez elegida la zona, entra en su ficha para ver la{' '}
+            <Link href="/mejores-horas" className="text-accent underline">previsión hora a hora</Link>, las mareas y tu{' '}
+            <strong>plan de pesca</strong> completo.
           </p>
         </div>
       </section>

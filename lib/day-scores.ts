@@ -22,8 +22,13 @@ export interface SpotDayScore {
   gustMax: number | null
   waveMax: number | null
   precipProb: number | null
-  /** Only meaningful for barco/kayak: within navigation limits all day. */
-  navegable: boolean
+  /** True for a COASTAL zone whose wave data is missing (model land cell / API
+   * down). We must not treat that as a flat sea — the score is capped and the
+   * UI flags it instead of implying calm. */
+  waveUnknown: boolean
+  /** Navigation safety for barco/kayak: 'ok', 'no' (over limits) or 'unknown'
+   * (can't tell — wave data missing). Always 'ok' for tierra. */
+  navegabilidad: 'ok' | 'no' | 'unknown'
 }
 
 export interface DayBoard {
@@ -33,9 +38,15 @@ export interface DayBoard {
   modality: ModalityProfile
   /** National solunar rating 1..5 (same activity component for every zone). */
   solunarRating: number
+  /** False when the marine API returned nothing — sea state is unknown for
+   * every coastal zone and the page warns instead of over-scoring. */
+  marineAvailable: boolean
   spots: SpotDayScore[]
   fetchedAt: number
 }
+
+/** A coastal zone with unknown sea can never be scored "excellent" (≥70). */
+const UNKNOWN_WAVE_CAP = 62
 
 export const DAY_BOARD_REVALIDATE_S = 1800
 
@@ -72,7 +83,7 @@ function chunk<T>(list: T[], size: number): T[][] {
 
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v))
 
-function slimScore(
+export function slimScore(
   m: ModalityProfile,
   isMar: boolean,
   solunarRating: number,
@@ -80,7 +91,9 @@ function slimScore(
   gustMax: number | null,
   waveMax: number | null,
   precipProb: number | null,
-): { score: number; navegable: boolean } {
+): { score: number; navegabilidad: 'ok' | 'no' | 'unknown' } {
+  const waveUnknown = isMar && waveMax == null
+
   let cond = 95
   // Gentle gradient below the thresholds too, so calm zones don't all tie:
   // among "good" days, the calmest sea still ranks first.
@@ -101,12 +114,24 @@ function slimScore(
   const activity = 30 + solunarRating * 12 // 1..5 → 42..90
   let score = Math.round(0.6 * cond + 0.4 * activity)
 
-  const navegable =
-    m.id === 'tierra' ||
-    !((windMax ?? 0) > m.navWind || (gustMax ?? 0) > m.navGust || (isMar && (waveMax ?? 0) > m.navWave))
-  if (!navegable) score = Math.min(score, 25)
+  // Navigation safety. On tierra it's always fine; otherwise a missing wave
+  // reading means we CANNOT confirm it's safe, so 'unknown' (not 'ok').
+  let navegabilidad: 'ok' | 'no' | 'unknown'
+  if (m.id === 'tierra') {
+    navegabilidad = 'ok'
+  } else if (waveUnknown) {
+    navegabilidad = 'unknown'
+  } else {
+    const overLimits = (windMax ?? 0) > m.navWind || (gustMax ?? 0) > m.navGust || (isMar && (waveMax ?? 0) > m.navWave)
+    navegabilidad = overLimits ? 'no' : 'ok'
+  }
+  if (navegabilidad === 'no') score = Math.min(score, 25)
 
-  return { score: clamp(score, 0, 100), navegable }
+  // Unknown sea must never masquerade as calm: cap below "excellent" and, for
+  // navigation modalities, keep it out of the "go" range entirely.
+  if (waveUnknown) score = Math.min(score, m.id === 'tierra' ? UNKNOWN_WAVE_CAP : 45)
+
+  return { score: clamp(score, 0, 100), navegabilidad }
 }
 
 /** Score every zone for one day. Data covers 7 days and is cached 30 min. */
@@ -123,7 +148,7 @@ export async function getDayBoard(dateISO?: string | null, modalityId?: string |
       fetchBulk(
         `https://api.open-meteo.com/v1/forecast?latitude=${c.map((s) => s.lat.toFixed(3)).join(',')}&longitude=${c
           .map((s) => s.lon.toFixed(3))
-          .join(',')}&daily=wind_speed_10m_max,wind_gusts_10m_max,precipitation_probability_max&forecast_days=7&timezone=auto&wind_speed_unit=kmh`,
+          .join(',')}&daily=wind_speed_10m_max,wind_gusts_10m_max,precipitation_probability_max&forecast_days=7&timezone=Europe%2FMadrid&wind_speed_unit=kmh`,
       ),
     ),
   )
@@ -132,7 +157,7 @@ export async function getDayBoard(dateISO?: string | null, modalityId?: string |
       fetchBulk(
         `https://marine-api.open-meteo.com/v1/marine?latitude=${c.map((s) => s.lat.toFixed(3)).join(',')}&longitude=${c
           .map((s) => s.lon.toFixed(3))
-          .join(',')}&daily=wave_height_max&forecast_days=7&timezone=auto`,
+          .join(',')}&daily=wave_height_max&forecast_days=7&timezone=Europe%2FMadrid`,
       ),
     ),
   )
@@ -143,19 +168,22 @@ export async function getDayBoard(dateISO?: string | null, modalityId?: string |
     days,
     modality,
     solunarRating: 3,
+    marineAvailable: false,
     spots: [],
     fetchedAt: Date.now(),
   }
   if (forecastChunks.some((c) => c === null)) return empty
   const forecastAll = forecastChunks.flatMap((c) => c!)
-  const marineAll = marineChunks.every((c) => c !== null) ? marineChunks.flatMap((c) => c!) : null
+  const marineAvailable = marineChunks.every((c) => c !== null)
+  const marineAll = marineAvailable ? marineChunks.flatMap((c) => c!) : null
   const marineBySlug = new Map<string, { daily?: DailyBlock }>()
   if (marineAll) marSpots.forEach((s, i) => marineBySlug.set(s.slug, marineAll[i]))
 
   // Solunar activity is national-scale for ranking purposes (phase + period
   // timing barely move across Spain in one day); each zone page computes its
-  // own exact local solunar.
-  const solunarRating = solunarDay(40.4, -3.7, date).rating
+  // own exact local solunar. Anchor it on a mid-coast point (Valencia), not
+  // inland Madrid, so the reference is a place people actually fish.
+  const solunarRating = solunarDay(39.45, -0.33, date).rating
 
   const at = (block: DailyBlock | undefined, key: keyof DailyBlock): number | null => {
     if (!block?.time) return null
@@ -171,9 +199,10 @@ export async function getDayBoard(dateISO?: string | null, modalityId?: string |
     const gustMax = at(daily, 'wind_gusts_10m_max')
     const precipProb = at(daily, 'precipitation_probability_max')
     const waveMax = s.type === 'mar' ? at(marineBySlug.get(s.slug)?.daily, 'wave_height_max') : null
-    const { score, navegable } = slimScore(modality, s.type === 'mar', solunarRating, windMax, gustMax, waveMax, precipProb)
-    return { slug: s.slug, name: s.name, region: s.region, type: s.type, lat: s.lat, lon: s.lon, score, windMax, gustMax, waveMax, precipProb, navegable }
+    const waveUnknown = s.type === 'mar' && waveMax == null
+    const { score, navegabilidad } = slimScore(modality, s.type === 'mar', solunarRating, windMax, gustMax, waveMax, precipProb)
+    return { slug: s.slug, name: s.name, region: s.region, type: s.type, lat: s.lat, lon: s.lon, score, windMax, gustMax, waveMax, precipProb, waveUnknown, navegabilidad }
   })
 
-  return { available: true, dateISO: date, days, modality, solunarRating, spots, fetchedAt: Date.now() }
+  return { available: true, dateISO: date, days, modality, solunarRating, marineAvailable, spots, fetchedAt: Date.now() }
 }
