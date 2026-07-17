@@ -31,6 +31,7 @@ import { aemetZoneFor } from '@/lib/aemet-zones'
 import { getAemetObservation, AEMET_OBS_REVALIDATE_S, type AemetObservation } from '@/lib/aemet-obs'
 import { AEMET_STATIONS } from '@/lib/aemet-stations'
 import { getSpotAccuracy, type SpotAccuracy } from '@/lib/verification-store'
+import { getModelAgreement, AGREEMENT_LABEL } from '@/lib/model-agreement'
 import { scoreLabel, scoreHex, windWord, weatherEmoji } from '@/lib/forecast-format'
 import { fmtTime, fmtDayLabel, fmtDateLong, fmtWindowRange, todayMadridISO, addDaysISO, ratingLabel } from '@/lib/solunar-format'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
@@ -78,13 +79,15 @@ export default async function SpotDashboard({
   const d0 = days[0]
   const aemetZone = aemetZoneFor(s)
   const station = AEMET_STATIONS[s.slug]
-  const [forecast, tides, aemet, obs, accuracy] = await Promise.all([
+  const [forecast, tides, aemet, obs, accuracy, agreement] = await Promise.all([
     getMarineForecast(s, species.id === 'general' ? null : species.id, modality.id),
     s.type === 'mar' ? getTides(s.lat, s.lon) : Promise.resolve(null),
     aemetZone ? getAemetBulletin(aemetZone.costa, aemetZone.keyword) : Promise.resolve(null as AemetBulletin | null),
     station ? getAemetObservation(station.idema) : Promise.resolve(null as AemetObservation | null),
     getSpotAccuracy(s.slug).catch(() => null as SpotAccuracy | null),
+    getModelAgreement(s.lat, s.lon),
   ])
+  const agreementByDate = new Map(agreement.available ? agreement.days.map((d) => [d.dateISO, d]) : [])
 
   const hours = forecast.hours
   const nowHour = hours.find((h) => h.isNow) ?? hours[0] ?? null
@@ -542,6 +545,7 @@ export default async function SpotDashboard({
             <DayTabs labels={byDay.map((g, i) => `${i === bestDayIdx ? '⭐ ' : ''}${dayLabel(g.dateISO, i)}`)}>
               {byDay.map((g) => {
                 const sol = solByDate.get(g.dateISO)
+                const agr = agreementByDate.get(g.dateISO)
                 const win = bestWindow(g.hours)
                 const gStart = g.hours[0].time
                 const dayExtremes = tidesAll.filter((e) => e.time >= gStart - 8 * 3600000 && e.time < gStart + 32 * 3600000)
@@ -587,6 +591,20 @@ export default async function SpotDashboard({
                           <span className="font-mono text-[10px] uppercase tracking-widest text-ink/50">coef estimado · {coefficientLabel(coef)}</span>
                         </span>
                       )}
+                      {agr && (
+                        <span
+                          className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 ${
+                            agr.level === 'alta' ? 'text-accent border-accent/35' : agr.level === 'media' ? 'text-amber-700 border-amber-700/35' : 'text-red-800 border-red-800/35'
+                          }`}
+                          title={`Dispersión media del viento entre los modelos ECMWF (europeo), GFS (americano) e ICON (alemán) para este día: ±${agr.spreadKmh} km/h. Cuanto más coinciden, más fiable es la previsión.`}
+                        >
+                          <span aria-hidden>🧭</span>
+                          <span className="font-mono text-[10px] font-bold uppercase tracking-widest">
+                            Confianza {agr.level} · ±{agr.spreadKmh} km/h
+                          </span>
+                          <span className="font-mono text-[10px] uppercase tracking-wide text-ink/45 hidden sm:inline">{AGREEMENT_LABEL[agr.level]}</span>
+                        </span>
+                      )}
                       {navWins.map((w, i) => (
                         <span key={i} className="inline-flex items-center gap-2 rounded-xl border border-ink/15 px-3 py-2" title="Tramo con viento y olas aptos para embarcación menor">
                           <span aria-hidden>🚤</span>
@@ -629,7 +647,14 @@ export default async function SpotDashboard({
                         <h3 className="font-display uppercase text-lg text-ink leading-none flex items-center gap-2"><span aria-hidden>💨</span> Viento (km/h)</h3>
                         <WindChart hours={g.hours} sunrise={sol?.sunrise ?? null} sunset={sol?.sunset ?? null} periods={sol?.periods ?? []} now={now} />
                         <p className="text-[11px] text-ink/40">Barras: viento medio · línea: rachas · franjas verdes: periodos solunares · sombreado: noche.</p>
-                        <SourceBadge source="Open-Meteo" kind="previsto" fetchedAt={forecast.meta.fetchedAt} revalidateS={FORECAST_REVALIDATE_S} distanceKm={forecast.meta.gridKm} />
+                        <SourceBadge
+                          source="Open-Meteo"
+                          kind="previsto"
+                          fetchedAt={forecast.meta.fetchedAt}
+                          revalidateS={FORECAST_REVALIDATE_S}
+                          distanceKm={forecast.meta.gridKm}
+                          extra={agr ? `acuerdo ECMWF/GFS/ICON ±${agr.spreadKmh} km/h (${agr.level})` : undefined}
+                        />
                       </div>
                       {showTide && (
                         <div className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-5 space-y-3">
