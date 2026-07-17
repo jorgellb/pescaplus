@@ -33,6 +33,8 @@ interface NvidiaOptions {
   timeoutMs?: number
   /** Abort if the stream stalls (no bytes) for this long. Streaming only. */
   idleMs?: number
+  /** Per-call model chain override (some tasks need non-reasoning-first order). */
+  models?: string[]
 }
 
 /**
@@ -41,9 +43,9 @@ interface NvidiaOptions {
  */
 async function callNvidia(
   messages: ChatMessage[],
-  { maxTokens = 1024, temperature = 0.7, topP = 0.95, timeoutMs = 20000 }: NvidiaOptions = {},
+  { maxTokens = 1024, temperature = 0.7, topP = 0.95, timeoutMs = 20000, models }: NvidiaOptions = {},
 ): Promise<string | null> {
-  for (const model of NVIDIA_MODELS) {
+  for (const model of models ?? NVIDIA_MODELS) {
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), timeoutMs)
     try {
@@ -884,4 +886,120 @@ export function sanitizeSpanishProse(text: string): string {
   if (english > 2 && english >= spanish) return ''
   if (/\b(AI|IA|inteligencia artificial|prompt|modelo de lenguaje)\b/i.test(t)) return ''
   return t.slice(0, 900).trim()
+}
+
+export interface ZoneGuideContent {
+  intro: string
+  species: string
+  techniques: string
+  seasons: string
+  tips: string[]
+}
+
+const GUIDE_BANNED = /\b(AI|IA|inteligencia artificial|prompt|modelo de lenguaje|aliexpress|marketplace)\b/i
+
+function validGuideField(t: string, min: number, max: number): boolean {
+  if (t.length < min || t.length > max) return false
+  if (GUIDE_BANNED.test(t)) return false
+  // English chain-of-thought leak check.
+  const english = (t.match(/\b(the|we|let's|must|should|paragraph|words)\b/gi) ?? []).length
+  const spanish = (t.match(/\b(el|la|los|las|de|con|para|que|una)\b/gi) ?? []).length
+  return !(english > 2 && english >= spanish)
+}
+
+/**
+ * Local fishing guide for a zone — the editorial layer over the forecast.
+ * Anchored EXCLUSIVELY on the provided fact sheet: the prompt forbids invented
+ * place names and species outside the list; output is validated field by field
+ * (length, language, banned terms) and rejected wholesale on any failure so a
+ * bad generation never ships. Returns null on failure (caller retries).
+ */
+export async function generateZoneGuide(facts: {
+  name: string
+  region: string
+  waterType: 'mar' | 'interior'
+  sea: string
+  orientation: string | null
+  tides: string
+  knownFor: string
+  speciesLines: string[]
+  neighbors: string[]
+}): Promise<ZoneGuideContent | null> {
+  if (!isApiConfigured()) return null
+
+  const prompt = `Escribe la guía local de pesca deportiva de ${facts.name} (${facts.region}, España) para la web PescaPlus.
+
+DATOS REALES DE LA ZONA (tu ÚNICA fuente; no añadas nada que no esté aquí):
+- Aguas: ${facts.sea}${facts.orientation ? `; costa orientada al ${facts.orientation}` : ''}
+- Régimen de mareas: ${facts.tides}
+- La zona es conocida por: ${facts.knownFor}
+- Especies con su temporada y técnica: ${facts.speciesLines.join(' · ') || 'las propias de estas aguas'}
+- Zonas de pesca vecinas: ${facts.neighbors.join(' y ')}
+
+REGLAS ESTRICTAS:
+1. PROHIBIDO inventar: nada de nombres de playas, espigones, puertos concretos, calles, negocios, récords ni cifras que no estén en los datos.
+2. SOLO las especies listadas arriba; no menciones ninguna otra especie.
+3. Español de España impecable, tono de pescador local veterano, concreto y útil. Sin relleno ni frases comodín ("paraíso de la pesca", "sin duda").
+4. Cada afirmación debe apoyarse en los datos (orientación, mar, mareas, temporadas).
+5. Escribe DIRECTAMENTE el JSON, sin razonamiento previo.
+6. LONGITUD OBLIGATORIA: cada sección DEBE alcanzar su mínimo de palabras; si te quedas corto, desarrolla más el detalle práctico (montajes, horarios, lectura del agua). No entregues secciones breves.
+
+Devuelve SOLO JSON válido:
+{"intro": string (130-170 palabras: el carácter pesquero de la zona, sus aguas, orientación y qué la hace distinta),
+"species": string (120-160 palabras: qué se pesca y en qué temporada, con detalle práctico),
+"techniques": string (120-160 palabras: cómo se pesca aquí${facts.waterType === 'mar' ? ' desde orilla y desde embarcación' : ' en estas aguas interiores'}, técnicas y montajes),
+"seasons": string (80-120 palabras: mejor época del año, momento del día y ${facts.waterType === 'mar' ? 'el papel de la marea' : 'el papel del nivel y la presión'}),
+"tips": [4 strings (15-30 palabras cada uno): consejos prácticos de la zona, incluyendo uno de seguridad y uno de normativa/respeto]}`
+
+  const content = await callNvidia(
+    [
+      { role: 'system', content: 'Eres redactor experto de pesca deportiva española. Respondes SOLO con JSON válido en español, sin mostrar razonamiento.' },
+      { role: 'user', content: prompt },
+    ],
+    {
+      maxTokens: 3200,
+      temperature: 0.6,
+      timeoutMs: 100000,
+      // Only the 49b: it writes the JSON directly with the best Spanish. The
+      // reasoning 120b burns its tokens thinking and the nano leaks/short-writes,
+      // so falling back to them just wastes a driver retry.
+      models: ['nvidia/llama-3.3-nemotron-super-49b-v1.5'],
+    },
+  )
+  if (!content) {
+    console.warn(`zone-guide ${facts.name}: sin contenido de ningún modelo`)
+    return null
+  }
+  const parsed = extractJson(content)
+  if (!parsed) {
+    console.warn(`zone-guide ${facts.name}: JSON no parseable · inicio: ${content.slice(0, 160).replace(/\n/g, ' ')}`)
+    return null
+  }
+
+  const g: ZoneGuideContent = {
+    intro: sanitizeSpanishProse(asString(parsed.intro, '')),
+    species: sanitizeSpanishProse(asString(parsed.species, '')),
+    techniques: sanitizeSpanishProse(asString(parsed.techniques, '')),
+    seasons: sanitizeSpanishProse(asString(parsed.seasons, '')),
+    tips: Array.isArray(parsed.tips)
+      ? parsed.tips.filter((t): t is string => typeof t === 'string').map((t) => sanitizeSpanishProse(t)).filter(Boolean).slice(0, 5)
+      : [],
+  }
+
+  const checks: [string, boolean][] = [
+    ['intro', validGuideField(g.intro, 420, 1600)],
+    ['species', validGuideField(g.species, 380, 1500)],
+    ['techniques', validGuideField(g.techniques, 380, 1500)],
+    ['seasons', validGuideField(g.seasons, 250, 1100)],
+    ['tips', g.tips.length >= 3 && g.tips.every((t) => validGuideField(t, 40, 320))],
+  ]
+  const failed = checks.filter(([, ok]) => !ok).map(([k]) => k)
+  if (failed.length) {
+    console.warn(`zone-guide ${facts.name}: validación fallida en [${failed.join(', ')}]`, {
+      intro: g.intro.length, species: g.species.length, techniques: g.techniques.length,
+      seasons: g.seasons.length, tips: g.tips.map((t) => t.length),
+    })
+    return null
+  }
+  return g
 }

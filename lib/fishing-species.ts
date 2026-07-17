@@ -479,3 +479,32 @@ export function getSpecies(id?: string | null): SpeciesProfile {
 }
 
 export const MONTHS_SHORT = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
+
+/** Which spot `known` descriptions mention each species (shared by fichas + zone facts). */
+export const SPECIES_KNOWN_TERMS: Record<string, string[]> = {
+  lubina: ['lubina', 'robaliza'],
+  dorada: ['dorada'],
+  sargo: ['sargo'],
+  corvina: ['corvina'],
+  denton: ['dentón'],
+  pelagicos: ['bonito', 'lampuga', 'llampuga'],
+  atun: ['atún', 'marlin'],
+  calamares: ['calamar'],
+  sepia: ['sepia'],
+  jurel: ['jurel', 'chicharro'],
+  caballa: ['caballa'],
+  palometon: ['palometón', 'palometa'],
+  anjova: ['anjova', 'chova'],
+  congrio: ['congrio'],
+  pulpo: ['pulpo'],
+  lenguado: ['lenguado'],
+  herrera: ['herrera'],
+  espeton: ['espetón', 'barracuda'],
+  galanes: ['galán', 'raor'],
+  pargos: ['pargo'],
+  brecas: ['breca'],
+  meros: ['mero'],
+  lechas: ['lecha', 'serviola', 'pez limón', 'verderol'],
+  'gallo-pedro': ['gallo'],
+  gallineta: ['gallineta', 'cabracho'],
+}

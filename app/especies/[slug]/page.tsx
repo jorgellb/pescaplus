@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import Layout from '@/components/Layout'
-import { SEA_SPECIES, MONTHS_SHORT } from '@/lib/fishing-species'
+import { SEA_SPECIES, MONTHS_SHORT, SPECIES_KNOWN_TERMS } from '@/lib/fishing-species'
 import { FISHING_SPOTS } from '@/lib/fishing-spots'
 import { getTaxonomy, categoryName } from '@/lib/taxonomy-store'
 import { NATIONAL_SIZES_URL } from '@/lib/fishing-regulations'
@@ -16,35 +16,6 @@ export function generateStaticParams() {
   return SEA_SPECIES.map((s) => ({ slug: s.id }))
 }
 
-/** Which spot `known` descriptions mention each species. */
-const KNOWN_TERMS: Record<string, string[]> = {
-  lubina: ['lubina', 'robaliza'],
-  dorada: ['dorada'],
-  sargo: ['sargo'],
-  corvina: ['corvina'],
-  denton: ['dentón'],
-  pelagicos: ['bonito', 'lampuga', 'llampuga'],
-  atun: ['atún', 'marlin'],
-  calamares: ['calamar'],
-  sepia: ['sepia'],
-  jurel: ['jurel', 'chicharro'],
-  caballa: ['caballa'],
-  palometon: ['palometón', 'palometa'],
-  anjova: ['anjova', 'chova'],
-  congrio: ['congrio'],
-  pulpo: ['pulpo'],
-  lenguado: ['lenguado'],
-  herrera: ['herrera'],
-  espeton: ['espetón', 'barracuda'],
-  potas: ['pota', 'volador'],
-  galanes: ['galán', 'raor'],
-  pargos: ['pargo'],
-  brecas: ['breca'],
-  meros: ['mero'],
-  lechas: ['lecha', 'serviola', 'pez limón', 'verderol'],
-  'gallo-pedro': ['gallo'],
-  gallineta: ['gallineta', 'cabracho'],
-}
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params
@@ -76,7 +47,7 @@ export default async function SpeciesPage({ params }: Params) {
   const taxonomy = await getTaxonomy()
   const currentMonth = Number(new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Madrid', month: 'numeric' }).format(new Date()))
   const inSeason = sp.bestMonths.includes(currentMonth)
-  const terms = KNOWN_TERMS[sp.id] ?? [sp.name.toLowerCase()]
+  const terms = SPECIES_KNOWN_TERMS[sp.id] ?? [sp.name.toLowerCase()]
   const spots = FISHING_SPOTS.filter((s) => s.type === 'mar' && terms.some((t) => s.known.toLowerCase().includes(t))).slice(0, 14)
 
   const breadcrumbLd = breadcrumbJsonLd([

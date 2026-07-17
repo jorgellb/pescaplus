@@ -25,6 +25,7 @@ import { getSpecies, GENERAL, SEA_SPECIES } from '@/lib/fishing-species'
 import { douglasState, safetyAlerts, navigationWindows, outAndBack, dayVerdict, gearForConditions } from '@/lib/sea-state'
 import { seawardBearing, windRelation, windRelationLabel } from '@/lib/coast'
 import { getRegulation, REGULATIONS_REVIEWED, NATIONAL_SIZES_URL } from '@/lib/fishing-regulations'
+import { getZoneGuide } from '@/lib/zone-guides'
 import { scoreLabel, scoreHex, windWord, weatherEmoji } from '@/lib/forecast-format'
 import { fmtTime, fmtDayLabel, fmtDateLong, fmtWindowRange, todayMadridISO, addDaysISO, ratingLabel } from '@/lib/solunar-format'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
@@ -172,9 +173,12 @@ export default async function SpotDashboard({
 
   const nearby = nearestSpots(s, 5)
 
+  const guide = getZoneGuide(s.slug)
+
   const SECTIONS = [
     { id: 'ahora', label: 'Ahora' },
     { id: 'prevision', label: '7 días' },
+    ...(guide ? [{ id: 'guia', label: 'Guía local' }] : []),
     ...(speciesPicks.length ? [{ id: 'especies', label: 'Qué buscar' }] : []),
     { id: 'equipo', label: 'Equipo' },
     { id: 'sol-luna', label: 'Sol y luna' },
@@ -710,6 +714,41 @@ export default async function SpotDashboard({
             })}
           </div>
         </div>
+
+        {/* Local editorial guide — the unique content layer of each zone */}
+        {guide && (
+          <div id="guia" className="border-t-2 border-ink pt-8 space-y-6 scroll-mt-28">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h2 className="font-display uppercase text-3xl md:text-4xl leading-none text-ink">Pescar en {s.name}: la guía local</h2>
+              <span className="font-mono text-[10px] uppercase tracking-widest text-ink/35">Guía orientativa · revisada {new Date(guide.generatedAt).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}</span>
+            </div>
+            <p className="text-[16px] text-ink/85 leading-relaxed max-w-3xl first-letter:font-display first-letter:text-5xl first-letter:float-left first-letter:mr-2 first-letter:leading-[0.85]">{guide.intro}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="border border-ink/12 rounded-2xl bg-paper p-5 space-y-2">
+                <h3 className="font-display uppercase text-xl text-ink leading-none flex items-center gap-2"><span aria-hidden>🐟</span> Qué se pesca</h3>
+                <p className="text-[14px] text-ink/75 leading-relaxed">{guide.species}</p>
+              </div>
+              <div className="border border-ink/12 rounded-2xl bg-paper p-5 space-y-2">
+                <h3 className="font-display uppercase text-xl text-ink leading-none flex items-center gap-2"><span aria-hidden>🎣</span> Cómo se pesca</h3>
+                <p className="text-[14px] text-ink/75 leading-relaxed">{guide.techniques}</p>
+              </div>
+            </div>
+            <div className="border-l-4 border-accent bg-accent/[0.05] rounded-r-2xl px-5 py-4">
+              <h3 className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent mb-1.5">📅 Cuándo ir</h3>
+              <p className="text-[14px] text-ink/80 leading-relaxed">{guide.seasons}</p>
+            </div>
+            <div>
+              <h3 className="font-display uppercase text-xl text-ink leading-none mb-3">Consejos de la zona</h3>
+              <ul className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                {guide.tips.map((t, i) => (
+                  <li key={i} className="flex items-start gap-2.5 border border-ink/12 rounded-xl bg-paper px-4 py-3 text-[13px] text-ink/75 leading-relaxed">
+                    <span className="text-accent font-bold flex-shrink-0" aria-hidden>{i + 1}.</span> {t}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
 
         {/* SEO copy + internal links */}
         <div className="border-t border-ink/12 pt-8 space-y-3 text-[15px] text-ink/80 leading-relaxed">
