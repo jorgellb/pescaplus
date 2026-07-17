@@ -31,6 +31,25 @@ const EMPTY: AemetObservation = {
 
 export const AEMET_OBS_REVALIDATE_S = 900
 
+/** A station reading older than this (minutes) is no longer "ahora". Stations
+ * report hourly, so this tolerates the normal cadence plus one missed slot. */
+export const OBS_FRESH_MAX_MIN = 120
+
+/** Minutes between `nowMs` and the observation's UTC timestamp. AEMET `fint` is
+ * UTC; if it carries no zone marker we add one. Null when unparseable. */
+export function observationAgeMin(obsTimeIso: string | null, nowMs: number): number | null {
+  if (!obsTimeIso || nowMs <= 0) return null
+  const iso = /Z|[+-]\d\d:?\d\d$/.test(obsTimeIso) ? obsTimeIso : `${obsTimeIso}Z`
+  const ms = Date.parse(iso)
+  return Number.isFinite(ms) ? Math.round((nowMs - ms) / 60000) : null
+}
+
+/** Fresh enough to label "observado ahora" and to diff against the model. A
+ * small negative age is allowed for clock skew between server and station. */
+export function isObservationFresh(ageMin: number | null): boolean {
+  return ageMin != null && ageMin >= -20 && ageMin <= OBS_FRESH_MAX_MIN
+}
+
 async function fetchJson(url: string, revalidate: number): Promise<unknown | null> {
   try {
     const res = await fetch(url, { next: { revalidate }, signal: AbortSignal.timeout(12000) })

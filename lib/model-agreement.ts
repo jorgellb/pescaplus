@@ -38,7 +38,9 @@ export async function getModelAgreement(lat: number, lon: number): Promise<Model
   const empty: ModelAgreement = { available: false, days: [], fetchedAt: Date.now() }
   try {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(3)}&longitude=${lon.toFixed(3)}&hourly=wind_speed_10m&models=${MODELS.join(',')}&forecast_days=7&timezone=Europe%2FMadrid&wind_speed_unit=kmh`
-    const res = await fetch(url, { next: { revalidate: AGREEMENT_REVALIDATE_S }, signal: AbortSignal.timeout(12000) })
+    // Secondary enhancement: keep a tighter timeout so a slow multi-model
+    // query can't hold the whole dashboard (it degrades to no chip gracefully).
+    const res = await fetch(url, { next: { revalidate: AGREEMENT_REVALIDATE_S }, signal: AbortSignal.timeout(8000) })
     if (!res.ok) return empty
     const data = (await res.json()) as {
       hourly?: { time?: string[] } & Record<string, (number | null)[] | string[] | undefined>

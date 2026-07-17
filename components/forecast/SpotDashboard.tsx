@@ -28,7 +28,7 @@ import { getRegulation, REGULATIONS_REVIEWED, NATIONAL_SIZES_URL } from '@/lib/f
 import { getZoneGuide } from '@/lib/zone-guides'
 import { getAemetBulletin, AEMET_REVALIDATE_S, type AemetBulletin } from '@/lib/aemet'
 import { aemetZoneFor } from '@/lib/aemet-zones'
-import { getAemetObservation, AEMET_OBS_REVALIDATE_S, type AemetObservation } from '@/lib/aemet-obs'
+import { getAemetObservation, AEMET_OBS_REVALIDATE_S, observationAgeMin, isObservationFresh, type AemetObservation } from '@/lib/aemet-obs'
 import { AEMET_STATIONS } from '@/lib/aemet-stations'
 import { getSpotAccuracy, type SpotAccuracy } from '@/lib/verification-store'
 import { getModelAgreement, AGREEMENT_LABEL } from '@/lib/model-agreement'
@@ -93,6 +93,12 @@ export default async function SpotDashboard({
   const nowHour = hours.find((h) => h.isNow) ?? hours[0] ?? null
   const now = nowHour?.time ?? hours[0]?.time ?? 0
   const todayHours = hours.filter((h) => h.dateISO === today)
+
+  // AEMET stations report hourly but some have multi-hour gaps. A stale reading
+  // must NOT be shown as "ahora", and its wind must NOT be diffed against the
+  // current model hour (apples to oranges).
+  const obsAgeMin = observationAgeMin(obs?.time ?? null, now)
+  const obsFresh = isObservationFresh(obsAgeMin)
 
   let pressureTrend: string | null = null
   if (nowHour?.pressure != null) {
@@ -421,21 +427,25 @@ export default async function SpotDashboard({
                 </p>
               )}
 
-              {/* OBSERVED right now — real measurement vs the model */}
+              {/* OBSERVED — real measurement vs the model, only "ahora" if fresh */}
               {obs?.available && (
-                <div className="border border-accent/30 rounded-xl bg-accent/[0.04] p-3.5 space-y-2">
+                <div className={`border rounded-xl p-3.5 space-y-2 ${obsFresh ? 'border-accent/30 bg-accent/[0.04]' : 'border-ink/15 bg-ink/[0.02]'}`}>
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">
-                      📡 Observado ahora · estación {obs.stationName}{station ? ` (a ${station.km} km)` : ''}
+                    <p className={`font-mono text-[10px] font-bold uppercase tracking-widest ${obsFresh ? 'text-accent' : 'text-ink/55'}`}>
+                      📡 {obsFresh ? 'Observado ahora' : 'Última medición'} · estación {obs.stationName}{station ? ` (a ${station.km} km)` : ''}
                     </p>
-                    {obs.time && <span className="font-mono text-[10px] uppercase tracking-widest text-ink/40">{obs.time.slice(11, 16)} UTC</span>}
+                    {obs.time && (
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-ink/40">
+                        {obs.time.slice(11, 16)} UTC{!obsFresh && obsAgeMin != null ? ` · hace ${obsAgeMin >= 120 ? `${Math.round(obsAgeMin / 60)} h` : `${obsAgeMin} min`}` : ''}
+                      </span>
+                    )}
                   </div>
                   <div className="flex flex-wrap gap-x-5 gap-y-1 text-[13px] text-ink/85">
                     {obs.windKmh != null && (
                       <span>
                         <strong>Viento medido: {obs.windKmh} km/h</strong>
                         {obs.gustKmh != null && ` (rachas ${obs.gustKmh})`}
-                        {nowHour.windKmh != null && (
+                        {obsFresh && nowHour.windKmh != null && (
                           <span className={Math.abs(obs.windKmh - nowHour.windKmh) <= 5 ? 'text-accent' : 'text-amber-700'}>
                             {' '}· modelo {Math.round(nowHour.windKmh)} {Math.abs(obs.windKmh - nowHour.windKmh) <= 5 ? '✓' : `(Δ${Math.abs(Math.round(obs.windKmh - nowHour.windKmh))})`}
                           </span>
@@ -445,7 +455,10 @@ export default async function SpotDashboard({
                     {obs.tempC != null && <span>Temp: {Math.round(obs.tempC)}°C</span>}
                     {obs.pressureHpa != null && <span>Presión: {Math.round(obs.pressureHpa)} hPa</span>}
                   </div>
-                  <p className="font-mono text-[9px] uppercase tracking-wide text-ink/35">Dato OBSERVADO (red oficial de estaciones de AEMET) — no es una previsión.</p>
+                  <p className="font-mono text-[9px] uppercase tracking-wide text-ink/35">
+                    Dato OBSERVADO (red oficial de estaciones de AEMET) — no es una previsión.
+                    {!obsFresh && ' La estación no ha reportado en la última hora; no lo comparamos con el modelo.'}
+                  </p>
                 </div>
               )}
 

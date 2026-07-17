@@ -27,7 +27,9 @@ export default async function DondePescarPage({ searchParams }: Params) {
   const mar = board.spots.filter((s) => s.type === 'mar')
   const interior = board.spots.filter((s) => s.type === 'interior')
   const top = [...mar].sort((a, b) => b.score - a.score || (a.windMax ?? 99) - (b.windMax ?? 99)).slice(0, 15)
-  const worst = [...mar].sort((a, b) => a.score - b.score).slice(0, 3)
+  // "Mejor evita" = zones we can actually judge as bad; a zone with no wave
+  // reading is unknown, not bad, so it doesn't belong here.
+  const worst = [...mar].filter((s) => !s.waveUnknown).sort((a, b) => a.score - b.score).slice(0, 3)
   const topInterior = [...interior].sort((a, b) => b.score - a.score || (a.windMax ?? 99) - (b.windMax ?? 99)).slice(0, 4)
 
   const dayName = board.dateISO === today ? 'hoy' : fmtDayLabel(board.dateISO)

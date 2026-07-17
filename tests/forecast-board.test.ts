@@ -4,6 +4,7 @@ import { getModality } from '@/lib/marine-forecast'
 import { agreementLevel } from '@/lib/model-agreement'
 import { fmtWindowRange } from '@/lib/solunar-format'
 import { upsertPrediction, listUnresolved, resolveCheck, getSpotAccuracy } from '@/lib/verification-store'
+import { observationAgeMin, isObservationFresh } from '@/lib/aemet-obs'
 
 const tierra = getModality('tierra')
 const barco = getModality('barco')
@@ -95,6 +96,36 @@ describe('getSpotAccuracy — public verification stats (memory path)', () => {
     expect(acc!.maeKmh).toBeCloseTo(3.7, 1)
     // 2 of 3 within ±5 km/h
     expect(acc!.within5).toBeCloseTo(2 / 3, 5)
+  })
+})
+
+describe('AEMET observation freshness — "ahora" must not lie', () => {
+  const now = Date.parse('2026-07-17T19:00:00Z')
+
+  it('a reading from the current hour is fresh', () => {
+    const age = observationAgeMin('2026-07-17T19:00:00', now) // fint without Z = UTC
+    expect(age).toBe(0)
+    expect(isObservationFresh(age)).toBe(true)
+  })
+
+  it('a reading 45 min old is still fresh', () => {
+    const age = observationAgeMin('2026-07-17T18:15:00', now)
+    expect(age).toBe(45)
+    expect(isObservationFresh(age)).toBe(true)
+  })
+
+  // Regression: stations with multi-hour gaps were shown as "observado ahora".
+  it('a reading 3 hours old is NOT fresh', () => {
+    const age = observationAgeMin('2026-07-17T16:00:00', now)
+    expect(age).toBe(180)
+    expect(isObservationFresh(age)).toBe(false)
+  })
+
+  it('honours an explicit Z or offset and rejects junk', () => {
+    expect(observationAgeMin('2026-07-17T18:00:00Z', now)).toBe(60)
+    expect(observationAgeMin(null, now)).toBeNull()
+    expect(observationAgeMin('not-a-date', now)).toBeNull()
+    expect(isObservationFresh(null)).toBe(false)
   })
 })
 
