@@ -13,6 +13,8 @@ import { outAndBack, safetyAlerts, dayVerdict, gearForConditions, douglasState }
 import { rankSpeciesToday } from '@/lib/what-to-fish'
 import { buildTimeline } from '@/lib/plan'
 import { getRegulation } from '@/lib/fishing-regulations'
+import { getAemetBulletin, type AemetBulletin } from '@/lib/aemet'
+import { aemetZoneFor } from '@/lib/aemet-zones'
 import { generatePlanAdvice } from '@/lib/nvidia-ai'
 import { scoreHex, windWord } from '@/lib/forecast-format'
 import { fmtTime, fmtDateLong, fmtDayLabel, fmtWindowRange, todayMadridISO, addDaysISO } from '@/lib/solunar-format'
@@ -47,9 +49,11 @@ export default async function PlanPage({ params, searchParams }: Params) {
   const species = getSpecies(especie)
   const modality = getModality(s.type === 'mar' ? modo : 'tierra')
   const sol = solunarDay(s.lat, s.lon, targetDay)
-  const [forecast, tides] = await Promise.all([
+  const aemetZone = aemetZoneFor(s)
+  const [forecast, tides, aemet] = await Promise.all([
     getMarineForecast(s, species.id === 'general' ? null : species.id, modality.id),
     s.type === 'mar' ? getTides(s.lat, s.lon) : Promise.resolve(null),
+    aemetZone ? getAemetBulletin(aemetZone.costa, aemetZone.keyword) : Promise.resolve(null as AemetBulletin | null),
   ])
 
   const dayGroup = groupByDay(forecast.hours).find((g) => g.dateISO === targetDay)
@@ -164,6 +168,11 @@ export default async function PlanPage({ params, searchParams }: Params) {
                 )}
               </div>
               {verdict && <p className="text-[15px] text-ink/85 leading-relaxed"><span className="font-bold">📋 </span>{verdict}</p>}
+              {aemet?.hasAviso && (
+                <p className="text-sm font-semibold rounded-xl border border-red-700/40 bg-red-700/[0.07] text-red-900 px-4 py-3">
+                  ⚠️ Aviso oficial de AEMET: {aemet.avisoTexto}
+                </p>
+              )}
               {alerts.map((a, i) => (
                 <p key={i} className={`text-sm font-semibold rounded-xl border px-4 py-3 ${a.level === 'peligro' ? 'border-red-700/40 bg-red-700/[0.07] text-red-900' : 'border-amber-600/40 bg-amber-500/[0.08] text-amber-900'}`}>
                   {a.level === 'peligro' ? '🚫' : '⚠️'} {a.text}

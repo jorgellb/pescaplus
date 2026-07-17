@@ -117,3 +117,19 @@ model AlertSubscription {
   @@unique([email, spotSlug])
   @@index([spotSlug])
 }
+
+model ForecastCheck {
+  id          String    @id @default(cuid())
+  spotSlug    String
+  dateISO     String
+  targetUtc   String
+  idema       String
+  predWindKmh Float
+  obsWindKmh  Float?
+  errorKmh    Float?
+  createdAt   DateTime  @default(now())
+  resolvedAt  DateTime?
+
+  @@unique([spotSlug, dateISO])
+  @@index([spotSlug, resolvedAt])
+}

@@ -28,6 +28,9 @@ import { getRegulation, REGULATIONS_REVIEWED, NATIONAL_SIZES_URL } from '@/lib/f
 import { getZoneGuide } from '@/lib/zone-guides'
 import { getAemetBulletin, AEMET_REVALIDATE_S, type AemetBulletin } from '@/lib/aemet'
 import { aemetZoneFor } from '@/lib/aemet-zones'
+import { getAemetObservation, AEMET_OBS_REVALIDATE_S, type AemetObservation } from '@/lib/aemet-obs'
+import { AEMET_STATIONS } from '@/lib/aemet-stations'
+import { getSpotAccuracy, type SpotAccuracy } from '@/lib/verification-store'
 import { scoreLabel, scoreHex, windWord, weatherEmoji } from '@/lib/forecast-format'
 import { fmtTime, fmtDayLabel, fmtDateLong, fmtWindowRange, todayMadridISO, addDaysISO, ratingLabel } from '@/lib/solunar-format'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
@@ -74,10 +77,13 @@ export default async function SpotDashboard({
   const days = Array.from({ length: 7 }, (_, i) => solunarDay(s.lat, s.lon, addDaysISO(today, i)))
   const d0 = days[0]
   const aemetZone = aemetZoneFor(s)
-  const [forecast, tides, aemet] = await Promise.all([
+  const station = AEMET_STATIONS[s.slug]
+  const [forecast, tides, aemet, obs, accuracy] = await Promise.all([
     getMarineForecast(s, species.id === 'general' ? null : species.id, modality.id),
     s.type === 'mar' ? getTides(s.lat, s.lon) : Promise.resolve(null),
     aemetZone ? getAemetBulletin(aemetZone.costa, aemetZone.keyword) : Promise.resolve(null as AemetBulletin | null),
+    station ? getAemetObservation(station.idema) : Promise.resolve(null as AemetObservation | null),
+    getSpotAccuracy(s.slug).catch(() => null as SpotAccuracy | null),
   ])
 
   const hours = forecast.hours
@@ -397,6 +403,44 @@ export default async function SpotDashboard({
                   {modality.id !== 'tierra' && windRel.label.startsWith('Viento de mar') && (
                     <span className="text-ink/60"> Ojo: en {modality.name.toLowerCase()} este mismo viento incomoda la navegación.</span>
                   )}
+                </p>
+              )}
+
+              {/* OBSERVED right now — real measurement vs the model */}
+              {obs?.available && (
+                <div className="border border-accent/30 rounded-xl bg-accent/[0.04] p-3.5 space-y-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">
+                      📡 Observado ahora · estación {obs.stationName}{station ? ` (a ${station.km} km)` : ''}
+                    </p>
+                    {obs.time && <span className="font-mono text-[10px] uppercase tracking-widest text-ink/40">{obs.time.slice(11, 16)} UTC</span>}
+                  </div>
+                  <div className="flex flex-wrap gap-x-5 gap-y-1 text-[13px] text-ink/85">
+                    {obs.windKmh != null && (
+                      <span>
+                        <strong>Viento medido: {obs.windKmh} km/h</strong>
+                        {obs.gustKmh != null && ` (rachas ${obs.gustKmh})`}
+                        {nowHour.windKmh != null && (
+                          <span className={Math.abs(obs.windKmh - nowHour.windKmh) <= 5 ? 'text-accent' : 'text-amber-700'}>
+                            {' '}· modelo {Math.round(nowHour.windKmh)} {Math.abs(obs.windKmh - nowHour.windKmh) <= 5 ? '✓' : `(Δ${Math.abs(Math.round(obs.windKmh - nowHour.windKmh))})`}
+                          </span>
+                        )}
+                      </span>
+                    )}
+                    {obs.tempC != null && <span>Temp: {Math.round(obs.tempC)}°C</span>}
+                    {obs.pressureHpa != null && <span>Presión: {Math.round(obs.pressureHpa)} hPa</span>}
+                  </div>
+                  <p className="font-mono text-[9px] uppercase tracking-wide text-ink/35">Dato OBSERVADO (red oficial de estaciones de AEMET) — no es una previsión.</p>
+                </div>
+              )}
+
+              {/* Public verification badge */}
+              {station && station.km <= 15 && (
+                <p className="font-mono text-[10px] uppercase tracking-wide text-ink/45 leading-relaxed">
+                  🎯 Fiabilidad verificada:{' '}
+                  {accuracy
+                    ? `error medio del viento ±${accuracy.maeKmh} km/h · ${Math.round(accuracy.within5 * 100)}% de días dentro de ±5 (últimas ${accuracy.n} verificaciones contra la estación oficial)`
+                    : 'comparamos a diario nuestra previsión con la estación oficial de AEMET; primeras cifras públicas en cuanto acumulemos 3 días.'}
                 </p>
               )}
 
