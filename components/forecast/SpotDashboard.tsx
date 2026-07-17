@@ -26,6 +26,8 @@ import { douglasState, safetyAlerts, navigationWindows, outAndBack, dayVerdict, 
 import { seawardBearing, windRelation, windRelationLabel } from '@/lib/coast'
 import { getRegulation, REGULATIONS_REVIEWED, NATIONAL_SIZES_URL } from '@/lib/fishing-regulations'
 import { getZoneGuide } from '@/lib/zone-guides'
+import { getAemetBulletin, AEMET_REVALIDATE_S, type AemetBulletin } from '@/lib/aemet'
+import { aemetZoneFor } from '@/lib/aemet-zones'
 import { scoreLabel, scoreHex, windWord, weatherEmoji } from '@/lib/forecast-format'
 import { fmtTime, fmtDayLabel, fmtDateLong, fmtWindowRange, todayMadridISO, addDaysISO, ratingLabel } from '@/lib/solunar-format'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
@@ -71,9 +73,11 @@ export default async function SpotDashboard({
   const today = todayMadridISO()
   const days = Array.from({ length: 7 }, (_, i) => solunarDay(s.lat, s.lon, addDaysISO(today, i)))
   const d0 = days[0]
-  const [forecast, tides] = await Promise.all([
+  const aemetZone = aemetZoneFor(s)
+  const [forecast, tides, aemet] = await Promise.all([
     getMarineForecast(s, species.id === 'general' ? null : species.id, modality.id),
     s.type === 'mar' ? getTides(s.lat, s.lon) : Promise.resolve(null),
+    aemetZone ? getAemetBulletin(aemetZone.costa, aemetZone.keyword) : Promise.resolve(null as AemetBulletin | null),
   ])
 
   const hours = forecast.hours
@@ -179,6 +183,7 @@ export default async function SpotDashboard({
     { id: 'ahora', label: 'Ahora' },
     { id: 'prevision', label: '7 días' },
     ...(guide ? [{ id: 'guia', label: 'Guía local' }] : []),
+    ...(aemet?.available ? [{ id: 'aemet', label: 'Parte AEMET' }] : []),
     ...(speciesPicks.length ? [{ id: 'especies', label: 'Qué buscar' }] : []),
     { id: 'equipo', label: 'Equipo' },
     { id: 'sol-luna', label: 'Sol y luna' },
@@ -251,6 +256,17 @@ export default async function SpotDashboard({
       </nav>
 
       <section className="max-w-6xl mx-auto px-4 py-10 sm:px-6 space-y-10">
+        {/* Official AEMET coastal warning */}
+        {aemet?.hasAviso && (
+          <div role="alert" className="rounded-2xl border border-red-700/40 bg-red-700/[0.07] text-red-900 px-5 py-4 text-sm font-semibold flex items-start gap-3">
+            <span className="text-xl leading-none" aria-hidden>⚠️</span>
+            <span>
+              <span className="font-mono text-[10px] font-bold uppercase tracking-widest block mb-1">Aviso oficial de AEMET · fenómenos costeros</span>
+              {aemet.avisoTexto}
+            </span>
+          </div>
+        )}
+
         {/* Safety alerts */}
         {alerts.map((a, i) => (
           <div
@@ -714,6 +730,37 @@ export default async function SpotDashboard({
             })}
           </div>
         </div>
+
+        {/* Official AEMET coastal bulletin */}
+        {aemet?.available && (
+          <div id="aemet" className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-6 space-y-4 scroll-mt-28">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-ink/12 pb-4">
+              <h2 className="font-display uppercase text-2xl text-ink leading-none flex items-center gap-2">
+                <span aria-hidden>🏛️</span> El parte oficial de AEMET
+              </h2>
+              <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border ${aemet.hasAviso ? 'border-red-700/40 text-red-800 bg-red-700/[0.06]' : 'border-accent/40 text-accent'}`}>
+                {aemet.hasAviso ? '⚠️ Con avisos' : '✓ Sin avisos'}
+              </span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="border border-ink/12 rounded-xl bg-paper p-4 space-y-1.5">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/45">{aemet.subzonaNombre || 'Aguas costeras'}</p>
+                <p className="text-[14px] text-ink/80 leading-relaxed">{aemet.subzonaTexto}</p>
+              </div>
+              <div className="border border-ink/12 rounded-xl bg-paper p-4 space-y-1.5">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/45">Situación general</p>
+                <p className="text-[14px] text-ink/80 leading-relaxed">{aemet.situacion || '—'}</p>
+              </div>
+            </div>
+            <SourceBadge
+              source="AEMET (boletín marítimo costero oficial)"
+              kind="previsto"
+              fetchedAt={aemet.elaborado ? Date.parse(aemet.elaborado) : null}
+              revalidateS={AEMET_REVALIDATE_S}
+              extra="© AEMET"
+            />
+          </div>
+        )}
 
         {/* Local editorial guide — the unique content layer of each zone */}
         {guide && (
