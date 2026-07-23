@@ -1,4 +1,4 @@
-export const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+export const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://pescaplus.es'
 
 /** Absolute URL for a site-relative path. */
 export function absoluteUrl(path: string): string {

@@ -13,7 +13,7 @@ const oswald = Oswald({
 });
 const mono = Space_Mono({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-mono-custom", display: "swap" });
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pescaplus.es";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
