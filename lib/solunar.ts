@@ -151,7 +151,27 @@ function phaseName(phase: number): string {
  * @param dateISO YYYY-MM-DD
  * @param tz IANA timezone (default Europe/Madrid)
  */
+/**
+ * Cross-request memo. solunarDay is a pure, deterministic function of
+ * (lat, lon, date, tz) but costs ~1.6 ms (minute-by-minute astronomy). It is
+ * called 7× per forecast render and 365× per year-planner render, so on a warm
+ * Fluid instance this cache turns most of that CPU into map lookups. Bounded so
+ * it can't grow without limit; entries are for fixed past/future dates, so a
+ * hard reset when large is fine (they get recomputed on demand).
+ */
+const _solunarMemo = new Map<string, SolunarDay>()
+
 export function solunarDay(lat: number, lon: number, dateISO: string, tz = 'Europe/Madrid'): SolunarDay {
+  const key = `${lat.toFixed(3)},${lon.toFixed(3)},${dateISO},${tz}`
+  const cached = _solunarMemo.get(key)
+  if (cached) return cached
+  const result = computeSolunarDay(lat, lon, dateISO, tz)
+  if (_solunarMemo.size > 4000) _solunarMemo.clear()
+  _solunarMemo.set(key, result)
+  return result
+}
+
+function computeSolunarDay(lat: number, lon: number, dateISO: string, tz: string): SolunarDay {
   const [y, m, d] = dateISO.split('-').map(Number)
   const start = localMidnightUtc(y, m, d, tz)
   const stepMs = 60000 // 1 minute
