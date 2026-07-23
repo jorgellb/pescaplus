@@ -10,6 +10,7 @@ import DayTabs from '@/components/forecast/DayTabs'
 import SourceBadge from '@/components/forecast/SourceBadge'
 import SpotFavButton from '@/components/forecast/SpotFavButton'
 import AlertSignup from '@/components/forecast/AlertSignup'
+import ZoneMeetups from '@/components/quedadas/ZoneMeetups'
 import { nearestSpots, type FishingSpot } from '@/lib/fishing-spots'
 import { rankSpeciesToday } from '@/lib/what-to-fish'
 import { solunarDay, type SolunarDay } from '@/lib/solunar'
@@ -966,6 +967,11 @@ export default async function SpotDashboard({
             <Link href="/advice" className="text-accent underline">asesor</Link>.
           </p>
         </div>
+
+        {/* Quedadas de pesca en esta zona — streamed so it never blocks the forecast */}
+        <Suspense fallback={null}>
+          <ZoneMeetups spotSlug={s.slug} spotName={s.name} />
+        </Suspense>
 
         {/* Window alerts by email */}
         <AlertSignup spotSlug={s.slug} spotName={s.name} isSea={s.type === 'mar'} />

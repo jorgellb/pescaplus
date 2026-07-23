@@ -18,6 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/mejores-horas`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     { url: `${base}/donde-pescar`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     { url: `${base}/diario`, lastModified: now, changeFrequency: 'monthly', priority: 0.4 },
+    { url: `${base}/quedadas`, lastModified: now, changeFrequency: 'daily', priority: 0.6 },
     { url: `${base}/calendario`, lastModified: now, changeFrequency: 'weekly', priority: 0.6 },
     { url: `${base}/especies`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${base}/guias`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
