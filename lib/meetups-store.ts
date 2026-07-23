@@ -25,7 +25,11 @@ export interface MeetupInput {
   level?: string
   maxPlaces: number
   minToConfirm?: number
-  costShare?: number | null
+  /** How the outing's cost works: free, a fixed amount per person, or a total
+   * shared cost split among everyone aboard (the "BlaBlaCar" model). */
+  costMode?: 'gratis' | 'fijo' | 'reparto'
+  costShare?: number | null // per person, for costMode 'fijo'
+  totalCost?: number | null // total to split, for costMode 'reparto'
   notes?: string
 }
 
@@ -53,7 +57,9 @@ export interface Meetup {
   level: string
   maxPlaces: number
   minToConfirm: number
+  costMode: 'gratis' | 'fijo' | 'reparto'
   costShare: number | null
+  totalCost: number | null
   notes: string
   status: 'open' | 'confirmed' | 'cancelled'
   createdAt: number
@@ -87,7 +93,9 @@ type MeetupData = {
   level: string
   maxPlaces: number
   minToConfirm: number
+  costMode: 'gratis' | 'fijo' | 'reparto'
   costShare: number | null
+  totalCost: number | null
   notes: string
 }
 
@@ -96,7 +104,14 @@ function clean(input: MeetupInput): MeetupData {
   const level = input.level && LEVELS.has(input.level) ? input.level : 'cualquiera'
   const maxPlaces = Math.min(30, Math.max(1, Math.round(Number(input.maxPlaces) || 4)))
   const minToConfirm = Math.min(maxPlaces, Math.max(1, Math.round(Number(input.minToConfirm) || 1)))
-  const costShare = input.costShare != null && Number.isFinite(input.costShare) && input.costShare > 0 ? Math.min(200, input.costShare) : null
+  const money = (v: number | null | undefined) => (v != null && Number.isFinite(v) && v > 0 ? Math.min(2000, v) : null)
+  const rawShare = money(input.costShare)
+  const rawTotal = money(input.totalCost)
+  // Resolve the cost mode from what was actually provided (defensive against
+  // a client sending a mode without its amount).
+  let costMode: MeetupData['costMode'] = input.costMode ?? 'gratis'
+  if (costMode === 'reparto' && rawTotal == null) costMode = 'gratis'
+  if (costMode === 'fijo' && rawShare == null) costMode = 'gratis'
   return {
     hostName: (input.hostName ?? '').trim().slice(0, 60),
     hostContact: (input.hostContact ?? '').trim().slice(0, 120),
@@ -110,9 +125,37 @@ function clean(input: MeetupInput): MeetupData {
     level,
     maxPlaces,
     minToConfirm,
-    costShare,
+    costMode,
+    costShare: costMode === 'fijo' ? rawShare : null,
+    totalCost: costMode === 'reparto' ? rawTotal : null,
     notes: (input.notes ?? '').trim().slice(0, 600),
   }
+}
+
+export interface CostInfo {
+  mode: 'gratis' | 'fijo' | 'reparto'
+  /** Short label for cards/lists ("Gratis", "5 €/persona", "≈12 €/persona"). */
+  label: string
+  /** For 'reparto': €/person now (host + current attendees) and when full. */
+  perPersonNow?: number
+  perPersonFull?: number
+}
+
+/** Cost display for a meetup. For 'reparto', the total splits among everyone
+ * aboard (host + attendees), so the price per head drops as the group grows —
+ * the "cuantos más, más barato" of shared boat trips (co-navegación, sin lucro). */
+export function costInfo(m: Pick<Meetup, 'costMode' | 'costShare' | 'totalCost' | 'placesTaken' | 'maxPlaces'>): CostInfo {
+  if (m.costMode === 'fijo' && m.costShare != null) {
+    return { mode: 'fijo', label: `${m.costShare} €/persona` }
+  }
+  if (m.costMode === 'reparto' && m.totalCost != null) {
+    const aboardNow = m.placesTaken + 1 // host + attendees
+    const aboardFull = m.maxPlaces + 1
+    const now = Math.ceil(m.totalCost / aboardNow)
+    const full = Math.ceil(m.totalCost / aboardFull)
+    return { mode: 'reparto', label: `≈${now} €/persona`, perPersonNow: now, perPersonFull: full }
+  }
+  return { mode: 'gratis', label: 'Gratis' }
 }
 
 /** Valid future-ish date and a HH:MM time; keeps junk out of the store. */
@@ -169,7 +212,9 @@ function rowToBase(row: any): Omit<Meetup, 'rsvps' | 'placesTaken'> {
     level: row.level ?? 'cualquiera',
     maxPlaces: row.maxPlaces,
     minToConfirm: row.minToConfirm,
+    costMode: row.costMode ?? 'gratis',
     costShare: row.costShare ?? null,
+    totalCost: row.totalCost ?? null,
     notes: row.notes ?? '',
     status: row.status,
     createdAt: row.createdAt instanceof Date ? row.createdAt.getTime() : row.createdAt,

@@ -36,7 +36,9 @@ export default function NewMeetupForm({ spots, species, defaultSpot }: { spots: 
     level: 'cualquiera',
     maxPlaces: 4,
     minToConfirm: 2,
+    costMode: 'gratis',
     costShare: '',
+    totalCost: '',
     notes: '',
     website: '', // honeypot
   })
@@ -63,7 +65,9 @@ export default function NewMeetupForm({ spots, species, defaultSpot }: { spots: 
           level: form.level,
           maxPlaces: Number(form.maxPlaces),
           minToConfirm: Number(form.minToConfirm),
-          costShare: form.costShare ? Number(form.costShare) : undefined,
+          costMode: form.costMode,
+          costShare: form.costMode === 'fijo' && form.costShare ? Number(form.costShare) : undefined,
+          totalCost: form.costMode === 'reparto' && form.totalCost ? Number(form.totalCost) : undefined,
           notes: form.notes || undefined,
           website: form.website || undefined,
         }),
@@ -154,10 +158,32 @@ export default function NewMeetupForm({ spots, species, defaultSpot }: { spots: 
           <input type="number" min={1} max={30} value={form.minToConfirm} onChange={(e) => set('minToConfirm', Number(e.target.value))} className={inputCls} />
         </label>
         <label className="block">
-          <span className={labelCls}>Gasto/persona (€, opcional)</span>
-          <input type="number" min={0} max={200} step="0.5" value={form.costShare} onChange={(e) => set('costShare', e.target.value)} placeholder="cebo, gasolina…" className={inputCls} />
+          <span className={labelCls}>Coste</span>
+          <select value={form.costMode} onChange={(e) => set('costMode', e.target.value)} className={inputCls}>
+            <option value="gratis">Gratis</option>
+            <option value="fijo">Fijo por persona</option>
+            <option value="reparto">Repartir gastos (BlaBlaCar)</option>
+          </select>
         </label>
       </div>
+
+      {form.costMode === 'fijo' && (
+        <label className="block sm:max-w-xs">
+          <span className={labelCls}>€ por persona</span>
+          <input type="number" min={0} max={2000} step="0.5" value={form.costShare} onChange={(e) => set('costShare', e.target.value)} placeholder="p. ej. cebo compartido" className={inputCls} />
+        </label>
+      )}
+      {form.costMode === 'reparto' && (
+        <label className="block sm:max-w-md">
+          <span className={labelCls}>Gastos totales del barco/salida (€) — se reparten entre todos</span>
+          <input type="number" min={0} max={2000} step="1" value={form.totalCost} onChange={(e) => set('totalCost', e.target.value)} placeholder="gasolina, amarre, cebo…" className={inputCls} />
+          {form.totalCost && Number(form.totalCost) > 0 && (
+            <span className="block text-[12px] text-ink/60 mt-1">
+              Ahora saldría a ≈{Math.ceil(Number(form.totalCost) / 2)} €/persona (2 a bordo) · si se llena ({Number(form.maxPlaces) + 1}), ≈{Math.ceil(Number(form.totalCost) / (Number(form.maxPlaces) + 1))} €/persona. Cuantos más, más barato.
+            </span>
+          )}
+        </label>
+      )}
 
       <label className="block">
         <span className={labelCls}>Notas (equipo, plan, quién sois…)</span>

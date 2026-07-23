@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Layout from '@/components/Layout'
-import { listUpcomingMeetups } from '@/lib/meetups-store'
+import { listUpcomingMeetups, costInfo } from '@/lib/meetups-store'
 import { getSpot } from '@/lib/fishing-spots'
 import { getSpecies } from '@/lib/fishing-species'
 import { todayMadridISO, fmtDayLabel } from '@/lib/solunar-format'
@@ -69,8 +69,7 @@ export default async function QuedadasHub() {
                     <p className="font-display uppercase text-xl text-ink leading-none mt-2">{spot?.name ?? m.spotSlug}</p>
                     <p className="text-[13px] text-ink/65 mt-1">
                       {sp ? `A por ${sp.name.toLowerCase()} · ` : ''}
-                      nivel {m.level}
-                      {m.costShare ? ` · ${m.costShare} €/persona` : ' · gratis'}
+                      nivel {m.level} · {costInfo(m).label}
                       {full ? ' · completa' : ` · faltan ${m.maxPlaces - m.placesTaken}`}
                     </p>
                   </Link>

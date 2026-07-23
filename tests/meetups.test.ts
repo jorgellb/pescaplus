@@ -6,6 +6,7 @@ import {
   getMeetupByToken,
   joinMeetup,
   cancelMeetup,
+  costInfo,
 } from '@/lib/meetups-store'
 
 // No DATABASE_URL in the test env → the store uses its in-memory backend, which
@@ -71,6 +72,27 @@ describe('meetups store — quedadas CRUD (memory path)', () => {
     expect(await cancelMeetup(m.id, m.manageToken)).toBe(true)
     // Cancelled meetups drop out of the zone listing.
     expect(await listMeetupsBySpot('cadiz', '2026-07-01')).toHaveLength(0)
+  })
+
+  it('splits shared cost dynamically — cheaper per head as the group grows', async () => {
+    // Total 60 €, boat for 5 attendees (6 aboard with the host).
+    const m = await createMeetup({ ...base, modality: 'barco', maxPlaces: 5, minToConfirm: 2, costMode: 'reparto', totalCost: 60 })
+    // Just the host aboard → 60/1.
+    let c = costInfo(m)
+    expect(c.mode).toBe('reparto')
+    expect(c.perPersonNow).toBe(60)
+    expect(c.perPersonFull).toBe(10) // 60 / 6 aboard when full
+    // Two join → 3 aboard → 20 €.
+    await joinMeetup(m.id, { name: 'Ana' })
+    const after = await joinMeetup(m.id, { name: 'Luis' })
+    c = costInfo(after)
+    expect(c.perPersonNow).toBe(20)
+  })
+
+  it('cost mode falls back to gratis when the amount is missing', async () => {
+    const m = await createMeetup({ ...base, costMode: 'reparto' }) // no totalCost
+    expect(costInfo(m).mode).toBe('gratis')
+    expect(costInfo(m).label).toBe('Gratis')
   })
 
   it('lists only upcoming meetups for the zone, soonest first', async () => {

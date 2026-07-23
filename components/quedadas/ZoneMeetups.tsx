@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { listMeetupsBySpot } from '@/lib/meetups-store'
+import { listMeetupsBySpot, costInfo } from '@/lib/meetups-store'
 import { getSpecies } from '@/lib/fishing-species'
 import { todayMadridISO, fmtDayLabel } from '@/lib/solunar-format'
 
@@ -39,7 +39,7 @@ export default async function ZoneMeetups({ spotSlug, spotName }: { spotSlug: st
                       {sp ? ` · ${sp.name}` : ''}
                     </span>
                     <span className="block font-mono text-[10px] uppercase tracking-widest text-ink/45">
-                      nivel {m.level}{m.costShare ? ` · ${m.costShare} €` : ' · gratis'}
+                      nivel {m.level} · {costInfo(m).label}
                     </span>
                   </span>
                   <span className={`font-mono text-[10px] font-bold uppercase tracking-widest shrink-0 ${m.status === 'confirmed' ? 'text-accent' : 'text-ink/40'}`}>

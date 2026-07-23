@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import Layout from '@/components/Layout'
 import JoinMeetup from '@/components/quedadas/JoinMeetup'
 import ManageMeetup from '@/components/quedadas/ManageMeetup'
-import { getMeetup, getMeetupByToken } from '@/lib/meetups-store'
+import { getMeetup, getMeetupByToken, costInfo } from '@/lib/meetups-store'
 import { getSpot } from '@/lib/fishing-spots'
 import { getSpecies } from '@/lib/fishing-species'
 import { getMarineForecast, groupByDay, bestWindow, getModality } from '@/lib/marine-forecast'
@@ -32,6 +32,7 @@ export default async function MeetupPage({ params, searchParams }: Params) {
   const modality = getModality(meetup.modality)
   const full = meetup.placesTaken >= meetup.maxPlaces
   const cancelled = meetup.status === 'cancelled'
+  const cost = costInfo(meetup)
 
   // Forecast + safety for the meetup's day, from our own marine engine.
   const today = todayMadridISO()
@@ -98,7 +99,7 @@ export default async function MeetupPage({ params, searchParams }: Params) {
             </span>
             <span className="inline-flex items-center gap-2 rounded-xl border border-ink/15 px-3 py-2 text-sm">
               <span className="font-mono text-[10px] uppercase tracking-widest text-ink/50">Coste</span>
-              <span className="font-bold text-ink">{meetup.costShare ? `${meetup.costShare} €/persona` : 'Gratis'}</span>
+              <span className="font-bold text-ink">{cost.label}</span>
             </span>
           </div>
         </div>
@@ -113,6 +114,21 @@ export default async function MeetupPage({ params, searchParams }: Params) {
           <p><strong>👤 Anfitrión:</strong> {meetup.hostName}</p>
           {meetup.notes && <p className="text-ink/75 whitespace-pre-line border-l-4 border-accent/40 pl-3">{meetup.notes}</p>}
         </div>
+
+        {/* Reparto de gastos dinámico (barco compartido, sin lucro) */}
+        {cost.mode === 'reparto' && cost.perPersonNow != null && (
+          <div className="border border-accent/30 rounded-2xl bg-accent/[0.05] p-4 space-y-1">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">🚤 Gastos compartidos</p>
+            <p className="text-[15px] text-ink/85">
+              Gastos totales <strong>{meetup.totalCost} €</strong> a repartir entre todos los que vais.
+              Ahora sois <strong>{meetup.placesTaken + 1}</strong> a bordo → <strong>≈{cost.perPersonNow} €/persona</strong>.
+              {!full && cost.perPersonFull != null && cost.perPersonFull < cost.perPersonNow && (
+                <> Si se llena ({meetup.maxPlaces + 1} a bordo), baja a <strong>≈{cost.perPersonFull} €</strong>. Cuantos más seáis, más barato.</>
+              )}
+            </p>
+            <p className="font-mono text-[10px] uppercase tracking-wide text-ink/40">Solo reparto de gastos reales, sin ánimo de lucro.</p>
+          </div>
+        )}
 
         {/* Previsión + seguridad del día */}
         {danger && (

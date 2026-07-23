@@ -17,7 +17,9 @@ const schema = z.object({
   level: z.enum(['principiante', 'medio', 'experto', 'cualquiera']).optional(),
   maxPlaces: z.number().int().min(1).max(30),
   minToConfirm: z.number().int().min(1).max(30).optional(),
-  costShare: z.number().min(0).max(200).optional(),
+  costMode: z.enum(['gratis', 'fijo', 'reparto']).optional(),
+  costShare: z.number().min(0).max(2000).optional(),
+  totalCost: z.number().min(0).max(2000).optional(),
   notes: z.string().max(600).optional(),
   // Honeypot
   website: z.string().max(200).optional(),

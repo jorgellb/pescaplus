@@ -21,7 +21,9 @@ CREATE TABLE IF NOT EXISTS "Meetup" (
   "level"         TEXT NOT NULL DEFAULT 'cualquiera',
   "maxPlaces"     INTEGER NOT NULL DEFAULT 4,
   "minToConfirm"  INTEGER NOT NULL DEFAULT 1,
+  "costMode"      TEXT NOT NULL DEFAULT 'gratis',
   "costShare"     DOUBLE PRECISION,
+  "totalCost"     DOUBLE PRECISION,
   "notes"         TEXT NOT NULL DEFAULT '',
   "status"        TEXT NOT NULL DEFAULT 'open',
   "createdAt"     TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
