@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import Layout from '@/components/Layout'
-import { SEA_SPECIES, MONTHS_SHORT, SPECIES_KNOWN_TERMS } from '@/lib/fishing-species'
-import { FISHING_SPOTS } from '@/lib/fishing-spots'
+import { SEA_SPECIES, MONTHS_SHORT } from '@/lib/fishing-species'
+import { zonesForSpecies } from '@/lib/species-zones'
 import { getTaxonomy, categoryName } from '@/lib/taxonomy-store'
 import { NATIONAL_SIZES_URL } from '@/lib/fishing-regulations'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
@@ -47,8 +47,7 @@ export default async function SpeciesPage({ params }: Params) {
   const taxonomy = await getTaxonomy()
   const currentMonth = Number(new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Madrid', month: 'numeric' }).format(new Date()))
   const inSeason = sp.bestMonths.includes(currentMonth)
-  const terms = SPECIES_KNOWN_TERMS[sp.id] ?? [sp.name.toLowerCase()]
-  const spots = FISHING_SPOTS.filter((s) => s.type === 'mar' && terms.some((t) => s.known.toLowerCase().includes(t))).slice(0, 14)
+  const spots = zonesForSpecies(sp.id).slice(0, 18)
 
   const breadcrumbLd = breadcrumbJsonLd([
     { name: 'Inicio', url: SITE_URL },
@@ -150,10 +149,10 @@ export default async function SpeciesPage({ params }: Params) {
         {spots.length > 0 && (
           <div className="space-y-3">
             <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3">Dónde se busca</h2>
-            <p className="text-sm text-ink/60">Zonas de nuestra red conocidas por la {sp.name.toLowerCase()} — cada una con su previsión de actividad adaptada a la especie:</p>
+            <p className="text-sm text-ink/60">Guías de cómo pescar {sp.name.toLowerCase()} zona a zona — temporada, técnica y mejores horas de cada localidad:</p>
             <div className="flex flex-wrap gap-2">
               {spots.map((s) => (
-                <Link key={s.slug} href={`/mejores-horas/${s.slug}?especie=${sp.id}`} className="px-3 py-1.5 text-sm font-semibold text-ink border border-ink/15 rounded-full hover:bg-ink hover:text-paper transition-colors">
+                <Link key={s.slug} href={`/pesca/${sp.id}/${s.slug}`} className="px-3 py-1.5 text-sm font-semibold text-ink border border-ink/15 rounded-full hover:bg-ink hover:text-paper transition-colors">
                   {s.name} <span className="font-mono text-[10px] uppercase tracking-widest opacity-50">{s.region}</span>
                 </Link>
               ))}

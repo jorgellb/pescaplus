@@ -29,7 +29,7 @@ const COMPASS_WORDS: Record<string, string> = {
 }
 const COMPASS = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSO', 'SO', 'OSO', 'O', 'ONO', 'NO', 'NNO']
 
-function seaName(s: FishingSpot): string {
+export function seaName(s: FishingSpot): string {
   if (s.type === 'interior') return 'aguas interiores'
   if (s.region === 'Canarias') return 'océano Atlántico (aguas canarias)'
   if (['Asturias', 'Cantabria', 'País Vasco'].includes(s.region)) return 'mar Cantábrico'

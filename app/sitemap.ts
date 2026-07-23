@@ -5,6 +5,7 @@ import { listGuides } from '@/lib/guides-store'
 import { roundupSlugs } from '@/lib/roundups'
 import { FISHING_SPOTS } from '@/lib/fishing-spots'
 import { SEA_SPECIES } from '@/lib/fishing-species'
+import { allSpeciesZonePairs } from '@/lib/species-zones'
 
 const base = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
@@ -46,6 +47,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: now,
     changeFrequency: 'daily',
     priority: 0.6,
+  }))
+
+  // Species × zone landing mesh ("pescar lubina en Cádiz"): ~1.1k pages.
+  const speciesZoneRoutes: MetadataRoute.Sitemap = allSpeciesZonePairs().map(({ especie, zona }) => ({
+    url: `${base}/pesca/${especie}/${zona}`,
+    lastModified: now,
+    changeFrequency: 'weekly',
+    priority: 0.55,
   }))
 
   let roundupRoutes: MetadataRoute.Sitemap = []
@@ -105,5 +114,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     /* guides store unavailable */
   }
 
-  return [...staticRoutes, ...categoryRoutes, ...speciesRoutes, ...spotRoutes, ...subcategoryRoutes, ...roundupRoutes, ...productRoutes, ...guideRoutes]
+  return [...staticRoutes, ...categoryRoutes, ...speciesRoutes, ...spotRoutes, ...speciesZoneRoutes, ...subcategoryRoutes, ...roundupRoutes, ...productRoutes, ...guideRoutes]
 }

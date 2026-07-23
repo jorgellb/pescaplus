@@ -33,6 +33,7 @@ import { getAemetObservation, observationAgeMin, isObservationFresh, type AemetO
 import { AEMET_STATIONS } from '@/lib/aemet-stations'
 import { getSpotAccuracy, type SpotAccuracy } from '@/lib/verification-store'
 import { getModelAgreement, AGREEMENT_LABEL } from '@/lib/model-agreement'
+import { isSpeciesZone } from '@/lib/species-zones'
 import { scoreLabel, scoreHex, windWord, weatherEmoji } from '@/lib/forecast-format'
 import { fmtTime, fmtDayLabel, fmtDateLong, fmtWindowRange, todayMadridISO, addDaysISO, ratingLabel } from '@/lib/solunar-format'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
@@ -616,9 +617,15 @@ export default async function SpotDashboard({
                     <Link href={buildHref({ especie: p.species.id, modo })} scroll={false} className="inline-flex items-center text-[11px] font-bold uppercase tracking-wide text-paper bg-ink hover:bg-accent px-3 py-1.5 rounded-lg transition-colors">
                       Puntuar para {p.species.name} →
                     </Link>
-                    <Link href={`/especies/${p.species.id}`} className="inline-flex items-center text-[11px] font-bold uppercase tracking-wide text-ink border border-ink/15 px-3 py-1.5 rounded-lg hover:bg-ink hover:text-paper transition-colors">
-                      Ficha
-                    </Link>
+                    {isSpeciesZone(p.species.id, s.slug) ? (
+                      <Link href={`/pesca/${p.species.id}/${s.slug}`} className="inline-flex items-center text-[11px] font-bold uppercase tracking-wide text-ink border border-ink/15 px-3 py-1.5 rounded-lg hover:bg-ink hover:text-paper transition-colors">
+                        Guía en {s.name}
+                      </Link>
+                    ) : (
+                      <Link href={`/especies/${p.species.id}`} className="inline-flex items-center text-[11px] font-bold uppercase tracking-wide text-ink border border-ink/15 px-3 py-1.5 rounded-lg hover:bg-ink hover:text-paper transition-colors">
+                        Ficha
+                      </Link>
+                    )}
                   </div>
                 </div>
               ))}

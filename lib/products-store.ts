@@ -125,6 +125,11 @@ function applyInput(input: ProductInput, id: string): Product {
   }
 }
 
+/**
+ * READ helper. When no database is configured we use the in-memory store (local
+ * dev / demos). When a database IS configured but the read fails, we degrade to
+ * memory so the public site keeps serving the base catalog instead of 500-ing.
+ */
 async function withDb<T>(op: (prisma: any) => Promise<T>, fallback: () => T | Promise<T>): Promise<T> {
   if (!isDatabaseConfigured()) return fallback()
   try {
@@ -132,8 +137,28 @@ async function withDb<T>(op: (prisma: any) => Promise<T>, fallback: () => T | Pr
     await ensureSeeded(prisma)
     return await op(prisma)
   } catch (error) {
-    console.warn('Database operation failed, using in-memory store instead:', error)
+    console.warn('Database read failed, using in-memory store instead:', error)
     return fallback()
+  }
+}
+
+/**
+ * WRITE helper. Critically different from `withDb`: when a database is
+ * configured but the write fails (e.g. Neon quota exhausted, connection down),
+ * we DO NOT silently fall back to the volatile in-memory store — that store is
+ * wiped on the next cold start, so a "successful" save would be lost. Instead
+ * we throw, so the admin sees a real error and nothing is lost silently.
+ * The in-memory path is used only when no database is configured at all.
+ */
+async function withDbWrite<T>(op: (prisma: any) => Promise<T>, memory: () => T | Promise<T>): Promise<T> {
+  if (!isDatabaseConfigured()) return memory()
+  const { prisma } = await import('@/lib/prisma')
+  await ensureSeeded(prisma)
+  try {
+    return await op(prisma)
+  } catch (error) {
+    console.error('Database write failed — NOT falling back to memory to avoid silent data loss:', error)
+    throw new Error('La base de datos no está disponible ahora mismo; el cambio no se ha guardado. Inténtalo de nuevo en unos minutos.')
   }
 }
 
@@ -199,7 +224,7 @@ export async function getProduct(id: string): Promise<Product | undefined> {
 }
 
 export async function createProduct(input: ProductInput): Promise<Product> {
-  return withDb(
+  return withDbWrite(
     async (prisma) => {
       const id = uniqueId(slugify(input.title), () => false)
       // Rely on the DB unique constraint; retry with a suffixed id on collision.
@@ -228,7 +253,7 @@ export async function updateProduct(
   id: string,
   patch: Partial<ProductInput>,
 ): Promise<Product | undefined> {
-  return withDb(
+  return withDbWrite(
     async (prisma) => {
       const existing = await prisma.product.findUnique({ where: { id } })
       if (!existing) return undefined
@@ -248,7 +273,7 @@ export async function updateProduct(
 }
 
 export async function deleteProduct(id: string): Promise<boolean> {
-  return withDb(
+  return withDbWrite(
     async (prisma) => {
       try {
         await prisma.product.delete({ where: { id } })
@@ -263,7 +288,7 @@ export async function deleteProduct(id: string): Promise<boolean> {
 
 /** Reset the store back to the shipped catalog (admin "danger zone"). */
 export async function resetToCatalog(): Promise<number> {
-  return withDb(
+  return withDbWrite(
     async (prisma) => {
       await prisma.product.deleteMany({})
       for (const p of CATALOG) await prisma.product.create({ data: { ...p } })
