@@ -133,3 +133,43 @@ model ForecastCheck {
   @@unique([spotSlug, dateISO])
   @@index([spotSlug, resolvedAt])
 }
+
+model Meetup {
+  id           String   @id @default(cuid())
+  // Secret token: whoever holds it can edit/cancel the meetup (no accounts).
+  manageToken  String   @unique
+  hostName     String
+  // Contact channel (WhatsApp/phone/email) shown to attendees once they join.
+  hostContact  String
+  spotSlug     String
+  meetingPoint String   @default("")
+  dateISO      String // YYYY-MM-DD (local)
+  timeStart    String // "07:00"
+  durationH    Float?
+  modality     String // tierra | kayak | barco
+  targetSpecies String  @default("")
+  level        String   @default("cualquiera") // principiante | medio | experto | cualquiera
+  maxPlaces    Int      @default(4)
+  minToConfirm Int      @default(1)
+  costShare    Float? // per-person shared cost (fuel/bait), NO profit; null = free
+  notes        String   @default("")
+  status       String   @default("open") // open | confirmed | cancelled
+  createdAt    DateTime @default(now())
+  rsvps        Rsvp[]
+
+  @@index([spotSlug, dateISO])
+  @@index([dateISO])
+}
+
+model Rsvp {
+  id        String   @id @default(cuid())
+  meetupId  String
+  name      String
+  contact   String   @default("")
+  places    Int      @default(1)
+  status    String   @default("in") // in | out
+  createdAt DateTime @default(now())
+  meetup    Meetup   @relation(fields: [meetupId], references: [id], onDelete: Cascade)
+
+  @@index([meetupId])
+}
