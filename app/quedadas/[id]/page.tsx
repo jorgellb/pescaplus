@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import Layout from '@/components/Layout'
 import JoinMeetup from '@/components/quedadas/JoinMeetup'
 import ManageMeetup from '@/components/quedadas/ManageMeetup'
+import MeetupShare from '@/components/quedadas/MeetupShare'
 import { getMeetup, getMeetupByToken, costInfo } from '@/lib/meetups-store'
 import { getSpot } from '@/lib/fishing-spots'
 import { getSpecies } from '@/lib/fishing-species'
@@ -114,6 +115,12 @@ export default async function MeetupPage({ params, searchParams }: Params) {
           <p><strong>👤 Anfitrión:</strong> {meetup.hostName}</p>
           {meetup.notes && <p className="text-ink/75 whitespace-pre-line border-l-4 border-accent/40 pl-3">{meetup.notes}</p>}
         </div>
+
+        {!cancelled && (
+          <MeetupShare
+            waText={`🎣 Quedada de pesca en ${spot?.name ?? meetup.spotSlug} — ${fmtDateLong(meetup.dateISO)} a las ${meetup.timeStart}${sp ? ` (a por ${sp.name.toLowerCase()})` : ''}. ${meetup.placesTaken}/${meetup.maxPlaces} plazas. ¿Te apuntas?`}
+          />
+        )}
 
         {/* Reparto de gastos dinámico (barco compartido, sin lucro) */}
         {cost.mode === 'reparto' && cost.perPersonNow != null && (
