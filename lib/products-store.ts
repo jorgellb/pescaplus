@@ -1,6 +1,16 @@
+import { unstable_cache, revalidateTag } from 'next/cache'
 import type { Product } from '@/types'
 import { CATALOG, slugify, filterProducts, type ProductFilter } from '@/lib/catalog'
 import { decodeEntities } from '@/lib/text'
+
+/**
+ * Cache tag for the whole product catalog. Reads are served from one cached
+ * snapshot (see `allProducts`), so the public site stops hitting Neon on every
+ * request — the fix for the data-transfer quota exhaustion. Any successful
+ * write invalidates this tag so the next read refreshes.
+ */
+const PRODUCTS_TAG = 'products'
+const PRODUCTS_CACHE_TTL_S = 3600
 
 /**
  * Mutable product repository used by both the public site and the admin backend.
@@ -154,12 +164,22 @@ async function withDbWrite<T>(op: (prisma: any) => Promise<T>, memory: () => T |
   if (!isDatabaseConfigured()) return memory()
   const { prisma } = await import('@/lib/prisma')
   await ensureSeeded(prisma)
+  let result: T
   try {
-    return await op(prisma)
+    result = await op(prisma)
   } catch (error) {
     console.error('Database write failed — NOT falling back to memory to avoid silent data loss:', error)
     throw new Error('La base de datos no está disponible ahora mismo; el cambio no se ha guardado. Inténtalo de nuevo en unos minutos.')
   }
+  // Expire the cached catalog immediately (not stale-while-revalidate) so the
+  // admin sees their change on the very next read — read-your-own-writes.
+  try {
+    revalidateTag(PRODUCTS_TAG, { expire: 0 })
+  } catch {
+    /* called outside a request scope (e.g. a maintenance script) — the TTL
+       will refresh the cache anyway. */
+  }
+  return result
 }
 
 let seeded = false
@@ -205,22 +225,42 @@ function toProduct(row: any): Product {
 // Public API
 // ---------------------------------------------------------------------------
 
+/**
+ * The whole catalog, fetched from the DB ONCE and cached under PRODUCTS_TAG.
+ * Next's Data Cache is shared across serverless instances and survives cold
+ * starts, so a healthy site issues ~one product query per hour instead of one
+ * per request. A failed DB read throws (so it is never cached) and callers fall
+ * back to memory. Filtering happens in memory on this snapshot — zero extra
+ * egress regardless of the filter.
+ */
+const fetchAllFromDb = unstable_cache(
+  async (): Promise<Product[]> => {
+    const { prisma } = await import('@/lib/prisma')
+    await ensureSeeded(prisma)
+    return (await prisma.product.findMany({ orderBy: { title: 'asc' } })).map(toProduct)
+  },
+  ['pescaplus-all-products'],
+  { tags: [PRODUCTS_TAG], revalidate: PRODUCTS_CACHE_TTL_S },
+)
+
+async function allProducts(): Promise<Product[]> {
+  if (!isDatabaseConfigured()) return Array.from(memoryStore().values())
+  try {
+    return await fetchAllFromDb()
+  } catch (error) {
+    console.warn('Cached product read failed, using in-memory store instead:', error)
+    return Array.from(memoryStore().values())
+  }
+}
+
 export async function listProducts(filter: ProductFilter = {}): Promise<Product[]> {
-  const all = await withDb(
-    async (prisma) => (await prisma.product.findMany({ orderBy: { title: 'asc' } })).map(toProduct),
-    () => Array.from(memoryStore().values()),
-  )
-  return filterProducts(all, filter)
+  return filterProducts(await allProducts(), filter)
 }
 
 export async function getProduct(id: string): Promise<Product | undefined> {
-  return withDb(
-    async (prisma) => {
-      const row = await prisma.product.findUnique({ where: { id } })
-      return row ? toProduct(row) : undefined
-    },
-    () => memoryStore().get(id),
-  )
+  // Derived from the cached snapshot — product pages no longer hit the DB one
+  // row at a time (another big egress saving).
+  return (await allProducts()).find((p) => p.id === id)
 }
 
 export async function createProduct(input: ProductInput): Promise<Product> {
