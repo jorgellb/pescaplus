@@ -18,12 +18,15 @@ if (!url) {
 }
 
 const ca = process.env.DATABASE_CA_CERT?.replace(/\\n/g, '\n')
-const ssl = /@(localhost|127\.0\.0\.1)/.test(url) ? undefined : ca ? { ca } : { rejectUnauthorized: false }
+const isLocal = /@(localhost|127\.0\.0\.1)/.test(url)
+const ssl = isLocal ? undefined : ca ? { ca } : { rejectUnauthorized: false }
+// Strip sslmode so our explicit `ssl` object wins (see lib/prisma.ts).
+const cleanUrl = url.replace(/([?&])ssl(mode)?=[^&]*/gi, '$1').replace(/[?&]$/, '')
 
 const host = (url.match(/@([^/:]+)/) || [])[1] || '—'
 console.log(`⏳ Conectando a ${host} ${ca ? '(CA verificada)' : '(TLS sin verificar)'}…`)
 
-const pool = new pg.Pool({ connectionString: url, ssl, connectionTimeoutMillis: 15000 })
+const pool = new pg.Pool({ connectionString: cleanUrl, ssl, connectionTimeoutMillis: 15000 })
 try {
   const { rows: tables } = await pool.query(
     `SELECT table_name FROM information_schema.tables
