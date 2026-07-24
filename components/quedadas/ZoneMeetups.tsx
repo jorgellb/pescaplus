@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { listMeetupsBySpot, costInfo } from '@/lib/meetups-store'
+import ZoneAlertSignup from '@/components/quedadas/ZoneAlertSignup'
 import { getSpecies } from '@/lib/fishing-species'
 import { todayMadridISO, fmtDayLabel } from '@/lib/solunar-format'
 
@@ -51,6 +52,10 @@ export default async function ZoneMeetups({ spotSlug, spotName }: { spotSlug: st
           })}
         </ul>
       )}
+
+      <div className="border-t border-ink/10 pt-3">
+        <ZoneAlertSignup spotSlug={spotSlug} spotName={spotName} />
+      </div>
     </div>
   )
 }

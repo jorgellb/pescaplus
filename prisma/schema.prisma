@@ -176,3 +176,13 @@ model Rsvp {
 
   @@index([meetupId])
 }
+
+model ZoneMeetupAlert {
+  id        String   @id @default(cuid())
+  email     String
+  spotSlug  String
+  createdAt DateTime @default(now())
+
+  @@unique([email, spotSlug])
+  @@index([spotSlug])
+}

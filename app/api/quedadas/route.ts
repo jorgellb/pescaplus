@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse, after } from 'next/server'
 import { z } from 'zod'
 import { createMeetup, validateMeetup } from '@/lib/meetups-store'
+import { notifyNewMeetup } from '@/lib/zone-alerts-store'
 import { getSpot } from '@/lib/fishing-spots'
 import { rateLimit, clientIp } from '@/lib/rate-limit'
 
@@ -45,6 +46,8 @@ export async function POST(request: NextRequest) {
 
   try {
     const m = await createMeetup(parsed.data)
+    // Notify zone subscribers AFTER the response is sent (non-blocking).
+    after(() => notifyNewMeetup(m))
     return NextResponse.json({ success: true, id: m.id, manageToken: m.manageToken }, { status: 201 })
   } catch (error) {
     console.error('Error creating meetup:', error)
