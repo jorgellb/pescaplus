@@ -144,7 +144,8 @@ model Meetup {
   spotSlug     String
   meetingPoint String   @default("")
   dateISO      String // YYYY-MM-DD (local)
-  timeStart    String // "07:00"
+  timeStart    String // "07:00" (quedada) o franja ("Mañana") en una llamada
+  kind         String   @default("quedada") // quedada | llamada (¿quién se apunta?)
   durationH    Float?
   modality     String // tierra | kayak | barco
   targetSpecies String  @default("")

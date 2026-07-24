@@ -11,12 +11,13 @@ export const metadata: Metadata = {
   robots: { index: false, follow: true },
 }
 
-type Params = { searchParams: Promise<{ zona?: string }> }
+type Params = { searchParams: Promise<{ zona?: string; tipo?: string }> }
 
 export default async function NuevaQuedadaPage({ searchParams }: Params) {
-  const { zona } = await searchParams
+  const { zona, tipo } = await searchParams
   const spots = FISHING_SPOTS.map((s) => ({ slug: s.slug, name: s.name, region: s.region }))
   const species = SEA_SPECIES.map((s) => ({ id: s.id, name: s.name }))
+  const defaultKind = tipo === 'llamada' ? 'llamada' : 'quedada'
 
   return (
     <Layout>
@@ -33,7 +34,7 @@ export default async function NuevaQuedadaPage({ searchParams }: Params) {
         </div>
       </section>
       <section className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
-        <NewMeetupForm spots={spots} species={species} defaultSpot={zona} />
+        <NewMeetupForm spots={spots} species={species} defaultSpot={zona} defaultKind={defaultKind} />
       </section>
     </Layout>
   )

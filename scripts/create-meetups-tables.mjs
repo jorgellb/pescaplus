@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS "Meetup" (
   "meetingPoint"  TEXT NOT NULL DEFAULT '',
   "dateISO"       TEXT NOT NULL,
   "timeStart"     TEXT NOT NULL,
+  "kind"          TEXT NOT NULL DEFAULT 'quedada',
   "durationH"     DOUBLE PRECISION,
   "modality"      TEXT NOT NULL,
   "targetSpecies" TEXT NOT NULL DEFAULT '',

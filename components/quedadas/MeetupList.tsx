@@ -11,6 +11,7 @@ export interface MeetupCard {
   lat: number
   lon: number
   modality: 'tierra' | 'kayak' | 'barco'
+  kind: 'quedada' | 'llamada'
   dayLabel: string
   timeStart: string
   speciesName: string | null
@@ -120,14 +121,24 @@ export default function MeetupList({ meetups }: { meetups: MeetupCard[] }) {
                       {MOD.find((x) => x.id === m.modality)?.label ?? m.modality} · <span className="capitalize">{m.dayLabel}</span> · {m.timeStart}
                     </span>
                     <span className={`font-mono text-[10px] font-bold uppercase tracking-widest ${m.status === 'confirmed' ? 'text-accent' : 'text-ink/40'}`}>
-                      {m.status === 'confirmed' ? 'Confirmada' : `${m.placesTaken}/${m.maxPlaces}`}
+                      {m.kind === 'llamada'
+                        ? m.status === 'confirmed'
+                          ? '¡Grupo formado!'
+                          : `${m.placesTaken} interesados`
+                        : m.status === 'confirmed'
+                          ? 'Confirmada'
+                          : `${m.placesTaken}/${m.maxPlaces}`}
                     </span>
                   </div>
                   <p className="font-display uppercase text-xl text-ink leading-none mt-2">{m.spotName}</p>
                   <p className="text-[13px] text-ink/65 mt-1">
                     {m.speciesName ? `A por ${m.speciesName.toLowerCase()} · ` : ''}
-                    nivel {m.level} · {m.costLabel}
-                    {full ? ' · completa' : ` · faltan ${m.maxPlaces - m.placesTaken}`}
+                    nivel {m.level}
+                    {m.kind === 'llamada'
+                      ? m.status !== 'confirmed'
+                        ? ` · faltan ${Math.max(0, m.maxPlaces - m.placesTaken)}`
+                        : ''
+                      : ` · ${m.costLabel}${full ? ' · completa' : ` · faltan ${m.maxPlaces - m.placesTaken}`}`}
                     {m.km != null ? ` · a ${Math.round(m.km)} km` : ''}
                   </p>
                 </Link>

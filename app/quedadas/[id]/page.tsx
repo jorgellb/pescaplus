@@ -79,7 +79,7 @@ export default async function MeetupPage({ params, searchParams }: Params) {
           )}
 
           <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3">
-            {MOD_LABEL[meetup.modality]}{sp ? ` · a por ${sp.name.toLowerCase()}` : ''}
+            {meetup.kind === 'llamada' ? '🙋 Busca compañía · ' : ''}{MOD_LABEL[meetup.modality]}{sp ? ` · a por ${sp.name.toLowerCase()}` : ''}
           </p>
           <h1 className="font-display uppercase text-3xl sm:text-4xl md:text-5xl leading-[1.02] text-ink">
             {spot?.name ?? meetup.spotSlug}
@@ -88,10 +88,10 @@ export default async function MeetupPage({ params, searchParams }: Params) {
 
           <div className="flex flex-wrap gap-2 mt-4">
             <span className="inline-flex items-center gap-2 rounded-xl border border-ink/15 px-3 py-2 text-sm">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-ink/50">Plazas</span>
-              <span className="font-display text-lg text-ink">{meetup.placesTaken}/{meetup.maxPlaces}</span>
+              <span className="font-mono text-[10px] uppercase tracking-widest text-ink/50">{meetup.kind === 'llamada' ? 'Interesados' : 'Plazas'}</span>
+              <span className="font-display text-lg text-ink">{meetup.kind === 'llamada' ? meetup.placesTaken : `${meetup.placesTaken}/${meetup.maxPlaces}`}</span>
               <span className={`font-mono text-[10px] uppercase tracking-widest ${meetup.status === 'confirmed' ? 'text-accent' : 'text-ink/40'}`}>
-                {meetup.status === 'confirmed' ? '✓ confirmada' : `mín. ${meetup.minToConfirm}`}
+                {meetup.status === 'confirmed' ? (meetup.kind === 'llamada' ? '✓ grupo formado' : '✓ confirmada') : `mín. ${meetup.minToConfirm}`}
               </span>
             </span>
             <span className="inline-flex items-center gap-2 rounded-xl border border-ink/15 px-3 py-2 text-sm">

@@ -89,6 +89,23 @@ describe('meetups store — quedadas CRUD (memory path)', () => {
     expect(c.perPersonNow).toBe(20)
   })
 
+  it('a "llamada" (open call) accepts a loose time slot and defaults to gratis', async () => {
+    // A quedada needs HH:MM; a llamada accepts a franja label.
+    expect(validateMeetup({ ...base, kind: 'quedada', timeStart: 'Mañana' })).toMatch(/hora/i)
+    expect(validateMeetup({ ...base, kind: 'llamada', timeStart: 'Mañana' })).toBeNull()
+    expect(validateMeetup({ ...base, kind: 'llamada', timeStart: '' })).toMatch(/franja/i)
+
+    const m = await createMeetup({ ...base, kind: 'llamada', timeStart: 'Flexible', costMode: 'reparto', totalCost: 50 })
+    expect(m.kind).toBe('llamada')
+    expect(m.timeStart).toBe('Flexible')
+    // an open call carries no cost regardless of what was sent
+    expect(costInfo(m).mode).toBe('gratis')
+    // people can still express interest and it confirms at the threshold
+    await joinMeetup(m.id, { name: 'Ana' })
+    const after = await joinMeetup(m.id, { name: 'Luis' })
+    expect(after.status).toBe('confirmed')
+  })
+
   it('cost mode falls back to gratis when the amount is missing', async () => {
     const m = await createMeetup({ ...base, costMode: 'reparto' }) // no totalCost
     expect(costInfo(m).mode).toBe('gratis')

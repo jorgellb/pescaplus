@@ -18,7 +18,10 @@ export interface MeetupInput {
   spotSlug: string
   meetingPoint?: string
   dateISO: string
+  /** For 'quedada' a fixed HH:MM; for 'llamada' a loose slot ("Mañana", "Flexible"…). */
   timeStart: string
+  /** 'quedada' = concrete outing; 'llamada' = open call ("¿quién se apunta?"). */
+  kind?: 'quedada' | 'llamada'
   durationH?: number | null
   modality: 'tierra' | 'kayak' | 'barco'
   targetSpecies?: string
@@ -51,6 +54,7 @@ export interface Meetup {
   meetingPoint: string
   dateISO: string
   timeStart: string
+  kind: 'quedada' | 'llamada'
   durationH: number | null
   modality: 'tierra' | 'kayak' | 'barco'
   targetSpecies: string
@@ -87,6 +91,7 @@ type MeetupData = {
   meetingPoint: string
   dateISO: string
   timeStart: string
+  kind: 'quedada' | 'llamada'
   durationH: number | null
   modality: Meetup['modality']
   targetSpecies: string
@@ -100,6 +105,7 @@ type MeetupData = {
 }
 
 function clean(input: MeetupInput): MeetupData {
+  const kind: MeetupData['kind'] = input.kind === 'llamada' ? 'llamada' : 'quedada'
   const modality = MODALITIES.has(input.modality) ? input.modality : 'tierra'
   const level = input.level && LEVELS.has(input.level) ? input.level : 'cualquiera'
   const maxPlaces = Math.min(30, Math.max(1, Math.round(Number(input.maxPlaces) || 4)))
@@ -108,8 +114,9 @@ function clean(input: MeetupInput): MeetupData {
   const rawShare = money(input.costShare)
   const rawTotal = money(input.totalCost)
   // Resolve the cost mode from what was actually provided (defensive against
-  // a client sending a mode without its amount).
-  let costMode: MeetupData['costMode'] = input.costMode ?? 'gratis'
+  // a client sending a mode without its amount). An open call ('llamada') never
+  // carries a price — the cost is decided when it becomes a concrete outing.
+  let costMode: MeetupData['costMode'] = kind === 'llamada' ? 'gratis' : input.costMode ?? 'gratis'
   if (costMode === 'reparto' && rawTotal == null) costMode = 'gratis'
   if (costMode === 'fijo' && rawShare == null) costMode = 'gratis'
   return {
@@ -118,7 +125,8 @@ function clean(input: MeetupInput): MeetupData {
     spotSlug: (input.spotSlug ?? '').trim(),
     meetingPoint: (input.meetingPoint ?? '').trim().slice(0, 120),
     dateISO: input.dateISO,
-    timeStart: input.timeStart,
+    timeStart: (input.timeStart ?? '').trim().slice(0, 20),
+    kind,
     durationH: input.durationH != null && Number.isFinite(input.durationH) ? Math.min(24, Math.max(0.5, input.durationH)) : null,
     modality,
     targetSpecies: (input.targetSpecies ?? '').trim(),
@@ -158,13 +166,18 @@ export function costInfo(m: Pick<Meetup, 'costMode' | 'costShare' | 'totalCost' 
   return { mode: 'gratis', label: 'Gratis' }
 }
 
-/** Valid future-ish date and a HH:MM time; keeps junk out of the store. */
+/** Validate a meetup. A 'quedada' needs a fixed HH:MM; a 'llamada' (open call)
+ * accepts a loose slot label, so it only needs a non-empty time hint. */
 export function validateMeetup(input: MeetupInput): string | null {
   if (!input.hostName?.trim()) return 'Falta el nombre del anfitrión.'
   if (!input.hostContact?.trim()) return 'Falta un contacto (WhatsApp, teléfono o email).'
   if (!input.spotSlug?.trim()) return 'Falta la zona de pesca.'
   if (!/^\d{4}-\d{2}-\d{2}$/.test(input.dateISO ?? '')) return 'Fecha no válida.'
-  if (!/^\d{2}:\d{2}$/.test(input.timeStart ?? '')) return 'Hora no válida.'
+  if (input.kind === 'llamada') {
+    if (!input.timeStart?.trim()) return 'Indica una franja (mañana, tarde…).'
+  } else if (!/^\d{2}:\d{2}$/.test(input.timeStart ?? '')) {
+    return 'Hora no válida.'
+  }
   return null
 }
 
@@ -206,6 +219,7 @@ function rowToBase(row: any): Omit<Meetup, 'rsvps' | 'placesTaken'> {
     meetingPoint: row.meetingPoint ?? '',
     dateISO: row.dateISO,
     timeStart: row.timeStart,
+    kind: row.kind ?? 'quedada',
     durationH: row.durationH ?? null,
     modality: row.modality,
     targetSpecies: row.targetSpecies ?? '',

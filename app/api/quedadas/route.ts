@@ -10,7 +10,8 @@ const schema = z.object({
   spotSlug: z.string().min(2).max(80),
   meetingPoint: z.string().max(120).optional(),
   dateISO: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  timeStart: z.string().regex(/^\d{2}:\d{2}$/),
+  timeStart: z.string().min(1).max(20), // HH:MM (quedada) o franja (llamada); validateMeetup afina
+  kind: z.enum(['quedada', 'llamada']).optional(),
   durationH: z.number().min(0.5).max(24).optional(),
   modality: z.enum(['tierra', 'kayak', 'barco']),
   targetSpecies: z.string().max(40).optional(),
