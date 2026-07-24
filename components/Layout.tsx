@@ -52,6 +52,7 @@ export default function Layout({ children }: LayoutProps) {
                 <li><Link href="/donde-pescar" className="hover:text-accent transition-colors">Dónde pescar</Link></li>
                 <li><Link href="/diario" className="hover:text-accent transition-colors">Diario de capturas</Link></li>
                 <li><Link href="/quedadas" className="hover:text-accent transition-colors">Quedadas de pesca</Link></li>
+                <li><Link href="/charters" className="hover:text-accent transition-colors">Chárters con patrón</Link></li>
                 <li><Link href="/calendario" className="hover:text-accent transition-colors">Calendario</Link></li>
                 <li><Link href="/especies" className="hover:text-accent transition-colors">Especies</Link></li>
                 <li><Link href="/guias" className="hover:text-accent transition-colors">Guías</Link></li>

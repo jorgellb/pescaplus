@@ -10,6 +10,7 @@ const NAV = [
   { href: '/admin/guides', label: 'Guías', icon: '📝' },
   { href: '/admin/analytics', label: 'Analítica', icon: '📊' },
   { href: '/admin/mensajes', label: 'Mensajes', icon: '✉️' },
+  { href: '/admin/operadores', label: 'Operadores', icon: '⚓' },
   { href: '/admin/settings', label: 'Configuración', icon: '⚙️' },
 ]
 

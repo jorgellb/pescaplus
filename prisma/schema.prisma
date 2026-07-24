@@ -186,3 +186,67 @@ model ZoneMeetupAlert {
   @@unique([email, spotSlug])
   @@index([spotSlug])
 }
+
+model Operator {
+  id           String    @id @default(cuid())
+  // Secret token so the operator manages their charters without an account.
+  manageToken  String    @unique
+  name         String
+  businessName String    @default("")
+  email        String
+  phone        String    @default("")
+  spotSlug     String // home port / base zone
+  boatName     String    @default("")
+  boatType     String    @default("")
+  capacity     Int       @default(6)
+  licenseRef   String    @default("") // titulación / licencia (a verificar)
+  insuranceRef String    @default("") // seguro de ocupantes / RC
+  bio          String    @default("")
+  // Only verified operators (license + insurance checked) go public and can charge.
+  verified     Boolean   @default(false)
+  verifiedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  charters     Charter[]
+
+  @@index([spotSlug])
+  @@index([verified])
+}
+
+model Charter {
+  id             String           @id @default(cuid())
+  operatorId     String
+  spotSlug       String
+  dateISO        String
+  timeStart      String
+  durationH      Float?
+  modality       String           @default("barco")
+  targetSpecies  String           @default("")
+  level          String           @default("cualquiera")
+  pricePerPerson Float
+  maxPlaces      Int              @default(6)
+  minToConfirm   Int              @default(1)
+  includes       String           @default("") // equipo, cebo, licencia incluidos
+  notes          String           @default("")
+  status         String           @default("open") // open | confirmed | cancelled
+  createdAt      DateTime         @default(now())
+  operator       Operator         @relation(fields: [operatorId], references: [id], onDelete: Cascade)
+  bookings       CharterBooking[]
+
+  @@index([spotSlug, dateISO])
+  @@index([operatorId])
+}
+
+model CharterBooking {
+  id        String   @id @default(cuid())
+  charterId String
+  name      String
+  contact   String
+  people    Int      @default(1)
+  message   String   @default("")
+  // requested → accepted/declined by operator → paid (when Stripe is wired) → cancelled
+  status    String   @default("requested")
+  createdAt DateTime @default(now())
+  charter   Charter  @relation(fields: [charterId], references: [id], onDelete: Cascade)
+
+  @@index([charterId])
+}
