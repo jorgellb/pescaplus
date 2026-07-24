@@ -1,3 +1,4 @@
+import { unstable_cache } from 'next/cache'
 import type { FishingSpot } from '@/lib/fishing-spots'
 import { solunarDay, type SolunarDay } from '@/lib/solunar'
 import { getSpecies, type SpeciesProfile } from '@/lib/fishing-species'
@@ -238,8 +239,11 @@ function scoreHour(h: ScoredInput, pressure3hAgo: number | null, p: SpeciesProfi
   return { activity, conditions, score: clamp100(score) }
 }
 
-export async function getMarineForecast(
-  spot: FishingSpot,
+/** Minimal identity for caching — excludes bulky fields so the cache key is tight. */
+type SpotKey = { slug: string; lat: number; lon: number; type: 'mar' | 'interior' }
+
+async function computeMarineForecast(
+  spot: SpotKey,
   speciesId?: string | null,
   modalityId?: string | null,
 ): Promise<MarineForecast> {
@@ -344,6 +348,39 @@ export async function getMarineForecast(
   }))
 
   return { available: hours.length > 0, hasMarine: !!mh, hours, meta }
+}
+
+/**
+ * Cached compute: the fetch is already in the Data Cache, but parsing and
+ * scoring 168 hourly points ran on every request. Now the whole scored result
+ * is cached per (spot, species, modality) and shared across all visitors,
+ * recomputed at most every 30 min — the biggest reusable CPU on the dashboard.
+ * The only time-dependent field, `isNow`, is re-stamped fresh below.
+ */
+const cachedMarineForecast = unstable_cache(
+  (spot: SpotKey, speciesId: string | null, modalityId: string | null) => computeMarineForecast(spot, speciesId, modalityId),
+  ['marine-forecast-v1'],
+  { revalidate: FORECAST_REVALIDATE_S, tags: ['marine-forecast'] },
+)
+
+export async function getMarineForecast(
+  spot: FishingSpot,
+  speciesId?: string | null,
+  modalityId?: string | null,
+): Promise<MarineForecast> {
+  const base = await cachedMarineForecast(
+    { slug: spot.slug, lat: spot.lat, lon: spot.lon, type: spot.type },
+    speciesId ?? null,
+    modalityId ?? null,
+  )
+  if (!base.available || base.hours.length === 0) return base
+  // Re-stamp `isNow` from the current time (the cached copy is up to 30 min old).
+  const nowHour = Math.floor(Date.now() / 3600000)
+  const hours = base.hours.map((h) => {
+    const isNow = Math.floor(h.time / 3600000) === nowHour
+    return h.isNow === isNow ? h : { ...h, isNow }
+  })
+  return { ...base, hours }
 }
 
 /** Pressure 3 h before an hour of the list — for recomputing factor breakdowns at render. */
