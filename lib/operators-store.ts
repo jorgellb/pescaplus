@@ -38,6 +38,10 @@ export interface Operator {
   bio: string
   verified: boolean
   verifiedAt: number | null
+  /** Stripe Connect (Express) account id, '' until the operator connects. */
+  stripeAccountId: string
+  /** True when Stripe onboarding is complete and payouts/charges are enabled. */
+  stripeReady: boolean
   createdAt: number
 }
 
@@ -101,6 +105,8 @@ function rowToOperator(row: any): Operator {
     bio: row.bio ?? '',
     verified: row.verified,
     verifiedAt: row.verifiedAt instanceof Date ? row.verifiedAt.getTime() : row.verifiedAt ?? null,
+    stripeAccountId: row.stripeAccountId ?? '',
+    stripeReady: row.stripeReady ?? false,
     createdAt: row.createdAt instanceof Date ? row.createdAt.getTime() : row.createdAt,
   }
 }
@@ -118,9 +124,55 @@ export async function registerOperator(input: OperatorInput): Promise<OperatorWi
       throw new Error(WRITE_FAIL)
     }
   }
-  const stored: StoredOperator = { id: `mem-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, ...data, verified: false, verifiedAt: null, createdAt: Date.now(), manageToken }
+  const stored: StoredOperator = { id: `mem-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, ...data, verified: false, verifiedAt: null, stripeAccountId: '', stripeReady: false, createdAt: Date.now(), manageToken }
   mem().unshift(stored)
   return { ...stored }
+}
+
+/** Save the operator's Stripe Connect account id (when first created). */
+export async function setOperatorStripeAccount(id: string, stripeAccountId: string): Promise<void> {
+  if (isDatabaseConfigured()) {
+    try {
+      const { prisma } = await import('@/lib/prisma')
+      await prisma.operator.update({ where: { id }, data: { stripeAccountId } })
+      return
+    } catch (error) {
+      console.error('Operator stripe account save failed:', error)
+      throw new Error(WRITE_FAIL)
+    }
+  }
+  const o = mem().find((x) => x.id === id)
+  if (o) o.stripeAccountId = stripeAccountId
+}
+
+/** Update whether the operator can receive charges/payouts (from Stripe). */
+export async function setOperatorStripeReady(id: string, ready: boolean): Promise<void> {
+  if (isDatabaseConfigured()) {
+    try {
+      const { prisma } = await import('@/lib/prisma')
+      await prisma.operator.update({ where: { id }, data: { stripeReady: ready } })
+      return
+    } catch (error) {
+      console.error('Operator stripe ready save failed:', error)
+      throw new Error(WRITE_FAIL)
+    }
+  }
+  const o = mem().find((x) => x.id === id)
+  if (o) o.stripeReady = ready
+}
+
+/** Find an operator by their Stripe account id (for webhooks). */
+export async function getOperatorByStripeAccount(stripeAccountId: string): Promise<Operator | null> {
+  if (isDatabaseConfigured()) {
+    try {
+      const { prisma } = await import('@/lib/prisma')
+      const row = await prisma.operator.findFirst({ where: { stripeAccountId } })
+      return row ? rowToOperator(row) : null
+    } catch (error) {
+      console.warn('Operator by stripe account read failed:', error)
+    }
+  }
+  return mem().find((o) => o.stripeAccountId === stripeAccountId) ?? null
 }
 
 export async function getOperator(id: string): Promise<Operator | null> {

@@ -205,6 +205,9 @@ model Operator {
   // Only verified operators (license + insurance checked) go public and can charge.
   verified     Boolean   @default(false)
   verifiedAt   DateTime?
+  // Stripe Connect (Express) — set when the operator connects payouts.
+  stripeAccountId String @default("")
+  stripeReady     Boolean @default(false)
   createdAt    DateTime  @default(now())
   charters     Charter[]
 

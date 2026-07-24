@@ -11,13 +11,24 @@ interface Charter {
   pricePerPerson: number; maxPlaces: number; placesTaken: number; status: string; bookings: Booking[]
 }
 
-export default function OperatorDashboard({ operatorId, manageToken, verified, defaultSpot, spots, species, charters }: {
-  operatorId: string; manageToken: string; verified: boolean; defaultSpot: string; spots: Opt[]; species: Species[]; charters: Charter[]
+export default function OperatorDashboard({ operatorId, manageToken, verified, stripeReady, paymentsAvailable, defaultSpot, spots, species, charters }: {
+  operatorId: string; manageToken: string; verified: boolean; stripeReady: boolean; paymentsAvailable: boolean; defaultSpot: string; spots: Opt[]; species: Species[]; charters: Charter[]
 }) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [busy, setBusy] = useState<string | null>(null)
+  const [connecting, setConnecting] = useState(false)
   const [msg, setMsg] = useState('')
+
+  const connectStripe = async () => {
+    setConnecting(true)
+    try {
+      const res = await fetch('/api/charters/operador/stripe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ operatorId, manageToken }) })
+      const data = await res.json()
+      if (data.success && data.url) { window.location.href = data.url; return }
+      setMsg(data.error || 'No se pudo conectar con Stripe.'); setConnecting(false)
+    } catch { setMsg('Fallo de red.'); setConnecting(false) }
+  }
   const [f, setF] = useState({ spotSlug: defaultSpot, dateISO: '', timeStart: '08:00', modality: 'barco', targetSpecies: '', level: 'cualquiera', pricePerPerson: '', maxPlaces: 6, minToConfirm: 1, includes: '', notes: '' })
   const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => setF((s) => ({ ...s, [k]: v }))
 
@@ -72,6 +83,22 @@ export default function OperatorDashboard({ operatorId, manageToken, verified, d
           {msg && <p className="text-sm text-red-700">{msg}</p>}
           <button type="submit" disabled={saving} className="bg-accent text-paper px-5 py-2.5 text-xs font-bold uppercase tracking-wide rounded-xl hover:bg-ink disabled:opacity-60 transition-colors">{saving ? 'Publicando…' : 'Publicar chárter'}</button>
         </form>
+      )}
+
+      {verified && paymentsAvailable && (
+        stripeReady ? (
+          <div className="border border-accent/30 rounded-2xl bg-accent/[0.06] p-4 flex flex-wrap items-center gap-3">
+            <p className="font-bold text-ink">💳 Cobros online activos <span className="text-accent">✓</span></p>
+            <p className="text-sm text-ink/70">Los pescadores pueden reservar y pagar por adelantado. El dinero llega a tu cuenta y nosotros retenemos la comisión de la plataforma.</p>
+          </div>
+        ) : (
+          <div className="border border-ink/15 rounded-2xl bg-paper p-5 space-y-2">
+            <p className="font-display uppercase text-xl leading-none">💳 Activa los cobros online</p>
+            <p className="text-sm text-ink/70">Conecta tu cuenta con Stripe para aceptar reservas pagadas por adelantado. Es gratis, tarda un par de minutos y el dinero va directo a tu banco. {operatorId && <span className="text-ink/50">Sin esto, seguirás recibiendo solicitudes de reserva por contacto.</span>}</p>
+            <button onClick={connectStripe} disabled={connecting} className="bg-accent text-paper px-5 py-2.5 text-xs font-bold uppercase tracking-wide rounded-xl hover:bg-ink disabled:opacity-60 transition-colors">{connecting ? 'Conectando…' : 'Conectar cobros con Stripe'}</button>
+            {msg && <p className="text-sm text-red-700">{msg}</p>}
+          </div>
+        )
       )}
 
       <div className="space-y-4">

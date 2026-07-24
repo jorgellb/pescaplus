@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import Layout from '@/components/Layout'
 import RequestBooking from '@/components/charters/RequestBooking'
+import PayBooking from '@/components/charters/PayBooking'
 import { getCharter } from '@/lib/charters-store'
 import { getSpot } from '@/lib/fishing-spots'
 import { getSpecies } from '@/lib/fishing-species'
@@ -14,8 +15,9 @@ export const metadata: Metadata = { title: 'Chárter de pesca', robots: { index:
 
 const MOD_LABEL: Record<string, string> = { tierra: '🏖️ Orilla', kayak: '🛶 Kayak', barco: '🚤 Barco' }
 
-export default async function CharterPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function CharterPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ pagado?: string; cancelado?: string }> }) {
   const { id } = await params
+  const { pagado, cancelado } = await searchParams
   const charter = await getCharter(id)
   if (!charter || !charter.operator?.verified) notFound()
   const spot = getSpot(charter.spotSlug)
@@ -52,6 +54,8 @@ export default async function CharterPage({ params }: { params: Promise<{ id: st
             <Link href="/charters" className="hover:text-accent">Chárters</Link> <span className="mx-1">/</span> <span className="text-ink">{spot?.name ?? charter.spotSlug}</span>
           </nav>
           {cancelled && <div className="border border-red-700/40 rounded-xl bg-red-700/[0.07] p-3 mb-5 text-sm font-bold text-red-900">Este chárter se ha cancelado.</div>}
+          {pagado === '1' && <div className="border border-accent/40 rounded-xl bg-accent/[0.08] p-3 mb-5 text-sm font-bold text-ink">✅ ¡Pago completado! Tu plaza está reservada. El patrón recibirá tu reserva y te contactará con los detalles de la salida.</div>}
+          {cancelado === '1' && <div className="border border-ink/20 rounded-xl bg-ink/[0.03] p-3 mb-5 text-sm text-ink/70">Has cancelado el pago. Tu plaza no se ha reservado; puedes intentarlo de nuevo cuando quieras.</div>}
           <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3">{MOD_LABEL[charter.modality]}{sp ? ` · a por ${sp.name.toLowerCase()}` : ''}</p>
           <h1 className="font-display uppercase text-3xl sm:text-4xl md:text-5xl leading-[1.02] text-ink">{spot?.name ?? charter.spotSlug}</h1>
           <p className="text-ink/70 text-[15px] mt-3 capitalize">{fmtDateLong(charter.dateISO)} · {charter.timeStart}{charter.durationH ? ` · ${charter.durationH} h` : ''}</p>
@@ -88,12 +92,15 @@ export default async function CharterPage({ params }: { params: Promise<{ id: st
           </div>
         )}
 
-        {/* Solicitar plaza (stub de pago) */}
-        {!cancelled && <RequestBooking id={charter.id} full={full} price={charter.pricePerPerson} />}
+        {/* Reservar plaza: pago online si el operador tiene Stripe listo, si no, solicitud por contacto */}
+        {!cancelled && (charter.operator.stripeReady
+          ? <PayBooking id={charter.id} full={full} price={charter.pricePerPerson} />
+          : <RequestBooking id={charter.id} full={full} price={charter.pricePerPerson} />)}
 
         <p className="text-[12px] text-ink/50 leading-relaxed border-t border-ink/12 pt-6">
-          Salida con patrón profesional verificado. Cada participante debe llevar su documentación. El pago con tarjeta
-          en la web llegará pronto; de momento, coordinas el pago directamente con el patrón tras confirmar la plaza.
+          Salida con patrón profesional verificado. Cada participante debe llevar su documentación.{charter.operator.stripeReady
+            ? ' El pago se procesa de forma segura con Stripe; PescaPlus retiene una comisión de servicio y el resto llega al patrón.'
+            : ' Coordinas el pago directamente con el patrón tras confirmar la plaza.'}
         </p>
       </section>
     </Layout>

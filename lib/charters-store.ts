@@ -43,6 +43,7 @@ export interface OperatorPublic {
   capacity: number
   bio: string
   verified: boolean
+  stripeReady: boolean
   spotSlug: string
 }
 
@@ -81,6 +82,7 @@ function operatorPublic(o: Operator): OperatorPublic {
     capacity: o.capacity,
     bio: o.bio,
     verified: o.verified,
+    stripeReady: o.stripeReady,
     spotSlug: o.spotSlug,
   }
 }
@@ -270,6 +272,7 @@ function rowOperatorToOperator(row: any): Operator {
     spotSlug: row.spotSlug, boatName: row.boatName ?? '', boatType: row.boatType ?? '', capacity: row.capacity,
     licenseRef: row.licenseRef ?? '', insuranceRef: row.insuranceRef ?? '', bio: row.bio ?? '',
     verified: row.verified, verifiedAt: row.verifiedAt instanceof Date ? row.verifiedAt.getTime() : row.verifiedAt ?? null,
+    stripeAccountId: row.stripeAccountId ?? '', stripeReady: row.stripeReady ?? false,
     createdAt: row.createdAt instanceof Date ? row.createdAt.getTime() : row.createdAt,
   }
 }
@@ -320,6 +323,43 @@ export async function requestBooking(charterId: string, input: { name: string; c
   const b: CharterBooking = { id: `cb-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, charterId, name, contact, people, message, status: 'requested', createdAt: Date.now() }
   memB().push(b)
   return b
+}
+
+/**
+ * Create a PAID booking (called from the Stripe webhook after checkout). The
+ * booking is already paid, so it counts toward places and can confirm the
+ * charter. Idempotent-ish: skips if a booking with the same paymentRef exists.
+ */
+export async function createPaidBooking(
+  charterId: string,
+  input: { name: string; contact: string; people: number; message?: string; paymentRef: string },
+): Promise<void> {
+  const name = (input.name ?? '').trim().slice(0, 80) || 'Reserva'
+  const contact = (input.contact ?? '').trim().slice(0, 120)
+  const people = Math.min(20, Math.max(1, Math.round(Number(input.people) || 1)))
+  const message = `${(input.message ?? '').trim().slice(0, 300)} [pago ${input.paymentRef}]`.trim()
+
+  if (isDatabaseConfigured()) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+      const existing = await prisma.charterBooking.findFirst({ where: { charterId, message: { contains: input.paymentRef } } })
+      if (existing) return
+      await prisma.charterBooking.create({ data: { charterId, name, contact, people, message, status: 'paid' } })
+      const after = await getCharter(charterId)
+      if (after && after.placesTaken >= after.minToConfirm && after.status === 'open') {
+        await prisma.charter.update({ where: { id: charterId }, data: { status: 'confirmed' } })
+      }
+    } catch (error) {
+      console.error('Paid booking create failed:', error)
+      throw error
+    }
+    return
+  }
+  if (memB().some((b) => b.charterId === charterId && b.message.includes(input.paymentRef))) return
+  memB().push({ id: `cb-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, charterId, name, contact, people, message, status: 'paid', createdAt: Date.now() })
+  const after = await getCharter(charterId)
+  const stored = memC().find((x) => x.id === charterId)
+  if (after && stored && after.placesTaken >= after.minToConfirm && stored.status === 'open') stored.status = 'confirmed'
 }
 
 /** Operator accepts / declines a booking. Accepting auto-confirms the charter at the minimum. */

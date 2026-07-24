@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { registerOperator, setOperatorVerified, validateOperator, listOperators } from '@/lib/operators-store'
-import { createCharter, listPublicCharters, requestBooking, respondBooking, getCharter, validateCharter } from '@/lib/charters-store'
+import { createCharter, listPublicCharters, requestBooking, respondBooking, getCharter, validateCharter, createPaidBooking } from '@/lib/charters-store'
+import { setOperatorStripeReady, getOperator } from '@/lib/operators-store'
 
 // No DATABASE_URL in tests → memory backend (same logic).
 const g = globalThis as unknown as { __pescaplusOperators?: unknown[]; __pescaplusCharters?: unknown[]; __pescaplusBookings?: unknown[] }
@@ -75,6 +76,26 @@ describe('charters — operator verification + booking flow (memory)', () => {
     const after = await respondBooking(charter.id, b.id, op.id, op.manageToken, 'accept')
     expect(after!.placesTaken).toBe(2)
     expect(after!.status).toBe('confirmed') // reached minToConfirm=2
+  })
+
+  it('a Stripe-paid booking takes places, auto-confirms, and is idempotent per payment', async () => {
+    const op = await registerOperator(opInput)
+    await setOperatorVerified(op.id, true)
+    // Simulate completed Stripe onboarding.
+    await setOperatorStripeReady(op.id, true)
+    expect((await getOperator(op.id))!.stripeReady).toBe(true)
+
+    const charter = await createCharter(op.id, op.manageToken, charterInput)
+
+    // Webhook fires once → a paid booking of 2 reaches minToConfirm and confirms.
+    await createPaidBooking(charter.id, { name: 'Lola', contact: 'lola@x.es', people: 2, paymentRef: 'pi_ABC123' })
+    const after = await getCharter(charter.id)
+    expect(after!.placesTaken).toBe(2)
+    expect(after!.status).toBe('confirmed')
+
+    // Stripe may deliver the same event twice — must not double-book.
+    await createPaidBooking(charter.id, { name: 'Lola', contact: 'lola@x.es', people: 2, paymentRef: 'pi_ABC123' })
+    expect((await getCharter(charter.id))!.placesTaken).toBe(2)
   })
 
   it('lists pending vs verified operators for the admin', async () => {
