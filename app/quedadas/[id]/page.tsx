@@ -5,6 +5,7 @@ import Layout from '@/components/Layout'
 import JoinMeetup from '@/components/quedadas/JoinMeetup'
 import ManageMeetup from '@/components/quedadas/ManageMeetup'
 import MeetupShare from '@/components/quedadas/MeetupShare'
+import Roster from '@/components/quedadas/Roster'
 import { getMeetup, getMeetupByToken, costInfo } from '@/lib/meetups-store'
 import { getSpot } from '@/lib/fishing-spots'
 import { getSpecies } from '@/lib/fishing-species'
@@ -170,22 +171,18 @@ export default async function MeetupPage({ params, searchParams }: Params) {
           </p>
         )}
 
-        {/* Apuntarse */}
-        {!cancelled && <JoinMeetup id={meetup.id} full={full} />}
+        {/* Apuntarse (o lista de espera si está llena) */}
+        {!cancelled && <JoinMeetup id={meetup.id} full={full} kind={meetup.kind} />}
 
-        {/* Quién va */}
-        {meetup.rsvps.length > 0 && (
-          <div className="space-y-2">
-            <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50">Quién va ({meetup.placesTaken})</p>
-            <div className="flex flex-wrap gap-2">
-              {meetup.rsvps.map((r) => (
-                <span key={r.id} className="inline-flex items-center gap-1.5 border border-ink/12 rounded-full px-3 py-1.5 text-sm text-ink">
-                  {r.name}{r.places > 1 ? ` +${r.places - 1}` : ''}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Quién va + lista de espera (el anfitrión puede quitar y promociona solo) */}
+        <Roster
+          meetupId={meetup.id}
+          attendees={meetup.rsvps.map((r) => ({ id: r.id, name: r.name, contact: r.contact, places: r.places }))}
+          waitlist={meetup.waitlist.map((r) => ({ id: r.id, name: r.name, contact: r.contact, places: r.places }))}
+          placesTaken={meetup.placesTaken}
+          isHost={isHost}
+          manageToken={isHost ? t : undefined}
+        />
 
         <p className="text-[12px] text-ink/50 leading-relaxed border-t border-ink/12 pt-6">
           Quedada para compartir gastos, sin ánimo de lucro. Lleva tu licencia de pesca, chaleco y avisa a alguien en tierra.

@@ -23,8 +23,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   if (parsed.data.website) return NextResponse.json({ success: true })
 
   try {
-    const meetup = await joinMeetup(id, parsed.data)
-    return NextResponse.json({ success: true, meetup })
+    const { meetup, waitlisted } = await joinMeetup(id, parsed.data)
+    return NextResponse.json({ success: true, meetup, waitlisted })
   } catch (error) {
     return NextResponse.json({ success: false, error: (error as Error).message }, { status: 400 })
   }

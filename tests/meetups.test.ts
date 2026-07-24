@@ -7,6 +7,7 @@ import {
   joinMeetup,
   cancelMeetup,
   costInfo,
+  removeRsvp,
 } from '@/lib/meetups-store'
 
 // No DATABASE_URL in the test env → the store uses its in-memory backend, which
@@ -50,18 +51,30 @@ describe('meetups store — quedadas CRUD (memory path)', () => {
 
   it('auto-confirms once the minimum places are reached', async () => {
     const m = await createMeetup(base)
-    let after = await joinMeetup(m.id, { name: 'Ana' })
-    expect(after.placesTaken).toBe(1)
-    expect(after.status).toBe('open')
-    after = await joinMeetup(m.id, { name: 'Luis' })
-    expect(after.placesTaken).toBe(2)
-    expect(after.status).toBe('confirmed') // reached minToConfirm=2
+    let r = await joinMeetup(m.id, { name: 'Ana' })
+    expect(r.meetup.placesTaken).toBe(1)
+    expect(r.meetup.status).toBe('open')
+    expect(r.waitlisted).toBe(false)
+    r = await joinMeetup(m.id, { name: 'Luis' })
+    expect(r.meetup.placesTaken).toBe(2)
+    expect(r.meetup.status).toBe('confirmed') // reached minToConfirm=2
   })
 
-  it('refuses to overbook past maxPlaces', async () => {
+  it('sends overflow to the waiting list and auto-promotes when a spot frees', async () => {
     const m = await createMeetup({ ...base, maxPlaces: 3, minToConfirm: 1 })
-    await joinMeetup(m.id, { name: 'Ana', places: 2 })
-    await expect(joinMeetup(m.id, { name: 'Pepe', places: 2 })).rejects.toThrow(/plazas/i)
+    const a = await joinMeetup(m.id, { name: 'Ana', places: 2 })
+    expect(a.waitlisted).toBe(false)
+    // Only 1 spot left → a party of 2 goes to the waitlist, not rejected.
+    const p = await joinMeetup(m.id, { name: 'Pepe', places: 2 })
+    expect(p.waitlisted).toBe(true)
+    expect(p.meetup.placesTaken).toBe(2) // still just Ana's party in
+    expect(p.meetup.waitlist).toHaveLength(1)
+    // Host removes Ana → the spot frees and Pepe (2) now fits → auto-promoted.
+    const anaRsvpId = p.meetup.rsvps.find((x) => x.name === 'Ana')!.id
+    const after = await removeRsvp(m.id, anaRsvpId, m.manageToken)
+    expect(after!.placesTaken).toBe(2) // Pepe promoted
+    expect(after!.waitlist).toHaveLength(0)
+    expect(after!.rsvps.some((x) => x.name === 'Pepe')).toBe(true)
   })
 
   it('only the holder of the management token can cancel', async () => {
@@ -85,7 +98,7 @@ describe('meetups store — quedadas CRUD (memory path)', () => {
     // Two join → 3 aboard → 20 €.
     await joinMeetup(m.id, { name: 'Ana' })
     const after = await joinMeetup(m.id, { name: 'Luis' })
-    c = costInfo(after)
+    c = costInfo(after.meetup)
     expect(c.perPersonNow).toBe(20)
   })
 
@@ -103,7 +116,7 @@ describe('meetups store — quedadas CRUD (memory path)', () => {
     // people can still express interest and it confirms at the threshold
     await joinMeetup(m.id, { name: 'Ana' })
     const after = await joinMeetup(m.id, { name: 'Luis' })
-    expect(after.status).toBe('confirmed')
+    expect(after.meetup.status).toBe('confirmed')
   })
 
   it('cost mode falls back to gratis when the amount is missing', async () => {

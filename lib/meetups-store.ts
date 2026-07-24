@@ -42,7 +42,7 @@ export interface Rsvp {
   name: string
   contact: string
   places: number
-  status: 'in' | 'out'
+  status: 'in' | 'wait' | 'out'
   createdAt: number
 }
 
@@ -67,7 +67,10 @@ export interface Meetup {
   notes: string
   status: 'open' | 'confirmed' | 'cancelled'
   createdAt: number
+  /** Confirmed attendees (status 'in'). */
   rsvps: Rsvp[]
+  /** Waiting list (status 'wait'), oldest first — filled once the meetup is full. */
+  waitlist: Rsvp[]
   /** Confirmed places taken (sum of active RSVPs). Derived, never stored. */
   placesTaken: number
 }
@@ -185,7 +188,7 @@ export function validateMeetup(input: MeetupInput): string | null {
 // In-memory backend (only used when no database is configured)
 // ---------------------------------------------------------------------------
 
-interface StoredMeetup extends Omit<Meetup, 'rsvps' | 'placesTaken'> {
+interface StoredMeetup extends Omit<Meetup, 'rsvps' | 'waitlist' | 'placesTaken'> {
   manageToken: string
 }
 const globalForMeetups = globalThis as unknown as {
@@ -205,12 +208,13 @@ function memRsvps(): Rsvp[] {
 // Assembly helpers
 // ---------------------------------------------------------------------------
 
-function assemble(base: Omit<Meetup, 'rsvps' | 'placesTaken'>, rsvps: Rsvp[]): Meetup {
+function assemble(base: Omit<Meetup, 'rsvps' | 'waitlist' | 'placesTaken'>, rsvps: Rsvp[]): Meetup {
   const active = rsvps.filter((r) => r.status === 'in')
-  return { ...base, rsvps: active, placesTaken: active.reduce((s, r) => s + r.places, 0) }
+  const waiting = rsvps.filter((r) => r.status === 'wait').sort((a, b) => a.createdAt - b.createdAt)
+  return { ...base, rsvps: active, waitlist: waiting, placesTaken: active.reduce((s, r) => s + r.places, 0) }
 }
 
-function rowToBase(row: any): Omit<Meetup, 'rsvps' | 'placesTaken'> {
+function rowToBase(row: any): Omit<Meetup, 'rsvps' | 'waitlist' | 'placesTaken'> {
   return {
     id: row.id,
     hostName: row.hostName,
@@ -356,7 +360,10 @@ export async function createMeetup(input: MeetupInput): Promise<MeetupWithToken>
 }
 
 /** Join a meetup. Rejects when full or already closed. */
-export async function joinMeetup(id: string, rsvp: { name: string; contact?: string; places?: number }): Promise<Meetup> {
+export async function joinMeetup(
+  id: string,
+  rsvp: { name: string; contact?: string; places?: number },
+): Promise<{ meetup: Meetup; waitlisted: boolean }> {
   const name = (rsvp.name ?? '').trim().slice(0, 60)
   const contact = (rsvp.contact ?? '').trim().slice(0, 120)
   const places = Math.min(10, Math.max(1, Math.round(Number(rsvp.places) || 1)))
@@ -365,25 +372,72 @@ export async function joinMeetup(id: string, rsvp: { name: string; contact?: str
   const current = await getMeetup(id)
   if (!current) throw new Error('Esta quedada ya no existe.')
   if (current.status === 'cancelled') throw new Error('Esta quedada se ha cancelado.')
-  if (current.placesTaken + places > current.maxPlaces) throw new Error('No quedan plazas suficientes.')
+  // Full → join the waiting list instead of being rejected.
+  const waitlisted = current.placesTaken + places > current.maxPlaces
+  const status: Rsvp['status'] = waitlisted ? 'wait' : 'in'
 
   if (isDatabaseConfigured()) {
     const { prisma } = await import('@/lib/prisma')
     try {
-      await prisma.rsvp.create({ data: { meetupId: id, name, contact, places } })
-      // Auto-confirm once the minimum is reached.
-      if (current.placesTaken + places >= current.minToConfirm && current.status === 'open') {
+      await prisma.rsvp.create({ data: { meetupId: id, name, contact, places, status } })
+      if (!waitlisted && current.placesTaken + places >= current.minToConfirm && current.status === 'open') {
         await prisma.meetup.update({ where: { id }, data: { status: 'confirmed' } })
       }
     } catch (error) {
       console.error('RSVP write failed — not falling back to memory:', error)
       throw new Error(WRITE_FAIL)
     }
+    return { meetup: (await getMeetup(id))!, waitlisted }
+  }
+  memRsvps().push({ id: `mr-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, meetupId: id, name, contact, places, status, createdAt: Date.now() })
+  const stored = memMeetups().find((m) => m.id === id)
+  if (!waitlisted && stored && current.placesTaken + places >= stored.minToConfirm && stored.status === 'open') stored.status = 'confirmed'
+  return { meetup: (await getMeetup(id))!, waitlisted }
+}
+
+/**
+ * Host removes an attendee (with the management token). Frees their spot and
+ * auto-promotes the oldest waiting people that now fit — so the waitlist flows.
+ */
+export async function removeRsvp(id: string, rsvpId: string, manageToken: string): Promise<Meetup | null> {
+  const ok = await getMeetupByToken(id, manageToken)
+  if (!ok) return null
+
+  if (isDatabaseConfigured()) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+      await prisma.rsvp.updateMany({ where: { id: rsvpId, meetupId: id }, data: { status: 'out' } })
+      const after = await getMeetup(id)
+      if (after) {
+        let taken = after.placesTaken
+        for (const w of after.waitlist) {
+          if (taken + w.places <= after.maxPlaces) {
+            await prisma.rsvp.update({ where: { id: w.id }, data: { status: 'in' } })
+            taken += w.places
+          }
+        }
+      }
+    } catch (error) {
+      console.error('RSVP remove failed — not falling back to memory:', error)
+      throw new Error(WRITE_FAIL)
+    }
     return (await getMeetup(id))!
   }
-  memRsvps().push({ id: `mr-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, meetupId: id, name, contact, places, status: 'in', createdAt: Date.now() })
-  const stored = memMeetups().find((m) => m.id === id)
-  if (stored && current.placesTaken + places >= stored.minToConfirm && stored.status === 'open') stored.status = 'confirmed'
+
+  const rows = memRsvps()
+  const target = rows.find((r) => r.id === rsvpId && r.meetupId === id)
+  if (target) target.status = 'out'
+  const after = await getMeetup(id)
+  if (after) {
+    let taken = after.placesTaken
+    for (const w of after.waitlist) {
+      if (taken + w.places <= after.maxPlaces) {
+        const row = rows.find((r) => r.id === w.id)
+        if (row) row.status = 'in'
+        taken += w.places
+      }
+    }
+  }
   return (await getMeetup(id))!
 }
 
