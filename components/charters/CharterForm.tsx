@@ -8,6 +8,7 @@ import {
   TECHNIQUES, TARGET_SPECIES, FISHING_AREAS, INCLUDED, EXCLUDED,
   POLICIES, SEASONS, LANGUAGES, TRIP_TYPES,
 } from '@/lib/charter-options'
+import { WEEKDAYS, expandSeriesDates, describeSeries, MAX_SERIES_DATES } from '@/lib/charter-recurrence'
 
 interface Opt { slug: string; name: string; region: string }
 
@@ -33,6 +34,14 @@ export default function CharterForm({ operatorId, manageToken, defaultSpot, spot
   })
   const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => setF((s) => ({ ...s, [k]: v }))
 
+  const [repeatOn, setRepeatOn] = useState(false)
+  const [weekdays, setWeekdays] = useState<number[]>([])
+  const [until, setUntil] = useState('')
+  // Vista previa derivada: cuántas salidas saldrían con lo elegido.
+  const preview = repeatOn && f.dateISO
+    ? expandSeriesDates(f.dateISO, { weekdays, untilISO: until })
+    : { dates: f.dateISO ? [f.dateISO] : [], truncated: false, error: undefined as string | undefined }
+
   const [sel, setSel] = useState<Record<string, string[]>>({
     techniques: [], species: [], areas: [], included: [], excluded: [],
     policies: [], seasons: [], languages: ['es'],
@@ -55,10 +64,12 @@ export default function CharterForm({ operatorId, manageToken, defaultSpot, spot
           meetingPoint: f.meetingPoint || undefined,
           notes: f.notes || undefined,
           ...sel,
+          repeat: repeatOn && weekdays.length && until ? { weekdays, untilISO: until } : undefined,
         }),
       })
       const data = await res.json()
       if (!res.ok || !data.success) { setMsg(data.error || 'No se pudo publicar.'); return }
+      if (data.count > 1) setMsg(`✓ Publicadas ${data.count} salidas.${data.truncated ? ' Se alcanzó el máximo por serie.' : ''}`)
       router.refresh()
       setF((s) => ({ ...s, dateISO: '', pricePerPerson: '', privatePrice: '', highlights: '', notes: '' }))
       setOpenDetail(false)
@@ -117,6 +128,44 @@ export default function CharterForm({ operatorId, manageToken, defaultSpot, spot
         <label className="block"><span className={L}>Punto de encuentro</span>
           <input value={f.meetingPoint} onChange={(e) => set('meetingPoint', e.target.value)} maxLength={200}
             placeholder="Ej.: Pantalán 3, Marina Deportiva del Puerto" className={I} /></label>
+
+        {/* Repetición: publica la misma salida en varias fechas de una vez. */}
+        <div className="rounded-xl border border-ink/[0.07] bg-ink/[0.02] p-4 space-y-3">
+          <label className="flex items-center gap-2.5 cursor-pointer">
+            <input type="checkbox" checked={repeatOn} onChange={(e) => setRepeatOn(e.target.checked)}
+              className="w-4 h-4 accent-accent" />
+            <span className="font-semibold text-ink text-[15px]">Repetir esta salida</span>
+            <span className="text-[13px] text-ink/50">— si sales todas las semanas, publícalo una sola vez</span>
+          </label>
+
+          {repeatOn && (
+            <div className="space-y-3 pl-6">
+              <div>
+                <span className={L}>Días de la semana</span>
+                <div className="flex flex-wrap gap-1.5 mt-1.5">
+                  {WEEKDAYS.map((w) => {
+                    const on = weekdays.includes(w.id)
+                    return (
+                      <button key={w.id} type="button" aria-pressed={on} aria-label={w.label}
+                        onClick={() => setWeekdays((s) => on ? s.filter((d) => d !== w.id) : [...s, w.id])}
+                        className={`w-10 h-10 rounded-full text-sm font-semibold transition-colors ${
+                          on ? 'bg-accent text-paper' : 'bg-paper text-ink/70 border border-ink/12 hover:border-accent/50'
+                        }`}>{w.short}</button>
+                    )
+                  })}
+                </div>
+              </div>
+              <label className="block max-w-xs"><span className={L}>Repetir hasta</span>
+                <input type="date" value={until} onChange={(e) => setUntil(e.target.value)} className={I} /></label>
+              {preview.error
+                ? <p className="text-[13px] text-amber-800">{preview.error}</p>
+                : <p className="text-[13px] text-accent font-semibold">
+                    {describeSeries({ weekdays, untilISO: until }, preview.dates.length)}
+                    {preview.truncated && <span className="font-normal text-ink/55"> · se publicarán las {MAX_SERIES_DATES} primeras</span>}
+                  </p>}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* 2 · Detalle (plegable) */}
@@ -160,7 +209,7 @@ export default function CharterForm({ operatorId, manageToken, defaultSpot, spot
       {msg && <p className="text-sm text-red-700">{msg}</p>}
       <button type="submit" disabled={saving}
         className="bg-accent text-paper px-6 py-3 text-[15px] font-semibold rounded-full hover:brightness-110 disabled:opacity-60 transition-all">
-        {saving ? 'Publicando…' : 'Publicar salida'}
+        {saving ? 'Publicando…' : preview.dates.length > 1 && !preview.error ? `Publicar ${preview.dates.length} salidas` : 'Publicar salida'}
       </button>
     </form>
   )

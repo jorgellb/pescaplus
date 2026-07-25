@@ -20,6 +20,8 @@ export interface DashboardCharter {
   id: string; spotName: string; dateISO: string; dayLabel: string; timeStart: string; modality: string
   pricePerPerson: number; maxPlaces: number; placesTaken: number; status: string
   isPast: boolean; bookings: DashboardBooking[]
+  /** Pertenece a una serie repetida, y cuántas salidas activas quedan en ella. */
+  seriesId: string; seriesCount: number
 }
 
 /** Numeric specs travel to the form as strings so the input can be empty. */
@@ -46,6 +48,11 @@ export async function buildDashboardCharters(
 ): Promise<DashboardCharter[]> {
   const today = todayMadridISO()
   const reviewer = opts.reviewerUserId || null
+  // Cuántas salidas vivas quedan por serie, para ofrecer "cancelar la serie".
+  const seriesCounts = new Map<string, number>()
+  for (const c of charters) {
+    if (c.seriesId && c.status !== 'cancelled') seriesCounts.set(c.seriesId, (seriesCounts.get(c.seriesId) ?? 0) + 1)
+  }
 
   return Promise.all(charters.map(async (c) => {
     const isPast = c.dateISO < today
@@ -78,6 +85,8 @@ export async function buildDashboardCharters(
       status: c.status,
       isPast,
       bookings,
+      seriesId: c.seriesId,
+      seriesCount: c.seriesId ? (seriesCounts.get(c.seriesId) ?? 0) : 0,
     }
   }))
 }

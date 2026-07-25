@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { respondBooking, cancelCharter, cancelBooking } from '@/lib/charters-store'
+import { respondBooking, cancelCharter, cancelBooking, cancelCharterSeries, getCharter } from '@/lib/charters-store'
 import { rateLimit, clientIp } from '@/lib/rate-limit'
 
 const schema = z.object({
   operatorId: z.string().min(1).max(120),
   manageToken: z.string().min(6).max(120),
-  action: z.enum(['accept', 'decline', 'cancel', 'cancelBooking']),
+  action: z.enum(['accept', 'decline', 'cancel', 'cancelBooking', 'cancelSeries']),
   bookingId: z.string().max(120).optional(),
 })
 
@@ -21,6 +21,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (action === 'cancel') {
       const ok = await cancelCharter(id, operatorId, manageToken)
       return ok ? NextResponse.json({ success: true }) : NextResponse.json({ success: false, error: 'No autorizado.' }, { status: 403 })
+    }
+    if (action === 'cancelSeries') {
+      const charter = await getCharter(id)
+      if (!charter?.seriesId) return NextResponse.json({ success: false, error: 'Esta salida no forma parte de una serie.' }, { status: 400 })
+      const count = await cancelCharterSeries(charter.seriesId, operatorId, manageToken)
+      return count > 0
+        ? NextResponse.json({ success: true, cancelled: count })
+        : NextResponse.json({ success: false, error: 'No autorizado.' }, { status: 403 })
     }
     if (action === 'cancelBooking') {
       if (!bookingId) return NextResponse.json({ success: false, error: 'Falta la reserva.' }, { status: 400 })

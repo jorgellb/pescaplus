@@ -23,6 +23,7 @@ interface Charter {
   pricePerPerson: number; maxPlaces: number; placesTaken: number; status: string; bookings: Booking[]
   /** La salida ya ha terminado → se puede valorar a los pescadores. */
   isPast?: boolean
+  seriesId?: string; seriesCount?: number
 }
 
 interface Profile {
@@ -171,7 +172,18 @@ export default function OperatorDashboard({ operatorId, manageToken, verified, s
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="font-bold text-ink">{c.spotName} · <span className="capitalize">{c.dayLabel}</span> · {c.timeStart} · {c.pricePerPerson} €/pers · {c.placesTaken}/{c.maxPlaces}
                 <span className="ml-2 font-mono text-[10px] uppercase tracking-widest text-accent">{c.status === 'confirmed' ? 'confirmado' : c.status === 'cancelled' ? 'cancelado' : 'abierto'}</span></p>
-              {c.status !== 'cancelled' && <button onClick={() => respond(c.id, 'cancel')} disabled={busy === c.id + 'cancel'} className="font-mono text-[10px] uppercase tracking-wide text-red-700 hover:underline disabled:opacity-50">Cancelar chárter</button>}
+              {c.status !== 'cancelled' && (
+                <span className="flex flex-wrap items-center gap-3">
+                  {(c.seriesCount ?? 0) > 1 && (
+                    <span className="text-[11px] font-semibold text-accent bg-accent/[0.09] px-2 py-0.5 rounded-full">🔁 serie de {c.seriesCount}</span>
+                  )}
+                  <button onClick={() => respond(c.id, 'cancel')} disabled={busy === c.id + 'cancel'} className="font-mono text-[10px] uppercase tracking-wide text-red-700 hover:underline disabled:opacity-50">Cancelar esta</button>
+                  {(c.seriesCount ?? 0) > 1 && (
+                    <button onClick={() => { if (confirm(`¿Cancelar las ${c.seriesCount} salidas de esta serie?`)) respond(c.id, 'cancelSeries') }}
+                      disabled={busy === c.id + 'cancelSeries'} className="font-mono text-[10px] uppercase tracking-wide text-red-700 hover:underline disabled:opacity-50">Cancelar la serie</button>
+                  )}
+                </span>
+              )}
             </div>
             {c.bookings.length > 0 && (
               <div className="space-y-1.5 border-t border-ink/10 pt-2">

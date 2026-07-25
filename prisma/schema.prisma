@@ -355,6 +355,8 @@ model Charter {
   notes          String           @default("")
   status         String           @default("open") // open | confirmed | cancelled
   // — Ficha detallada de la salida (ids del catálogo en lib/charter-options) —
+  /** Salidas creadas de una vez comparten seriesId (repetición semanal). */
+  seriesId       String           @default("")
   tripType       String           @default("compartida") // privada | compartida
   meetingPoint   String           @default("") // amarre / punto de encuentro exacto
   highlights     String           @default("") // lo más destacado, una línea
@@ -374,6 +376,7 @@ model Charter {
 
   @@index([spotSlug, dateISO])
   @@index([operatorId])
+  @@index([seriesId])
 }
 
 model CharterBooking {

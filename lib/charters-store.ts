@@ -4,6 +4,7 @@ import {
   sanitizeIds, LANGUAGES, TECHNIQUES, TARGET_SPECIES, FISHING_AREAS,
   INCLUDED, EXCLUDED, POLICIES, SEASONS,
 } from '@/lib/charter-options'
+import { expandSeriesDates, type Repeat } from '@/lib/charter-recurrence'
 
 /**
  * Charter listings + booking requests (Fase 1 skeleton). A verified operator
@@ -96,6 +97,8 @@ export interface Charter {
   includes: string
   notes: string
   status: 'open' | 'confirmed' | 'cancelled'
+  /** Comparten seriesId las salidas creadas juntas por repetición. */
+  seriesId: string
   tripType: 'privada' | 'compartida'
   meetingPoint: string
   highlights: string
@@ -219,6 +222,7 @@ function baseFromRow(row: any): Omit<Charter, 'operator' | 'bookings' | 'placesT
     includes: row.includes ?? '',
     notes: row.notes ?? '',
     status: row.status,
+    seriesId: row.seriesId ?? '',
     tripType: row.tripType === 'privada' ? 'privada' : 'compartida',
     meetingPoint: row.meetingPoint ?? '',
     highlights: row.highlights ?? '',
@@ -275,9 +279,87 @@ export async function createCharter(operatorId: string, manageToken: string, inp
       throw new Error(WRITE_FAIL)
     }
   }
-  const stored: StoredCharter = { id: `mem-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, operatorId, ...data, status: 'open', createdAt: Date.now() }
+  const stored: StoredCharter = { id: `mem-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, operatorId, ...data, seriesId: '', status: 'open', createdAt: Date.now() }
   memC().unshift(stored)
   return assemble(stored, op, [])
+}
+
+/**
+ * Publish the same trip on every date of a recurrence (e.g. every Saturday
+ * until October). Each date is a real, independently bookable charter; they
+ * share a `seriesId` so the patrón can cancel the whole run at once.
+ */
+export async function createCharterSeries(
+  operatorId: string,
+  manageToken: string,
+  input: CharterInput,
+  repeat: Repeat | null | undefined,
+): Promise<{ charters: Charter[]; truncated: boolean }> {
+  const op = await getOperatorByToken(operatorId, manageToken)
+  if (!op) throw new Error('Operador no autorizado.')
+  if (!op.verified) throw new Error('Tu cuenta de operador aún no está verificada. Podrás publicar chárters en cuanto validemos tu licencia y seguro.')
+
+  const { dates, truncated, error } = expandSeriesDates(input.dateISO, repeat)
+  if (error) throw new Error(error)
+
+  const base = cleanCharter(input)
+  // Una sola fecha no es una serie: se deja sin seriesId para no ofrecer
+  // "cancelar la serie" sobre una salida suelta.
+  const seriesId = dates.length > 1 ? `s-${Date.now()}-${Math.random().toString(36).slice(2, 8)}` : ''
+
+  if (isDatabaseConfigured()) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+      await prisma.charter.createMany({
+        data: dates.map((dateISO) => ({ ...base, dateISO, operatorId, seriesId })),
+      })
+      const rows = await prisma.charter.findMany({
+        where: seriesId ? { seriesId } : { operatorId, dateISO: dates[0], timeStart: base.timeStart },
+        orderBy: { dateISO: 'asc' },
+        include: { bookings: true },
+      })
+      return { charters: rows.map((r) => assemble(baseFromRow(r), op, r.bookings.map(bookingFromRow))), truncated }
+    } catch (err) {
+      console.error('Charter series write failed — not falling back to memory:', err)
+      throw new Error(WRITE_FAIL)
+    }
+  }
+
+  const charters: Charter[] = []
+  for (const dateISO of dates) {
+    const stored: StoredCharter = {
+      id: `mem-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      operatorId, ...base, dateISO, seriesId, status: 'open', createdAt: Date.now(),
+    }
+    memC().unshift(stored)
+    charters.push(assemble(stored, op, []))
+  }
+  return { charters, truncated }
+}
+
+/** Cancel every remaining charter of a series. Returns how many were cancelled. */
+export async function cancelCharterSeries(seriesId: string, operatorId: string, manageToken: string): Promise<number> {
+  if (!seriesId) return 0
+  const op = await getOperatorByToken(operatorId, manageToken)
+  if (!op) return 0
+  if (isDatabaseConfigured()) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+      const res = await prisma.charter.updateMany({
+        where: { seriesId, operatorId, status: { not: 'cancelled' } },
+        data: { status: 'cancelled' },
+      })
+      return res.count
+    } catch (error) {
+      console.error('Charter series cancel failed:', error)
+      throw new Error(WRITE_FAIL)
+    }
+  }
+  let n = 0
+  for (const c of memC()) {
+    if (c.seriesId === seriesId && c.operatorId === operatorId && c.status !== 'cancelled') { c.status = 'cancelled'; n += 1 }
+  }
+  return n
 }
 
 export async function getCharter(id: string): Promise<Charter | null> {

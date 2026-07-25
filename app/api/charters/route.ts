@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { createCharter, validateCharter } from '@/lib/charters-store'
+import { createCharterSeries, validateCharter } from '@/lib/charters-store'
 import { getSpot } from '@/lib/fishing-spots'
 import { rateLimit, clientIp } from '@/lib/rate-limit'
 
@@ -32,6 +32,11 @@ const schema = z.object({
   excluded: z.array(z.string().max(40)).max(20).optional(),
   policies: z.array(z.string().max(40)).max(20).optional(),
   seasons: z.array(z.string().max(40)).max(12).optional(),
+  // Repetición semanal: publica la misma salida en varias fechas.
+  repeat: z.object({
+    weekdays: z.array(z.number().int().min(0).max(6)).max(7),
+    untilISO: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  }).optional(),
 })
 
 export async function POST(request: NextRequest) {
@@ -43,9 +48,15 @@ export async function POST(request: NextRequest) {
   const err = validateCharter(parsed.data)
   if (err) return NextResponse.json({ success: false, error: err }, { status: 400 })
   try {
-    const { operatorId, manageToken, ...input } = parsed.data
-    const charter = await createCharter(operatorId, manageToken, input)
-    return NextResponse.json({ success: true, id: charter.id }, { status: 201 })
+    const { operatorId, manageToken, repeat, ...input } = parsed.data
+    const { charters, truncated } = await createCharterSeries(operatorId, manageToken, input, repeat)
+    return NextResponse.json({
+      success: true,
+      id: charters[0]?.id,
+      count: charters.length,
+      seriesId: charters[0]?.seriesId || '',
+      truncated,
+    }, { status: 201 })
   } catch (error) {
     return NextResponse.json({ success: false, error: (error as Error).message }, { status: 400 })
   }
