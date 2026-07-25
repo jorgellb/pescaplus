@@ -12,7 +12,8 @@ import { fmtDayLabel, todayMadridISO } from '@/lib/solunar-format'
  */
 export interface DashboardBooking {
   id: string; name: string; contact: string; people: number; message: string; status: string
-  userId: string | null; anglerRating: number; anglerReviews: number; givenRating: number
+  userId: string | null; anglerRating: number; anglerReviews: number
+  givenRating: number; givenPending: boolean
 }
 export interface DashboardCharter {
   id: string; spotName: string; dateISO: string; dayLabel: string; timeStart: string; modality: string
@@ -40,7 +41,8 @@ export async function buildDashboardCharters(
         userId: reviewer ? b.userId : null, // sin patrón identificado no se ofrece valorar
         anglerRating: angler?.avgRating ?? 0,
         anglerReviews: angler?.reviewCount ?? 0,
-        givenRating: b.userId ? (given[b.userId] ?? 0) : 0,
+        givenRating: b.userId ? (given[b.userId]?.rating ?? 0) : 0,
+        givenPending: b.userId ? (given[b.userId]?.pending ?? false) : false,
       }
     }))
 

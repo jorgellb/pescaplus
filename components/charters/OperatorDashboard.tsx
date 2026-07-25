@@ -12,6 +12,8 @@ interface Booking {
   userId?: string | null; anglerRating?: number; anglerReviews?: number
   /** Estrellas que YA le puso este patrón en esta salida (0 = aún no). */
   givenRating?: number
+  /** Su valoración sigue oculta (doble ciego). */
+  givenPending?: boolean
 }
 interface Charter {
   id: string; spotName: string; dateISO: string; dayLabel: string; timeStart: string; modality: string
@@ -185,7 +187,7 @@ export default function OperatorDashboard({ operatorId, manageToken, verified, s
                     {/* Tras la salida, el patrón valora a quien embarcó (si tiene cuenta). */}
                     {c.isPast && b.userId && (b.status === 'accepted' || b.status === 'paid') && (
                       <div className="w-full">
-                        <ReviewForm charterId={c.id} direction="toAngler" subjectUserId={b.userId} initialRating={b.givenRating ?? 0} done={(b.givenRating ?? 0) > 0} label={`Valorar a ${b.name}`} />
+                        <ReviewForm charterId={c.id} direction="toAngler" subjectUserId={b.userId} initialRating={b.givenRating ?? 0} done={(b.givenRating ?? 0) > 0} pending={b.givenPending} label={`Valorar a ${b.name}`} />
                       </div>
                     )}
                   </div>

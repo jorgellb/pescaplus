@@ -9,7 +9,7 @@ import ReviewForm from './ReviewForm'
 export interface BookingRow {
   id: string; charterId: string; status: string; people: number; priceTotal: number
   dateISO: string; dayLabel: string; spotName: string; modality: string; operatorName: string
-  isPast: boolean; canReview: boolean; reviewedRating: number
+  isPast: boolean; canReview: boolean; reviewedRating: number; reviewPending: boolean
 }
 export interface RsvpRow { id: string; meetupId: string; status: string; dayLabel: string; spotName: string; kind: string }
 export interface ThreadRow { id: string; otherName: string; charterLabel: string; lastBody: string; unread: number }
@@ -74,7 +74,7 @@ export default function AccountPanel({ user, avatarChoices, bookings, rsvps, thr
                     </div>
                     <span className={`font-mono text-[10px] uppercase tracking-widest ${st.cls}`}>{st.label}</span>
                   </div>
-                  {b.canReview && <div className="mt-1"><ReviewForm charterId={b.charterId} initialRating={b.reviewedRating} done={b.reviewedRating > 0} /></div>}
+                  {b.canReview && <div className="mt-1"><ReviewForm charterId={b.charterId} initialRating={b.reviewedRating} done={b.reviewedRating > 0} pending={b.reviewPending} /></div>}
                   {!b.isPast && (b.status === 'requested' || b.status === 'accepted') && (
                     <button onClick={() => cancelBooking(b.id)} disabled={busy === 'b' + b.id} className="mt-1.5 font-mono text-[10px] uppercase tracking-wide text-red-700 hover:underline disabled:opacity-50">Cancelar reserva</button>
                   )}

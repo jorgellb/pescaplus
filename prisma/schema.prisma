@@ -194,6 +194,9 @@ model Review {
   subjectUserId String  @default("")
   rating       Int // 1..5
   text         String   @default("")
+  // Doble ciego: null mientras está oculta; se publica cuando la otra parte
+  // también valora, o al vencer el plazo (ver REVIEW_BLIND_DAYS).
+  publishedAt  DateTime?
   createdAt    DateTime @default(now())
   author       User     @relation("ReviewAuthor", fields: [authorUserId], references: [id], onDelete: Cascade)
 
@@ -201,6 +204,7 @@ model Review {
   @@unique([charterId, authorUserId, subjectUserId])
   @@index([operatorId])
   @@index([subjectUserId])
+  @@index([publishedAt])
 }
 
 // Conversación in-app entre un pescador y un patrón sobre un chárter concreto.

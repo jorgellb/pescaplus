@@ -93,14 +93,14 @@ describe('accounts — bookings / operator ownership / reviews', () => {
 
     const review = await createReview({ operatorId: op.id, charterId: charter.id, authorUserId: angler.id, rating: 5, text: 'Genial' })
     expect(review.rating).toBe(5)
-
-    const list = await listReviewsForOperator(op.id)
-    expect(list).toHaveLength(1)
-    expect(list[0].text).toBe('Genial')
+    // Doble ciego: aún no es pública (ver tests/reviews.test.ts), pero su autora
+    // la ve y le sirve de prefill.
+    expect(review.pending).toBe(true)
+    expect(await listReviewsForOperator(op.id)).toHaveLength(0)
+    expect((await getUserReviewForCharter(charter.id, angler.id))!.text).toBe('Genial')
 
     // Segunda reseña del mismo usuario sobre el mismo chárter = actualiza, no duplica.
     await createReview({ operatorId: op.id, charterId: charter.id, authorUserId: angler.id, rating: 3 })
-    expect(await listReviewsForOperator(op.id)).toHaveLength(1)
     expect((await getUserReviewForCharter(charter.id, angler.id))!.rating).toBe(3)
 
     // Valoración fuera de rango.

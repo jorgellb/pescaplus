@@ -70,6 +70,7 @@ export default async function CuentaPage({ searchParams }: { searchParams: Promi
       isPast,
       canReview: eligible,
       reviewedRating: existing?.rating ?? 0,
+      reviewPending: existing?.pending ?? false,
     }
   }))
 
