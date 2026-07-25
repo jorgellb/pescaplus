@@ -47,7 +47,7 @@ export default async function GuidesIndex() {
                 href={`/guias/${g.id}`}
                 className="group flex flex-col bg-paper border border-ink/15 rounded-xl shadow-hard hover-shift"
               >
-                <div className="relative aspect-[16/10] overflow-hidden bg-[#e6e2d6] border-b border-ink/12">
+                <div className="relative aspect-[16/10] overflow-hidden bg-ink/[0.05] border-b border-ink/12">
                   <ProductImage src={proxiedImage(g.coverImage, g.title)} alt={g.coverImageAlt || g.title} sizes="(max-width: 768px) 100vw, 33vw" className="absolute inset-0 w-full h-full object-cover" />
                   {g.typeFishing && (
                     <span className="absolute top-0 left-0 bg-ink text-paper text-[10px] font-bold uppercase tracking-widest px-2.5 py-1.5">

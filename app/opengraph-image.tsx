@@ -4,9 +4,9 @@ export const alt = 'PescaPlus — Tienda especializada de pesca'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
-const PAPER = '#f2efe6'
-const INK = '#111111'
-const ACCENT = '#0f766e'
+const PAPER = '#ffffff'
+const INK = '#0f1417'
+const ACCENT = '#0d9488'
 
 export default function OpengraphImage() {
   return new ImageResponse(

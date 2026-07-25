@@ -5,7 +5,6 @@ import Marquee from '@/components/Marquee'
 import ProductCard from '@/components/ProductCard'
 import ProductImage from '@/components/ProductImage'
 import CategoryIcon from '@/components/graphics/CategoryIcon'
-import AsesorButton from '@/components/AsesorButton'
 import { FISHING_TYPES } from '@/lib/fishing'
 import { listProducts } from '@/lib/products-store'
 import { listGuides } from '@/lib/guides-store'
@@ -17,7 +16,7 @@ import { proxiedImage } from '@/lib/img-proxy'
 export const metadata: Metadata = {
   title: { absolute: 'PescaPlus | Tienda de pesca online en España al mejor precio' },
   description:
-    'Tienda de pesca online en España: cañas, carretes, señuelos y aparejos al mejor precio. Material de pesca barato para spinning, carpfishing y surfcasting, con envío rápido y selección experta.',
+    'Tienda de pesca online en España: cañas, carretes, señuelos y aparejos al mejor precio. Además, gratis: mejores horas para pescar según mareas y viento, mapa de dónde pica hoy y salidas de pesca con patrón.',
   alternates: { canonical: '/' },
 }
 
@@ -43,6 +42,14 @@ const FAQS = [
   {
     q: '¿Cómo sé que compro al mejor precio?',
     a: 'Filtramos el catálogo por relación calidad-precio y por ventas y valoraciones reales, y lo actualizamos con las mejores ofertas para que consigas los mejores precios en pesca online.',
+  },
+  {
+    q: '¿Qué herramientas gratuitas ofrece PescaPlus además de la tienda?',
+    a: 'Puedes consultar las mejores horas para pescar en cada zona según mareas, viento y actividad solunar; el mapa del día con las zonas donde mejor pica; fichas de especies como lubina, dorada o atún; un calendario de pesca con luna y mareas; y un diario de capturas. Todo gratis y sin registro.',
+  },
+  {
+    q: '¿Puedo reservar una salida de pesca en barco?',
+    a: 'Sí. En PescaPlus puedes reservar chárters de pesca con patrón profesional (verificamos su titulación y su seguro) y pagar online de forma segura, o apuntarte a quedadas de pesca para compartir barco y gastos con otros pescadores.',
   },
 ]
 
@@ -77,47 +84,46 @@ export default async function Home() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
 
       {/* HERO */}
-      <section className="border-b border-ink/12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+      <section className="bg-paper border-b border-ink/[0.07]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-7">
-            <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-5">
-              ● Tienda de pesca online · España
+            <p className="inline-flex items-center gap-2 text-[13px] font-semibold text-accent bg-accent/[0.09] px-3 py-1.5 rounded-full mb-6">
+              🎣 Todo para el pescador en España
             </p>
-            <h1 className="font-display uppercase text-ink leading-[0.9] text-[2.5rem] sm:text-6xl md:text-7xl lg:text-8xl">
-              Equípate
-              <br />
-              como un
-              <br />
-              <span className="text-accent">profesional</span>
+            <h1 className="font-display text-ink text-[2rem] sm:text-[2.75rem] md:text-5xl leading-[1.08] max-w-[19ch]">
+              Tu tienda de pesca online{' '}
+              <span className="text-accent">y todo para salir a pescar</span>
             </h1>
-            <p className="mt-6 text-lg text-ink/70 max-w-lg leading-snug">
-              Tu tienda de pesca online en España: cañas, carretes, señuelos y aparejos
-              seleccionados por nuestro equipo de pescadores, al mejor precio y con envío rápido.
+            <p className="mt-6 text-lg text-ink/65 max-w-xl leading-relaxed">
+              Cañas, carretes, señuelos y aparejos al mejor precio. Y además, gratis: previsión de
+              las <strong className="text-ink/80 font-semibold">mejores horas</strong> según mareas y viento,
+              el <strong className="text-ink/80 font-semibold">mapa de dónde pica hoy</strong> y
+              <strong className="text-ink/80 font-semibold"> salidas de pesca</strong> con patrón o con otros pescadores.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/categories/canas" className="bg-ink text-paper px-7 py-4 text-sm font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift hover:bg-accent hover:border-accent">
-                Ver catálogo →
+              <Link href="/mejores" className="bg-accent text-paper px-6 py-3.5 text-[15px] font-semibold rounded-full shadow-hard-accent hover:brightness-110 transition-all">
+                Ver la tienda
               </Link>
-              <AsesorButton className="bg-paper text-ink px-7 py-4 text-sm font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift">
-                Asesor de pesca
-              </AsesorButton>
+              <Link href="/mejores-horas" className="bg-paper text-ink px-6 py-3.5 text-[15px] font-semibold rounded-full border border-ink/12 hover:border-accent hover:text-accent transition-colors">
+                ¿Cuándo salgo a pescar?
+              </Link>
             </div>
           </div>
 
           <div className="lg:col-span-5">
             <div className="relative">
               {heroA && (
-                <div className="relative aspect-[4/5] border border-ink/15 rounded-xl shadow-hard-lg overflow-hidden bg-[#e6e2d6]">
+                <div className="relative aspect-[4/5] border border-ink/15 rounded-xl shadow-hard-lg overflow-hidden bg-ink/[0.05]">
                   <ProductImage src={proxiedImage(heroA.imageUrl, heroA.title)} alt={heroA.title} priority sizes="(max-width: 1024px) 90vw, 40vw" className="absolute inset-0 w-full h-full object-cover" />
                   <Link href={`/products/${heroA.id}`} className="absolute inset-0" aria-label={heroA.title} />
                 </div>
               )}
               {heroB && (
-                <div className="hidden sm:block absolute -bottom-8 -left-8 w-40 aspect-square border border-ink/15 rounded-xl shadow-hard bg-[#e6e2d6] overflow-hidden">
+                <div className="hidden sm:block absolute -bottom-8 -left-8 w-40 aspect-square border border-ink/15 rounded-xl shadow-hard bg-ink/[0.05] overflow-hidden">
                   <ProductImage src={proxiedImage(heroB.imageUrl, heroB.title)} alt={heroB.title} sizes="200px" className="absolute inset-0 w-full h-full object-cover" />
                 </div>
               )}
-              <span className="absolute -top-5 -right-3 rotate-6 bg-accent text-paper font-display text-lg uppercase px-4 py-2 border border-ink/15 rounded-xl shadow-hard">
+              <span className="absolute -top-4 -right-3 bg-paper text-ink font-semibold text-sm px-4 py-2 rounded-full shadow-hard-md">
                 {all.length} productos
               </span>
             </div>
@@ -125,35 +131,62 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* QUÉ ES PESCAPLUS — los cuatro servicios, para que se entienda de un vistazo
+          (y como enlazado interno con texto descriptivo hacia cada hub). */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+        <div className="max-w-2xl mb-8">
+          <h2 className="font-display text-3xl md:text-4xl text-ink">Cuatro cosas que puedes hacer aquí</h2>
+          <p className="text-ink/60 mt-2 leading-relaxed">
+            PescaPlus no es solo una tienda: es la caja de herramientas del pescador en España.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            { href: '/mejores', emoji: '🛒', title: 'Comprar aparejos', text: 'Cañas, carretes, señuelos y más de 11 categorías, filtrados por valoraciones reales.', cta: 'Ir a la tienda' },
+            { href: '/mejores-horas', emoji: '🕐', title: 'Saber cuándo pescar', text: 'Mejores horas por zona según mareas, viento y actividad solunar. Actualizado a diario.', cta: 'Ver previsión' },
+            { href: '/donde-pescar', emoji: '🗺️', title: 'Saber dónde pescar', text: 'El mapa del día con las zonas donde mejor pica, y fichas de cada especie.', cta: 'Abrir el mapa' },
+            { href: '/charters', emoji: '🚤', title: 'Salir a pescar', text: 'Chárters con patrón verificado y quedadas para compartir barco con otros pescadores.', cta: 'Ver salidas' },
+          ].map((s) => (
+            <Link key={s.href} href={s.href}
+              className="group flex flex-col bg-paper rounded-2xl p-6 border border-ink/[0.07] shadow-hard hover-shift">
+              <span className="text-3xl">{s.emoji}</span>
+              <h3 className="font-display text-xl text-ink mt-4 group-hover:text-accent transition-colors">{s.title}</h3>
+              <p className="text-[14px] text-ink/60 leading-relaxed mt-2 flex-1">{s.text}</p>
+              <span className="text-[14px] font-semibold text-accent mt-4">{s.cta} →</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       <Marquee
         items={[
           'Envío a toda España',
           'Los mejores precios',
-          'Material de pesca barato',
-          'Selección experta',
-          '11 categorías de pesca',
+          'Previsión de mareas y viento',
+          'Chárters con patrón verificado',
+          'Quedadas de pesca',
         ]}
       />
 
       {/* CATEGORIES */}
       <section className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
-        <div className="flex items-end justify-between mb-8 gap-4 border-b border-ink/12 pb-4">
-          <h2 className="font-display uppercase text-4xl md:text-5xl leading-none">Categorías de pesca</h2>
-          <span className="font-mono text-xs uppercase tracking-widest text-ink/50 hidden sm:block">Elige tu aparejo</span>
+        <div className="flex items-end justify-between mb-8 gap-4">
+          <div>
+            <h2 className="font-display text-3xl md:text-4xl text-ink">Categorías de pesca</h2>
+            <p className="text-ink/60 mt-2">Elige tu aparejo y compara precios.</p>
+          </div>
+          <Link href="/mejores" className="text-sm font-semibold text-accent hover:underline whitespace-nowrap hidden sm:block">Ver todo →</Link>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {FISHING_TYPES.map((type, i) => (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          {FISHING_TYPES.map((type) => (
             <Link
               key={type.id}
               href={`/categories/${type.id}`}
-              className="group relative flex flex-col justify-between p-6 min-h-[10.5rem] border border-ink/12 -ml-px -mt-px bg-paper hover:bg-ink/[0.03] transition-colors"
+              className="group flex items-center gap-4 p-5 rounded-2xl bg-paper border border-ink/[0.07] hover:border-accent/40 shadow-hard hover-shift"
             >
-              <div className="flex items-start justify-between">
-                <span className="font-mono text-xs font-bold text-ink/35">{String(i + 1).padStart(2, '0')}</span>
-                <CategoryIcon id={type.id} className="w-12 h-12 md:w-16 md:h-16 text-ink/70 group-hover:text-accent transition-colors" strokeWidth={1.4} />
-              </div>
-              <h3 className="font-display text-xl md:text-[1.7rem] leading-[1.05] text-ink group-hover:text-accent transition-colors mt-6 hyphens-none">
+              <CategoryIcon id={type.id} className="w-9 h-9 shrink-0 text-ink/55 group-hover:text-accent transition-colors" strokeWidth={1.5} />
+              <h3 className="font-semibold text-[15px] leading-snug text-ink group-hover:text-accent transition-colors hyphens-none">
                 {categoryName(taxonomy, type.id)}
               </h3>
             </Link>
@@ -165,8 +198,8 @@ export default async function Home() {
       {featured.length > 0 && (
         <section className="bg-ink text-paper border-y border-ink/12 py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-end justify-between mb-8 gap-4 border-b-2 border-paper/30 pb-4">
-              <h2 className="font-display uppercase text-4xl md:text-5xl leading-none">Lo más buscado</h2>
+            <div className="flex items-end justify-between mb-8 gap-4 border-b border-paper/15 pb-4">
+              <h2 className="font-display text-3xl md:text-4xl">Lo más buscado</h2>
               <Link href="/mejores" className="font-mono text-xs font-bold uppercase tracking-widest text-accent hover:underline whitespace-nowrap">Guías de compra →</Link>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
@@ -207,7 +240,7 @@ export default async function Home() {
           </div>
           <div className="lg:col-span-5 grid grid-cols-2 gap-4">
             {collage.map((p, i) => (
-              <div key={p.id} className={`relative aspect-[3/4] border border-ink/15 rounded-xl overflow-hidden bg-[#e6e2d6] shadow-hard ${i === 1 ? 'mt-8' : ''}`}>
+              <div key={p.id} className={`relative aspect-[3/4] border border-ink/15 rounded-xl overflow-hidden bg-ink/[0.05] shadow-hard ${i === 1 ? 'mt-8' : ''}`}>
                 <ProductImage src={proxiedImage(p.imageUrl, p.title)} alt={p.title} sizes="(max-width: 1024px) 45vw, 20vw" className="absolute inset-0 w-full h-full object-cover" />
                 <Link href={`/products/${p.id}`} className="absolute inset-0" aria-label={p.title} />
               </div>
@@ -222,7 +255,7 @@ export default async function Home() {
           <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
             <div className="flex items-end justify-between mb-8 gap-4 border-b border-ink/15 pb-4">
               <div>
-                <h2 className="font-display uppercase text-4xl md:text-5xl leading-none">Los mejores precios en pesca</h2>
+                <h2 className="font-display text-3xl md:text-4xl">Los mejores precios en pesca</h2>
                 <p className="text-sm text-ink/60 mt-2">Chollos y ofertas en material de pesca online — calidad probada, sin pagar de más.</p>
               </div>
               <Link href="/search?q=oferta" className="font-mono text-xs font-bold uppercase tracking-widest text-accent hover:underline whitespace-nowrap hidden sm:block">Ver más →</Link>
@@ -240,13 +273,13 @@ export default async function Home() {
       {topRoundups.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
           <div className="flex items-end justify-between mb-8 gap-4 border-b border-ink/12 pb-4">
-            <h2 className="font-display uppercase text-4xl md:text-5xl leading-none">Guías de compra</h2>
+            <h2 className="font-display text-3xl md:text-4xl">Guías de compra</h2>
             <Link href="/mejores" className="font-mono text-xs font-bold uppercase tracking-widest text-accent hover:underline whitespace-nowrap">Ver todas →</Link>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
             {topRoundups.map((r) => (
               <Link key={r.slug} href={`/mejores/${r.slug}`} className="group flex flex-col border border-ink/12 rounded-xl overflow-hidden bg-paper shadow-hard hover-shift">
-                <div className="relative aspect-[16/10] bg-[#e6e2d6] border-b border-ink/10 overflow-hidden">
+                <div className="relative aspect-[16/10] bg-ink/[0.05] border-b border-ink/10 overflow-hidden">
                   <ProductImage src={r.cover} alt={`Mejores ${r.name}`} sizes="(max-width: 768px) 50vw, 33vw" className="absolute inset-0 w-full h-full object-cover" />
                 </div>
                 <div className="p-4">
@@ -281,14 +314,14 @@ export default async function Home() {
       {latestGuides.length > 0 && (
         <section className="border-t border-ink/12 bg-ink text-paper py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-end justify-between mb-8 gap-4 border-b-2 border-paper/30 pb-4">
-              <h2 className="font-display uppercase text-4xl md:text-5xl leading-none">Consejos y guías de pesca</h2>
+            <div className="flex items-end justify-between mb-8 gap-4 border-b border-paper/15 pb-4">
+              <h2 className="font-display text-3xl md:text-4xl">Consejos y guías de pesca</h2>
               <Link href="/guias" className="font-mono text-xs font-bold uppercase tracking-widest text-accent hover:underline whitespace-nowrap">Ver blog →</Link>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {latestGuides.map((g) => (
                 <Link key={g.id} href={`/guias/${g.id}`} className="group flex flex-col bg-paper text-ink rounded-xl overflow-hidden border border-paper/10 hover-shift">
-                  <div className="relative aspect-[16/9] bg-[#e6e2d6] overflow-hidden">
+                  <div className="relative aspect-[16/9] bg-ink/[0.05] overflow-hidden">
                     <ProductImage src={proxiedImage(g.coverImage, g.title)} alt={g.coverImageAlt || g.title} sizes="(max-width: 768px) 100vw, 33vw" className="absolute inset-0 w-full h-full object-cover" />
                   </div>
                   <div className="p-5 flex flex-col flex-1">
@@ -305,7 +338,7 @@ export default async function Home() {
 
       {/* FAQ */}
       <section className="max-w-4xl mx-auto px-4 py-16 sm:px-6">
-        <h2 className="font-display uppercase text-4xl md:text-5xl leading-none mb-8">Preguntas frecuentes</h2>
+        <h2 className="font-display text-3xl md:text-4xl mb-8">Preguntas frecuentes</h2>
         <div className="space-y-3">
           {FAQS.map((f, i) => (
             <details key={i} className="border border-ink/12 rounded-xl bg-paper group">

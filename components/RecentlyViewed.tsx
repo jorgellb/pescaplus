@@ -27,7 +27,7 @@ export default function RecentlyViewed({
       <div className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-none">
         {items.map((p) => (
           <Link key={p.id} href={`/products/${p.id}`} className="flex-shrink-0 w-40 sm:w-48 group">
-            <div className="relative aspect-square bg-[#e6e2d6] border border-ink/10 rounded-xl overflow-hidden">
+            <div className="relative aspect-square bg-ink/[0.05] border border-ink/10 rounded-xl overflow-hidden">
               <ProductImage src={p.imageUrl} alt={p.title} sizes="200px" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
             </div>
             <h3 className="mt-2 text-sm font-semibold text-ink line-clamp-2 leading-snug group-hover:text-accent transition-colors">{p.title}</h3>

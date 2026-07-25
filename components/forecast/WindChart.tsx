@@ -43,7 +43,7 @@ export default function WindChart({
       {sunset != null && sunset < dayEnd && <rect x={x(sunset)} y={padT} width={padL + innerW - x(sunset)} height={innerH} fill={INK} opacity={0.05} />}
       {/* solunar bands */}
       {periods.map((p, i) => (
-        <rect key={i} x={x(Math.max(p.start, dayStart))} y={padT} width={Math.max(0, x(Math.min(p.end, dayEnd)) - x(Math.max(p.start, dayStart)))} height={innerH} fill="#0f766e" opacity={0.08} />
+        <rect key={i} x={x(Math.max(p.start, dayStart))} y={padT} width={Math.max(0, x(Math.min(p.end, dayEnd)) - x(Math.max(p.start, dayStart)))} height={innerH} fill="#0d9488" opacity={0.08} />
       ))}
       {/* gridlines every 10 km/h */}
       {Array.from({ length: Math.floor(scale / 10) }, (_, i) => (i + 1) * 10).map((v) => (
@@ -58,7 +58,7 @@ export default function WindChart({
       <polyline points={gustPts} fill="none" stroke={INK} strokeWidth={1.5} strokeOpacity={0.55} strokeLinejoin="round" />
       {/* now marker */}
       {now >= dayStart && now <= dayEnd && (
-        <line x1={x(now)} x2={x(now)} y1={padT} y2={padT + innerH} stroke="#0f766e" strokeWidth={1.5} strokeDasharray="3 3" />
+        <line x1={x(now)} x2={x(now)} y1={padT} y2={padT + innerH} stroke="#0d9488" strokeWidth={1.5} strokeDasharray="3 3" />
       )}
       {/* hour axis */}
       {[0, 3, 6, 9, 12, 15, 18, 21, 24].map((hh) => (

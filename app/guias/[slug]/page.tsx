@@ -88,7 +88,7 @@ export default async function GuidePage({ params }: Params) {
         <p className="text-lg text-ink/70 mt-4 leading-snug">{guide.excerpt}</p>
 
         {guide.coverImage && (
-          <div className="relative aspect-[16/9] mt-8 border border-ink/15 rounded-xl shadow-hard overflow-hidden bg-[#e6e2d6]">
+          <div className="relative aspect-[16/9] mt-8 border border-ink/15 rounded-xl shadow-hard overflow-hidden bg-ink/[0.05]">
             <ProductImage src={proxiedImage(guide.coverImage, guide.title)} alt={guide.coverImageAlt || guide.title} priority sizes="(max-width: 768px) 100vw, 768px" className="absolute inset-0 w-full h-full object-cover" />
           </div>
         )}

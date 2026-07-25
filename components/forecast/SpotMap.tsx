@@ -23,11 +23,11 @@ export default function SpotMap() {
       <div className="p-4 sm:p-6">
         <svg viewBox={`0 0 ${MAP_W} ${MAP_H}`} className="w-full h-auto" role="img" aria-label="Mapa de España con las zonas de pesca">
           <style>{`
-            .region { fill: #111111; fill-opacity: 0.05; stroke: #111111; stroke-opacity: 0.22; stroke-width: 0.7; transition: fill-opacity .15s; }
-            a:hover .region, a:focus .region { fill: #0f766e; fill-opacity: 0.13; }
-            .spot-g text { display: none; paint-order: stroke; stroke: #f2efe6; stroke-width: 3.5px; }
+            .region { fill: #0f1417; fill-opacity: 0.05; stroke: #0f1417; stroke-opacity: 0.22; stroke-width: 0.7; transition: fill-opacity .15s; }
+            a:hover .region, a:focus .region { fill: #0d9488; fill-opacity: 0.13; }
+            .spot-g text { display: none; paint-order: stroke; stroke: #ffffff; stroke-width: 3.5px; }
             .spot-g:hover text, .spot-g:focus-within text { display: block; }
-            .spot-g:hover .dot, .spot-g:focus-within .dot { fill: #111111; }
+            .spot-g:hover .dot, .spot-g:focus-within .dot { fill: #0f1417; }
           `}</style>
 
           {/* Land — recessive support under the data */}
@@ -44,8 +44,8 @@ export default function SpotMap() {
           )}
 
           {/* Canarias inset frame */}
-          <rect x={CANARY_BOX.x} y={CANARY_BOX.y} width={CANARY_BOX.w} height={CANARY_BOX.h} fill="none" stroke="#111111" strokeOpacity={0.18} rx={10} />
-          <text x={CANARY_BOX.x + 10} y={CANARY_BOX.y + 16} fontSize={9.5} fontFamily="monospace" fill="#111111" fillOpacity={0.45} letterSpacing={2}>
+          <rect x={CANARY_BOX.x} y={CANARY_BOX.y} width={CANARY_BOX.w} height={CANARY_BOX.h} fill="none" stroke="#0f1417" strokeOpacity={0.18} rx={10} />
+          <text x={CANARY_BOX.x + 10} y={CANARY_BOX.y + 16} fontSize={9.5} fontFamily="monospace" fill="#0f1417" fillOpacity={0.45} letterSpacing={2}>
             CANARIAS
           </text>
 
@@ -58,11 +58,11 @@ export default function SpotMap() {
                 <title>{`${s.name} · ${s.region}`}</title>
                 <circle cx={x} cy={y} r={9} fill="transparent" />
                 {s.type === 'mar' ? (
-                  <circle className="dot" cx={x} cy={y} r={3.6} fill="#0f766e" stroke="#f2efe6" strokeWidth={1.2} />
+                  <circle className="dot" cx={x} cy={y} r={3.6} fill="#0d9488" stroke="#ffffff" strokeWidth={1.2} />
                 ) : (
-                  <rect className="dot" x={x - 3.4} y={y - 3.4} width={6.8} height={6.8} rx={1.5} fill="#c98a1a" stroke="#f2efe6" strokeWidth={1.2} />
+                  <rect className="dot" x={x - 3.4} y={y - 3.4} width={6.8} height={6.8} rx={1.5} fill="#c98a1a" stroke="#ffffff" strokeWidth={1.2} />
                 )}
-                <text x={labelLeft ? x - 9 : x + 9} y={y + 4} fontSize={12.5} fontWeight={700} fill="#111111" textAnchor={labelLeft ? 'end' : 'start'}>
+                <text x={labelLeft ? x - 9 : x + 9} y={y + 4} fontSize={12.5} fontWeight={700} fill="#0f1417" textAnchor={labelLeft ? 'end' : 'start'}>
                   {s.name}
                 </text>
               </a>

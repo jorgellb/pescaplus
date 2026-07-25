@@ -28,18 +28,18 @@ export default function DayScoreMap({ spots, showNav }: { spots: SpotDayScore[];
       <div className="p-4 sm:p-6">
         <svg viewBox={`0 0 ${MAP_W} ${MAP_H}`} className="w-full h-auto" role="img" aria-label="Mapa de España coloreado por puntuación de pesca del día">
           <style>{`
-            .region-bg { fill: #111111; fill-opacity: 0.045; stroke: #111111; stroke-opacity: 0.2; stroke-width: 0.7; }
-            .day-spot text { display: none; paint-order: stroke; stroke: #f2efe6; stroke-width: 3.5px; }
+            .region-bg { fill: #0f1417; fill-opacity: 0.045; stroke: #0f1417; stroke-opacity: 0.2; stroke-width: 0.7; }
+            .day-spot text { display: none; paint-order: stroke; stroke: #ffffff; stroke-width: 3.5px; }
             .day-spot:hover text, .day-spot:focus-within text { display: block; }
-            .day-spot:hover .dot, .day-spot:focus-within .dot { stroke: #111111; stroke-width: 1.6; }
+            .day-spot:hover .dot, .day-spot:focus-within .dot { stroke: #0f1417; stroke-width: 1.6; }
           `}</style>
 
           {SPAIN_REGIONS.map((r) => (
             <path key={r.name} className="region-bg" d={r.path} style={{ pointerEvents: 'none' }} />
           ))}
 
-          <rect x={CANARY_BOX.x} y={CANARY_BOX.y} width={CANARY_BOX.w} height={CANARY_BOX.h} fill="none" stroke="#111111" strokeOpacity={0.18} rx={10} />
-          <text x={CANARY_BOX.x + 10} y={CANARY_BOX.y + 16} fontSize={9.5} fontFamily="monospace" fill="#111111" fillOpacity={0.45} letterSpacing={2}>
+          <rect x={CANARY_BOX.x} y={CANARY_BOX.y} width={CANARY_BOX.w} height={CANARY_BOX.h} fill="none" stroke="#0f1417" strokeOpacity={0.18} rx={10} />
+          <text x={CANARY_BOX.x + 10} y={CANARY_BOX.y + 16} fontSize={9.5} fontFamily="monospace" fill="#0f1417" fillOpacity={0.45} letterSpacing={2}>
             CANARIAS
           </text>
 
@@ -54,11 +54,11 @@ export default function DayScoreMap({ spots, showNav }: { spots: SpotDayScore[];
                 <title>{`${s.name} · ${s.score}/100${titleSuffix}`}</title>
                 <circle cx={x} cy={y} r={9} fill="transparent" />
                 {s.type === 'mar' ? (
-                  <circle className="dot" cx={x} cy={y} r={4} fill={fill} stroke={noNav ? '#b23b2e' : '#f2efe6'} strokeWidth={noNav ? 1.8 : 1.1} />
+                  <circle className="dot" cx={x} cy={y} r={4} fill={fill} stroke={noNav ? '#b23b2e' : '#ffffff'} strokeWidth={noNav ? 1.8 : 1.1} />
                 ) : (
-                  <rect className="dot" x={x - 3.6} y={y - 3.6} width={7.2} height={7.2} rx={1.5} fill={fill} stroke="#f2efe6" strokeWidth={1.1} />
+                  <rect className="dot" x={x - 3.6} y={y - 3.6} width={7.2} height={7.2} rx={1.5} fill={fill} stroke="#ffffff" strokeWidth={1.1} />
                 )}
-                <text x={labelLeft ? x - 10 : x + 10} y={y + 4} fontSize={12.5} fontWeight={700} fill="#111111" textAnchor={labelLeft ? 'end' : 'start'}>
+                <text x={labelLeft ? x - 10 : x + 10} y={y + 4} fontSize={12.5} fontWeight={700} fill="#0f1417" textAnchor={labelLeft ? 'end' : 'start'}>
                   {`${s.name} · ${s.score}`}
                 </text>
               </a>

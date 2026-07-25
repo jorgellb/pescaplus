@@ -53,7 +53,7 @@ export default function ActivityChart({
         const py = y(peak.score)
         return (
           <g>
-            <circle cx={px} cy={py} r={4} fill={ACCENT} stroke="#f2efe6" strokeWidth={1.5} />
+            <circle cx={px} cy={py} r={4} fill={ACCENT} stroke="#ffffff" strokeWidth={1.5} />
             <text x={Math.min(Math.max(px, 24), W - 24)} y={Math.max(py - 8, 10)} textAnchor="middle" fontSize={11} fontWeight={700} fill={INK}>
               {peak.score}
             </text>

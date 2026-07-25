@@ -23,7 +23,7 @@ const MONTH_NAMES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Jul
 const WEEKDAYS = ['L', 'M', 'X', 'J', 'V', 'S', 'D']
 
 const RATING_HEX: Record<number, string> = {
-  5: '#0f766e',
+  5: '#0d9488',
   4: '#3f9d94',
   3: '#b9b29f',
   2: '#a49c8a',
@@ -155,7 +155,7 @@ export default async function PlanificadorPage({ params }: { params: Promise<{ s
                         className="w-2 h-2 rounded-full inline-block"
                         style={{
                           backgroundColor: RATING_HEX[d.rating] ?? RATING_HEX[3],
-                          boxShadow: d.coef >= 85 ? '0 0 0 1.5px #111111b3' : undefined,
+                          boxShadow: d.coef >= 85 ? '0 0 0 1.5px #0f1417b3' : undefined,
                         }}
                       />
                     </span>

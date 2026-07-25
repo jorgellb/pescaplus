@@ -28,7 +28,7 @@ export default function ProductCard({
   return (
     <div className="group relative flex flex-col h-full bg-paper border border-ink/10 rounded-2xl overflow-hidden shadow-hard hover-shift">
       {/* Image */}
-      <div className="relative aspect-square overflow-hidden bg-[#e6e2d6]">
+      <div className="relative aspect-square overflow-hidden bg-ink/[0.05]">
         <ProductImage
           src={src}
           alt={title}

@@ -38,7 +38,7 @@ export default async function MejoresHub() {
               href={`/mejores/${p.slug}`}
               className="group flex flex-col border border-ink/15 rounded-xl shadow-hard bg-paper hover-shift overflow-hidden"
             >
-              <div className="relative aspect-[16/10] bg-[#e6e2d6] border-b border-ink/12 overflow-hidden">
+              <div className="relative aspect-[16/10] bg-ink/[0.05] border-b border-ink/12 overflow-hidden">
                 <ProductImage src={p.cover} alt={p.name} sizes="(max-width: 640px) 100vw, 33vw" className="absolute inset-0 w-full h-full object-cover" />
                 <span className="absolute top-2 left-2 inline-flex items-center gap-1.5 bg-paper text-ink px-2.5 py-1 border border-ink/15 rounded-xl text-[11px] font-bold uppercase tracking-tight">
                   <CategoryIcon id={p.slug} className="w-3.5 h-3.5" strokeWidth={2} /> {p.count} modelos

@@ -70,7 +70,7 @@ export default function TideChart({ extremes, dayStart, now }: { extremes: TideE
       {now >= dayStart && now <= dayEnd && (
         <>
           <line x1={x(now)} x2={x(now)} y1={padT} y2={padT + innerH} stroke={ACCENT} strokeWidth={1.5} strokeDasharray="3 3" />
-          <circle cx={x(now)} cy={y(interp(now))} r={4} fill={ACCENT} stroke="#f2efe6" strokeWidth={1.5} />
+          <circle cx={x(now)} cy={y(interp(now))} r={4} fill={ACCENT} stroke="#ffffff" strokeWidth={1.5} />
         </>
       )}
       {[0, 6, 12, 18, 24].map((hh) => (

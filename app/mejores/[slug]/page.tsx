@@ -115,7 +115,7 @@ export default async function RoundupPage({ params }: Params) {
           <article key={it.product.id} className="flex flex-col sm:flex-row gap-4 border border-ink/15 rounded-xl shadow-hard bg-paper p-4">
             <div className="flex items-center gap-4 sm:flex-col sm:items-center sm:justify-start">
               <span className="font-display text-4xl md:text-5xl leading-none text-accent w-12 text-center">{String(it.rank).padStart(2, '0')}</span>
-              <Link href={`/products/${it.product.id}`} className="relative block w-24 h-24 flex-shrink-0 bg-[#e6e2d6] border border-ink/15 rounded-xl overflow-hidden">
+              <Link href={`/products/${it.product.id}`} className="relative block w-24 h-24 flex-shrink-0 bg-ink/[0.05] border border-ink/15 rounded-xl overflow-hidden">
                 <ProductImage src={it.product.imageUrl} alt={it.product.title} sizes="96px" className="absolute inset-0 w-full h-full object-cover" />
               </Link>
             </div>

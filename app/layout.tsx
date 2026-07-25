@@ -1,16 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Oswald, Space_Grotesk, Space_Mono } from "next/font/google";
+import { Space_Grotesk, Space_Mono } from "next/font/google";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import "./globals.css";
 
+// One text face for body AND headings: the condensed display face (Oswald) was
+// what made every page read like a sports poster, so it's gone — one less font
+// to download, too.
 const grotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-grotesk", display: "swap" });
-// Condensed outdoor/sport display face for headings (fits the fishing-gear theme).
-const oswald = Oswald({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-oswald",
-  display: "swap",
-});
 const mono = Space_Mono({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-mono-custom", display: "swap" });
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pescaplus.es";
@@ -43,7 +39,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#111111",
+  themeColor: "#0f1417",
   colorScheme: "light",
 };
 
@@ -89,7 +85,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${grotesk.variable} ${oswald.variable} ${mono.variable}`}>
+    <html lang="es" className={`${grotesk.variable} ${mono.variable}`}>
       <body>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }} />
         {children}

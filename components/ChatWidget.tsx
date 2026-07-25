@@ -294,7 +294,7 @@ export default function ChatWidget() {
                             onClick={() => setOpen(false)}
                             className="flex items-center gap-2 bg-paper border border-ink/15 rounded-xl p-1.5 pr-3 hover:bg-ink/5 transition-colors"
                           >
-                            <span className="relative block w-9 h-9 flex-shrink-0 bg-[#e6e2d6] rounded-lg overflow-hidden">
+                            <span className="relative block w-9 h-9 flex-shrink-0 bg-ink/[0.05] rounded-lg overflow-hidden">
                               <ProductImage src={p.imageUrl} alt={p.title} sizes="40px" className="absolute inset-0 w-full h-full object-cover" />
                             </span>
                             <span className="min-w-0 flex-1">

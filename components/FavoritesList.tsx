@@ -36,7 +36,7 @@ export default function FavoritesList() {
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
       {items.map((p) => (
         <div key={p.id} className="group relative flex flex-col h-full bg-paper border border-ink/10 rounded-2xl overflow-hidden shadow-hard hover-shift">
-          <div className="relative aspect-square overflow-hidden bg-[#e6e2d6]">
+          <div className="relative aspect-square overflow-hidden bg-ink/[0.05]">
             <ProductImage src={p.imageUrl} alt={p.title} sizes="(max-width: 640px) 50vw, 22vw" className="absolute inset-0 w-full h-full object-cover" />
             <Link href={`/products/${p.id}`} className="absolute inset-0 z-10" aria-label={p.title} />
             <FavoriteButton product={p} className="absolute top-2.5 right-2.5 z-20" />
