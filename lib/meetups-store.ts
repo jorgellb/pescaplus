@@ -429,6 +429,50 @@ export async function listRsvpsByUser(userId: string): Promise<UserRsvp[]> {
   return out.sort((a, b) => b.rsvp.createdAt - a.rsvp.createdAt)
 }
 
+/** A pescador leaves a quedada they joined (from their account). Auto-promotes. */
+export async function leaveMeetupByUser(rsvpId: string, userId: string): Promise<boolean> {
+  if (!userId) return false
+  if (isDatabaseConfigured()) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+      const r = await prisma.rsvp.findUnique({ where: { id: rsvpId } })
+      if (!r || r.userId !== userId) return false
+      if (r.status === 'out') return true
+      await prisma.rsvp.update({ where: { id: rsvpId }, data: { status: 'out' } })
+      const after = await getMeetup(r.meetupId)
+      if (after) {
+        let taken = after.placesTaken
+        for (const w of after.waitlist) {
+          if (taken + w.places <= after.maxPlaces) {
+            await prisma.rsvp.update({ where: { id: w.id }, data: { status: 'in' } })
+            taken += w.places
+          }
+        }
+      }
+      return true
+    } catch (error) {
+      console.error('User leave meetup failed:', error)
+      throw new Error(WRITE_FAIL)
+    }
+  }
+  const rows = memRsvps()
+  const target = rows.find((r) => r.id === rsvpId)
+  if (!target || target.userId !== userId) return false
+  target.status = 'out'
+  const after = await getMeetup(target.meetupId)
+  if (after) {
+    let taken = after.placesTaken
+    for (const w of after.waitlist) {
+      if (taken + w.places <= after.maxPlaces) {
+        const row = rows.find((r) => r.id === w.id)
+        if (row) row.status = 'in'
+        taken += w.places
+      }
+    }
+  }
+  return true
+}
+
 /**
  * Host removes an attendee (with the management token). Frees their spot and
  * auto-promotes the oldest waiting people that now fit — so the waitlist flows.

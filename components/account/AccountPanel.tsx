@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import ProfileForm from './ProfileForm'
 import ReviewForm from './ReviewForm'
 
@@ -23,8 +24,23 @@ const BOOKING_STATUS: Record<string, { label: string; cls: string }> = {
 export default function AccountPanel({ user, avatarChoices, bookings, rsvps, hasOperator, operatorSlot }: {
   user: U; avatarChoices: string[]; bookings: BookingRow[]; rsvps: RsvpRow[]; hasOperator: boolean; operatorSlot?: ReactNode
 }) {
+  const router = useRouter()
   const [tab, setTab] = useState<'reservas' | 'perfil' | 'patron'>('reservas')
+  const [busy, setBusy] = useState<string | null>(null)
+  const [err, setErr] = useState('')
   const tabCls = (t: string) => `px-4 py-2.5 text-xs font-bold uppercase tracking-wide rounded-xl transition-colors ${tab === t ? 'bg-accent text-paper' : 'text-ink/60 hover:text-ink hover:bg-ink/5'}`
+
+  const act = async (key: string, url: string, body: object) => {
+    setBusy(key); setErr('')
+    try {
+      const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      const data = await res.json()
+      if (!res.ok || !data.success) { setErr(data.error || 'No se pudo completar.'); return }
+      router.refresh()
+    } catch { setErr('Fallo de red.') } finally { setBusy(null) }
+  }
+  const cancelBooking = (bookingId: string) => { if (confirm('¿Cancelar esta reserva?')) act('b' + bookingId, '/api/cuenta/reserva', { bookingId }) }
+  const leaveMeetup = (rsvpId: string) => { if (confirm('¿Salir de esta quedada?')) act('r' + rsvpId, '/api/cuenta/quedada', { rsvpId }) }
 
   return (
     <div className="space-y-6">
@@ -33,6 +49,7 @@ export default function AccountPanel({ user, avatarChoices, bookings, rsvps, has
         {hasOperator && <button onClick={() => setTab('patron')} className={tabCls('patron')}>⚓ Panel de patrón</button>}
         <button onClick={() => setTab('perfil')} className={tabCls('perfil')}>👤 Mi perfil</button>
       </div>
+      {err && <p className="text-sm text-red-700 border border-red-700/30 bg-red-700/[0.06] rounded-xl p-3">{err}</p>}
 
       {tab === 'reservas' && (
         <div className="space-y-8">
@@ -53,6 +70,12 @@ export default function AccountPanel({ user, avatarChoices, bookings, rsvps, has
                     <span className={`font-mono text-[10px] uppercase tracking-widest ${st.cls}`}>{st.label}</span>
                   </div>
                   {b.canReview && <div className="mt-1"><ReviewForm charterId={b.charterId} initialRating={b.reviewedRating} done={b.reviewedRating > 0} /></div>}
+                  {!b.isPast && (b.status === 'requested' || b.status === 'accepted') && (
+                    <button onClick={() => cancelBooking(b.id)} disabled={busy === 'b' + b.id} className="mt-1.5 font-mono text-[10px] uppercase tracking-wide text-red-700 hover:underline disabled:opacity-50">Cancelar reserva</button>
+                  )}
+                  {!b.isPast && b.status === 'paid' && (
+                    <p className="mt-1.5 font-mono text-[10px] uppercase tracking-wide text-ink/40">Para cancelar una reserva pagada, contacta con el patrón.</p>
+                  )}
                 </div>
               )
             })}
@@ -69,7 +92,10 @@ export default function AccountPanel({ user, avatarChoices, bookings, rsvps, has
                   <Link href={`/quedadas/${r.meetupId}`} className="font-bold text-ink hover:text-accent">{r.spotName}</Link>
                   <p className="text-[13px] text-ink/65 capitalize">{r.dayLabel} · {r.kind === 'llamada' ? '¿quién se apunta?' : 'quedada'}</p>
                 </div>
-                <span className={`font-mono text-[10px] uppercase tracking-widest ${r.status === 'wait' ? 'text-amber-700' : 'text-accent'}`}>{r.status === 'wait' ? 'En lista de espera' : 'Apuntado ✓'}</span>
+                <div className="flex items-center gap-3">
+                  <span className={`font-mono text-[10px] uppercase tracking-widest ${r.status === 'wait' ? 'text-amber-700' : 'text-accent'}`}>{r.status === 'wait' ? 'En lista de espera' : 'Apuntado ✓'}</span>
+                  <button onClick={() => leaveMeetup(r.id)} disabled={busy === 'r' + r.id} className="font-mono text-[10px] uppercase tracking-wide text-red-700 hover:underline disabled:opacity-50">Salir</button>
+                </div>
               </div>
             ))}
           </div>

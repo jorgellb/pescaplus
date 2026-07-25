@@ -138,6 +138,46 @@ export async function registerOperator(input: OperatorInput, userId?: string | n
   return { ...stored }
 }
 
+export interface OperatorProfileInput {
+  name?: string
+  businessName?: string
+  phone?: string
+  boatName?: string
+  boatType?: string
+  capacity?: number
+  bio?: string
+}
+
+/** Owner edits their public patrón profile (not licence/insurance/verification). */
+export async function updateOperatorProfile(operatorId: string, manageToken: string, input: OperatorProfileInput): Promise<Operator | null> {
+  const op = await getOperatorByToken(operatorId, manageToken)
+  if (!op) return null
+  const data: Record<string, unknown> = {}
+  if (input.name !== undefined) data.name = String(input.name).trim().slice(0, 80)
+  if (input.businessName !== undefined) data.businessName = String(input.businessName).trim().slice(0, 120)
+  if (input.phone !== undefined) data.phone = String(input.phone).trim().slice(0, 40)
+  if (input.boatName !== undefined) data.boatName = String(input.boatName).trim().slice(0, 80)
+  if (input.boatType !== undefined) data.boatType = String(input.boatType).trim().slice(0, 80)
+  if (input.capacity !== undefined) data.capacity = Math.min(50, Math.max(1, Math.round(Number(input.capacity) || op.capacity)))
+  if (input.bio !== undefined) data.bio = String(input.bio).trim().slice(0, 800)
+  if (Object.keys(data).length === 0) return op
+
+  if (isDatabaseConfigured()) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+      const row = await prisma.operator.update({ where: { id: operatorId }, data })
+      return rowToOperator(row)
+    } catch (error) {
+      console.error('Operator profile update failed:', error)
+      throw new Error(WRITE_FAIL)
+    }
+  }
+  const stored = mem().find((o) => o.id === operatorId)
+  if (!stored) return null
+  Object.assign(stored, data)
+  return { ...stored }
+}
+
 /** The operator profile owned by a user account (if they registered as patrón). */
 export async function getOperatorByUser(userId: string): Promise<Operator | null> {
   if (!userId) return null

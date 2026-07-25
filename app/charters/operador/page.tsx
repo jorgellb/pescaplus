@@ -56,6 +56,7 @@ export default async function OperatorPage({ searchParams }: Params) {
             defaultSpot={operator.spotSlug}
             spots={spots}
             species={species}
+            profile={{ name: operator.name, businessName: operator.businessName, phone: operator.phone, boatName: operator.boatName, boatType: operator.boatType, capacity: operator.capacity, bio: operator.bio }}
             charters={charters.map((c) => ({ id: c.id, spotName: getSpot(c.spotSlug)?.name ?? c.spotSlug, dateISO: c.dateISO, dayLabel: fmtDayLabel(c.dateISO), timeStart: c.timeStart, modality: c.modality, pricePerPerson: c.pricePerPerson, maxPlaces: c.maxPlaces, placesTaken: c.placesTaken, status: c.status, bookings: c.bookings.map((b) => ({ id: b.id, name: b.name, contact: b.contact, people: b.people, message: b.message, status: b.status })) }))}
           />
         </section>

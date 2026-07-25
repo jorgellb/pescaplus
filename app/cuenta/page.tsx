@@ -95,6 +95,7 @@ export default async function CuentaPage({ searchParams }: { searchParams: Promi
           defaultSpot={owned.spotSlug}
           spots={spots}
           species={species}
+          profile={{ name: owned.name, businessName: owned.businessName, phone: owned.phone, boatName: owned.boatName, boatType: owned.boatType, capacity: owned.capacity, bio: owned.bio }}
           charters={charters.map((c) => ({ id: c.id, spotName: getSpot(c.spotSlug)?.name ?? c.spotSlug, dateISO: c.dateISO, dayLabel: fmtDayLabel(c.dateISO), timeStart: c.timeStart, modality: c.modality, pricePerPerson: c.pricePerPerson, maxPlaces: c.maxPlaces, placesTaken: c.placesTaken, status: c.status, bookings: c.bookings.map((b) => ({ id: b.id, name: b.name, contact: b.contact, people: b.people, message: b.message, status: b.status })) }))}
         />
       </div>

@@ -11,14 +11,31 @@ interface Charter {
   pricePerPerson: number; maxPlaces: number; placesTaken: number; status: string; bookings: Booking[]
 }
 
-export default function OperatorDashboard({ operatorId, manageToken, verified, stripeReady, paymentsAvailable, defaultSpot, spots, species, charters }: {
-  operatorId: string; manageToken: string; verified: boolean; stripeReady: boolean; paymentsAvailable: boolean; defaultSpot: string; spots: Opt[]; species: Species[]; charters: Charter[]
+interface Profile { name: string; businessName: string; phone: string; boatName: string; boatType: string; capacity: number; bio: string }
+
+export default function OperatorDashboard({ operatorId, manageToken, verified, stripeReady, paymentsAvailable, defaultSpot, spots, species, charters, profile }: {
+  operatorId: string; manageToken: string; verified: boolean; stripeReady: boolean; paymentsAvailable: boolean; defaultSpot: string; spots: Opt[]; species: Species[]; charters: Charter[]; profile: Profile
 }) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [busy, setBusy] = useState<string | null>(null)
   const [connecting, setConnecting] = useState(false)
   const [msg, setMsg] = useState('')
+
+  const [editProfile, setEditProfile] = useState(false)
+  const [savingProfile, setSavingProfile] = useState(false)
+  const [pf, setPf] = useState<Profile>(profile)
+  const setP = <K extends keyof Profile>(k: K, v: Profile[K]) => setPf((s) => ({ ...s, [k]: v }))
+  const saveProfile = async (e: React.FormEvent) => {
+    e.preventDefault(); setSavingProfile(true); setMsg('')
+    try {
+      const res = await fetch('/api/charters/operador/perfil', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ operatorId, manageToken, ...pf, capacity: Number(pf.capacity) }) })
+      const data = await res.json()
+      if (!res.ok || !data.success) { setMsg(data.error || 'No se pudo guardar la ficha.'); return }
+      setEditProfile(false); router.refresh()
+    } finally { setSavingProfile(false) }
+  }
 
   const connectStripe = async () => {
     setConnecting(true)
@@ -101,6 +118,33 @@ export default function OperatorDashboard({ operatorId, manageToken, verified, s
         )
       )}
 
+      <div className="border border-ink/15 rounded-2xl bg-paper p-5">
+        <div className="flex items-center justify-between gap-2">
+          <p className="font-display uppercase text-xl leading-none">🪪 Tu ficha pública</p>
+          {!editProfile && <button onClick={() => { setPf(profile); setEditProfile(true) }} className="text-xs font-bold uppercase tracking-wide text-accent hover:underline">Editar</button>}
+        </div>
+        {!editProfile ? (
+          <p className="text-sm text-ink/70 mt-1">{profile.businessName || profile.name}{profile.boatName ? ` · ${profile.boatName}` : ''}{profile.boatType ? ` ${profile.boatType}` : ''}{profile.capacity ? ` · ${profile.capacity} plazas` : ''}{profile.bio ? ` — ${profile.bio}` : ''}</p>
+        ) : (
+          <form onSubmit={saveProfile} className="mt-3 space-y-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <label className="block"><span className={L}>Nombre</span><input value={pf.name} onChange={(e) => setP('name', e.target.value)} maxLength={80} className={I} /></label>
+              <label className="block"><span className={L}>Nombre comercial</span><input value={pf.businessName} onChange={(e) => setP('businessName', e.target.value)} maxLength={120} className={I} /></label>
+              <label className="block"><span className={L}>Teléfono</span><input value={pf.phone} onChange={(e) => setP('phone', e.target.value)} maxLength={40} className={I} /></label>
+              <label className="block"><span className={L}>Barco</span><input value={pf.boatName} onChange={(e) => setP('boatName', e.target.value)} maxLength={80} className={I} /></label>
+              <label className="block"><span className={L}>Tipo de barco</span><input value={pf.boatType} onChange={(e) => setP('boatType', e.target.value)} maxLength={80} className={I} /></label>
+              <label className="block"><span className={L}>Capacidad</span><input type="number" min={1} max={50} value={pf.capacity} onChange={(e) => setP('capacity', Number(e.target.value))} className={I} /></label>
+            </div>
+            <label className="block"><span className={L}>Sobre ti / tu servicio</span><textarea value={pf.bio} onChange={(e) => setP('bio', e.target.value)} maxLength={800} rows={3} className={I} /></label>
+            {msg && <p className="text-sm text-red-700">{msg}</p>}
+            <div className="flex gap-2">
+              <button type="submit" disabled={savingProfile} className="bg-accent text-paper px-5 py-2.5 text-xs font-bold uppercase tracking-wide rounded-xl hover:bg-ink disabled:opacity-60 transition-colors">{savingProfile ? 'Guardando…' : 'Guardar ficha'}</button>
+              <button type="button" onClick={() => setEditProfile(false)} className="px-4 py-2 text-xs font-bold uppercase tracking-wide text-ink/50 hover:text-ink">Cancelar</button>
+            </div>
+          </form>
+        )}
+      </div>
+
       <div className="space-y-4">
         <p className="font-display uppercase text-xl leading-none">Tus chárters ({charters.length})</p>
         {charters.length === 0 && <p className="text-sm text-ink/60">Aún no has publicado ninguno.</p>}
@@ -124,6 +168,9 @@ export default function OperatorDashboard({ operatorId, manageToken, verified, s
                         <button onClick={() => respond(c.id, 'accept', b.id)} disabled={busy === b.id + 'accept'} className="text-xs font-bold text-accent hover:underline disabled:opacity-50">Aceptar</button>
                         <button onClick={() => respond(c.id, 'decline', b.id)} disabled={busy === b.id + 'decline'} className="text-xs font-bold text-red-700 hover:underline disabled:opacity-50">Rechazar</button>
                       </span>
+                    )}
+                    {(b.status === 'accepted' || b.status === 'paid') && c.status !== 'cancelled' && (
+                      <button onClick={() => respond(c.id, 'cancelBooking', b.id)} disabled={busy === b.id + 'cancelBooking'} className="text-xs font-bold text-red-700 hover:underline disabled:opacity-50">Cancelar</button>
                     )}
                   </div>
                 ))}

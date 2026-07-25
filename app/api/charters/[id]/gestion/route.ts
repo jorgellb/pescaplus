@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { respondBooking, cancelCharter } from '@/lib/charters-store'
+import { respondBooking, cancelCharter, cancelBooking } from '@/lib/charters-store'
 import { rateLimit, clientIp } from '@/lib/rate-limit'
 
 const schema = z.object({
   operatorId: z.string().min(1).max(120),
   manageToken: z.string().min(6).max(120),
-  action: z.enum(['accept', 'decline', 'cancel']),
+  action: z.enum(['accept', 'decline', 'cancel', 'cancelBooking']),
   bookingId: z.string().max(120).optional(),
 })
 
@@ -20,6 +20,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   try {
     if (action === 'cancel') {
       const ok = await cancelCharter(id, operatorId, manageToken)
+      return ok ? NextResponse.json({ success: true }) : NextResponse.json({ success: false, error: 'No autorizado.' }, { status: 403 })
+    }
+    if (action === 'cancelBooking') {
+      if (!bookingId) return NextResponse.json({ success: false, error: 'Falta la reserva.' }, { status: 400 })
+      const ok = await cancelBooking(id, bookingId, operatorId, manageToken)
       return ok ? NextResponse.json({ success: true }) : NextResponse.json({ success: false, error: 'No autorizado.' }, { status: 403 })
     }
     if (!bookingId) return NextResponse.json({ success: false, error: 'Falta la reserva.' }, { status: 400 })

@@ -434,3 +434,54 @@ export async function respondBooking(charterId: string, bookingId: string, opera
   if (after && stored && after.placesTaken >= after.minToConfirm && stored.status === 'open') stored.status = 'confirmed'
   return getCharter(charterId)
 }
+
+/** Operator cancels a specific booking (frees the place). Owner-scoped by token. */
+export async function cancelBooking(charterId: string, bookingId: string, operatorId: string, manageToken: string): Promise<boolean> {
+  const op = await getOperatorByToken(operatorId, manageToken)
+  if (!op) return false
+  const charter = await getCharter(charterId)
+  if (!charter || charter.operatorId !== operatorId) return false
+  if (isDatabaseConfigured()) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+      await prisma.charterBooking.updateMany({ where: { id: bookingId, charterId }, data: { status: 'cancelled' } })
+      return true
+    } catch (error) {
+      console.error('Booking cancel failed:', error)
+      throw new Error(WRITE_FAIL)
+    }
+  }
+  const b = memB().find((x) => x.id === bookingId && x.charterId === charterId)
+  if (b) b.status = 'cancelled'
+  return true
+}
+
+const PAID_CANCEL_MSG = 'Esta reserva ya está pagada. Para cancelarla y gestionar el reembolso, contacta con el patrón.'
+
+/**
+ * A pescador cancels their own (unpaid) booking from their account. Paid
+ * bookings are refused here: the refund has to be handled with the operator/
+ * Stripe, not silently voided.
+ */
+export async function cancelBookingByUser(bookingId: string, userId: string): Promise<boolean> {
+  if (!userId) return false
+  if (isDatabaseConfigured()) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+      const b = await prisma.charterBooking.findUnique({ where: { id: bookingId } })
+      if (!b || b.userId !== userId) return false
+      if (b.status === 'paid') throw new Error(PAID_CANCEL_MSG)
+      if (b.status !== 'cancelled') await prisma.charterBooking.update({ where: { id: bookingId }, data: { status: 'cancelled' } })
+      return true
+    } catch (error) {
+      if ((error as Error).message === PAID_CANCEL_MSG) throw error
+      console.error('User booking cancel failed:', error)
+      throw new Error(WRITE_FAIL)
+    }
+  }
+  const b = memB().find((x) => x.id === bookingId)
+  if (!b || b.userId !== userId) return false
+  if (b.status === 'paid') throw new Error(PAID_CANCEL_MSG)
+  b.status = 'cancelled'
+  return true
+}
