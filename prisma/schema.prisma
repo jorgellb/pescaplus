@@ -311,6 +311,7 @@ model Operator {
   boatMaxSpeedKn Int? // velocidad máxima en nudos
   boatYear       Int?
   crewSize       Int     @default(1)
+  photos         String[] @default([]) // fotos del barco / de salidas
   navigation     String[] @default([]) // electrónica
   safety         String[] @default([])
   amenities      String[] @default([])

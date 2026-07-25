@@ -35,7 +35,7 @@ export function toProfileProps(o: Operator) {
     marina: o.marina,
     boatLength: numStr(o.boatLength), boatBeam: numStr(o.boatBeam),
     boatEngineHp: numStr(o.boatEngineHp), boatMaxSpeedKn: numStr(o.boatMaxSpeedKn),
-    boatYear: numStr(o.boatYear), crewSize: o.crewSize,
+    boatYear: numStr(o.boatYear), crewSize: o.crewSize, photos: o.photos,
     navigation: o.navigation, safety: o.safety, amenities: o.amenities, gear: o.gear,
   }
 }

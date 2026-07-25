@@ -72,6 +72,7 @@ export interface OperatorPublic {
   boatMaxSpeedKn: number | null
   boatYear: number | null
   crewSize: number
+  photos: string[]
   navigation: string[]
   safety: string[]
   amenities: string[]
@@ -137,6 +138,7 @@ function operatorPublic(o: Operator): OperatorPublic {
     boatMaxSpeedKn: o.boatMaxSpeedKn,
     boatYear: o.boatYear,
     crewSize: o.crewSize,
+    photos: o.photos,
     navigation: o.navigation,
     safety: o.safety,
     amenities: o.amenities,
@@ -357,7 +359,7 @@ function rowOperatorToOperator(row: any): Operator {
     spotSlug: row.spotSlug, boatName: row.boatName ?? '', boatType: row.boatType ?? '', capacity: row.capacity,
     marina: row.marina ?? '', boatLength: row.boatLength ?? null, boatBeam: row.boatBeam ?? null,
     boatEngineHp: row.boatEngineHp ?? null, boatMaxSpeedKn: row.boatMaxSpeedKn ?? null, boatYear: row.boatYear ?? null,
-    crewSize: row.crewSize ?? 1, navigation: row.navigation ?? [], safety: row.safety ?? [],
+    crewSize: row.crewSize ?? 1, photos: row.photos ?? [], navigation: row.navigation ?? [], safety: row.safety ?? [],
     amenities: row.amenities ?? [], gear: row.gear ?? [],
     licenseRef: row.licenseRef ?? '', insuranceRef: row.insuranceRef ?? '', bio: row.bio ?? '',
     verified: row.verified, verifiedAt: row.verifiedAt instanceof Date ? row.verifiedAt.getTime() : row.verifiedAt ?? null,

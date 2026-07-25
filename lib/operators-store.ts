@@ -1,5 +1,6 @@
 import { isDatabaseConfigured } from '@/lib/products-store'
 import { sanitizeIds, NAVIGATION, SAFETY, BOAT_AMENITIES, FISHING_GEAR } from '@/lib/charter-options'
+import { sanitizePhotos } from '@/lib/photos'
 
 /**
  * Charter operators — the paid side of the marketplace (Fase 1). An operator is
@@ -42,6 +43,8 @@ export interface Operator {
   boatMaxSpeedKn: number | null
   boatYear: number | null
   crewSize: number
+  /** Boat/trip photos (Vercel Blob URLs, or pasted https links). */
+  photos: string[]
   /** Catalogue ids — see lib/charter-options. */
   navigation: string[]
   safety: string[]
@@ -126,6 +129,7 @@ function rowToOperator(row: any): Operator {
     boatMaxSpeedKn: row.boatMaxSpeedKn ?? null,
     boatYear: row.boatYear ?? null,
     crewSize: row.crewSize ?? 1,
+    photos: row.photos ?? [],
     navigation: row.navigation ?? [],
     safety: row.safety ?? [],
     amenities: row.amenities ?? [],
@@ -161,7 +165,7 @@ export async function registerOperator(input: OperatorInput, userId?: string | n
   const stored: StoredOperator = {
     id: `mem-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, ...data,
     marina: '', boatLength: null, boatBeam: null, boatEngineHp: null, boatMaxSpeedKn: null, boatYear: null,
-    crewSize: 1, navigation: [], safety: [], amenities: [], gear: [],
+    crewSize: 1, photos: [], navigation: [], safety: [], amenities: [], gear: [],
     verified: false, verifiedAt: null, stripeAccountId: '', stripeReady: false,
     avgRating: 0, reviewCount: 0, userId: owner, createdAt: Date.now(), manageToken,
   }
@@ -185,6 +189,7 @@ export interface OperatorProfileInput {
   boatMaxSpeedKn?: number | string | null
   boatYear?: number | string | null
   crewSize?: number
+  photos?: string[]
   navigation?: string[]
   safety?: string[]
   amenities?: string[]
@@ -219,6 +224,7 @@ export async function updateOperatorProfile(operatorId: string, manageToken: str
   if (input.boatMaxSpeedKn !== undefined) data.boatMaxSpeedKn = spec(input.boatMaxSpeedKn, 1, 80)
   if (input.boatYear !== undefined) data.boatYear = spec(input.boatYear, 1900, new Date().getFullYear() + 1)
   if (input.crewSize !== undefined) data.crewSize = Math.min(20, Math.max(1, Math.round(Number(input.crewSize) || 1)))
+  if (input.photos !== undefined) data.photos = sanitizePhotos(input.photos)
   if (input.navigation !== undefined) data.navigation = sanitizeIds(NAVIGATION, input.navigation)
   if (input.safety !== undefined) data.safety = sanitizeIds(SAFETY, input.safety)
   if (input.amenities !== undefined) data.amenities = sanitizeIds(BOAT_AMENITIES, input.amenities)

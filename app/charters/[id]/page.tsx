@@ -7,6 +7,7 @@ import PayBooking from '@/components/charters/PayBooking'
 import AskOperator from '@/components/messages/AskOperator'
 import CharterIcon from '@/components/charters/CharterIcon'
 import { BoatSpecs, TripSpecs } from '@/components/charters/CharterSpecs'
+import PhotoGallery from '@/components/charters/PhotoGallery'
 import { resolveOptions, LANGUAGES } from '@/lib/charter-options'
 import { getCharter } from '@/lib/charters-store'
 import { listReviewsForOperator } from '@/lib/reviews-store'
@@ -100,6 +101,8 @@ export default async function CharterPage({ params, searchParams }: { params: Pr
       </section>
 
       <section className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+        <PhotoGallery photos={charter.operator.photos} alt={`${charter.operator.boatName || 'Barco'} — ${charter.highlights || 'chárter de pesca'}`} />
+
         {/* Operador verificado */}
         <div className="border border-accent/30 rounded-2xl bg-accent/[0.04] p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">⚓ Patrón profesional verificado ✓</p>

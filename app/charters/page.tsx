@@ -44,16 +44,29 @@ export default async function ChartersHub() {
               const spot = getSpot(c.spotSlug); const sp = c.targetSpecies ? getSpecies(c.targetSpecies) : null
               return (
                 <li key={c.id}>
-                  <Link href={`/charters/${c.id}`} className="block border border-ink/12 rounded-2xl bg-paper p-4 hover:border-accent transition-colors h-full">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">{MOD[c.modality]} <span className="capitalize">{fmtDayLabel(c.dateISO)}</span> · {c.timeStart}</span>
-                      <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/40">{c.placesTaken}/{c.maxPlaces}</span>
+                  <Link href={`/charters/${c.id}`} className="block border border-ink/[0.07] rounded-2xl bg-paper overflow-hidden hover:border-accent transition-colors h-full shadow-hard hover-shift">
+                    {/* La portada del patrón: lo que de verdad vende una salida. */}
+                    {c.operator?.photos?.[0] && (
+                      <div className="relative aspect-[16/9] bg-ink/[0.05]">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={c.operator.photos[0]} alt={`${c.operator.boatName || 'Barco'} en ${spot?.name ?? c.spotSlug}`}
+                          loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+                      </div>
+                    )}
+                    <div className="p-4">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[12px] font-semibold text-accent">{MOD[c.modality]} <span className="first-letter:uppercase inline-block">{fmtDayLabel(c.dateISO)}</span> · {c.timeStart}</span>
+                        <span className="text-[12px] font-medium text-ink/40">{c.placesTaken}/{c.maxPlaces}</span>
+                      </div>
+                      <p className="font-display text-xl text-ink mt-1.5">{c.highlights || spot?.name || c.spotSlug}</p>
+                      <p className="text-[13px] text-ink/65 mt-1">
+                        {c.operator?.businessName || c.operator?.name} · patrón verificado ✓{sp ? ` · a por ${sp.name.toLowerCase()}` : ''}
+                      </p>
+                      <p className="text-[15px] font-bold text-ink mt-1.5">
+                        {c.pricePerPerson} €<span className="font-normal text-ink/55">/persona</span>
+                        {c.durationH ? <span className="font-normal text-ink/55"> · {c.durationH} h</span> : null}
+                      </p>
                     </div>
-                    <p className="font-display uppercase text-xl text-ink leading-none mt-2">{spot?.name ?? c.spotSlug}</p>
-                    <p className="text-[13px] text-ink/65 mt-1">
-                      {c.operator?.businessName || c.operator?.name} · patrón verificado ✓{sp ? ` · a por ${sp.name.toLowerCase()}` : ''}
-                    </p>
-                    <p className="text-[15px] font-bold text-ink mt-1">{c.pricePerPerson} €/persona</p>
                   </Link>
                 </li>
               )

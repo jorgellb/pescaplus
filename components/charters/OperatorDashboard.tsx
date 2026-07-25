@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import ReviewForm from '@/components/account/ReviewForm'
 import CharterForm from './CharterForm'
 import ChipSelect from './ChipSelect'
+import PhotoUploader from './PhotoUploader'
 import { NAVIGATION, SAFETY, BOAT_AMENITIES, FISHING_GEAR } from '@/lib/charter-options'
 
 interface Opt { slug: string; name: string; region: string }
@@ -31,6 +32,7 @@ interface Profile {
   /** Numéricos como texto: el input debe poder quedar vacío. */
   boatLength: string; boatBeam: string; boatEngineHp: string; boatMaxSpeedKn: string; boatYear: string
   crewSize: number
+  photos: string[]
   navigation: string[]; safety: string[]; amenities: string[]; gear: string[]
 }
 
@@ -104,6 +106,10 @@ export default function OperatorDashboard({ operatorId, manageToken, verified, s
           </div>
         )
       )}
+
+      <div className="border border-ink/[0.07] rounded-2xl bg-paper p-5">
+        <PhotoUploader operatorId={operatorId} manageToken={manageToken} photos={profile.photos} />
+      </div>
 
       <div className="border border-ink/15 rounded-2xl bg-paper p-5">
         <div className="flex items-center justify-between gap-2">
