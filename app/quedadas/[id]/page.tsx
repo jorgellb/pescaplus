@@ -85,7 +85,7 @@ export default async function MeetupPage({ params, searchParams }: Params) {
           <h1 className="font-display uppercase text-3xl sm:text-4xl md:text-5xl leading-[1.02] text-ink">
             {spot?.name ?? meetup.spotSlug}
           </h1>
-          <p className="text-ink/70 text-[15px] mt-3 capitalize">{fmtDateLong(meetup.dateISO)} · {meetup.timeStart}</p>
+          <p className="text-ink/70 text-[15px] mt-3 first-letter:uppercase">{fmtDateLong(meetup.dateISO)} · {meetup.timeStart}</p>
 
           <div className="flex flex-wrap gap-2 mt-4">
             <span className="inline-flex items-center gap-2 rounded-xl border border-ink/15 px-3 py-2 text-sm">

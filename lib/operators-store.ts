@@ -1,4 +1,5 @@
 import { isDatabaseConfigured } from '@/lib/products-store'
+import { sanitizeIds, NAVIGATION, SAFETY, BOAT_AMENITIES, FISHING_GEAR } from '@/lib/charter-options'
 
 /**
  * Charter operators — the paid side of the marketplace (Fase 1). An operator is
@@ -33,6 +34,19 @@ export interface Operator {
   boatName: string
   boatType: string
   capacity: number
+  /** Base berth shown on every listing ("Marina Deportiva del Puerto de…"). */
+  marina: string
+  boatLength: number | null
+  boatBeam: number | null
+  boatEngineHp: number | null
+  boatMaxSpeedKn: number | null
+  boatYear: number | null
+  crewSize: number
+  /** Catalogue ids — see lib/charter-options. */
+  navigation: string[]
+  safety: string[]
+  amenities: string[]
+  gear: string[]
   licenseRef: string
   insuranceRef: string
   bio: string
@@ -105,6 +119,17 @@ function rowToOperator(row: any): Operator {
     boatName: row.boatName ?? '',
     boatType: row.boatType ?? '',
     capacity: row.capacity,
+    marina: row.marina ?? '',
+    boatLength: row.boatLength ?? null,
+    boatBeam: row.boatBeam ?? null,
+    boatEngineHp: row.boatEngineHp ?? null,
+    boatMaxSpeedKn: row.boatMaxSpeedKn ?? null,
+    boatYear: row.boatYear ?? null,
+    crewSize: row.crewSize ?? 1,
+    navigation: row.navigation ?? [],
+    safety: row.safety ?? [],
+    amenities: row.amenities ?? [],
+    gear: row.gear ?? [],
     licenseRef: row.licenseRef ?? '',
     insuranceRef: row.insuranceRef ?? '',
     bio: row.bio ?? '',
@@ -133,7 +158,13 @@ export async function registerOperator(input: OperatorInput, userId?: string | n
       throw new Error(WRITE_FAIL)
     }
   }
-  const stored: StoredOperator = { id: `mem-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, ...data, verified: false, verifiedAt: null, stripeAccountId: '', stripeReady: false, avgRating: 0, reviewCount: 0, userId: owner, createdAt: Date.now(), manageToken }
+  const stored: StoredOperator = {
+    id: `mem-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, ...data,
+    marina: '', boatLength: null, boatBeam: null, boatEngineHp: null, boatMaxSpeedKn: null, boatYear: null,
+    crewSize: 1, navigation: [], safety: [], amenities: [], gear: [],
+    verified: false, verifiedAt: null, stripeAccountId: '', stripeReady: false,
+    avgRating: 0, reviewCount: 0, userId: owner, createdAt: Date.now(), manageToken,
+  }
   mem().unshift(stored)
   return { ...stored }
 }
@@ -146,6 +177,27 @@ export interface OperatorProfileInput {
   boatType?: string
   capacity?: number
   bio?: string
+  marina?: string
+  /** Numéricos opcionales: el formulario los envía vacíos ('') al borrarlos. */
+  boatLength?: number | string | null
+  boatBeam?: number | string | null
+  boatEngineHp?: number | string | null
+  boatMaxSpeedKn?: number | string | null
+  boatYear?: number | string | null
+  crewSize?: number
+  navigation?: string[]
+  safety?: string[]
+  amenities?: string[]
+  gear?: string[]
+}
+
+/** Clamp an optional numeric spec, or null it out when cleared. */
+function spec(v: unknown, min: number, max: number, decimals = 0): number | null {
+  if (v === null || v === undefined || v === '') return null
+  const n = Number(v)
+  if (!Number.isFinite(n) || n <= 0) return null
+  const clamped = Math.min(max, Math.max(min, n))
+  return decimals ? Math.round(clamped * 10 ** decimals) / 10 ** decimals : Math.round(clamped)
 }
 
 /** Owner edits their public patrón profile (not licence/insurance/verification). */
@@ -160,6 +212,17 @@ export async function updateOperatorProfile(operatorId: string, manageToken: str
   if (input.boatType !== undefined) data.boatType = String(input.boatType).trim().slice(0, 80)
   if (input.capacity !== undefined) data.capacity = Math.min(50, Math.max(1, Math.round(Number(input.capacity) || op.capacity)))
   if (input.bio !== undefined) data.bio = String(input.bio).trim().slice(0, 800)
+  if (input.marina !== undefined) data.marina = String(input.marina).trim().slice(0, 160)
+  if (input.boatLength !== undefined) data.boatLength = spec(input.boatLength, 2, 60, 2)
+  if (input.boatBeam !== undefined) data.boatBeam = spec(input.boatBeam, 1, 20, 2)
+  if (input.boatEngineHp !== undefined) data.boatEngineHp = spec(input.boatEngineHp, 1, 5000)
+  if (input.boatMaxSpeedKn !== undefined) data.boatMaxSpeedKn = spec(input.boatMaxSpeedKn, 1, 80)
+  if (input.boatYear !== undefined) data.boatYear = spec(input.boatYear, 1900, new Date().getFullYear() + 1)
+  if (input.crewSize !== undefined) data.crewSize = Math.min(20, Math.max(1, Math.round(Number(input.crewSize) || 1)))
+  if (input.navigation !== undefined) data.navigation = sanitizeIds(NAVIGATION, input.navigation)
+  if (input.safety !== undefined) data.safety = sanitizeIds(SAFETY, input.safety)
+  if (input.amenities !== undefined) data.amenities = sanitizeIds(BOAT_AMENITIES, input.amenities)
+  if (input.gear !== undefined) data.gear = sanitizeIds(FISHING_GEAR, input.gear)
   if (Object.keys(data).length === 0) return op
 
   if (isDatabaseConfigured()) {

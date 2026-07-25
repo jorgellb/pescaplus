@@ -119,7 +119,7 @@ export default async function PlanPage({ params, searchParams }: Params) {
           </nav>
           <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3">🧾 Plan de pesca · {modality.name}{targetSpecies ? ` · ${targetSpecies.name}` : ''}</p>
           <h1 className="font-display uppercase text-3xl sm:text-4xl md:text-5xl leading-[1.02] text-ink">
-            {s.name} — <span className="capitalize">{fmtDateLong(targetDay)}</span>
+            {s.name} — <span className="inline-block first-letter:uppercase">{fmtDateLong(targetDay)}</span>
           </h1>
 
           {/* Day picker */}

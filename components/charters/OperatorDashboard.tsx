@@ -3,9 +3,11 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import ReviewForm from '@/components/account/ReviewForm'
+import CharterForm from './CharterForm'
+import ChipSelect from './ChipSelect'
+import { NAVIGATION, SAFETY, BOAT_AMENITIES, FISHING_GEAR } from '@/lib/charter-options'
 
 interface Opt { slug: string; name: string; region: string }
-interface Species { id: string; name: string }
 interface Booking {
   id: string; name: string; contact: string; people: number; message: string; status: string
   /** Cuenta del pescador (si reservó logueado) y su reputación a bordo. */
@@ -22,13 +24,20 @@ interface Charter {
   isPast?: boolean
 }
 
-interface Profile { name: string; businessName: string; phone: string; boatName: string; boatType: string; capacity: number; bio: string }
+interface Profile {
+  name: string; businessName: string; phone: string; bio: string
+  boatName: string; boatType: string; capacity: number
+  marina: string
+  /** Numéricos como texto: el input debe poder quedar vacío. */
+  boatLength: string; boatBeam: string; boatEngineHp: string; boatMaxSpeedKn: string; boatYear: string
+  crewSize: number
+  navigation: string[]; safety: string[]; amenities: string[]; gear: string[]
+}
 
-export default function OperatorDashboard({ operatorId, manageToken, verified, stripeReady, paymentsAvailable, defaultSpot, spots, species, charters, profile }: {
-  operatorId: string; manageToken: string; verified: boolean; stripeReady: boolean; paymentsAvailable: boolean; defaultSpot: string; spots: Opt[]; species: Species[]; charters: Charter[]; profile: Profile
+export default function OperatorDashboard({ operatorId, manageToken, verified, stripeReady, paymentsAvailable, defaultSpot, spots, charters, profile }: {
+  operatorId: string; manageToken: string; verified: boolean; stripeReady: boolean; paymentsAvailable: boolean; defaultSpot: string; spots: Opt[]; charters: Charter[]; profile: Profile
 }) {
   const router = useRouter()
-  const [saving, setSaving] = useState(false)
   const [busy, setBusy] = useState<string | null>(null)
   const [connecting, setConnecting] = useState(false)
   const [msg, setMsg] = useState('')
@@ -57,20 +66,6 @@ export default function OperatorDashboard({ operatorId, manageToken, verified, s
       setMsg(data.error || 'No se pudo conectar con Stripe.'); setConnecting(false)
     } catch { setMsg('Fallo de red.'); setConnecting(false) }
   }
-  const [f, setF] = useState({ spotSlug: defaultSpot, dateISO: '', timeStart: '08:00', modality: 'barco', targetSpecies: '', level: 'cualquiera', pricePerPerson: '', maxPlaces: 6, minToConfirm: 1, includes: '', notes: '' })
-  const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => setF((s) => ({ ...s, [k]: v }))
-
-  const post = async (e: React.FormEvent) => {
-    e.preventDefault(); setSaving(true); setMsg('')
-    try {
-      const res = await fetch('/api/charters', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ operatorId, manageToken, ...f, pricePerPerson: Number(f.pricePerPerson), maxPlaces: Number(f.maxPlaces), minToConfirm: Number(f.minToConfirm), targetSpecies: f.targetSpecies || undefined, includes: f.includes || undefined, notes: f.notes || undefined }) })
-      const data = await res.json()
-      if (!res.ok || !data.success) { setMsg(data.error || 'No se pudo publicar.'); return }
-      router.refresh(); setF((s) => ({ ...s, dateISO: '', pricePerPerson: '', includes: '', notes: '' }))
-    } finally { setSaving(false) }
-  }
-
   const respond = async (charterId: string, action: string, bookingId?: string) => {
     setBusy((bookingId ?? charterId) + action)
     try {
@@ -91,26 +86,7 @@ export default function OperatorDashboard({ operatorId, manageToken, verified, s
           <p className="text-sm text-ink/70 mt-1">Estamos revisando tu titulación y tu seguro. En cuanto quedes verificado podrás publicar chárters aquí. Guarda este enlace para volver.</p>
         </div>
       ) : (
-        <form onSubmit={post} className="border border-ink/15 rounded-2xl bg-paper p-5 space-y-3">
-          <p className="font-display uppercase text-xl leading-none">➕ Publicar un chárter</p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <label className="block"><span className={L}>Zona *</span>
-              <select required value={f.spotSlug} onChange={(e) => set('spotSlug', e.target.value)} className={I}><option value="">Elige…</option>{spots.map((s) => <option key={s.slug} value={s.slug}>{s.name}</option>)}</select></label>
-            <label className="block"><span className={L}>Día *</span><input required type="date" value={f.dateISO} onChange={(e) => set('dateISO', e.target.value)} className={I} /></label>
-            <label className="block"><span className={L}>Hora *</span><input required type="time" value={f.timeStart} onChange={(e) => set('timeStart', e.target.value)} className={I} /></label>
-            <label className="block"><span className={L}>€/persona *</span><input required type="number" min={1} max={5000} value={f.pricePerPerson} onChange={(e) => set('pricePerPerson', e.target.value)} className={I} /></label>
-            <label className="block"><span className={L}>Especie</span>
-              <select value={f.targetSpecies} onChange={(e) => set('targetSpecies', e.target.value)} className={I}><option value="">Cualquiera</option>{species.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select></label>
-            <label className="block"><span className={L}>Plazas</span><input type="number" min={1} max={50} value={f.maxPlaces} onChange={(e) => set('maxPlaces', Number(e.target.value))} className={I} /></label>
-            <label className="block"><span className={L}>Mín. para salir</span><input type="number" min={1} max={50} value={f.minToConfirm} onChange={(e) => set('minToConfirm', Number(e.target.value))} className={I} /></label>
-            <label className="block"><span className={L}>Modalidad</span>
-              <select value={f.modality} onChange={(e) => set('modality', e.target.value)} className={I}><option value="barco">🚤 Barco</option><option value="kayak">🛶 Kayak</option><option value="tierra">🏖️ Orilla</option></select></label>
-          </div>
-          <label className="block"><span className={L}>Incluye (equipo, cebo, licencia…)</span><input value={f.includes} onChange={(e) => set('includes', e.target.value)} maxLength={400} className={I} /></label>
-          <label className="block"><span className={L}>Notas</span><input value={f.notes} onChange={(e) => set('notes', e.target.value)} maxLength={800} className={I} /></label>
-          {msg && <p className="text-sm text-red-700">{msg}</p>}
-          <button type="submit" disabled={saving} className="bg-accent text-paper px-5 py-2.5 text-xs font-bold uppercase tracking-wide rounded-xl hover:bg-ink disabled:opacity-60 transition-colors">{saving ? 'Publicando…' : 'Publicar chárter'}</button>
-        </form>
+        <CharterForm operatorId={operatorId} manageToken={manageToken} defaultSpot={defaultSpot} spots={spots} />
       )}
 
       {verified && paymentsAvailable && (
@@ -142,10 +118,35 @@ export default function OperatorDashboard({ operatorId, manageToken, verified, s
               <label className="block"><span className={L}>Nombre</span><input value={pf.name} onChange={(e) => setP('name', e.target.value)} maxLength={80} className={I} /></label>
               <label className="block"><span className={L}>Nombre comercial</span><input value={pf.businessName} onChange={(e) => setP('businessName', e.target.value)} maxLength={120} className={I} /></label>
               <label className="block"><span className={L}>Teléfono</span><input value={pf.phone} onChange={(e) => setP('phone', e.target.value)} maxLength={40} className={I} /></label>
-              <label className="block"><span className={L}>Barco</span><input value={pf.boatName} onChange={(e) => setP('boatName', e.target.value)} maxLength={80} className={I} /></label>
-              <label className="block"><span className={L}>Tipo de barco</span><input value={pf.boatType} onChange={(e) => setP('boatType', e.target.value)} maxLength={80} className={I} /></label>
-              <label className="block"><span className={L}>Capacidad</span><input type="number" min={1} max={50} value={pf.capacity} onChange={(e) => setP('capacity', Number(e.target.value))} className={I} /></label>
             </div>
+            <label className="block"><span className={L}>Amarre base (marina / puerto)</span>
+              <input value={pf.marina} onChange={(e) => setP('marina', e.target.value)} maxLength={160}
+                placeholder="Ej.: Marina Deportiva del Puerto de Alicante" className={I} /></label>
+
+            <p className="text-[13px] font-bold uppercase tracking-wide text-accent pt-2">Características del barco</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <label className="block"><span className={L}>Nombre del barco</span><input value={pf.boatName} onChange={(e) => setP('boatName', e.target.value)} maxLength={80} className={I} /></label>
+              <label className="block"><span className={L}>Tipo</span><input value={pf.boatType} onChange={(e) => setP('boatType', e.target.value)} maxLength={80} placeholder="Ej.: Semirrígida" className={I} /></label>
+              <label className="block"><span className={L}>Eslora (m)</span><input type="number" step={0.05} min={2} max={60} value={pf.boatLength} onChange={(e) => setP('boatLength', e.target.value)} className={I} /></label>
+              <label className="block"><span className={L}>Manga (m)</span><input type="number" step={0.05} min={1} max={20} value={pf.boatBeam} onChange={(e) => setP('boatBeam', e.target.value)} className={I} /></label>
+              <label className="block"><span className={L}>Motor (CV)</span><input type="number" min={1} max={5000} value={pf.boatEngineHp} onChange={(e) => setP('boatEngineHp', e.target.value)} className={I} /></label>
+              <label className="block"><span className={L}>Vel. máx. (nudos)</span><input type="number" min={1} max={80} value={pf.boatMaxSpeedKn} onChange={(e) => setP('boatMaxSpeedKn', e.target.value)} className={I} /></label>
+              <label className="block"><span className={L}>Año</span><input type="number" min={1900} max={2100} value={pf.boatYear} onChange={(e) => setP('boatYear', e.target.value)} className={I} /></label>
+              <label className="block"><span className={L}>Tripulación</span><input type="number" min={1} max={20} value={pf.crewSize} onChange={(e) => setP('crewSize', Number(e.target.value))} className={I} /></label>
+              <label className="block"><span className={L}>Máx. pasajeros</span><input type="number" min={1} max={50} value={pf.capacity} onChange={(e) => setP('capacity', Number(e.target.value))} className={I} /></label>
+            </div>
+
+            <div className="space-y-5 pt-2">
+              <ChipSelect label="Electrónica y navegación" hint="Lo que llevas para encontrar el pescado." icon="radar"
+                options={NAVIGATION} value={pf.navigation} onChange={(v) => setP('navigation', v)} />
+              <ChipSelect label="Seguridad a bordo" hint="Equipamiento de seguridad." icon="lifebuoy"
+                options={SAFETY} value={pf.safety} onChange={(v) => setP('safety', v)} />
+              <ChipSelect label="Comodidades" hint="Qué encontrará el pescador a bordo." icon="cabin"
+                options={BOAT_AMENITIES} value={pf.amenities} onChange={(v) => setP('amenities', v)} />
+              <ChipSelect label="Aparejos disponibles" hint="Material de pesca que pones tú." icon="reel"
+                options={FISHING_GEAR} value={pf.gear} onChange={(v) => setP('gear', v)} />
+            </div>
+
             <label className="block"><span className={L}>Sobre ti / tu servicio</span><textarea value={pf.bio} onChange={(e) => setP('bio', e.target.value)} maxLength={800} rows={3} className={I} /></label>
             {msg && <p className="text-sm text-red-700">{msg}</p>}
             <div className="flex gap-2">

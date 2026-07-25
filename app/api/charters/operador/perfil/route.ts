@@ -13,6 +13,19 @@ const schema = z.object({
   boatType: z.string().max(80).optional(),
   capacity: z.number().int().min(1).max(50).optional(),
   bio: z.string().max(800).optional(),
+  // Características del barco. Los numéricos llegan como texto desde el
+  // formulario (el input puede quedar vacío) → se coercionan y se limpian.
+  marina: z.string().max(160).optional(),
+  boatLength: z.coerce.number().min(0).max(60).optional().or(z.literal('')),
+  boatBeam: z.coerce.number().min(0).max(20).optional().or(z.literal('')),
+  boatEngineHp: z.coerce.number().min(0).max(5000).optional().or(z.literal('')),
+  boatMaxSpeedKn: z.coerce.number().min(0).max(80).optional().or(z.literal('')),
+  boatYear: z.coerce.number().min(0).max(2100).optional().or(z.literal('')),
+  crewSize: z.number().int().min(1).max(20).optional(),
+  navigation: z.array(z.string().max(40)).max(20).optional(),
+  safety: z.array(z.string().max(40)).max(20).optional(),
+  amenities: z.array(z.string().max(40)).max(20).optional(),
+  gear: z.array(z.string().max(40)).max(20).optional(),
 })
 
 export async function POST(request: NextRequest) {

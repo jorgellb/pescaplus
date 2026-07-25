@@ -1,4 +1,5 @@
 import type { Charter } from '@/lib/charters-store'
+import type { Operator } from '@/lib/operators-store'
 import { getUserById } from '@/lib/users-store'
 import { anglerRatingsForCharter } from '@/lib/reviews-store'
 import { getSpot } from '@/lib/fishing-spots'
@@ -19,6 +20,24 @@ export interface DashboardCharter {
   id: string; spotName: string; dateISO: string; dayLabel: string; timeStart: string; modality: string
   pricePerPerson: number; maxPlaces: number; placesTaken: number; status: string
   isPast: boolean; bookings: DashboardBooking[]
+}
+
+/** Numeric specs travel to the form as strings so the input can be empty. */
+function numStr(v: number | null): string {
+  return v == null ? '' : String(v)
+}
+
+/** Operator → the shape OperatorDashboard's profile editor expects. */
+export function toProfileProps(o: Operator) {
+  return {
+    name: o.name, businessName: o.businessName, phone: o.phone, bio: o.bio,
+    boatName: o.boatName, boatType: o.boatType, capacity: o.capacity,
+    marina: o.marina,
+    boatLength: numStr(o.boatLength), boatBeam: numStr(o.boatBeam),
+    boatEngineHp: numStr(o.boatEngineHp), boatMaxSpeedKn: numStr(o.boatMaxSpeedKn),
+    boatYear: numStr(o.boatYear), crewSize: o.crewSize,
+    navigation: o.navigation, safety: o.safety, amenities: o.amenities, gear: o.gear,
+  }
 }
 
 export async function buildDashboardCharters(

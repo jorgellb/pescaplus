@@ -1,5 +1,9 @@
 import { isDatabaseConfigured } from '@/lib/products-store'
 import { getOperator, getOperatorByToken, type Operator } from '@/lib/operators-store'
+import {
+  sanitizeIds, LANGUAGES, TECHNIQUES, TARGET_SPECIES, FISHING_AREAS,
+  INCLUDED, EXCLUDED, POLICIES, SEASONS,
+} from '@/lib/charter-options'
 
 /**
  * Charter listings + booking requests (Fase 1 skeleton). A verified operator
@@ -20,6 +24,19 @@ export interface CharterInput {
   minToConfirm?: number
   includes?: string
   notes?: string
+  // Ficha detallada (ids del catálogo en lib/charter-options).
+  tripType?: 'privada' | 'compartida'
+  meetingPoint?: string
+  highlights?: string
+  privatePrice?: number | null
+  languages?: string[]
+  techniques?: string[]
+  species?: string[]
+  areas?: string[]
+  included?: string[]
+  excluded?: string[]
+  policies?: string[]
+  seasons?: string[]
 }
 
 export interface CharterBooking {
@@ -48,6 +65,18 @@ export interface OperatorPublic {
   spotSlug: string
   avgRating: number
   reviewCount: number
+  marina: string
+  boatLength: number | null
+  boatBeam: number | null
+  boatEngineHp: number | null
+  boatMaxSpeedKn: number | null
+  boatYear: number | null
+  crewSize: number
+  navigation: string[]
+  safety: string[]
+  amenities: string[]
+  gear: string[]
+  memberSince: number
 }
 
 export interface Charter {
@@ -66,6 +95,18 @@ export interface Charter {
   includes: string
   notes: string
   status: 'open' | 'confirmed' | 'cancelled'
+  tripType: 'privada' | 'compartida'
+  meetingPoint: string
+  highlights: string
+  privatePrice: number | null
+  languages: string[]
+  techniques: string[]
+  species: string[]
+  areas: string[]
+  included: string[]
+  excluded: string[]
+  policies: string[]
+  seasons: string[]
   createdAt: number
   operator: OperatorPublic | null
   bookings: CharterBooking[]
@@ -89,6 +130,18 @@ function operatorPublic(o: Operator): OperatorPublic {
     spotSlug: o.spotSlug,
     avgRating: o.avgRating,
     reviewCount: o.reviewCount,
+    marina: o.marina,
+    boatLength: o.boatLength,
+    boatBeam: o.boatBeam,
+    boatEngineHp: o.boatEngineHp,
+    boatMaxSpeedKn: o.boatMaxSpeedKn,
+    boatYear: o.boatYear,
+    crewSize: o.crewSize,
+    navigation: o.navigation,
+    safety: o.safety,
+    amenities: o.amenities,
+    gear: o.gear,
+    memberSince: o.createdAt,
   }
 }
 
@@ -107,7 +160,21 @@ function cleanCharter(input: CharterInput) {
     maxPlaces,
     minToConfirm: Math.min(maxPlaces, Math.max(1, Math.round(Number(input.minToConfirm) || 1))),
     includes: (input.includes ?? '').trim().slice(0, 400),
-    notes: (input.notes ?? '').trim().slice(0, 800),
+    notes: (input.notes ?? '').trim().slice(0, 4000),
+    tripType: (input.tripType === 'privada' ? 'privada' : 'compartida') as 'privada' | 'compartida',
+    meetingPoint: (input.meetingPoint ?? '').trim().slice(0, 200),
+    highlights: (input.highlights ?? '').trim().slice(0, 300),
+    privatePrice: input.privatePrice != null && Number.isFinite(Number(input.privatePrice)) && Number(input.privatePrice) > 0
+      ? Math.min(50000, Math.round(Number(input.privatePrice)))
+      : null,
+    languages: sanitizeIds(LANGUAGES, input.languages),
+    techniques: sanitizeIds(TECHNIQUES, input.techniques),
+    species: sanitizeIds(TARGET_SPECIES, input.species),
+    areas: sanitizeIds(FISHING_AREAS, input.areas),
+    included: sanitizeIds(INCLUDED, input.included),
+    excluded: sanitizeIds(EXCLUDED, input.excluded),
+    policies: sanitizeIds(POLICIES, input.policies),
+    seasons: sanitizeIds(SEASONS, input.seasons),
   }
 }
 
@@ -150,6 +217,18 @@ function baseFromRow(row: any): Omit<Charter, 'operator' | 'bookings' | 'placesT
     includes: row.includes ?? '',
     notes: row.notes ?? '',
     status: row.status,
+    tripType: row.tripType === 'privada' ? 'privada' : 'compartida',
+    meetingPoint: row.meetingPoint ?? '',
+    highlights: row.highlights ?? '',
+    privatePrice: row.privatePrice ?? null,
+    languages: row.languages ?? [],
+    techniques: row.techniques ?? [],
+    species: row.species ?? [],
+    areas: row.areas ?? [],
+    included: row.included ?? [],
+    excluded: row.excluded ?? [],
+    policies: row.policies ?? [],
+    seasons: row.seasons ?? [],
     createdAt: row.createdAt instanceof Date ? row.createdAt.getTime() : row.createdAt,
   }
 }
@@ -276,6 +355,10 @@ function rowOperatorToOperator(row: any): Operator {
   return {
     id: row.id, name: row.name, businessName: row.businessName ?? '', email: row.email, phone: row.phone ?? '',
     spotSlug: row.spotSlug, boatName: row.boatName ?? '', boatType: row.boatType ?? '', capacity: row.capacity,
+    marina: row.marina ?? '', boatLength: row.boatLength ?? null, boatBeam: row.boatBeam ?? null,
+    boatEngineHp: row.boatEngineHp ?? null, boatMaxSpeedKn: row.boatMaxSpeedKn ?? null, boatYear: row.boatYear ?? null,
+    crewSize: row.crewSize ?? 1, navigation: row.navigation ?? [], safety: row.safety ?? [],
+    amenities: row.amenities ?? [], gear: row.gear ?? [],
     licenseRef: row.licenseRef ?? '', insuranceRef: row.insuranceRef ?? '', bio: row.bio ?? '',
     verified: row.verified, verifiedAt: row.verifiedAt instanceof Date ? row.verifiedAt.getTime() : row.verifiedAt ?? null,
     stripeAccountId: row.stripeAccountId ?? '', stripeReady: row.stripeReady ?? false,

@@ -303,6 +303,18 @@ model Operator {
   boatName     String    @default("")
   boatType     String    @default("")
   capacity     Int       @default(6)
+  // — Características del barco (se muestran en cada ficha de chárter) —
+  marina         String  @default("") // amarre base: "Marina Deportiva del Puerto de Alicante"
+  boatLength     Float? // eslora en metros
+  boatBeam       Float? // manga en metros
+  boatEngineHp   Int? // potencia total en CV
+  boatMaxSpeedKn Int? // velocidad máxima en nudos
+  boatYear       Int?
+  crewSize       Int     @default(1)
+  navigation     String[] @default([]) // electrónica
+  safety         String[] @default([])
+  amenities      String[] @default([])
+  gear           String[] @default([])
   licenseRef   String    @default("") // titulación / licencia (a verificar)
   insuranceRef String    @default("") // seguro de ocupantes / RC
   bio          String    @default("")
@@ -341,6 +353,20 @@ model Charter {
   includes       String           @default("") // equipo, cebo, licencia incluidos
   notes          String           @default("")
   status         String           @default("open") // open | confirmed | cancelled
+  // — Ficha detallada de la salida (ids del catálogo en lib/charter-options) —
+  tripType       String           @default("compartida") // privada | compartida
+  meetingPoint   String           @default("") // amarre / punto de encuentro exacto
+  highlights     String           @default("") // lo más destacado, una línea
+  languages      String[]         @default([])
+  techniques     String[]         @default([])
+  species        String[]         @default([]) // especies objetivo (multi)
+  areas          String[]         @default([])
+  included       String[]         @default([])
+  excluded       String[]         @default([])
+  policies       String[]         @default([])
+  seasons        String[]         @default([])
+  /** Precio de la salida completa cuando es privada (en vez de por persona). */
+  privatePrice   Float?
   createdAt      DateTime         @default(now())
   operator       Operator         @relation(fields: [operatorId], references: [id], onDelete: Cascade)
   bookings       CharterBooking[]

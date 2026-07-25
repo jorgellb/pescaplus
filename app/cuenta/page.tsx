@@ -10,7 +10,7 @@ import { listRsvpsByUser } from '@/lib/meetups-store'
 import { getOwnedOperator, getOperator } from '@/lib/operators-store'
 import { listInbox } from '@/lib/messages-store'
 import { getUserReviewForCharter, listReviewsForUser } from '@/lib/reviews-store'
-import { buildDashboardCharters } from '@/lib/operator-view'
+import { buildDashboardCharters, toProfileProps } from '@/lib/operator-view'
 import { stripeConfigured, PLATFORM_FEE_PERCENT } from '@/lib/stripe'
 import { FISHING_SPOTS, getSpot } from '@/lib/fishing-spots'
 import { SEA_SPECIES } from '@/lib/fishing-species'
@@ -114,8 +114,7 @@ export default async function CuentaPage({ searchParams }: { searchParams: Promi
           paymentsAvailable={stripeConfigured()}
           defaultSpot={owned.spotSlug}
           spots={spots}
-          species={species}
-          profile={{ name: owned.name, businessName: owned.businessName, phone: owned.phone, boatName: owned.boatName, boatType: owned.boatType, capacity: owned.capacity, bio: owned.bio }}
+          profile={toProfileProps(owned)}
           charters={await buildDashboardCharters(charters, { reviewerUserId: user.id })}
         />
       </div>

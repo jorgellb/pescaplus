@@ -5,6 +5,9 @@ import Layout from '@/components/Layout'
 import RequestBooking from '@/components/charters/RequestBooking'
 import PayBooking from '@/components/charters/PayBooking'
 import AskOperator from '@/components/messages/AskOperator'
+import CharterIcon from '@/components/charters/CharterIcon'
+import { BoatSpecs, TripSpecs } from '@/components/charters/CharterSpecs'
+import { resolveOptions, LANGUAGES } from '@/lib/charter-options'
 import { getCharter } from '@/lib/charters-store'
 import { listReviewsForOperator } from '@/lib/reviews-store'
 import { getSessionUser } from '@/lib/auth'
@@ -19,6 +22,19 @@ export const metadata: Metadata = { title: 'Chárter de pesca', robots: { index:
 
 const MOD_LABEL: Record<string, string> = { tierra: '🏖️ Orilla', kayak: '🛶 Kayak', barco: '🚤 Barco' }
 
+/** Headline fact with its icon (duración, tipo, grupo, idiomas). */
+function SummaryChip({ icon, label, value }: { icon: string; label: string; value: string }) {
+  return (
+    <div className="flex items-center gap-3 rounded-xl border border-ink/[0.07] bg-paper px-3.5 py-3">
+      <CharterIcon name={icon} className="w-5 h-5 shrink-0 text-accent" />
+      <div className="min-w-0">
+        <p className="text-[11px] uppercase tracking-wide text-ink/45 leading-none">{label}</p>
+        <p className="font-semibold text-ink text-[14.5px] leading-tight mt-1 truncate">{value}</p>
+      </div>
+    </div>
+  )
+}
+
 export default async function CharterPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ pagado?: string; cancelado?: string }> }) {
   const { id } = await params
   const { pagado, cancelado } = await searchParams
@@ -31,6 +47,7 @@ export default async function CharterPage({ params, searchParams }: { params: Pr
   const viewer = await getSessionUser()
   const viewerOperator = viewer ? await getOperatorByUser(viewer.id) : null
   const isOwner = !!viewerOperator && viewerOperator.id === charter.operatorId
+  const langLabels = resolveOptions(LANGUAGES, charter.languages).map((l) => l.label).join(', ')
   const full = charter.placesTaken >= charter.maxPlaces
   const cancelled = charter.status === 'cancelled'
 
@@ -65,11 +82,19 @@ export default async function CharterPage({ params, searchParams }: { params: Pr
           {pagado === '1' && <div className="border border-accent/40 rounded-xl bg-accent/[0.08] p-3 mb-5 text-sm font-bold text-ink">✅ ¡Pago completado! Tu plaza está reservada. El patrón recibirá tu reserva y te contactará con los detalles de la salida.</div>}
           {cancelado === '1' && <div className="border border-ink/20 rounded-xl bg-ink/[0.03] p-3 mb-5 text-sm text-ink/70">Has cancelado el pago. Tu plaza no se ha reservado; puedes intentarlo de nuevo cuando quieras.</div>}
           <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3">{MOD_LABEL[charter.modality]}{sp ? ` · a por ${sp.name.toLowerCase()}` : ''}</p>
-          <h1 className="font-display uppercase text-3xl sm:text-4xl md:text-5xl leading-[1.02] text-ink">{spot?.name ?? charter.spotSlug}</h1>
-          <p className="text-ink/70 text-[15px] mt-3 capitalize">{fmtDateLong(charter.dateISO)} · {charter.timeStart}{charter.durationH ? ` · ${charter.durationH} h` : ''}</p>
-          <div className="flex flex-wrap gap-2 mt-4">
-            <span className="inline-flex items-center gap-2 rounded-xl border border-ink/15 px-3 py-2 text-sm"><span className="font-mono text-[10px] uppercase tracking-widest text-ink/50">Precio</span><span className="font-display text-lg text-ink">{charter.pricePerPerson} €/persona</span></span>
-            <span className="inline-flex items-center gap-2 rounded-xl border border-ink/15 px-3 py-2 text-sm"><span className="font-mono text-[10px] uppercase tracking-widest text-ink/50">Plazas</span><span className="font-display text-lg text-ink">{charter.placesTaken}/{charter.maxPlaces}</span></span>
+          <h1 className="font-display text-3xl sm:text-4xl md:text-5xl text-ink">{charter.highlights || `Pesca en ${spot?.name ?? charter.spotSlug}`}</h1>
+          <p className="text-ink/60 text-[15px] mt-2 flex items-center gap-1.5">
+            <CharterIcon name="location" className="w-4 h-4 shrink-0" />
+            {charter.operator.marina || spot?.name || charter.spotSlug}
+          </p>
+          <p className="text-ink/70 text-[15px] mt-1 first-letter:uppercase">{fmtDateLong(charter.dateISO)} · {charter.timeStart}</p>
+
+          {/* Chips de resumen: lo que un pescador compara de un vistazo. */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-5">
+            <SummaryChip icon="clock" label="Duración" value={charter.durationH ? `${charter.durationH} horas` : 'A consultar'} />
+            <SummaryChip icon={charter.tripType === 'privada' ? 'lock' : 'users'} label="Tipo de salida" value={charter.tripType === 'privada' ? 'Privada' : 'Compartida'} />
+            <SummaryChip icon="users" label="Grupo" value={`${charter.maxPlaces} ${charter.maxPlaces === 1 ? 'persona' : 'personas'}`} />
+            <SummaryChip icon="language" label="Idiomas" value={langLabels || 'Español'} />
           </div>
         </div>
       </section>
@@ -87,10 +112,42 @@ export default async function CharterPage({ params, searchParams }: { params: Pr
           {!cancelled && <div className="mt-3"><AskOperator charterId={charter.id} loggedIn={!!viewer} isOwner={isOwner} /></div>}
         </div>
 
-        <div className="space-y-2 text-[15px] text-ink/85">
-          {charter.includes && <p><strong>✅ Incluye:</strong> {charter.includes}</p>}
-          {charter.notes && <p className="text-ink/75 whitespace-pre-line border-l-4 border-accent/40 pl-3">{charter.notes}</p>}
-        </div>
+        {/* Vista general */}
+        {(charter.notes || charter.includes) && (
+          <section>
+            <h2 className="font-display text-2xl text-ink mb-2">Vista general</h2>
+            {charter.notes && <p className="text-[15px] text-ink/80 leading-relaxed whitespace-pre-line">{charter.notes}</p>}
+            {charter.includes && <p className="text-[15px] text-ink/80 mt-2"><strong className="font-semibold">Incluye:</strong> {charter.includes}</p>}
+          </section>
+        )}
+
+        {charter.meetingPoint && (
+          <div className="flex items-start gap-3 rounded-2xl border border-ink/[0.07] bg-paper p-4">
+            <CharterIcon name="location" className="w-5 h-5 shrink-0 text-accent mt-0.5" />
+            <div>
+              <p className="font-semibold text-ink text-[15px]">Punto de encuentro</p>
+              <p className="text-[14px] text-ink/70">{charter.meetingPoint}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Todo lo que define la salida, con iconos */}
+        <TripSpecs trip={{
+          techniques: charter.techniques, species: charter.species, areas: charter.areas,
+          included: charter.included, excluded: charter.excluded, policies: charter.policies,
+          seasons: charter.seasons, languages: charter.languages, highlights: '',
+        }} />
+
+        {/* El barco */}
+        <BoatSpecs boat={{
+          boatName: charter.operator.boatName, boatType: charter.operator.boatType,
+          capacity: charter.operator.capacity, crewSize: charter.operator.crewSize,
+          boatLength: charter.operator.boatLength, boatBeam: charter.operator.boatBeam,
+          boatEngineHp: charter.operator.boatEngineHp, boatMaxSpeedKn: charter.operator.boatMaxSpeedKn,
+          boatYear: charter.operator.boatYear, marina: charter.operator.marina,
+          navigation: charter.operator.navigation, safety: charter.operator.safety,
+          amenities: charter.operator.amenities, gear: charter.operator.gear,
+        }} />
 
         {/* Previsión del día */}
         {outlook && (

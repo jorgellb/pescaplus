@@ -5,7 +5,7 @@ import OperatorRegister from '@/components/charters/OperatorRegister'
 import OperatorDashboard from '@/components/charters/OperatorDashboard'
 import { getOperatorByToken } from '@/lib/operators-store'
 import { getSessionUser } from '@/lib/auth'
-import { buildDashboardCharters } from '@/lib/operator-view'
+import { buildDashboardCharters, toProfileProps } from '@/lib/operator-view'
 import { syncOperatorStripe } from '@/lib/charter-payments'
 import { stripeConfigured } from '@/lib/stripe'
 import { listChartersByOperator } from '@/lib/charters-store'
@@ -60,8 +60,7 @@ export default async function OperatorPage({ searchParams }: Params) {
             paymentsAvailable={paymentsAvailable}
             defaultSpot={operator.spotSlug}
             spots={spots}
-            species={species}
-            profile={{ name: operator.name, businessName: operator.businessName, phone: operator.phone, boatName: operator.boatName, boatType: operator.boatType, capacity: operator.capacity, bio: operator.bio }}
+            profile={toProfileProps(operator)}
             charters={await buildDashboardCharters(charters, { reviewerUserId: reviewerUserId })}
           />
         </section>

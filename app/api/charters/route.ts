@@ -18,7 +18,20 @@ const schema = z.object({
   maxPlaces: z.number().int().min(1).max(50).optional(),
   minToConfirm: z.number().int().min(1).max(50).optional(),
   includes: z.string().max(400).optional(),
-  notes: z.string().max(800).optional(),
+  notes: z.string().max(4000).optional(),
+  // Ficha detallada — los ids se validan luego contra el catálogo.
+  tripType: z.enum(['privada', 'compartida']).optional(),
+  meetingPoint: z.string().max(200).optional(),
+  highlights: z.string().max(300).optional(),
+  privatePrice: z.number().min(1).max(50000).optional(),
+  languages: z.array(z.string().max(40)).max(20).optional(),
+  techniques: z.array(z.string().max(40)).max(30).optional(),
+  species: z.array(z.string().max(40)).max(60).optional(),
+  areas: z.array(z.string().max(40)).max(10).optional(),
+  included: z.array(z.string().max(40)).max(20).optional(),
+  excluded: z.array(z.string().max(40)).max(20).optional(),
+  policies: z.array(z.string().max(40)).max(20).optional(),
+  seasons: z.array(z.string().max(40)).max(12).optional(),
 })
 
 export async function POST(request: NextRequest) {
