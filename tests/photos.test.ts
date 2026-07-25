@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { isValidPhotoUrl, sanitizePhotos, isBlobUrl, blobConfigured, MAX_PHOTOS } from '@/lib/photos'
+import { isValidPhotoUrl, sanitizePhotos, isBlobUrl, blobConfigured, blobToken, MAX_PHOTOS } from '@/lib/photos'
 import { registerOperator, updateOperatorProfile } from '@/lib/operators-store'
 
 const g = globalThis as unknown as Record<string, unknown[]>
@@ -35,6 +35,27 @@ describe('fotos — validación de direcciones', () => {
   it('sin token de almacenamiento, la subida queda desactivada (no rompe)', () => {
     // En tests no hay BLOB_READ_WRITE_TOKEN: el modo "pega una URL" sigue vivo.
     expect(blobConfigured()).toBe(false)
+  })
+
+  it('encuentra el token aunque Vercel le haya puesto un prefijo al conectar el store', () => {
+    // Al conectar un Blob store se puede elegir prefijo: PESCAPLUS_READ_WRITE_TOKEN.
+    process.env.PESCAPLUS_READ_WRITE_TOKEN = 'vercel_blob_rw_ejemplo123'
+    try {
+      expect(blobConfigured()).toBe(true)
+      expect(blobToken()).toBe('vercel_blob_rw_ejemplo123')
+    } finally {
+      delete process.env.PESCAPLUS_READ_WRITE_TOKEN
+    }
+    expect(blobConfigured()).toBe(false)
+  })
+
+  it('no confunde otra variable que acabe igual pero no sea un token de Blob', () => {
+    process.env.OTRA_COSA_READ_WRITE_TOKEN = 'no-es-un-token-de-blob'
+    try {
+      expect(blobConfigured()).toBe(false)
+    } finally {
+      delete process.env.OTRA_COSA_READ_WRITE_TOKEN
+    }
   })
 })
 

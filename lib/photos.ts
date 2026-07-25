@@ -14,8 +14,26 @@ export const MAX_PHOTOS = 8
 const MAX_BYTES = 3 * 1024 * 1024
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
+/**
+ * Find the Blob read-write token.
+ *
+ * The SDK defaults to `BLOB_READ_WRITE_TOKEN`, but Vercel lets you pick an
+ * environment-variable PREFIX when connecting a store to a project, in which
+ * case the var is `<PREFIX>_READ_WRITE_TOKEN` and nothing works with no clue as
+ * to why. So: use the standard name if present, otherwise accept any variable
+ * that looks like a Blob token (`vercel_blob_rw_…`). Values are never logged.
+ */
+export function blobToken(): string | undefined {
+  const std = process.env.BLOB_READ_WRITE_TOKEN
+  if (std) return std
+  for (const [name, value] of Object.entries(process.env)) {
+    if (name.endsWith('_READ_WRITE_TOKEN') && value?.startsWith('vercel_blob_rw_')) return value
+  }
+  return undefined
+}
+
 export function blobConfigured(): boolean {
-  return !!process.env.BLOB_READ_WRITE_TOKEN
+  return !!blobToken()
 }
 
 export interface UploadResult {
@@ -42,6 +60,7 @@ export async function uploadPhoto(file: File, operatorId: string): Promise<Uploa
       contentType: file.type,
       // Blob adds its own random suffix; ours already is unique.
       addRandomSuffix: false,
+      token: blobToken(),
     })
     return { ok: true, url: blob.url }
   } catch (error) {
@@ -55,7 +74,7 @@ export async function deletePhoto(url: string): Promise<void> {
   if (!blobConfigured() || !isBlobUrl(url)) return
   try {
     const { del } = await import('@vercel/blob')
-    await del(url)
+    await del(url, { token: blobToken() })
   } catch (error) {
     console.warn('Photo delete failed:', error)
   }
