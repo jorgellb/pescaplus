@@ -16,6 +16,9 @@ export interface User {
   bio: string
   avatar: string
   emailVerified: boolean
+  /** Reputation as a pescador, from patrón reviews. */
+  avgRating: number
+  reviewCount: number
   createdAt: number
   updatedAt: number
 }
@@ -40,6 +43,8 @@ function rowToUser(row: any): User {
     bio: row.bio ?? '',
     avatar: row.avatar ?? '',
     emailVerified: row.emailVerified ?? false,
+    avgRating: row.avgRating ?? 0,
+    reviewCount: row.reviewCount ?? 0,
     createdAt: row.createdAt instanceof Date ? row.createdAt.getTime() : row.createdAt,
     updatedAt: row.updatedAt instanceof Date ? row.updatedAt.getTime() : row.updatedAt,
   }
@@ -74,7 +79,7 @@ export async function findOrCreateUserByEmail(rawEmail: string): Promise<User> {
   const existing = mem().find((u) => u.email === email)
   if (existing) { existing.emailVerified = true; return { ...existing } }
   const now = Date.now()
-  const user: StoredUser = { id: `usr-${now}-${Math.random().toString(36).slice(2, 8)}`, email, name: '', phone: '', phoneVerified: false, bio: '', avatar, emailVerified: true, createdAt: now, updatedAt: now }
+  const user: StoredUser = { id: `usr-${now}-${Math.random().toString(36).slice(2, 8)}`, email, name: '', phone: '', phoneVerified: false, bio: '', avatar, emailVerified: true, avgRating: 0, reviewCount: 0, createdAt: now, updatedAt: now }
   mem().unshift(user)
   return { ...user }
 }

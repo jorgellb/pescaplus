@@ -2,13 +2,22 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import ReviewForm from '@/components/account/ReviewForm'
 
 interface Opt { slug: string; name: string; region: string }
 interface Species { id: string; name: string }
-interface Booking { id: string; name: string; contact: string; people: number; message: string; status: string }
+interface Booking {
+  id: string; name: string; contact: string; people: number; message: string; status: string
+  /** Cuenta del pescador (si reservó logueado) y su reputación a bordo. */
+  userId?: string | null; anglerRating?: number; anglerReviews?: number
+  /** Estrellas que YA le puso este patrón en esta salida (0 = aún no). */
+  givenRating?: number
+}
 interface Charter {
   id: string; spotName: string; dateISO: string; dayLabel: string; timeStart: string; modality: string
   pricePerPerson: number; maxPlaces: number; placesTaken: number; status: string; bookings: Booking[]
+  /** La salida ya ha terminado → se puede valorar a los pescadores. */
+  isPast?: boolean
 }
 
 interface Profile { name: string; businessName: string; phone: string; boatName: string; boatType: string; capacity: number; bio: string }
@@ -160,6 +169,7 @@ export default function OperatorDashboard({ operatorId, manageToken, verified, s
                 {c.bookings.map((b) => (
                   <div key={b.id} className="flex flex-wrap items-center gap-2 text-sm">
                     <span className="font-bold text-ink">{b.name}</span>
+                    {(b.anglerReviews ?? 0) > 0 && <span className="text-amber-600 text-[12px]" title={`${b.anglerReviews} valoraciones de otros patrones`}>★ {(b.anglerRating ?? 0).toFixed(1)}</span>}
                     <span className="text-ink/60">{b.people} pers · {b.contact}</span>
                     {b.message && <span className="text-ink/50 italic">“{b.message}”</span>}
                     <span className="font-mono text-[10px] uppercase tracking-wide text-ink/45">{b.status}</span>
@@ -169,8 +179,14 @@ export default function OperatorDashboard({ operatorId, manageToken, verified, s
                         <button onClick={() => respond(c.id, 'decline', b.id)} disabled={busy === b.id + 'decline'} className="text-xs font-bold text-red-700 hover:underline disabled:opacity-50">Rechazar</button>
                       </span>
                     )}
-                    {(b.status === 'accepted' || b.status === 'paid') && c.status !== 'cancelled' && (
+                    {(b.status === 'accepted' || b.status === 'paid') && c.status !== 'cancelled' && !c.isPast && (
                       <button onClick={() => respond(c.id, 'cancelBooking', b.id)} disabled={busy === b.id + 'cancelBooking'} className="text-xs font-bold text-red-700 hover:underline disabled:opacity-50">Cancelar</button>
+                    )}
+                    {/* Tras la salida, el patrón valora a quien embarcó (si tiene cuenta). */}
+                    {c.isPast && b.userId && (b.status === 'accepted' || b.status === 'paid') && (
+                      <div className="w-full">
+                        <ReviewForm charterId={c.id} direction="toAngler" subjectUserId={b.userId} initialRating={b.givenRating ?? 0} done={(b.givenRating ?? 0) > 0} label={`Valorar a ${b.name}`} />
+                      </div>
                     )}
                   </div>
                 ))}

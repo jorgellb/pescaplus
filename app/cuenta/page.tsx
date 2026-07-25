@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import Layout from '@/components/Layout'
-import AccountPanel, { type BookingRow, type RsvpRow, type ThreadRow } from '@/components/account/AccountPanel'
+import AccountPanel, { type BookingRow, type RsvpRow, type ThreadRow, type ReceivedReview } from '@/components/account/AccountPanel'
 import OperatorDashboard from '@/components/charters/OperatorDashboard'
 import { getSessionUser } from '@/lib/auth'
 import { AVATAR_CHOICES, getUserById } from '@/lib/users-store'
@@ -9,7 +9,8 @@ import { listBookingsByUser, listChartersByOperator, getCharter } from '@/lib/ch
 import { listRsvpsByUser } from '@/lib/meetups-store'
 import { getOwnedOperator, getOperator } from '@/lib/operators-store'
 import { listInbox } from '@/lib/messages-store'
-import { getUserReviewForCharter } from '@/lib/reviews-store'
+import { getUserReviewForCharter, listReviewsForUser } from '@/lib/reviews-store'
+import { buildDashboardCharters } from '@/lib/operator-view'
 import { stripeConfigured, PLATFORM_FEE_PERCENT } from '@/lib/stripe'
 import { FISHING_SPOTS, getSpot } from '@/lib/fishing-spots'
 import { SEA_SPECIES } from '@/lib/fishing-species'
@@ -43,7 +44,12 @@ export default async function CuentaPage({ searchParams }: { searchParams: Promi
     const charterLabel = c ? `${getSpot(c.spotSlug)?.name ?? c.spotSlug} · ${fmtDayLabel(c.dateISO)}` : 'Chárter'
     return { id: t.id, otherName, charterLabel, lastBody: t.lastBody, unread: t.unread }
   }))
-  const initialTab = tab === 'mensajes' ? 'mensajes' as const : tab === 'patron' && owned ? 'patron' as const : 'reservas' as const
+  const initialTab = tab === 'mensajes' ? 'mensajes' as const : tab === 'patron' && owned ? 'patron' as const : tab === 'perfil' ? 'perfil' as const : 'reservas' as const
+
+  // Valoraciones que los patrones han dejado sobre este pescador.
+  const received: ReceivedReview[] = user.reviewCount > 0
+    ? (await listReviewsForUser(user.id, 10)).map((r) => ({ id: r.id, authorName: r.authorName, authorAvatar: r.authorAvatar, rating: r.rating, text: r.text }))
+    : []
 
   // Filas de reservas del pescador (con elegibilidad de reseña).
   const bookings: BookingRow[] = await Promise.all(userBookings.map(async ({ booking, charter }) => {
@@ -109,7 +115,7 @@ export default async function CuentaPage({ searchParams }: { searchParams: Promi
           spots={spots}
           species={species}
           profile={{ name: owned.name, businessName: owned.businessName, phone: owned.phone, boatName: owned.boatName, boatType: owned.boatType, capacity: owned.capacity, bio: owned.bio }}
-          charters={charters.map((c) => ({ id: c.id, spotName: getSpot(c.spotSlug)?.name ?? c.spotSlug, dateISO: c.dateISO, dayLabel: fmtDayLabel(c.dateISO), timeStart: c.timeStart, modality: c.modality, pricePerPerson: c.pricePerPerson, maxPlaces: c.maxPlaces, placesTaken: c.placesTaken, status: c.status, bookings: c.bookings.map((b) => ({ id: b.id, name: b.name, contact: b.contact, people: b.people, message: b.message, status: b.status })) }))}
+          charters={await buildDashboardCharters(charters, { reviewerUserId: user.id })}
         />
       </div>
     )
@@ -131,11 +137,12 @@ export default async function CuentaPage({ searchParams }: { searchParams: Promi
       </section>
       <section className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         <AccountPanel
-          user={{ name: user.name, phone: user.phone, bio: user.bio, avatar: user.avatar, email: user.email }}
+          user={{ name: user.name, phone: user.phone, bio: user.bio, avatar: user.avatar, email: user.email, avgRating: user.avgRating, reviewCount: user.reviewCount }}
           avatarChoices={[...AVATAR_CHOICES]}
           bookings={bookings}
           rsvps={rsvps}
           threads={threads}
+          received={received}
           hasOperator={!!owned}
           operatorSlot={operatorSlot}
           initialTab={initialTab}

@@ -143,6 +143,9 @@ model User {
   bio           String   @default("")
   avatar        String   @default("") // emoji elegido por el usuario
   emailVerified Boolean  @default(false)
+  // Reputación como pescador (denormalizada desde Review 'toAngler').
+  avgRating     Float    @default(0)
+  reviewCount   Int      @default(0)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -178,19 +181,26 @@ model LoginToken {
   @@index([email])
 }
 
-// Reseña del pescador al patrón tras una salida (confianza tipo marketplace).
+// Reseña tras una salida, en ambos sentidos (confianza tipo marketplace):
+// el pescador valora al patrón y el patrón valora a cada pescador que embarcó.
 model Review {
   id           String   @id @default(cuid())
   operatorId   String
   charterId    String   @default("")
   authorUserId String
+  // 'toOperator' = pescador→patrón · 'toAngler' = patrón→pescador
+  direction    String   @default("toOperator")
+  // Pescador valorado (solo en 'toAngler'); "" cuando se valora al patrón.
+  subjectUserId String  @default("")
   rating       Int // 1..5
   text         String   @default("")
   createdAt    DateTime @default(now())
   author       User     @relation("ReviewAuthor", fields: [authorUserId], references: [id], onDelete: Cascade)
 
-  @@unique([charterId, authorUserId])
+  // Un autor deja una reseña por sujeto y salida (el patrón valora a varios).
+  @@unique([charterId, authorUserId, subjectUserId])
   @@index([operatorId])
+  @@index([subjectUserId])
 }
 
 // Conversación in-app entre un pescador y un patrón sobre un chárter concreto.

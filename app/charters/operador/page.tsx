@@ -4,12 +4,13 @@ import Layout from '@/components/Layout'
 import OperatorRegister from '@/components/charters/OperatorRegister'
 import OperatorDashboard from '@/components/charters/OperatorDashboard'
 import { getOperatorByToken } from '@/lib/operators-store'
+import { getSessionUser } from '@/lib/auth'
+import { buildDashboardCharters } from '@/lib/operator-view'
 import { syncOperatorStripe } from '@/lib/charter-payments'
 import { stripeConfigured } from '@/lib/stripe'
 import { listChartersByOperator } from '@/lib/charters-store'
-import { FISHING_SPOTS, getSpot } from '@/lib/fishing-spots'
+import { FISHING_SPOTS } from '@/lib/fishing-spots'
 import { SEA_SPECIES } from '@/lib/fishing-species'
-import { fmtDayLabel } from '@/lib/solunar-format'
 
 export const metadata: Metadata = {
   title: '¿Eres patrón? Ofrece tus salidas de pesca',
@@ -34,6 +35,10 @@ export default async function OperatorPage({ searchParams }: Params) {
     if (paymentsAvailable && operator.stripeAccountId && (!operator.stripeReady || stripe === 'done')) {
       stripeReady = await syncOperatorStripe(operator)
     }
+    // Valorar pescadores exige sesión: solo se ofrece si quien mira es la
+    // cuenta dueña de este perfil (la API lo verifica igualmente).
+    const viewer = await getSessionUser()
+    const reviewerUserId = viewer && operator.userId === viewer.id ? viewer.id : null
     const charters = await listChartersByOperator(operator.id)
     return (
       <Layout>
@@ -57,7 +62,7 @@ export default async function OperatorPage({ searchParams }: Params) {
             spots={spots}
             species={species}
             profile={{ name: operator.name, businessName: operator.businessName, phone: operator.phone, boatName: operator.boatName, boatType: operator.boatType, capacity: operator.capacity, bio: operator.bio }}
-            charters={charters.map((c) => ({ id: c.id, spotName: getSpot(c.spotSlug)?.name ?? c.spotSlug, dateISO: c.dateISO, dayLabel: fmtDayLabel(c.dateISO), timeStart: c.timeStart, modality: c.modality, pricePerPerson: c.pricePerPerson, maxPlaces: c.maxPlaces, placesTaken: c.placesTaken, status: c.status, bookings: c.bookings.map((b) => ({ id: b.id, name: b.name, contact: b.contact, people: b.people, message: b.message, status: b.status })) }))}
+            charters={await buildDashboardCharters(charters, { reviewerUserId: reviewerUserId })}
           />
         </section>
       </Layout>

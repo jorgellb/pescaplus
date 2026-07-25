@@ -13,7 +13,8 @@ export interface BookingRow {
 }
 export interface RsvpRow { id: string; meetupId: string; status: string; dayLabel: string; spotName: string; kind: string }
 export interface ThreadRow { id: string; otherName: string; charterLabel: string; lastBody: string; unread: number }
-interface U { name: string; phone: string; bio: string; avatar: string; email: string }
+export interface ReceivedReview { id: string; authorName: string; authorAvatar: string; rating: number; text: string }
+interface U { name: string; phone: string; bio: string; avatar: string; email: string; avgRating: number; reviewCount: number }
 type Tab = 'reservas' | 'mensajes' | 'perfil' | 'patron'
 
 const BOOKING_STATUS: Record<string, { label: string; cls: string }> = {
@@ -23,8 +24,8 @@ const BOOKING_STATUS: Record<string, { label: string; cls: string }> = {
   cancelled: { label: 'Cancelada', cls: 'text-red-700' },
 }
 
-export default function AccountPanel({ user, avatarChoices, bookings, rsvps, threads, hasOperator, operatorSlot, initialTab = 'reservas' }: {
-  user: U; avatarChoices: string[]; bookings: BookingRow[]; rsvps: RsvpRow[]; threads: ThreadRow[]; hasOperator: boolean; operatorSlot?: ReactNode; initialTab?: Tab
+export default function AccountPanel({ user, avatarChoices, bookings, rsvps, threads, received, hasOperator, operatorSlot, initialTab = 'reservas' }: {
+  user: U; avatarChoices: string[]; bookings: BookingRow[]; rsvps: RsvpRow[]; threads: ThreadRow[]; received: ReceivedReview[]; hasOperator: boolean; operatorSlot?: ReactNode; initialTab?: Tab
 }) {
   const router = useRouter()
   const [tab, setTab] = useState<Tab>(initialTab)
@@ -135,6 +136,31 @@ export default function AccountPanel({ user, avatarChoices, bookings, rsvps, thr
 
       {tab === 'perfil' && (
         <div className="space-y-4">
+          <div className="border border-ink/15 rounded-2xl bg-paper p-5 max-w-xl">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Tu reputación como pescador</p>
+            {user.reviewCount > 0 ? (
+              <>
+                <p className="font-display text-2xl leading-tight mt-1 text-ink">
+                  <span className="text-amber-500">★</span> {user.avgRating.toFixed(1)}
+                  <span className="text-ink/45 text-base"> · {user.reviewCount} {user.reviewCount === 1 ? 'valoración' : 'valoraciones'}</span>
+                </p>
+                <div className="space-y-2 mt-3">
+                  {received.map((r) => (
+                    <div key={r.id} className="border-t border-ink/10 pt-2">
+                      <p className="text-sm">
+                        <span className="mr-1">{r.authorAvatar}</span>
+                        <span className="font-bold text-ink">{r.authorName}</span>
+                        <span className="ml-2 text-amber-500">{'★'.repeat(r.rating)}<span className="text-ink/20">{'★'.repeat(5 - r.rating)}</span></span>
+                      </p>
+                      {r.text && <p className="text-[13px] text-ink/75 mt-0.5">{r.text}</p>}
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <p className="text-sm text-ink/60 mt-1">Aún no tienes valoraciones. Los patrones podrán valorarte tras cada salida, igual que tú a ellos.</p>
+            )}
+          </div>
           <ProfileForm user={user} avatarChoices={avatarChoices} />
           <form action="/api/auth/logout" method="post">
             <button type="submit" className="text-xs font-bold uppercase tracking-wide text-red-700 hover:underline">Cerrar sesión</button>
