@@ -58,7 +58,7 @@ export async function syncOperatorStripe(operator: Operator): Promise<boolean> {
 /** Create a Checkout Session for a paid booking (destination charge + platform fee). */
 export async function createCharterCheckout(
   charter: Charter,
-  buyer: { name: string; contact: string; people: number; message?: string },
+  buyer: { name: string; contact: string; people: number; message?: string; userId?: string | null },
 ): Promise<string> {
   if (!stripe) throw new Error('Pagos no configurados.')
   if (!charter.operator?.stripeReady || !charter.operator) throw new Error('Este chárter aún no acepta pago online.')
@@ -90,6 +90,7 @@ export async function createCharterCheckout(
       buyerContact: buyer.contact.slice(0, 100),
       people: String(people),
       note: (buyer.message ?? '').slice(0, 200),
+      userId: buyer.userId ?? '',
     },
     success_url: `${SITE_URL}/charters/${charter.id}?pagado=1`,
     cancel_url: `${SITE_URL}/charters/${charter.id}?cancelado=1`,

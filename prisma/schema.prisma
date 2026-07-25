@@ -134,6 +134,65 @@ model ForecastCheck {
   @@index([spotSlug, resolvedAt])
 }
 
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String   @default("")
+  phone         String   @default("")
+  phoneVerified Boolean  @default(false)
+  bio           String   @default("")
+  avatar        String   @default("") // emoji elegido por el usuario
+  emailVerified Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  sessions Session[]
+  bookings CharterBooking[]
+  rsvps    Rsvp[]
+  operator Operator?
+  reviews  Review[]         @relation("ReviewAuthor")
+
+  @@index([email])
+}
+
+// Sesión de acceso (cookie httpOnly guarda el id). En BD para poder revocar.
+model Session {
+  id        String   @id
+  userId    String
+  userAgent String   @default("")
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// Token de un solo uso del enlace mágico de acceso.
+model LoginToken {
+  id        String    @id
+  email     String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([email])
+}
+
+// Reseña del pescador al patrón tras una salida (confianza tipo marketplace).
+model Review {
+  id           String   @id @default(cuid())
+  operatorId   String
+  charterId    String   @default("")
+  authorUserId String
+  rating       Int // 1..5
+  text         String   @default("")
+  createdAt    DateTime @default(now())
+  author       User     @relation("ReviewAuthor", fields: [authorUserId], references: [id], onDelete: Cascade)
+
+  @@unique([charterId, authorUserId])
+  @@index([operatorId])
+}
+
 model Meetup {
   id           String   @id @default(cuid())
   // Secret token: whoever holds it can edit/cancel the meetup (no accounts).
@@ -167,14 +226,17 @@ model Meetup {
 model Rsvp {
   id        String   @id @default(cuid())
   meetupId  String
+  userId    String? // vinculado a la cuenta si el pescador estaba logueado
   name      String
   contact   String   @default("")
   places    Int      @default(1)
   status    String   @default("in") // in | out
   createdAt DateTime @default(now())
   meetup    Meetup   @relation(fields: [meetupId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([meetupId])
+  @@index([userId])
 }
 
 model ZoneMeetupAlert {
@@ -208,8 +270,14 @@ model Operator {
   // Stripe Connect (Express) — set when the operator connects payouts.
   stripeAccountId String @default("")
   stripeReady     Boolean @default(false)
+  // Reputación (denormalizada desde Review para listados rápidos).
+  avgRating    Float     @default(0)
+  reviewCount  Int       @default(0)
+  // Cuenta de usuario dueña de este perfil de patrón (si se registró logueado).
+  userId       String?   @unique
   createdAt    DateTime  @default(now())
   charters     Charter[]
+  user         User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([spotSlug])
   @@index([verified])
@@ -242,6 +310,7 @@ model Charter {
 model CharterBooking {
   id        String   @id @default(cuid())
   charterId String
+  userId    String? // vinculado a la cuenta si el pescador estaba logueado
   name      String
   contact   String
   people    Int      @default(1)
@@ -250,6 +319,8 @@ model CharterBooking {
   status    String   @default("requested")
   createdAt DateTime @default(now())
   charter   Charter  @relation(fields: [charterId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([charterId])
+  @@index([userId])
 }

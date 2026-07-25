@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { requestBooking } from '@/lib/charters-store'
+import { getUserFromRequest } from '@/lib/auth'
 import { rateLimit, clientIp } from '@/lib/rate-limit'
 
 const schema = z.object({
@@ -19,7 +20,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   if (!parsed.success) return NextResponse.json({ success: false, error: 'Revisa tus datos.' }, { status: 400 })
   if (parsed.data.website) return NextResponse.json({ success: true })
   try {
-    const booking = await requestBooking(id, parsed.data)
+    const user = await getUserFromRequest(request)
+    const booking = await requestBooking(id, { ...parsed.data, userId: user?.id ?? null })
     return NextResponse.json({ success: true, bookingId: booking.id })
   } catch (error) {
     return NextResponse.json({ success: false, error: (error as Error).message }, { status: 400 })

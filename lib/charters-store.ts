@@ -25,6 +25,7 @@ export interface CharterInput {
 export interface CharterBooking {
   id: string
   charterId: string
+  userId: string | null
   name: string
   contact: string
   people: number
@@ -45,6 +46,8 @@ export interface OperatorPublic {
   verified: boolean
   stripeReady: boolean
   spotSlug: string
+  avgRating: number
+  reviewCount: number
 }
 
 export interface Charter {
@@ -84,6 +87,8 @@ function operatorPublic(o: Operator): OperatorPublic {
     verified: o.verified,
     stripeReady: o.stripeReady,
     spotSlug: o.spotSlug,
+    avgRating: o.avgRating,
+    reviewCount: o.reviewCount,
   }
 }
 
@@ -153,6 +158,7 @@ function bookingFromRow(row: any): CharterBooking {
   return {
     id: row.id,
     charterId: row.charterId,
+    userId: row.userId ?? null,
     name: row.name,
     contact: row.contact ?? '',
     people: row.people,
@@ -273,6 +279,7 @@ function rowOperatorToOperator(row: any): Operator {
     licenseRef: row.licenseRef ?? '', insuranceRef: row.insuranceRef ?? '', bio: row.bio ?? '',
     verified: row.verified, verifiedAt: row.verifiedAt instanceof Date ? row.verifiedAt.getTime() : row.verifiedAt ?? null,
     stripeAccountId: row.stripeAccountId ?? '', stripeReady: row.stripeReady ?? false,
+    avgRating: row.avgRating ?? 0, reviewCount: row.reviewCount ?? 0, userId: row.userId ?? null,
     createdAt: row.createdAt instanceof Date ? row.createdAt.getTime() : row.createdAt,
   }
 }
@@ -298,11 +305,12 @@ export async function cancelCharter(id: string, operatorId: string, manageToken:
 }
 
 /** Angler requests a place (no payment yet). Never auto-accepts. */
-export async function requestBooking(charterId: string, input: { name: string; contact: string; people?: number; message?: string }): Promise<CharterBooking> {
+export async function requestBooking(charterId: string, input: { name: string; contact: string; people?: number; message?: string; userId?: string | null }): Promise<CharterBooking> {
   const name = (input.name ?? '').trim().slice(0, 80)
   const contact = (input.contact ?? '').trim().slice(0, 120)
   const people = Math.min(20, Math.max(1, Math.round(Number(input.people) || 1)))
   const message = (input.message ?? '').trim().slice(0, 400)
+  const userId = input.userId || null
   if (!name) throw new Error('Falta tu nombre.')
   if (!contact) throw new Error('Falta un contacto (email o teléfono).')
 
@@ -313,14 +321,14 @@ export async function requestBooking(charterId: string, input: { name: string; c
   if (isDatabaseConfigured()) {
     const { prisma } = await import('@/lib/prisma')
     try {
-      const row = await prisma.charterBooking.create({ data: { charterId, name, contact, people, message } })
+      const row = await prisma.charterBooking.create({ data: { charterId, userId, name, contact, people, message } })
       return bookingFromRow(row)
     } catch (error) {
       console.error('Booking write failed — not falling back to memory:', error)
       throw new Error(WRITE_FAIL)
     }
   }
-  const b: CharterBooking = { id: `cb-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, charterId, name, contact, people, message, status: 'requested', createdAt: Date.now() }
+  const b: CharterBooking = { id: `cb-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, charterId, userId, name, contact, people, message, status: 'requested', createdAt: Date.now() }
   memB().push(b)
   return b
 }
@@ -332,11 +340,12 @@ export async function requestBooking(charterId: string, input: { name: string; c
  */
 export async function createPaidBooking(
   charterId: string,
-  input: { name: string; contact: string; people: number; message?: string; paymentRef: string },
+  input: { name: string; contact: string; people: number; message?: string; paymentRef: string; userId?: string | null },
 ): Promise<void> {
   const name = (input.name ?? '').trim().slice(0, 80) || 'Reserva'
   const contact = (input.contact ?? '').trim().slice(0, 120)
   const people = Math.min(20, Math.max(1, Math.round(Number(input.people) || 1)))
+  const userId = input.userId || null
   const message = `${(input.message ?? '').trim().slice(0, 300)} [pago ${input.paymentRef}]`.trim()
 
   if (isDatabaseConfigured()) {
@@ -344,7 +353,7 @@ export async function createPaidBooking(
     try {
       const existing = await prisma.charterBooking.findFirst({ where: { charterId, message: { contains: input.paymentRef } } })
       if (existing) return
-      await prisma.charterBooking.create({ data: { charterId, name, contact, people, message, status: 'paid' } })
+      await prisma.charterBooking.create({ data: { charterId, userId, name, contact, people, message, status: 'paid' } })
       const after = await getCharter(charterId)
       if (after && after.placesTaken >= after.minToConfirm && after.status === 'open') {
         await prisma.charter.update({ where: { id: charterId }, data: { status: 'confirmed' } })
@@ -356,10 +365,44 @@ export async function createPaidBooking(
     return
   }
   if (memB().some((b) => b.charterId === charterId && b.message.includes(input.paymentRef))) return
-  memB().push({ id: `cb-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, charterId, name, contact, people, message, status: 'paid', createdAt: Date.now() })
+  memB().push({ id: `cb-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, charterId, userId, name, contact, people, message, status: 'paid', createdAt: Date.now() })
   const after = await getCharter(charterId)
   const stored = memC().find((x) => x.id === charterId)
   if (after && stored && after.placesTaken >= after.minToConfirm && stored.status === 'open') stored.status = 'confirmed'
+}
+
+export interface UserBooking {
+  booking: CharterBooking
+  charter: Charter
+}
+
+/** Every charter booking made by a user, with its charter (for "Mis reservas"). */
+export async function listBookingsByUser(userId: string): Promise<UserBooking[]> {
+  if (!userId) return []
+  if (isDatabaseConfigured()) {
+    try {
+      const { prisma } = await import('@/lib/prisma')
+      const rows = await prisma.charterBooking.findMany({
+        where: { userId, status: { not: 'declined' } },
+        orderBy: { createdAt: 'desc' },
+        include: { charter: { include: { bookings: true, operator: true } } },
+        take: 100,
+      })
+      return rows.map((r) => ({
+        booking: bookingFromRow(r),
+        charter: assemble(baseFromRow(r.charter), r.charter.operator ? rowOperatorToOperator(r.charter.operator) : null, r.charter.bookings.map(bookingFromRow)),
+      }))
+    } catch (error) {
+      console.warn('User bookings read failed, using memory:', error)
+    }
+  }
+  const out: UserBooking[] = []
+  for (const b of memB()) {
+    if (b.userId !== userId || b.status === 'declined') continue
+    const charter = await getCharter(b.charterId)
+    if (charter) out.push({ booking: b, charter })
+  }
+  return out.sort((a, b) => b.booking.createdAt - a.booking.createdAt)
 }
 
 /** Operator accepts / declines a booking. Accepting auto-confirms the charter at the minimum. */

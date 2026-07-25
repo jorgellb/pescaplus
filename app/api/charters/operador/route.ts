@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { registerOperator, validateOperator } from '@/lib/operators-store'
+import { registerOperator, validateOperator, getOperatorByUser } from '@/lib/operators-store'
+import { getUserFromRequest } from '@/lib/auth'
 import { getSpot } from '@/lib/fishing-spots'
 import { rateLimit, clientIp } from '@/lib/rate-limit'
 
@@ -29,7 +30,12 @@ export async function POST(request: NextRequest) {
   const err = validateOperator(parsed.data)
   if (err) return NextResponse.json({ success: false, error: err }, { status: 400 })
   try {
-    const op = await registerOperator(parsed.data)
+    const user = await getUserFromRequest(request)
+    // Un usuario logueado solo puede tener un perfil de patrón.
+    if (user && (await getOperatorByUser(user.id))) {
+      return NextResponse.json({ success: false, error: 'Tu cuenta ya tiene un perfil de patrón.' }, { status: 400 })
+    }
+    const op = await registerOperator(parsed.data, user?.id ?? null)
     return NextResponse.json({ success: true, id: op.id, manageToken: op.manageToken }, { status: 201 })
   } catch (error) {
     return NextResponse.json({ success: false, error: (error as Error).message }, { status: 500 })

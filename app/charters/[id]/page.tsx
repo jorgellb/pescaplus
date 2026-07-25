@@ -5,6 +5,7 @@ import Layout from '@/components/Layout'
 import RequestBooking from '@/components/charters/RequestBooking'
 import PayBooking from '@/components/charters/PayBooking'
 import { getCharter } from '@/lib/charters-store'
+import { listReviewsForOperator } from '@/lib/reviews-store'
 import { getSpot } from '@/lib/fishing-spots'
 import { getSpecies } from '@/lib/fishing-species'
 import { getMarineForecast, groupByDay, bestWindow, getModality } from '@/lib/marine-forecast'
@@ -23,6 +24,7 @@ export default async function CharterPage({ params, searchParams }: { params: Pr
   const spot = getSpot(charter.spotSlug)
   const sp = charter.targetSpecies ? getSpecies(charter.targetSpecies) : null
   const modality = getModality(charter.modality)
+  const reviews = charter.operator.reviewCount > 0 ? await listReviewsForOperator(charter.operatorId, 8) : []
   const full = charter.placesTaken >= charter.maxPlaces
   const cancelled = charter.status === 'cancelled'
 
@@ -70,7 +72,9 @@ export default async function CharterPage({ params, searchParams }: { params: Pr
         {/* Operador verificado */}
         <div className="border border-accent/30 rounded-2xl bg-accent/[0.04] p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">⚓ Patrón profesional verificado ✓</p>
-          <p className="text-[15px] font-bold text-ink mt-1">{charter.operator.businessName || charter.operator.name}</p>
+          <p className="text-[15px] font-bold text-ink mt-1">{charter.operator.businessName || charter.operator.name}
+            {charter.operator.reviewCount > 0 && <span className="ml-2 text-[13px] font-normal text-amber-600">★ {charter.operator.avgRating.toFixed(1)} <span className="text-ink/45">({charter.operator.reviewCount})</span></span>}
+          </p>
           <p className="text-[13px] text-ink/70">{charter.operator.boatName} {charter.operator.boatType}{charter.operator.capacity ? ` · ${charter.operator.capacity} plazas` : ''}</p>
           {charter.operator.bio && <p className="text-[13px] text-ink/70 mt-1">{charter.operator.bio}</p>}
           <p className="font-mono text-[10px] uppercase tracking-wide text-ink/40 mt-1">Licencia y seguro comprobados por PescaPlus.</p>
@@ -96,6 +100,22 @@ export default async function CharterPage({ params, searchParams }: { params: Pr
         {!cancelled && (charter.operator.stripeReady
           ? <PayBooking id={charter.id} full={full} price={charter.pricePerPerson} />
           : <RequestBooking id={charter.id} full={full} price={charter.pricePerPerson} />)}
+
+        {reviews.length > 0 && (
+          <div className="space-y-3 border-t border-ink/12 pt-6">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">⭐ Opiniones de pescadores ({charter.operator.reviewCount})</p>
+            {reviews.map((r) => (
+              <div key={r.id} className="border border-ink/12 rounded-2xl bg-paper p-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">{r.authorAvatar}</span>
+                  <span className="font-bold text-ink text-sm">{r.authorName}</span>
+                  <span className="text-amber-500 text-sm">{'★'.repeat(r.rating)}<span className="text-ink/20">{'★'.repeat(5 - r.rating)}</span></span>
+                </div>
+                {r.text && <p className="text-[14px] text-ink/80 mt-1.5">{r.text}</p>}
+              </div>
+            ))}
+          </div>
+        )}
 
         <p className="text-[12px] text-ink/50 leading-relaxed border-t border-ink/12 pt-6">
           Salida con patrón profesional verificado. Cada participante debe llevar su documentación.{charter.operator.stripeReady

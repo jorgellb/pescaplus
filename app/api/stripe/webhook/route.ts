@@ -27,6 +27,7 @@ export async function POST(request: NextRequest) {
           contact: m.buyerContact || '',
           people: Number(m.people) || 1,
           message: m.note || '',
+          userId: m.userId || null,
           paymentRef: (typeof s.payment_intent === 'string' ? s.payment_intent : s.id),
         })
       }

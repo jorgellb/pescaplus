@@ -42,6 +42,11 @@ export interface Operator {
   stripeAccountId: string
   /** True when Stripe onboarding is complete and payouts/charges are enabled. */
   stripeReady: boolean
+  /** Average review score (denormalized) + how many reviews. */
+  avgRating: number
+  reviewCount: number
+  /** Owning user account (if the operator registered while logged in). */
+  userId: string | null
   createdAt: number
 }
 
@@ -107,26 +112,81 @@ function rowToOperator(row: any): Operator {
     verifiedAt: row.verifiedAt instanceof Date ? row.verifiedAt.getTime() : row.verifiedAt ?? null,
     stripeAccountId: row.stripeAccountId ?? '',
     stripeReady: row.stripeReady ?? false,
+    avgRating: row.avgRating ?? 0,
+    reviewCount: row.reviewCount ?? 0,
+    userId: row.userId ?? null,
     createdAt: row.createdAt instanceof Date ? row.createdAt.getTime() : row.createdAt,
   }
 }
 
-export async function registerOperator(input: OperatorInput): Promise<OperatorWithToken> {
+export async function registerOperator(input: OperatorInput, userId?: string | null): Promise<OperatorWithToken> {
   const data = clean(input)
   const manageToken = token()
+  const owner = userId || null
   if (isDatabaseConfigured()) {
     const { prisma } = await import('@/lib/prisma')
     try {
-      const row = await prisma.operator.create({ data: { ...data, manageToken } })
+      const row = await prisma.operator.create({ data: { ...data, manageToken, userId: owner } })
       return { ...rowToOperator(row), manageToken }
     } catch (error) {
       console.error('Operator write failed — not falling back to memory:', error)
       throw new Error(WRITE_FAIL)
     }
   }
-  const stored: StoredOperator = { id: `mem-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, ...data, verified: false, verifiedAt: null, stripeAccountId: '', stripeReady: false, createdAt: Date.now(), manageToken }
+  const stored: StoredOperator = { id: `mem-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, ...data, verified: false, verifiedAt: null, stripeAccountId: '', stripeReady: false, avgRating: 0, reviewCount: 0, userId: owner, createdAt: Date.now(), manageToken }
   mem().unshift(stored)
   return { ...stored }
+}
+
+/** The operator profile owned by a user account (if they registered as patrón). */
+export async function getOperatorByUser(userId: string): Promise<Operator | null> {
+  if (!userId) return null
+  if (isDatabaseConfigured()) {
+    try {
+      const { prisma } = await import('@/lib/prisma')
+      const row = await prisma.operator.findUnique({ where: { userId } })
+      return row ? rowToOperator(row) : null
+    } catch (error) {
+      console.warn('Operator by user read failed:', error)
+    }
+  }
+  return mem().find((o) => o.userId === userId) ?? null
+}
+
+/** Owner-scoped: the operator + its manageToken for the account that owns it. */
+export async function getOwnedOperator(userId: string): Promise<OperatorWithToken | null> {
+  if (!userId) return null
+  if (isDatabaseConfigured()) {
+    try {
+      const { prisma } = await import('@/lib/prisma')
+      const row = await prisma.operator.findUnique({ where: { userId } })
+      return row ? { ...rowToOperator(row), manageToken: row.manageToken } : null
+    } catch (error) {
+      console.warn('Owned operator read failed:', error)
+    }
+  }
+  const o = mem().find((x) => x.userId === userId)
+  return o ? { ...o } : null
+}
+
+/** Link an existing (token-managed) operator to a user account. */
+export async function linkOperatorToUser(operatorId: string, manageToken: string, userId: string): Promise<Operator | null> {
+  const op = await getOperatorByToken(operatorId, manageToken)
+  if (!op) return null
+  if (op.userId && op.userId !== userId) return null // ya vinculado a otra cuenta
+  if (isDatabaseConfigured()) {
+    try {
+      const { prisma } = await import('@/lib/prisma')
+      const row = await prisma.operator.update({ where: { id: operatorId }, data: { userId } })
+      return rowToOperator(row)
+    } catch (error) {
+      console.error('Operator link failed:', error)
+      throw new Error(WRITE_FAIL)
+    }
+  }
+  const stored = mem().find((o) => o.id === operatorId)
+  if (stored) stored.userId = userId
+  return stored ? { ...stored } : null
 }
 
 /** Save the operator's Stripe Connect account id (when first created). */

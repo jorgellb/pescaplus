@@ -13,8 +13,16 @@ export default function Navbar() {
   const [catOpen, setCatOpen] = useState(false)
   const [names, setNames] = useState<Record<string, string>>({})
   const [favCount, setFavCount] = useState(0)
+  const [account, setAccount] = useState<{ avatar: string } | null>(null)
   const pathname = usePathname()
   const catRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then((r) => r.json())
+      .then((d) => setAccount(d.user ? { avatar: d.user.avatar } : null))
+      .catch(() => {})
+  }, [pathname])
 
   useEffect(() => {
     const update = () => setFavCount(getFavorites().length)
@@ -124,6 +132,16 @@ export default function Navbar() {
                 <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-accent text-paper text-[10px] font-bold rounded-full flex items-center justify-center">{favCount}</span>
               )}
             </Link>
+            {/* Cuenta: avatar si hay sesión, "Entrar" si no. /cuenta redirige a /entrar si no hay sesión. */}
+            <Link
+              href={account ? '/cuenta' : '/entrar'}
+              aria-label={account ? 'Mi cuenta' : 'Entrar'}
+              className="inline-flex items-center justify-center w-10 h-10 border border-ink/15 rounded-xl text-ink hover:bg-ink hover:text-paper transition-colors"
+            >
+              {account ? <span className="text-lg leading-none">{account.avatar}</span> : (
+                <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+              )}
+            </Link>
             {/* Opens the floating chat widget; falls back to the full page if it isn't mounted. */}
             <Link
               href="/advice"
@@ -187,6 +205,9 @@ export default function Navbar() {
             <Link href="/guias" onClick={() => setMobileMenuOpen(false)} className="text-center px-3 py-2.5 text-sm font-bold uppercase border border-ink/15 rounded-xl text-ink">Guías</Link>
             <Link href="/favoritos" onClick={() => setMobileMenuOpen(false)} className="text-center px-3 py-2.5 text-sm font-bold uppercase border border-ink/15 rounded-xl text-ink">
               Favoritos{favCount > 0 ? ` (${favCount})` : ''}
+            </Link>
+            <Link href={account ? '/cuenta' : '/entrar'} onClick={() => setMobileMenuOpen(false)} className="text-center px-3 py-2.5 text-sm font-bold uppercase border border-ink/15 rounded-xl text-ink col-span-2">
+              {account ? `${account.avatar} Mi cuenta` : '👤 Entrar / Crear cuenta'}
             </Link>
           </div>
           <div className="pt-3 pb-1">

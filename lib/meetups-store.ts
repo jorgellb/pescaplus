@@ -39,6 +39,7 @@ export interface MeetupInput {
 export interface Rsvp {
   id: string
   meetupId: string
+  userId: string | null
   name: string
   contact: string
   places: number
@@ -243,6 +244,7 @@ function rowToRsvp(row: any): Rsvp {
   return {
     id: row.id,
     meetupId: row.meetupId,
+    userId: row.userId ?? null,
     name: row.name,
     contact: row.contact ?? '',
     places: row.places,
@@ -362,11 +364,12 @@ export async function createMeetup(input: MeetupInput): Promise<MeetupWithToken>
 /** Join a meetup. Rejects when full or already closed. */
 export async function joinMeetup(
   id: string,
-  rsvp: { name: string; contact?: string; places?: number },
+  rsvp: { name: string; contact?: string; places?: number; userId?: string | null },
 ): Promise<{ meetup: Meetup; waitlisted: boolean }> {
   const name = (rsvp.name ?? '').trim().slice(0, 60)
   const contact = (rsvp.contact ?? '').trim().slice(0, 120)
   const places = Math.min(10, Math.max(1, Math.round(Number(rsvp.places) || 1)))
+  const userId = rsvp.userId || null
   if (!name) throw new Error('Falta tu nombre.')
 
   const current = await getMeetup(id)
@@ -379,7 +382,7 @@ export async function joinMeetup(
   if (isDatabaseConfigured()) {
     const { prisma } = await import('@/lib/prisma')
     try {
-      await prisma.rsvp.create({ data: { meetupId: id, name, contact, places, status } })
+      await prisma.rsvp.create({ data: { meetupId: id, userId, name, contact, places, status } })
       if (!waitlisted && current.placesTaken + places >= current.minToConfirm && current.status === 'open') {
         await prisma.meetup.update({ where: { id }, data: { status: 'confirmed' } })
       }
@@ -389,10 +392,41 @@ export async function joinMeetup(
     }
     return { meetup: (await getMeetup(id))!, waitlisted }
   }
-  memRsvps().push({ id: `mr-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, meetupId: id, name, contact, places, status, createdAt: Date.now() })
+  memRsvps().push({ id: `mr-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, meetupId: id, userId, name, contact, places, status, createdAt: Date.now() })
   const stored = memMeetups().find((m) => m.id === id)
   if (!waitlisted && stored && current.placesTaken + places >= stored.minToConfirm && stored.status === 'open') stored.status = 'confirmed'
   return { meetup: (await getMeetup(id))!, waitlisted }
+}
+
+export interface UserRsvp {
+  rsvp: Rsvp
+  meetup: Meetup
+}
+
+/** Every quedada a user has joined (for their account panel). */
+export async function listRsvpsByUser(userId: string): Promise<UserRsvp[]> {
+  if (!userId) return []
+  if (isDatabaseConfigured()) {
+    try {
+      const { prisma } = await import('@/lib/prisma')
+      const rows = await prisma.rsvp.findMany({
+        where: { userId, status: { not: 'out' } },
+        orderBy: { createdAt: 'desc' },
+        include: { meetup: { include: { rsvps: true } } },
+        take: 100,
+      })
+      return rows.map((r) => ({ rsvp: rowToRsvp(r), meetup: assemble(rowToBase(r.meetup), r.meetup.rsvps.map(rowToRsvp)) }))
+    } catch (error) {
+      console.warn('User RSVPs read failed, using memory:', error)
+    }
+  }
+  const out: UserRsvp[] = []
+  for (const r of memRsvps()) {
+    if (r.userId !== userId || r.status === 'out') continue
+    const meetup = await getMeetup(r.meetupId)
+    if (meetup) out.push({ rsvp: r, meetup })
+  }
+  return out.sort((a, b) => b.rsvp.createdAt - a.rsvp.createdAt)
 }
 
 /**
