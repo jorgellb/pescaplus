@@ -1,13 +1,14 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import Layout from '@/components/Layout'
-import AccountPanel, { type BookingRow, type RsvpRow } from '@/components/account/AccountPanel'
+import AccountPanel, { type BookingRow, type RsvpRow, type ThreadRow } from '@/components/account/AccountPanel'
 import OperatorDashboard from '@/components/charters/OperatorDashboard'
 import { getSessionUser } from '@/lib/auth'
-import { AVATAR_CHOICES } from '@/lib/users-store'
-import { listBookingsByUser, listChartersByOperator } from '@/lib/charters-store'
+import { AVATAR_CHOICES, getUserById } from '@/lib/users-store'
+import { listBookingsByUser, listChartersByOperator, getCharter } from '@/lib/charters-store'
 import { listRsvpsByUser } from '@/lib/meetups-store'
-import { getOwnedOperator } from '@/lib/operators-store'
+import { getOwnedOperator, getOperator } from '@/lib/operators-store'
+import { listInbox } from '@/lib/messages-store'
 import { getUserReviewForCharter } from '@/lib/reviews-store'
 import { stripeConfigured, PLATFORM_FEE_PERCENT } from '@/lib/stripe'
 import { FISHING_SPOTS, getSpot } from '@/lib/fishing-spots'
@@ -20,8 +21,8 @@ export const metadata: Metadata = {
   robots: { index: false, follow: true },
 }
 
-export default async function CuentaPage({ searchParams }: { searchParams: Promise<{ bienvenida?: string }> }) {
-  const { bienvenida } = await searchParams
+export default async function CuentaPage({ searchParams }: { searchParams: Promise<{ bienvenida?: string; tab?: string }> }) {
+  const { bienvenida, tab } = await searchParams
   const user = await getSessionUser()
   if (!user) redirect('/entrar')
 
@@ -31,6 +32,18 @@ export default async function CuentaPage({ searchParams }: { searchParams: Promi
     listRsvpsByUser(user.id),
     getOwnedOperator(user.id),
   ])
+
+  // Bandeja de mensajes (como pescador y, si lo es, como patrón).
+  const inbox = await listInbox(user.id, owned?.id)
+  const threads: ThreadRow[] = await Promise.all(inbox.map(async (t) => {
+    const otherName = t.role === 'user'
+      ? ((await getOperator(t.otherId))?.businessName || (await getOperator(t.otherId))?.name || 'Patrón')
+      : ((await getUserById(t.otherId))?.name || 'Pescador')
+    const c = await getCharter(t.charterId)
+    const charterLabel = c ? `${getSpot(c.spotSlug)?.name ?? c.spotSlug} · ${fmtDayLabel(c.dateISO)}` : 'Chárter'
+    return { id: t.id, otherName, charterLabel, lastBody: t.lastBody, unread: t.unread }
+  }))
+  const initialTab = tab === 'mensajes' ? 'mensajes' as const : tab === 'patron' && owned ? 'patron' as const : 'reservas' as const
 
   // Filas de reservas del pescador (con elegibilidad de reseña).
   const bookings: BookingRow[] = await Promise.all(userBookings.map(async ({ booking, charter }) => {
@@ -122,8 +135,10 @@ export default async function CuentaPage({ searchParams }: { searchParams: Promi
           avatarChoices={[...AVATAR_CHOICES]}
           bookings={bookings}
           rsvps={rsvps}
+          threads={threads}
           hasOperator={!!owned}
           operatorSlot={operatorSlot}
+          initialTab={initialTab}
         />
       </section>
     </Layout>

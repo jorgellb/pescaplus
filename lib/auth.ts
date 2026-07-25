@@ -3,6 +3,7 @@ import { cache } from 'react'
 import { cookies } from 'next/headers'
 import { isDatabaseConfigured } from '@/lib/products-store'
 import { findOrCreateUserByEmail, getUserById, isValidEmail, type User } from '@/lib/users-store'
+import { claimOperatorByEmail } from '@/lib/operators-store'
 import { sendEmail, emailConfigured } from '@/lib/email'
 import { SITE_URL } from '@/lib/seo'
 
@@ -88,7 +89,10 @@ export async function consumeMagicLink(token: string): Promise<User | null> {
     email = t.email
   }
   if (!email) return null
-  return findOrCreateUserByEmail(email)
+  const user = await findOrCreateUserByEmail(email)
+  // Vincula (por email demostrado) un perfil de patrón sin dueño, si lo hay.
+  await claimOperatorByEmail(email, user.id)
+  return user
 }
 
 // ---- Sessions -------------------------------------------------------------

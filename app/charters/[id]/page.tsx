@@ -4,8 +4,11 @@ import { notFound } from 'next/navigation'
 import Layout from '@/components/Layout'
 import RequestBooking from '@/components/charters/RequestBooking'
 import PayBooking from '@/components/charters/PayBooking'
+import AskOperator from '@/components/messages/AskOperator'
 import { getCharter } from '@/lib/charters-store'
 import { listReviewsForOperator } from '@/lib/reviews-store'
+import { getSessionUser } from '@/lib/auth'
+import { getOperatorByUser } from '@/lib/operators-store'
 import { getSpot } from '@/lib/fishing-spots'
 import { getSpecies } from '@/lib/fishing-species'
 import { getMarineForecast, groupByDay, bestWindow, getModality } from '@/lib/marine-forecast'
@@ -25,6 +28,9 @@ export default async function CharterPage({ params, searchParams }: { params: Pr
   const sp = charter.targetSpecies ? getSpecies(charter.targetSpecies) : null
   const modality = getModality(charter.modality)
   const reviews = charter.operator.reviewCount > 0 ? await listReviewsForOperator(charter.operatorId, 8) : []
+  const viewer = await getSessionUser()
+  const viewerOperator = viewer ? await getOperatorByUser(viewer.id) : null
+  const isOwner = !!viewerOperator && viewerOperator.id === charter.operatorId
   const full = charter.placesTaken >= charter.maxPlaces
   const cancelled = charter.status === 'cancelled'
 
@@ -78,6 +84,7 @@ export default async function CharterPage({ params, searchParams }: { params: Pr
           <p className="text-[13px] text-ink/70">{charter.operator.boatName} {charter.operator.boatType}{charter.operator.capacity ? ` · ${charter.operator.capacity} plazas` : ''}</p>
           {charter.operator.bio && <p className="text-[13px] text-ink/70 mt-1">{charter.operator.bio}</p>}
           <p className="font-mono text-[10px] uppercase tracking-wide text-ink/40 mt-1">Licencia y seguro comprobados por PescaPlus.</p>
+          {!cancelled && <div className="mt-3"><AskOperator charterId={charter.id} loggedIn={!!viewer} isOwner={isOwner} /></div>}
         </div>
 
         <div className="space-y-2 text-[15px] text-ink/85">

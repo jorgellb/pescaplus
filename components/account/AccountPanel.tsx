@@ -12,7 +12,9 @@ export interface BookingRow {
   isPast: boolean; canReview: boolean; reviewedRating: number
 }
 export interface RsvpRow { id: string; meetupId: string; status: string; dayLabel: string; spotName: string; kind: string }
+export interface ThreadRow { id: string; otherName: string; charterLabel: string; lastBody: string; unread: number }
 interface U { name: string; phone: string; bio: string; avatar: string; email: string }
+type Tab = 'reservas' | 'mensajes' | 'perfil' | 'patron'
 
 const BOOKING_STATUS: Record<string, { label: string; cls: string }> = {
   requested: { label: 'Solicitada', cls: 'text-amber-700' },
@@ -21,11 +23,12 @@ const BOOKING_STATUS: Record<string, { label: string; cls: string }> = {
   cancelled: { label: 'Cancelada', cls: 'text-red-700' },
 }
 
-export default function AccountPanel({ user, avatarChoices, bookings, rsvps, hasOperator, operatorSlot }: {
-  user: U; avatarChoices: string[]; bookings: BookingRow[]; rsvps: RsvpRow[]; hasOperator: boolean; operatorSlot?: ReactNode
+export default function AccountPanel({ user, avatarChoices, bookings, rsvps, threads, hasOperator, operatorSlot, initialTab = 'reservas' }: {
+  user: U; avatarChoices: string[]; bookings: BookingRow[]; rsvps: RsvpRow[]; threads: ThreadRow[]; hasOperator: boolean; operatorSlot?: ReactNode; initialTab?: Tab
 }) {
   const router = useRouter()
-  const [tab, setTab] = useState<'reservas' | 'perfil' | 'patron'>('reservas')
+  const [tab, setTab] = useState<Tab>(initialTab)
+  const totalUnread = threads.reduce((s, t) => s + t.unread, 0)
   const [busy, setBusy] = useState<string | null>(null)
   const [err, setErr] = useState('')
   const tabCls = (t: string) => `px-4 py-2.5 text-xs font-bold uppercase tracking-wide rounded-xl transition-colors ${tab === t ? 'bg-accent text-paper' : 'text-ink/60 hover:text-ink hover:bg-ink/5'}`
@@ -46,6 +49,7 @@ export default function AccountPanel({ user, avatarChoices, bookings, rsvps, has
     <div className="space-y-6">
       <div className="flex flex-wrap gap-2 border-b border-ink/10 pb-3">
         <button onClick={() => setTab('reservas')} className={tabCls('reservas')}>🎣 Mis reservas</button>
+        <button onClick={() => setTab('mensajes')} className={tabCls('mensajes')}>💬 Mensajes{totalUnread > 0 && <span className="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 bg-red-600 text-paper text-[10px] font-bold rounded-full align-middle">{totalUnread}</span>}</button>
         {hasOperator && <button onClick={() => setTab('patron')} className={tabCls('patron')}>⚓ Panel de patrón</button>}
         <button onClick={() => setTab('perfil')} className={tabCls('perfil')}>👤 Mi perfil</button>
       </div>
@@ -107,6 +111,23 @@ export default function AccountPanel({ user, avatarChoices, bookings, rsvps, has
               <Link href="/charters/operador" className="inline-block mt-3 bg-accent text-paper px-5 py-2.5 text-xs font-bold uppercase tracking-wide rounded-xl hover:bg-ink transition-colors">Darme de alta como patrón</Link>
             </div>
           )}
+        </div>
+      )}
+
+      {tab === 'mensajes' && (
+        <div className="space-y-3">
+          <p className="font-display uppercase text-xl leading-none">Conversaciones ({threads.length})</p>
+          {threads.length === 0 && <p className="text-sm text-ink/60">No tienes mensajes. Puedes escribir a un patrón desde la ficha de su chárter.</p>}
+          {threads.map((t) => (
+            <Link key={t.id} href={`/cuenta/mensajes/${t.id}`} className={`block border rounded-2xl p-4 transition-colors hover:border-accent/50 ${t.unread > 0 ? 'border-accent/40 bg-accent/[0.05]' : 'border-ink/15 bg-paper'}`}>
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-bold text-ink">{t.otherName}</span>
+                {t.unread > 0 && <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 bg-red-600 text-paper text-[10px] font-bold rounded-full">{t.unread}</span>}
+              </div>
+              <p className="text-[12px] text-ink/50">{t.charterLabel}</p>
+              {t.lastBody && <p className="text-[13px] text-ink/70 mt-1 truncate">{t.lastBody}</p>}
+            </Link>
+          ))}
         </div>
       )}
 

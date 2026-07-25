@@ -193,6 +193,26 @@ export async function getOperatorByUser(userId: string): Promise<Operator | null
   return mem().find((o) => o.userId === userId) ?? null
 }
 
+/**
+ * On login, claim an unowned operator whose email matches the account. The
+ * magic link proves control of that email — the same email used to register
+ * the patrón — so it's safe to link them (enables messaging, the /cuenta panel).
+ */
+export async function claimOperatorByEmail(email: string, userId: string): Promise<void> {
+  const norm = (email ?? '').trim().toLowerCase()
+  if (!norm || !userId) return
+  if (isDatabaseConfigured()) {
+    try {
+      const { prisma } = await import('@/lib/prisma')
+      // No pisar cuentas ya vinculadas ni robar operadores de otro usuario.
+      await prisma.operator.updateMany({ where: { email: norm, userId: null }, data: { userId } })
+    } catch (error) { console.warn('Operator claim-by-email failed:', error) }
+    return
+  }
+  const o = mem().find((x) => x.email === norm && !x.userId)
+  if (o) o.userId = userId
+}
+
 /** Owner-scoped: the operator + its manageToken for the account that owns it. */
 export async function getOwnedOperator(userId: string): Promise<OperatorWithToken | null> {
   if (!userId) return null

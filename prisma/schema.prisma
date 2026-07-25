@@ -193,6 +193,34 @@ model Review {
   @@index([operatorId])
 }
 
+// Conversación in-app entre un pescador y un patrón sobre un chárter concreto.
+model Thread {
+  id             String    @id @default(cuid())
+  charterId      String
+  operatorId     String
+  userId         String // el pescador
+  lastMessageAt  DateTime  @default(now())
+  unreadUser     Int       @default(0) // mensajes sin leer por el pescador
+  unreadOperator Int       @default(0) // mensajes sin leer por el patrón
+  createdAt      DateTime  @default(now())
+  messages       Message[]
+
+  @@unique([charterId, userId])
+  @@index([userId])
+  @@index([operatorId])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  threadId  String
+  sender    String // 'user' | 'operator'
+  body      String
+  createdAt DateTime @default(now())
+  thread    Thread   @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@index([threadId])
+}
+
 model Meetup {
   id           String   @id @default(cuid())
   // Secret token: whoever holds it can edit/cancel the meetup (no accounts).
