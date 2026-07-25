@@ -1,23 +1,46 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Layout from '@/components/Layout'
+import CharterFilters from '@/components/charters/CharterFilters'
 import { listPublicCharters } from '@/lib/charters-store'
-import { getSpot } from '@/lib/fishing-spots'
+import { parseCharterFilter, isFiltered, describeFilter } from '@/lib/charter-filters'
+import { FISHING_SPOTS, getSpot } from '@/lib/fishing-spots'
 import { getSpecies } from '@/lib/fishing-species'
 import { todayMadridISO, fmtDayLabel } from '@/lib/solunar-format'
 
 export const dynamic = 'force-dynamic'
 
-export const metadata: Metadata = {
+const BASE_METADATA: Metadata = {
   title: 'Chárters de pesca en España: sal con patrón profesional',
   description: 'Reserva una salida de pesca con patrón profesional verificado (licencia y seguro): barco, día, precio por persona y previsión del día. Directorio de chárters de pesca por zona.',
   alternates: { canonical: '/charters' },
 }
 
+/**
+ * Una combinación de filtros es una vista, no una página: se marca noindex y el
+ * canónico sigue apuntando al listado limpio, para no abrirle al rastreador un
+ * espacio infinito de URLs con el mismo contenido barajado.
+ */
+export async function generateMetadata({ searchParams }: Params): Promise<Metadata> {
+  const filter = parseCharterFilter(await searchParams)
+  if (!isFiltered(filter)) return BASE_METADATA
+  const label = describeFilter(filter)
+  return {
+    ...BASE_METADATA,
+    title: label ? `Chárters de pesca: ${label}` : BASE_METADATA.title as string,
+    robots: { index: false, follow: true },
+  }
+}
+
 const MOD: Record<string, string> = { tierra: '🏖️', kayak: '🛶', barco: '🚤' }
 
-export default async function ChartersHub() {
-  const charters = await listPublicCharters(todayMadridISO())
+type Params = { searchParams: Promise<Record<string, string | string[] | undefined>> }
+
+export default async function ChartersHub({ searchParams }: Params) {
+  const filter = parseCharterFilter(await searchParams)
+  const filtered = isFiltered(filter)
+  const charters = await listPublicCharters(todayMadridISO(), filter)
+  const spots = FISHING_SPOTS.map((s) => ({ slug: s.slug, name: s.name }))
   return (
     <Layout>
       <section className="bg-paper border-b border-ink/12">
@@ -32,11 +55,32 @@ export default async function ChartersHub() {
           </div>
         </div>
       </section>
-      <section className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
-        <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3 mb-5">Próximos chárters</h2>
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 py-10 space-y-6">
+        {/* Los filtros viven en la URL: la vista es compartible y navegable. */}
+        <CharterFilters initial={filter} spots={spots} resultCount={charters.length} />
+
+        <div>
+          <h2 className="font-display text-2xl md:text-3xl text-ink">
+            {filtered ? 'Resultados' : 'Próximos chárters'}
+          </h2>
+          {filtered && describeFilter(filter) && (
+            <p className="text-[14px] text-ink/55 mt-1">{describeFilter(filter)}</p>
+          )}
+        </div>
+
         {charters.length === 0 ? (
-          <div className="border border-ink/12 rounded-2xl bg-paper p-6 text-center text-ink/70">
-            Aún no hay chárters publicados. ¿Eres patrón profesional? <Link href="/charters/operador" className="text-accent underline">Regístrate y ofrece tus salidas</Link>.
+          <div className="border border-ink/[0.07] rounded-2xl bg-paper p-6 text-center text-ink/70">
+            {filtered ? (
+              <>
+                Ninguna salida coincide con esos filtros.{' '}
+                <Link href="/charters" className="text-accent font-semibold underline">Ver todos los chárters</Link>.
+              </>
+            ) : (
+              <>
+                Aún no hay chárters publicados. ¿Eres patrón profesional?{' '}
+                <Link href="/charters/operador" className="text-accent underline">Regístrate y ofrece tus salidas</Link>.
+              </>
+            )}
           </div>
         ) : (
           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">

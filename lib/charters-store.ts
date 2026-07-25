@@ -5,6 +5,7 @@ import {
   INCLUDED, EXCLUDED, POLICIES, SEASONS,
 } from '@/lib/charter-options'
 import { expandSeriesDates, type Repeat } from '@/lib/charter-recurrence'
+import { matches, EMPTY_FILTER, type CharterFilter } from '@/lib/charter-filters'
 
 /**
  * Charter listings + booking requests (Fase 1 skeleton). A verified operator
@@ -381,33 +382,53 @@ export async function getCharter(id: string): Promise<Charter | null> {
 }
 
 /** Public upcoming charters — verified operators only. */
-export async function listPublicCharters(fromDateISO: string, spotSlug?: string): Promise<Charter[]> {
+export async function listPublicCharters(
+  fromDateISO: string,
+  spotSlugOrFilter?: string | CharterFilter,
+): Promise<Charter[]> {
+  // Compat: la firma antigua aceptaba un slug de zona suelto.
+  const f: CharterFilter = typeof spotSlugOrFilter === 'string'
+    ? { ...EMPTY_FILTER, spotSlug: spotSlugOrFilter }
+    : spotSlugOrFilter ?? EMPTY_FILTER
+  // La fecha mínima efectiva: nunca mostramos salidas pasadas aunque el filtro
+  // pida un "desde" anterior a hoy.
+  const from = f.fromISO && f.fromISO > fromDateISO ? f.fromISO : fromDateISO
+
   if (isDatabaseConfigured()) {
     try {
       const { prisma } = await import('@/lib/prisma')
       const rows = await prisma.charter.findMany({
         where: {
           status: { not: 'cancelled' },
-          dateISO: { gte: fromDateISO },
-          ...(spotSlug ? { spotSlug } : {}),
+          dateISO: { gte: from, ...(f.untilISO ? { lte: f.untilISO } : {}) },
+          ...(f.spotSlug ? { spotSlug: f.spotSlug } : {}),
+          ...(f.tripType ? { tripType: f.tripType } : {}),
+          ...(f.maxPrice != null ? { pricePerPerson: { lte: f.maxPrice } } : {}),
+          ...(f.techniques.length ? { techniques: { hasSome: f.techniques } } : {}),
+          ...(f.species.length ? { species: { hasSome: f.species } } : {}),
+          ...(f.areas.length ? { areas: { hasSome: f.areas } } : {}),
           operator: { verified: true },
         },
         orderBy: [{ dateISO: 'asc' }, { timeStart: 'asc' }],
         include: { bookings: true, operator: true },
         take: 200,
       })
-      return rows.map((r) => assemble(baseFromRow(r), r.operator ? rowOperatorToOperator(r.operator) : null, r.bookings.map(bookingFromRow)))
+      const list = rows.map((r) => assemble(baseFromRow(r), r.operator ? rowOperatorToOperator(r.operator) : null, r.bookings.map(bookingFromRow)))
+      // El texto libre se resuelve aquí: acentos y varios campos a la vez son
+      // más simples (y más correctos) en JS que en un LIKE.
+      return f.q ? list.filter((c) => matches(c, f)) : list
     } catch (error) {
       console.warn('Charters read failed, using memory:', error)
     }
   }
   const out: Charter[] = []
   for (const c of memC()) {
-    if (c.status === 'cancelled' || c.dateISO < fromDateISO) continue
-    if (spotSlug && c.spotSlug !== spotSlug) continue
+    if (c.status === 'cancelled' || c.dateISO < from) continue
     const op = await getOperator(c.operatorId)
     if (!op?.verified) continue
-    out.push(assemble(c, op, memB().filter((b) => b.charterId === c.id)))
+    const full = assemble(c, op, memB().filter((b) => b.charterId === c.id))
+    if (!matches(full, f)) continue
+    out.push(full)
   }
   return out.sort((a, b) => a.dateISO.localeCompare(b.dateISO) || a.timeStart.localeCompare(b.timeStart))
 }
