@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { requestBooking } from '@/lib/charters-store'
+import { after } from 'next/server'
+import { requestBooking, getCharter } from '@/lib/charters-store'
+import { getOperator } from '@/lib/operators-store'
+import { notifyOperatorNewBooking } from '@/lib/charter-notify'
 import { getUserFromRequest } from '@/lib/auth'
 import { rateLimit, clientIp } from '@/lib/rate-limit'
 
@@ -22,6 +25,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   try {
     const user = await getUserFromRequest(request)
     const booking = await requestBooking(id, { ...parsed.data, userId: user?.id ?? null })
+    // El aviso va fuera de la respuesta: que un fallo de correo no tumbe la reserva.
+    after(async () => {
+      const charter = await getCharter(id)
+      const op = charter ? await getOperator(charter.operatorId) : null
+      if (charter && op?.email) await notifyOperatorNewBooking(op.email, charter, booking, false)
+    })
     return NextResponse.json({ success: true, bookingId: booking.id })
   } catch (error) {
     return NextResponse.json({ success: false, error: (error as Error).message }, { status: 400 })

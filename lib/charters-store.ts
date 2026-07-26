@@ -45,6 +45,8 @@ export interface CharterBooking {
   id: string
   charterId: string
   userId: string | null
+  /** payment_intent de Stripe (vacío si no fue una reserva pagada). */
+  paymentRef: string
   name: string
   contact: string
   people: number
@@ -245,6 +247,7 @@ function bookingFromRow(row: any): CharterBooking {
     id: row.id,
     charterId: row.charterId,
     userId: row.userId ?? null,
+    paymentRef: row.paymentRef ?? '',
     name: row.name,
     contact: row.contact ?? '',
     people: row.people,
@@ -336,6 +339,31 @@ export async function createCharterSeries(
     charters.push(assemble(stored, op, []))
   }
   return { charters, truncated }
+}
+
+/** Charters happening on a given day, with their bookings (for reminders). */
+export async function listChartersOnDate(dateISO: string): Promise<Charter[]> {
+  if (isDatabaseConfigured()) {
+    try {
+      const { prisma } = await import('@/lib/prisma')
+      const rows = await prisma.charter.findMany({
+        where: { dateISO, status: { not: 'cancelled' } },
+        include: { bookings: true, operator: true },
+        take: 200,
+      })
+      return rows.map((r) => assemble(baseFromRow(r), r.operator ? rowOperatorToOperator(r.operator) : null, r.bookings.map(bookingFromRow)))
+    } catch (error) {
+      console.warn('Charters by date read failed:', error)
+      return []
+    }
+  }
+  const out: Charter[] = []
+  for (const c of memC()) {
+    if (c.dateISO !== dateISO || c.status === 'cancelled') continue
+    const op = await getOperator(c.operatorId)
+    out.push(assemble(c, op, memB().filter((b) => b.charterId === c.id)))
+  }
+  return out
 }
 
 /** Cancel every remaining charter of a series. Returns how many were cancelled. */
@@ -516,7 +544,7 @@ export async function requestBooking(charterId: string, input: { name: string; c
       throw new Error(WRITE_FAIL)
     }
   }
-  const b: CharterBooking = { id: `cb-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, charterId, userId, name, contact, people, message, status: 'requested', createdAt: Date.now() }
+  const b: CharterBooking = { id: `cb-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, charterId, userId, paymentRef: '', name, contact, people, message, status: 'requested', createdAt: Date.now() }
   memB().push(b)
   return b
 }
@@ -534,14 +562,16 @@ export async function createPaidBooking(
   const contact = (input.contact ?? '').trim().slice(0, 120)
   const people = Math.min(20, Math.max(1, Math.round(Number(input.people) || 1)))
   const userId = input.userId || null
-  const message = `${(input.message ?? '').trim().slice(0, 300)} [pago ${input.paymentRef}]`.trim()
+  const message = (input.message ?? '').trim().slice(0, 300)
+  const paymentRef = input.paymentRef
 
   if (isDatabaseConfigured()) {
     const { prisma } = await import('@/lib/prisma')
     try {
-      const existing = await prisma.charterBooking.findFirst({ where: { charterId, message: { contains: input.paymentRef } } })
+      // Idempotencia por la referencia de pago: Stripe puede repetir el evento.
+      const existing = await prisma.charterBooking.findFirst({ where: { charterId, paymentRef } })
       if (existing) return
-      await prisma.charterBooking.create({ data: { charterId, userId, name, contact, people, message, status: 'paid' } })
+      await prisma.charterBooking.create({ data: { charterId, userId, paymentRef, name, contact, people, message, status: 'paid' } })
       const after = await getCharter(charterId)
       if (after && after.placesTaken >= after.minToConfirm && after.status === 'open') {
         await prisma.charter.update({ where: { id: charterId }, data: { status: 'confirmed' } })
@@ -552,8 +582,8 @@ export async function createPaidBooking(
     }
     return
   }
-  if (memB().some((b) => b.charterId === charterId && b.message.includes(input.paymentRef))) return
-  memB().push({ id: `cb-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, charterId, userId, name, contact, people, message, status: 'paid', createdAt: Date.now() })
+  if (memB().some((b) => b.charterId === charterId && b.paymentRef === paymentRef)) return
+  memB().push({ id: `cb-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, charterId, userId, paymentRef, name, contact, people, message, status: 'paid', createdAt: Date.now() })
   const after = await getCharter(charterId)
   const stored = memC().find((x) => x.id === charterId)
   if (after && stored && after.placesTaken >= after.minToConfirm && stored.status === 'open') stored.status = 'confirmed'

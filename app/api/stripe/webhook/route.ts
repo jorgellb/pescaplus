@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
-import { createPaidBooking } from '@/lib/charters-store'
-import { getOperatorByStripeAccount, setOperatorStripeReady } from '@/lib/operators-store'
+import { createPaidBooking, getCharter } from '@/lib/charters-store'
+import { notifyOperatorNewBooking } from '@/lib/charter-notify'
+import { getOperator, getOperatorByStripeAccount, setOperatorStripeReady } from '@/lib/operators-store'
 
 export async function POST(request: NextRequest) {
   if (!stripe) return NextResponse.json({ received: true })
@@ -22,14 +23,22 @@ export async function POST(request: NextRequest) {
       const s = event.data.object as { id: string; metadata?: Record<string, string>; payment_intent?: string }
       const m = s.metadata || {}
       if (m.charterId) {
+        const ref = (typeof s.payment_intent === 'string' ? s.payment_intent : s.id)
         await createPaidBooking(m.charterId, {
           name: m.buyerName || 'Reserva',
           contact: m.buyerContact || '',
           people: Number(m.people) || 1,
           message: m.note || '',
           userId: m.userId || null,
-          paymentRef: (typeof s.payment_intent === 'string' ? s.payment_intent : s.id),
+          paymentRef: ref,
         })
+        // Avisar al patrón: hasta ahora un pago entraba en silencio.
+        const charter = await getCharter(m.charterId)
+        const booking = charter?.bookings.find((b) => b.paymentRef === ref)
+        if (charter && booking) {
+          const op = await getOperator(charter.operatorId)
+          if (op?.email) await notifyOperatorNewBooking(op.email, charter, booking, true)
+        }
       }
     } else if (event.type === 'account.updated') {
       const a = event.data.object as { id: string; charges_enabled?: boolean; payouts_enabled?: boolean; details_submitted?: boolean }

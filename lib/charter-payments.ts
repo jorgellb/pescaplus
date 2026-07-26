@@ -55,6 +55,33 @@ export async function syncOperatorStripe(operator: Operator): Promise<boolean> {
   }
 }
 
+/**
+ * Refund a paid booking in full.
+ *
+ * With a destination charge the money already sat in the operator's balance, so
+ * `reverse_transfer` pulls it back and `refund_application_fee` returns our
+ * commission too — cancelling a trip shouldn't leave the platform keeping a cut
+ * of a service nobody received.
+ *
+ * Returns false (never throws) when there's nothing to refund or Stripe says no:
+ * the cancellation itself must go through regardless, and a stuck refund is a
+ * support case, not a reason to keep the trip alive.
+ */
+export async function refundBooking(paymentRef: string): Promise<boolean> {
+  if (!stripe || !paymentRef) return false
+  try {
+    await stripe.refunds.create({
+      payment_intent: paymentRef,
+      reverse_transfer: true,
+      refund_application_fee: true,
+    })
+    return true
+  } catch (error) {
+    console.error('Refund failed for', paymentRef, error)
+    return false
+  }
+}
+
 /** Create a Checkout Session for a paid booking (destination charge + platform fee). */
 export async function createCharterCheckout(
   charter: Charter,

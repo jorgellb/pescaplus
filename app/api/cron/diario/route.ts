@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { GET as verificacion } from '@/app/api/cron/verificacion/route'
 import { GET as alertas } from '@/app/api/cron/alertas/route'
 import { publishDueReviews } from '@/lib/reviews-store'
+import { listChartersOnDate } from '@/lib/charters-store'
+import { notifyTripReminder } from '@/lib/charter-notify'
+import { todayMadridISO, addDaysISO } from '@/lib/solunar-format'
 
 export const maxDuration = 300
 
@@ -25,6 +28,23 @@ export async function GET(request: NextRequest) {
   const alertRes = await alertas(request)
   const alert = await alertRes.json()
 
+  // Recordatorio de la víspera: quien reserva con semanas de antelación se
+  // olvida, y una plaza vacía no la recupera nadie.
+  let remindersSent = 0
+  try {
+    const tomorrow = addDaysISO(todayMadridISO(), 1)
+    for (const charter of await listChartersOnDate(tomorrow)) {
+      for (const b of charter.bookings) {
+        if (b.status === 'paid' || b.status === 'accepted') {
+          await notifyTripReminder(b, charter)
+          remindersSent += 1
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Trip reminders failed:', error)
+  }
+
   let reviewsPublished = 0
   try {
     reviewsPublished = await publishDueReviews()
@@ -32,5 +52,5 @@ export async function GET(request: NextRequest) {
     console.error('publishDueReviews failed:', error)
   }
 
-  return NextResponse.json({ success: verif.success && alert.success, verificacion: verif, alertas: alert, reviewsPublished })
+  return NextResponse.json({ success: verif.success && alert.success, verificacion: verif, alertas: alert, reviewsPublished, remindersSent })
 }

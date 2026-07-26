@@ -387,6 +387,8 @@ model CharterBooking {
   id        String   @id @default(cuid())
   charterId String
   userId    String? // vinculado a la cuenta si el pescador estaba logueado
+  /** payment_intent de Stripe: idempotencia del webhook y base del reembolso. */
+  paymentRef String  @default("")
   name      String
   contact   String
   people    Int      @default(1)
@@ -399,4 +401,5 @@ model CharterBooking {
 
   @@index([charterId])
   @@index([userId])
+  @@index([paymentRef])
 }
