@@ -31,6 +31,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
   const [type, setType] = useState('caladero')
   const [depth, setDepth] = useState('')
   const [saving, setSaving] = useState(false)
+  const [zone, setZone] = useState<{ coverage: string; areas: { name: string; recreationalFishing: boolean | null; requiresPermit: boolean | null; rulesUrl: string; sourceName: string; sourceDate: string }[]; pescarec: { note: string; url: string } | null } | null>(null)
   const [err, setErr] = useState('')
   const markers = useRef<{ remove(): void }[]>([])
 
@@ -91,8 +92,14 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
     m.on('load', () => setReady(true))
     m.on('click', (e) => {
       if (!loggedIn) return
-      setDraft({ lat: Math.round(e.lngLat.lat * 1e6) / 1e6, lon: Math.round(e.lngLat.lng * 1e6) / 1e6 })
-      setName(''); setDepth(''); setErr('')
+      const lat = Math.round(e.lngLat.lat * 1e6) / 1e6
+      const lon = Math.round(e.lngLat.lng * 1e6) / 1e6
+      setDraft({ lat, lon })
+      setName(''); setDepth(''); setErr(''); setZone(null)
+      fetch(`/api/areas-protegidas?lat=${lat}&lon=${lon}`)
+        .then((r) => r.json())
+        .then((d) => { if (d.success) setZone(d) })
+        .catch(() => {})
     })
     map.current = m
 
@@ -190,6 +197,34 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
               placeholder="Sonda (m)"
               className="border border-ink/12 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-accent" />
           </div>
+          {zone?.coverage === 'inside' && (
+            <div className="rounded-xl border border-red-600/35 bg-red-600/[0.07] p-2.5 space-y-1">
+              <p className="text-[12.5px] font-semibold text-red-900">⚠️ Estás dentro de un espacio protegido</p>
+              {zone.areas.map((a) => (
+                <p key={a.name} className="text-[12px] text-red-900/90">
+                  <strong>{a.name}</strong>
+                  {a.recreationalFishing === false && ' · pesca recreativa NO permitida'}
+                  {a.recreationalFishing === true && ' · pesca recreativa permitida'}
+                  {a.recreationalFishing === null && ' · consulta la normativa'}
+                  {a.requiresPermit && ' · requiere autorización'}
+                  {a.rulesUrl && <> · <a href={a.rulesUrl} target="_blank" rel="noopener noreferrer" className="underline">normativa</a></>}
+                  <span className="block text-[11px] opacity-70">Fuente: {a.sourceName} ({a.sourceDate})</span>
+                </p>
+              ))}
+              {zone.pescarec && (
+                <p className="text-[11.5px] text-red-900/90">
+                  {zone.pescarec.note}{' '}
+                  <a href={zone.pescarec.url} target="_blank" rel="noopener noreferrer" className="underline">Más información</a>
+                </p>
+              )}
+            </div>
+          )}
+          {zone?.coverage === 'unverified' && (
+            <p className="text-[11.5px] text-amber-900 bg-amber-500/10 border border-amber-600/25 rounded-xl px-2.5 py-2">
+              No tenemos verificada la capa de espacios protegidos en esta zona. <strong>Esto no significa
+              que puedas pescar aquí</strong>: comprueba la normativa antes de salir.
+            </p>
+          )}
           {err && <p className="text-[13px] text-red-700">{err}</p>}
           <p className="text-[11px] text-ink/60">🔒 Solo tú verás esta marca.</p>
           <div className="flex gap-2">
@@ -221,7 +256,6 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
           </ul>
           {/* Descarga de fichero, no navegación: un <Link> haría transición de
               cliente y el navegador nunca recibiría el GPX. */}
-          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a href="/api/waypoints/gpx" download className="block px-4 py-2 text-[13px] font-semibold text-accent hover:underline">
             Descargar en GPX ↓
           </a>

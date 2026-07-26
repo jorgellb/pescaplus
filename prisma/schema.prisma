@@ -292,6 +292,39 @@ model Waypoint {
   @@index([visibility])
 }
 
+/**
+ * Espacio marino protegido: reserva marina, reserva integral, zona regulada.
+ *
+ * Aquí SÍ hace falta PostGIS: la pregunta es "¿este punto cae dentro?", y eso
+ * son geometrías, no píxeles de un WMS.
+ *
+ * Las geometrías se importan de fuentes oficiales verificadas y NUNCA se
+ * interpolan ni se dibujan a ojo: un falso negativo aquí puede costarle una
+ * sanción a un pescador. Mientras la tabla esté vacía para una zona, la
+ * aplicación dice "no verificado", nunca "puedes pescar".
+ */
+model ProtectedArea {
+  id             String   @id @default(cuid())
+  name           String
+  /** reserva-integral | reserva-marina | zona-regulada | otro */
+  type           String   @default("reserva-marina")
+  /** Organismo que la gestiona (estatal, autonómico o compartido). */
+  authority      String   @default("")
+  /** null = no consta en la fuente; se muestra como "consultar", no como "sí". */
+  recreationalFishing Boolean?
+  requiresPermit Boolean?
+  /** Enlace a la norma vigente. */
+  rulesUrl       String   @default("")
+  /** Dónde y cuándo se obtuvo: se muestra en la interfaz. */
+  sourceName     String   @default("")
+  sourceDate     String   @default("")
+  geom           Unsupported("geometry(MultiPolygon, 4326)")
+  createdAt      DateTime @default(now())
+
+  @@index([geom], type: Gist)
+  @@index([type])
+}
+
 model Meetup {
   id           String   @id @default(cuid())
   // Secret token: whoever holds it can edit/cancel the meetup (no accounts).
