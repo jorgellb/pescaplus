@@ -4,6 +4,7 @@ import {
   createMeetup,
   listMeetupsBySpot,
   getMeetupByToken,
+  getMeetup,
   joinMeetup,
   cancelMeetup,
   costInfo,
@@ -131,5 +132,33 @@ describe('meetups store — quedadas CRUD (memory path)', () => {
     await createMeetup({ ...base, dateISO: '2026-05-01' }) // past relative to the "from" date
     const list = await listMeetupsBySpot('cadiz', '2026-07-15')
     expect(list.map((m) => m.dateISO)).toEqual(['2026-08-02', '2026-08-10'])
+  })
+})
+
+describe('quedadas — ficha detallada (catálogo compartido con chárters)', () => {
+  it('guarda solo ids válidos de técnicas, especies y qué llevar', async () => {
+    const m = await createMeetup({
+      hostName: 'Ana', hostContact: 'ana@x.es', spotSlug: 'tarifa',
+      dateISO: '2030-09-09', timeStart: '07:00', modality: 'barco', maxPlaces: 4,
+      techniques: ['spinning', 'jigging', 'inventada'],
+      species: ['lubina', 'dragon'],
+      bring: ['canas', 'licencia', 'ovni'],
+    })
+    expect(m.techniques).toEqual(['spinning', 'jigging'])
+    expect(m.species).toEqual(['lubina'])
+    expect(m.bring).toEqual(['canas', 'licencia'])
+
+    // Y se leen igual al recuperarla.
+    const again = await getMeetup(m.id)
+    expect(again!.techniques).toEqual(['spinning', 'jigging'])
+  })
+
+  it('una quedada sin esos campos sigue siendo válida (listas vacías)', async () => {
+    const m = await createMeetup({
+      hostName: 'Ana', hostContact: 'ana@x.es', spotSlug: 'tarifa',
+      dateISO: '2030-09-09', timeStart: '07:00', modality: 'tierra', maxPlaces: 2,
+    })
+    expect(m.techniques).toEqual([])
+    expect(m.bring).toEqual([])
   })
 })

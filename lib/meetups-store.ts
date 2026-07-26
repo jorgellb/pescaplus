@@ -1,4 +1,5 @@
 import { isDatabaseConfigured } from '@/lib/products-store'
+import { sanitizeIds, TECHNIQUES, TARGET_SPECIES, MEETUP_BRING } from '@/lib/charter-options'
 
 /**
  * "Quedadas de pesca" store — free angler meetups (shore / kayak / boat cost-
@@ -30,6 +31,10 @@ export interface MeetupInput {
   minToConfirm?: number
   /** How the outing's cost works: free, a fixed amount per person, or a total
    * shared cost split among everyone aboard (the "BlaBlaCar" model). */
+  /** Ids del catálogo compartido (lib/charter-options). */
+  techniques?: string[]
+  species?: string[]
+  bring?: string[]
   costMode?: 'gratis' | 'fijo' | 'reparto'
   costShare?: number | null // per person, for costMode 'fijo'
   totalCost?: number | null // total to split, for costMode 'reparto'
@@ -62,6 +67,9 @@ export interface Meetup {
   level: string
   maxPlaces: number
   minToConfirm: number
+  techniques: string[]
+  species: string[]
+  bring: string[]
   costMode: 'gratis' | 'fijo' | 'reparto'
   costShare: number | null
   totalCost: number | null
@@ -102,6 +110,9 @@ type MeetupData = {
   level: string
   maxPlaces: number
   minToConfirm: number
+  techniques: string[]
+  species: string[]
+  bring: string[]
   costMode: 'gratis' | 'fijo' | 'reparto'
   costShare: number | null
   totalCost: number | null
@@ -137,6 +148,9 @@ function clean(input: MeetupInput): MeetupData {
     level,
     maxPlaces,
     minToConfirm,
+    techniques: sanitizeIds(TECHNIQUES, input.techniques),
+    species: sanitizeIds(TARGET_SPECIES, input.species),
+    bring: sanitizeIds(MEETUP_BRING, input.bring),
     costMode,
     costShare: costMode === 'fijo' ? rawShare : null,
     totalCost: costMode === 'reparto' ? rawTotal : null,
@@ -231,6 +245,9 @@ function rowToBase(row: any): Omit<Meetup, 'rsvps' | 'waitlist' | 'placesTaken'>
     level: row.level ?? 'cualquiera',
     maxPlaces: row.maxPlaces,
     minToConfirm: row.minToConfirm,
+    techniques: row.techniques ?? [],
+    species: row.species ?? [],
+    bring: row.bring ?? [],
     costMode: row.costMode ?? 'gratis',
     costShare: row.costShare ?? null,
     totalCost: row.totalCost ?? null,

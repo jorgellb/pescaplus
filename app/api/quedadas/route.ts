@@ -23,6 +23,10 @@ const schema = z.object({
   costShare: z.number().min(0).max(2000).optional(),
   totalCost: z.number().min(0).max(2000).optional(),
   notes: z.string().max(600).optional(),
+  // Ficha detallada; los ids se validan contra el catálogo en el store.
+  techniques: z.array(z.string().max(40)).max(30).optional(),
+  species: z.array(z.string().max(40)).max(60).optional(),
+  bring: z.array(z.string().max(40)).max(20).optional(),
   // Honeypot
   website: z.string().max(200).optional(),
 })

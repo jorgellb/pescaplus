@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import Layout from '@/components/Layout'
+import OptionGroup from '@/components/charters/OptionGroup'
+import { resolveOptions, TECHNIQUES, TARGET_SPECIES, MEETUP_BRING } from '@/lib/charter-options'
 import JoinMeetup from '@/components/quedadas/JoinMeetup'
 import ManageMeetup from '@/components/quedadas/ManageMeetup'
 import MeetupShare from '@/components/quedadas/MeetupShare'
@@ -115,6 +117,13 @@ export default async function MeetupPage({ params, searchParams }: Params) {
           {meetup.meetingPoint && <p><strong>📍 Punto de encuentro:</strong> {meetup.meetingPoint}</p>}
           <p><strong>👤 Anfitrión:</strong> {meetup.hostName}</p>
           {meetup.notes && <p className="text-ink/75 whitespace-pre-line border-l-4 border-accent/40 pl-3">{meetup.notes}</p>}
+        </div>
+
+        {/* Qué se pesca y con qué — mismo catálogo e iconos que los chárters. */}
+        <div className="space-y-6">
+          <OptionGroup title="Técnicas de pesca" icon="rod" options={resolveOptions(TECHNIQUES, meetup.techniques)} />
+          <OptionGroup title="Especies objetivo" icon="fish" options={resolveOptions(TARGET_SPECIES, meetup.species)} />
+          <OptionGroup title="Qué tienes que llevar" icon="check" tone="yes" options={resolveOptions(MEETUP_BRING, meetup.bring)} />
         </div>
 
         {!cancelled && (

@@ -146,6 +146,25 @@ export const EXCLUDED: Option[] = [
   { id: 'traslado-no', label: 'Traslado al puerto', icon: 'car' },
 ]
 
+/**
+ * What each angler brings to a QUEDADA. A peer meetup has no operator putting
+ * the gear, so the useful question isn't "what's included in the price" but
+ * "what do I need to turn up with". Techniques and species are shared with
+ * charters — same catalogue, same icons.
+ */
+export const MEETUP_BRING: Option[] = [
+  { id: 'canas', label: 'Tu caña y carrete', icon: 'rod' },
+  { id: 'cebo', label: 'Tu cebo y señuelos', icon: 'lure' },
+  { id: 'licencia', label: 'Licencia de pesca en vigor', icon: 'license' },
+  { id: 'chaleco', label: 'Chaleco salvavidas', icon: 'lifejacket' },
+  { id: 'comida', label: 'Comida y bebida', icon: 'meal' },
+  { id: 'nevera', label: 'Nevera para las capturas', icon: 'ice' },
+  { id: 'ropa', label: 'Ropa de agua', icon: 'shower' },
+  { id: 'crema', label: 'Crema solar y gorra', icon: 'sun' },
+  { id: 'mareo', label: 'Pastillas para el mareo', icon: 'pill' },
+  { id: 'nada', label: 'Nada: hay equipo de sobra', icon: 'check' },
+]
+
 // ---------------------------------------------------------------------------
 // Boat-level (live on the operator profile: one boat per patrón)
 // ---------------------------------------------------------------------------

@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import ChipSelect from '@/components/charters/ChipSelect'
+import { TECHNIQUES, TARGET_SPECIES, MEETUP_BRING } from '@/lib/charter-options'
 import { useRouter } from 'next/navigation'
 
 interface Opt {
@@ -45,6 +47,9 @@ export default function NewMeetupForm({ spots, species, defaultSpot, defaultKind
     notes: '',
     website: '', // honeypot
   })
+  const [sel, setSel] = useState<Record<string, string[]>>({ techniques: [], species: [], bring: [] })
+  const pick = (k: string) => (next: string[]) => setSel((s) => ({ ...s, [k]: next }))
+
 
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) => setForm((f) => ({ ...f, [k]: v }))
 
@@ -73,6 +78,7 @@ export default function NewMeetupForm({ spots, species, defaultSpot, defaultKind
           costShare: kind === 'quedada' && form.costMode === 'fijo' && form.costShare ? Number(form.costShare) : undefined,
           totalCost: kind === 'quedada' && form.costMode === 'reparto' && form.totalCost ? Number(form.totalCost) : undefined,
           notes: form.notes || undefined,
+          ...sel,
           website: form.website || undefined,
         }),
       })
@@ -228,6 +234,16 @@ export default function NewMeetupForm({ spots, species, defaultSpot, defaultKind
         <span className={labelCls}>Notas (equipo, plan, quién sois…)</span>
         <textarea value={form.notes} onChange={(e) => set('notes', e.target.value)} maxLength={600} rows={3} className={inputCls} />
       </label>
+
+      {/* Qué se pesca y qué trae cada uno: mismo catálogo que los chárters. */}
+      <div className="space-y-5 border-t border-ink/[0.07] pt-5">
+        <ChipSelect label="Técnicas de pesca" hint="Qué vais a practicar." icon="rod"
+          options={TECHNIQUES} value={sel.techniques} onChange={pick('techniques')} />
+        <ChipSelect label="Especies objetivo" hint="A qué vais a por ello." icon="fish"
+          options={TARGET_SPECIES} value={sel.species} onChange={pick('species')} collapseAfter={10} />
+        <ChipSelect label="Qué tiene que llevar cada uno" hint="Así nadie se presenta sin lo suyo." icon="check"
+          options={MEETUP_BRING} value={sel.bring} onChange={pick('bring')} />
+      </div>
 
       {/* Honeypot */}
       <input type="text" tabIndex={-1} autoComplete="off" value={form.website} onChange={(e) => set('website', e.target.value)} className="hidden" aria-hidden />

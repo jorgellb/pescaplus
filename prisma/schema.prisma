@@ -253,6 +253,10 @@ model Meetup {
   level        String   @default("cualquiera") // principiante | medio | experto | cualquiera
   maxPlaces    Int      @default(4)
   minToConfirm Int      @default(1)
+  // Ficha detallada (ids del catálogo compartido en lib/charter-options).
+  techniques   String[] @default([])
+  species      String[] @default([]) // especies objetivo (multi)
+  bring        String[] @default([]) // qué tiene que llevar cada uno
   costMode     String   @default("gratis") // gratis | fijo | reparto
   costShare    Float? // per-person fixed cost (costMode 'fijo')
   totalCost    Float? // total to split among all aboard (costMode 'reparto')
