@@ -10,7 +10,11 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
-  "connect-src 'self'",
+  // La carta náutica pide teselas a estos orígenes; MapLibre las carga por
+  // fetch, así que con connect-src 'self' quedaría en blanco sin decir por qué.
+  "connect-src 'self' https://tile.openstreetmap.org https://tiles.openseamap.org https://tiles.emodnet-bathymetry.eu",
+  // MapLibre crea su worker desde un blob.
+  "worker-src 'self' blob:",
   "frame-ancestors 'self'",
   "base-uri 'self'",
   "form-action 'self'",
