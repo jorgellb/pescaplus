@@ -1,4 +1,4 @@
-import { copyFile, mkdir } from 'node:fs/promises'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -19,6 +19,10 @@ const to = join(root, 'public/maplibre')
 
 await mkdir(to, { recursive: true })
 for (const f of ['maplibre-gl-worker.mjs', 'maplibre-gl-shared.mjs']) {
-  await copyFile(join(from, f), join(to, f))
+  // Se quita la referencia al mapa de fuente: no publicamos los .map y el
+  // navegador los pedía, ensuciando la consola con 404 que no son problema
+  // real pero esconden los que sí lo son.
+  const code = (await readFile(join(from, f), 'utf8')).replace(/\n?\/\/# sourceMappingURL=.*$/m, '')
+  await writeFile(join(to, f), code)
   console.log('copiado', f)
 }
