@@ -95,7 +95,7 @@ export default async function SpeciesZonePage({ params }: Params) {
   }
   const breadcrumbLd = breadcrumbJsonLd([
     { name: 'Inicio', url: SITE_URL },
-    { name: 'Especies', url: `${SITE_URL}/especies` },
+    { name: 'Qué pescar', url: `${SITE_URL}/pesca` },
     { name: sp.name, url: `${SITE_URL}/especies/${sp.id}` },
     { name: spot.name, url: `${SITE_URL}/pesca/${sp.id}/${spot.slug}` },
   ])
@@ -109,6 +109,7 @@ export default async function SpeciesZonePage({ params }: Params) {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
           <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-5">
             <Link href="/" className="hover:text-accent">Inicio</Link> <span className="mx-1">/</span>{' '}
+            <Link href="/pesca" className="hover:text-accent">Qué pescar</Link> <span className="mx-1">/</span>{' '}
             <Link href={`/especies/${sp.id}`} className="hover:text-accent">{sp.name}</Link> <span className="mx-1">/</span>{' '}
             <span className="text-ink">{spot.name}</span>
           </nav>

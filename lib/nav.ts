@@ -60,6 +60,7 @@ export const NAV_SECTIONS: NavSection[] = [
     tagline: 'Mapa de zonas y fichas de especies con sus mejores momentos.',
     links: [
       { href: '/donde-pescar', label: 'Mapa del día', hint: 'Dónde pica mejor hoy en España', emoji: '🗺️' },
+      { href: '/pesca', label: 'Qué pescar y dónde', hint: 'Guía por especie y zona del litoral', emoji: '🎯' },
       { href: '/especies', label: 'Especies de pesca', hint: 'Lubina, dorada, atún… cómo y cuándo', emoji: '🐟' },
       { href: '/mejores-horas', label: 'Zonas de pesca', hint: 'Puertos y playas con previsión propia', emoji: '⚓' },
       { href: '/diario', label: 'Diario de capturas', hint: 'Registra lo que pescas y con qué', emoji: '📖' },

@@ -17,6 +17,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/mejores`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
     { url: `${base}/mejores-horas`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     { url: `${base}/donde-pescar`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
+    // Índice de la malla especie × zona: prioridad de cabecera de sección.
+    { url: `${base}/pesca`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
     { url: `${base}/diario`, lastModified: now, changeFrequency: 'monthly', priority: 0.4 },
     { url: `${base}/quedadas`, lastModified: now, changeFrequency: 'daily', priority: 0.6 },
     { url: `${base}/charters`, lastModified: now, changeFrequency: 'daily', priority: 0.6 },
