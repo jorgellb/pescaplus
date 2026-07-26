@@ -73,7 +73,7 @@ export default async function SubcategoryPage({ params }: Params) {
     <Layout>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
 
-      <section className="bg-paper border-b border-ink/12">
+      <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-5">
             <Link href="/" className="hover:text-accent">Inicio</Link> <span className="mx-1">/</span>{' '}
@@ -81,7 +81,7 @@ export default async function SubcategoryPage({ params }: Params) {
             <span className="mx-1">/</span> <span className="text-ink">{sub.name}</span>
           </nav>
           <div className="flex items-center gap-5">
-            <span className="inline-flex flex-shrink-0 text-ink p-4 border border-ink/15 rounded-xl shadow-hard bg-paper">
+            <span className="inline-flex flex-shrink-0 text-ink p-4 border border-ink/10 rounded-xl shadow-hard bg-paper">
               <CategoryIcon id={fishingType.id} className="w-10 h-10" strokeWidth={1.6} />
             </span>
             <div className="min-w-0">
@@ -89,7 +89,7 @@ export default async function SubcategoryPage({ params }: Params) {
               <p className="text-ink/60 text-sm md:text-base mt-2 max-w-2xl">{description}</p>
             </div>
           </div>
-          <Link href={`/categories/${category}`} className="inline-block mt-5 font-mono text-xs font-bold uppercase tracking-widest text-accent hover:underline">
+          <Link href={`/categories/${category}`} className="inline-block mt-5 text-xs font-semibold text-accent hover:underline">
             ← Ver toda la categoría {catName}
           </Link>
         </div>
@@ -100,13 +100,13 @@ export default async function SubcategoryPage({ params }: Params) {
         {subs.length > 1 && (
           <div className="flex flex-wrap gap-2">
             <span className="inline-flex items-center font-mono text-[11px] font-bold uppercase tracking-widest text-ink/40 mr-1">Subcategorías:</span>
-            <Link href={`/categories/${category}`} className="px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-tight border border-ink/15 rounded-full text-ink hover:bg-ink hover:text-paper transition-colors">Todas</Link>
+            <Link href={`/categories/${category}`} className="px-3.5 py-1.5 text-[11px] font-semibold border border-ink/10 rounded-full text-ink hover:bg-ink hover:text-paper transition-colors">Todas</Link>
             {subs.map((s) => (
               <Link
                 key={s.id}
                 href={`/categories/${category}/${s.id}`}
-                className={`px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-tight border rounded-full transition-colors ${
-                  s.id === subcategory ? 'bg-ink text-paper border-ink' : 'border-ink/15 text-ink hover:bg-ink hover:text-paper'
+                className={`px-3.5 py-1.5 text-[11px] font-semibold border rounded-full transition-colors${
+                  s.id === subcategory ? 'bg-ink text-paper border-ink' : 'border-ink/10 text-ink hover:bg-ink hover:text-paper'
                 }`}
               >
                 {s.name}
@@ -120,11 +120,11 @@ export default async function SubcategoryPage({ params }: Params) {
         </p>
 
         {products.length === 0 ? (
-          <div className="text-center py-16 border border-ink/15 rounded-xl shadow-hard bg-paper max-w-lg mx-auto px-8 space-y-4">
+          <div className="text-center py-16 border border-ink/10 rounded-xl shadow-hard bg-paper max-w-lg mx-auto px-8 space-y-4">
             <span className="inline-block text-5xl">⚓</span>
             <h2 className="font-display uppercase text-2xl text-ink">Sin productos por ahora</h2>
             <p className="text-sm text-ink/60">Vuelve pronto o explora el resto de la categoría.</p>
-            <Link href={`/categories/${category}`} className="inline-block bg-ink text-paper px-5 py-2.5 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl hover:bg-accent transition-colors">
+            <Link href={`/categories/${category}`} className="inline-block bg-ink text-paper px-5 py-2.5 text-sm font-semibold border border-ink/10 rounded-full hover:bg-accent transition-colors">
               Ver {catName}
             </Link>
           </div>

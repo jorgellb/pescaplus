@@ -46,7 +46,7 @@ export default function ManageMeetup({ id, manageToken, justCreated }: { id: str
   }
 
   return (
-    <div className="border border-ink/20 rounded-2xl bg-ink/[0.03] p-4 space-y-3">
+    <div className="border border-ink/12 rounded-2xl bg-ink/[0.03] p-4 space-y-3">
       <p className="font-display uppercase text-lg leading-none">🔑 Eres el anfitrión</p>
       {justCreated && (
         <p className="text-sm text-ink/80">
@@ -54,10 +54,10 @@ export default function ManageMeetup({ id, manageToken, justCreated }: { id: str
         </p>
       )}
       <div className="flex flex-wrap items-center gap-2">
-        <button onClick={copy} className="inline-flex items-center gap-2 bg-ink text-paper px-4 py-2 text-xs font-bold uppercase tracking-wide rounded-xl hover:bg-accent transition-colors">
+        <button onClick={copy} className="inline-flex items-center gap-2 bg-ink text-paper px-4 py-2 text-sm font-semibold rounded-full hover:bg-accent transition-colors">
           {copied ? '✓ Copiado' : '📋 Copiar enlace de gestión'}
         </button>
-        <button onClick={cancel} disabled={state === 'working'} className="inline-flex items-center gap-2 bg-paper text-red-700 border border-red-700/40 px-4 py-2 text-xs font-bold uppercase tracking-wide rounded-xl hover:bg-red-700 hover:text-paper disabled:opacity-60 transition-colors">
+        <button onClick={cancel} disabled={state === 'working'} className="inline-flex items-center gap-2 bg-paper text-red-700 border border-red-700/40 px-4 py-2 text-sm font-semibold rounded-full hover:bg-red-700 hover:text-paper disabled:opacity-60 transition-colors">
           {state === 'working' ? 'Cancelando…' : 'Cancelar quedada'}
         </button>
       </div>

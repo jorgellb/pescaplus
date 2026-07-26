@@ -77,7 +77,7 @@ export default function CharterForm({ operatorId, manageToken, defaultSpot, spot
   }
 
   const L = 'text-[12px] font-semibold uppercase tracking-wide text-ink/50'
-  const I = 'mt-1 w-full border border-ink/12 rounded-xl bg-paper px-3 py-2.5 text-sm focus:outline-none focus:border-accent'
+  const I = 'mt-1 w-full border border-ink/[0.07] rounded-xl bg-paper px-3 py-2.5 text-sm focus:outline-none focus:border-accent'
 
   return (
     <form onSubmit={submit} className="border border-ink/[0.07] rounded-2xl bg-paper p-5 sm:p-6 space-y-6 shadow-hard">
@@ -149,7 +149,7 @@ export default function CharterForm({ operatorId, manageToken, defaultSpot, spot
                       <button key={w.id} type="button" aria-pressed={on} aria-label={w.label}
                         onClick={() => setWeekdays((s) => on ? s.filter((d) => d !== w.id) : [...s, w.id])}
                         className={`w-10 h-10 rounded-full text-sm font-semibold transition-colors ${
-                          on ? 'bg-accent text-paper' : 'bg-paper text-ink/70 border border-ink/12 hover:border-accent/50'
+                          on ? 'bg-accent text-paper' : 'bg-paper text-ink/70 border border-ink/[0.07] hover:border-accent/50'
                         }`}>{w.short}</button>
                     )
                   })}

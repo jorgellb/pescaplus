@@ -63,7 +63,7 @@ async function StationPanel({
   return (
     <>
       {obs?.available && (
-        <div className={`border rounded-xl p-3.5 space-y-2 ${obsFresh ? 'border-accent/30 bg-accent/[0.04]' : 'border-ink/15 bg-ink/[0.02]'}`}>
+        <div className={`border rounded-xl p-3.5 space-y-2 ${obsFresh ? 'border-accent/30 bg-accent/[0.04]' : 'border-ink/10 bg-ink/[0.02]'}`}>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className={`font-mono text-[10px] font-bold uppercase tracking-widest ${obsFresh ? 'text-accent' : 'text-ink/55'}`}>
               📡 {obsFresh ? 'Observado ahora' : 'Última medición'} · estación {obs.stationName} (a {station.km} km)
@@ -109,7 +109,7 @@ async function StationPanel({
 
 function StationSkeleton({ km }: { km: number }) {
   return (
-    <div className="border border-ink/12 rounded-xl bg-ink/[0.02] p-3.5 space-y-2 animate-pulse" aria-hidden>
+    <div className="border border-ink/[0.07] rounded-xl bg-ink/[0.02] p-3.5 space-y-2 animate-pulse" aria-hidden>
       <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/30">📡 Consultando estación oficial (a {km} km)…</p>
       <div className="h-3 w-2/3 rounded bg-ink/10" />
     </div>
@@ -149,7 +149,7 @@ function WindArrow({ deg }: { deg: number | null }) {
 
 function Metric({ label, value, icon, sub }: { label: string; value: React.ReactNode; icon: React.ReactNode; sub?: string }) {
   return (
-    <div className="border border-ink/12 rounded-xl bg-paper px-3 py-2.5">
+    <div className="border border-ink/[0.07] rounded-xl bg-paper px-3 py-2.5">
       <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/40 flex items-center gap-1">
         <span aria-hidden>{icon}</span> {label}
       </p>
@@ -313,7 +313,7 @@ export default async function SpotDashboard({
     <Layout>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
 
-      <section className="bg-paper border-b border-ink/12">
+      <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
           <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-5">
             <Link href="/" className="hover:text-accent">Inicio</Link> <span className="mx-1">/</span>{' '}
@@ -337,25 +337,25 @@ export default async function SpotDashboard({
           <div className="flex flex-wrap items-center gap-3 mt-4">
             <Link
               href={`/mejores-horas/${s.slug}/plan${especie || modo ? `?${new URLSearchParams({ ...(especie ? { especie } : {}), ...(modo ? { modo } : {}) })}` : ''}`}
-              className="inline-flex items-center gap-2 bg-ink text-paper px-4 py-2.5 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift hover:bg-accent hover:border-accent"
+              className="inline-flex items-center gap-2 bg-ink text-paper px-4 py-2.5 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift hover:bg-accent hover:border-accent"
             >
               🧾 Genera mi plan de pesca
             </Link>
             <Link
               href={`/mejores-horas/comparar?zonas=${[s.slug, ...nearby.slice(0, 2).map((n) => n.slug)].join(',')}`}
-              className="inline-flex items-center gap-2 bg-paper text-ink px-4 py-2.5 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift hover:bg-ink hover:text-paper"
+              className="inline-flex items-center gap-2 bg-paper text-ink px-4 py-2.5 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift hover:bg-ink hover:text-paper"
             >
               ⚖️ Comparar con zonas cercanas
             </Link>
             <Link
               href={`/mejores-horas/${s.slug}/planificador`}
-              className="inline-flex items-center gap-2 bg-paper text-ink px-4 py-2.5 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift hover:bg-ink hover:text-paper"
+              className="inline-flex items-center gap-2 bg-paper text-ink px-4 py-2.5 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift hover:bg-ink hover:text-paper"
             >
               📅 Planificador de 12 meses
             </Link>
             <Link
               href={`/diario?zona=${s.slug}`}
-              className="inline-flex items-center gap-2 bg-paper text-ink px-4 py-2.5 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift hover:bg-ink hover:text-paper"
+              className="inline-flex items-center gap-2 bg-paper text-ink px-4 py-2.5 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift hover:bg-ink hover:text-paper"
             >
               🎣 Apunta tu captura
             </Link>
@@ -378,7 +378,7 @@ export default async function SpotDashboard({
             <a
               key={sec.id}
               href={`#${sec.id}`}
-              className="flex-shrink-0 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60 border border-ink/12 rounded-full hover:bg-ink hover:text-paper transition-colors"
+              className="flex-shrink-0 px-3.5 py-1.5 text-[13px] font-medium text-ink/70 border border-ink/[0.07] rounded-full hover:bg-ink hover:text-paper transition-colors"
             >
               {sec.label}
             </a>
@@ -414,7 +414,7 @@ export default async function SpotDashboard({
 
         {/* Modality + species selectors (sea only) */}
         {s.type === 'mar' && (
-          <div className="border border-ink/15 rounded-2xl bg-paper p-4 space-y-4">
+          <div className="border border-ink/10 rounded-2xl bg-paper p-4 space-y-4">
             <div className="space-y-2">
               <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50">¿Desde dónde pescas?</p>
               <div className="flex flex-wrap gap-2">
@@ -425,7 +425,7 @@ export default async function SpotDashboard({
                       key={m.id}
                       href={buildHref({ especie, modo: m.id === 'tierra' ? null : m.id })}
                       scroll={false}
-                      className={`px-3.5 py-2 text-sm font-bold rounded-xl border transition-colors ${active ? 'bg-accent text-paper border-accent' : 'bg-paper text-ink/80 border-ink/15 hover:bg-ink/5'}`}
+                      className={`px-3.5 py-2 text-sm font-bold rounded-xl border transition-colors ${active ? 'bg-accent text-paper border-accent' : 'bg-paper text-ink/80 border-ink/10 hover:bg-ink/5'}`}
                     >
                       {m.emoji} {m.name}
                     </Link>
@@ -446,7 +446,7 @@ export default async function SpotDashboard({
                       key={sp.id}
                       href={buildHref({ especie: sp.id === 'general' ? null : sp.id, modo })}
                       scroll={false}
-                      className={`px-3 py-1.5 text-sm font-bold rounded-full border transition-colors ${active ? 'bg-ink text-paper border-ink' : 'bg-paper text-ink/80 border-ink/15 hover:bg-ink/5'}`}
+                      className={`px-3 py-1.5 text-sm font-bold rounded-full border transition-colors ${active ? 'bg-ink text-paper border-ink' : 'bg-paper text-ink/80 border-ink/10 hover:bg-ink/5'}`}
                     >
                       {sp.name}
                     </Link>
@@ -461,8 +461,8 @@ export default async function SpotDashboard({
         {/* NOW dashboard */}
         {nowHour ? (
           <div id="ahora" className="grid grid-cols-1 lg:grid-cols-3 gap-6 scroll-mt-28">
-            <div className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-6 flex flex-col justify-between">
-              <div className="flex items-center justify-between gap-3 border-b border-ink/12 pb-4">
+            <div className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-6 flex flex-col justify-between">
+              <div className="flex items-center justify-between gap-3 border-b border-ink/[0.07] pb-4">
                 <h2 className="font-display uppercase text-2xl text-ink leading-none">Ahora</h2>
                 <span className="font-mono text-[11px] uppercase tracking-widest text-ink/50">{nowHour.hourLabel}</span>
               </div>
@@ -472,7 +472,7 @@ export default async function SpotDashboard({
               </div>
 
               {/* Verdict per modality — activity vs conditions, never one sign for all */}
-              <div className="space-y-1.5 border-t border-ink/12 pt-4">
+              <div className="space-y-1.5 border-t border-ink/[0.07] pt-4">
                 <div className="flex items-center justify-between text-[13px]">
                   <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/45">Actividad</span>
                   <span className="font-bold" style={{ color: scoreHex(nowHour.activity) }}>{activityWord(nowHour.activity)} ({nowHour.activity})</span>
@@ -488,14 +488,14 @@ export default async function SpotDashboard({
                 )}
               </div>
 
-              <div className="flex items-center justify-between border-t border-ink/12 pt-4">
+              <div className="flex items-center justify-between border-t border-ink/[0.07] pt-4">
                 <span className="font-mono text-[11px] uppercase tracking-widest text-ink/50">Solunar hoy</span>
                 <div className="text-right"><FishRating value={d0.rating} /><p className="font-mono text-[10px] uppercase tracking-widest text-ink/40 mt-1">{ratingLabel(d0.rating)}</p></div>
               </div>
             </div>
 
-            <div className="lg:col-span-2 border border-ink/15 rounded-2xl bg-paper shadow-hard p-6 space-y-4">
-              <h2 className="font-display uppercase text-2xl text-ink leading-none border-b border-ink/12 pb-4">Condiciones actuales</h2>
+            <div className="lg:col-span-2 border border-ink/10 rounded-2xl bg-paper shadow-hard p-6 space-y-4">
+              <h2 className="font-display uppercase text-2xl text-ink leading-none border-b border-ink/[0.07] pb-4">Condiciones actuales</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <Metric label="Viento" icon="💨" value={<span className="inline-flex items-center gap-1.5">{nowHour.windKmh ?? '–'} km/h <WindArrow deg={nowHour.windDir} /> {nowHour.windDirLabel}</span>} sub={windWord(nowHour.windKmh)} />
                 <Metric label="Rachas" icon="🌬️" value={nowHour.gustKmh != null ? `${nowHour.gustKmh} km/h` : '–'} />
@@ -523,7 +523,7 @@ export default async function SpotDashboard({
                 <Metric label="Primera luz" icon="🌄" value={fmtTime(d0.firstLight)} sub={`última luz ${fmtTime(d0.lastLight)}`} />
               </div>
               {windRel && (
-                <p className="text-[13px] text-ink/70 leading-relaxed border border-ink/12 rounded-xl px-3.5 py-2.5 bg-paper">
+                <p className="text-[13px] text-ink/70 leading-relaxed border border-ink/[0.07] rounded-xl px-3.5 py-2.5 bg-paper">
                   <span className="font-bold text-ink">{windRel.label}.</span> {windRel.hint}
                   {modality.id !== 'tierra' && windRel.label.startsWith('Viento de mar') && (
                     <span className="text-ink/60"> Ojo: en {modality.name.toLowerCase()} este mismo viento incomoda la navegación.</span>
@@ -541,7 +541,7 @@ export default async function SpotDashboard({
 
               {/* Transparent breakdown: why this score, factor by factor */}
               {(nowActivityFactors.length > 0 || nowConditionsFactors.length > 0) && (
-                <details className="group border border-ink/12 rounded-xl bg-paper px-4 py-3 [&_summary]:list-none">
+                <details className="group border border-ink/[0.07] rounded-xl bg-paper px-4 py-3 [&_summary]:list-none">
                   <summary className="flex items-center justify-between gap-3 cursor-pointer text-sm font-bold text-ink">
                     ¿Por qué esta puntuación?
                     <span className="flex-shrink-0 text-accent transition-transform group-open:rotate-45 text-lg leading-none">+</span>
@@ -576,7 +576,7 @@ export default async function SpotDashboard({
                   <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50 mb-2">Mejores horas hoy</p>
                   <div className="flex flex-wrap gap-2">
                     {bestToday.map((h) => (
-                      <span key={h.time} className="inline-flex items-center gap-2 border border-ink/15 rounded-full px-3 py-1.5">
+                      <span key={h.time} className="inline-flex items-center gap-2 border border-ink/10 rounded-full px-3 py-1.5">
                         <span className="font-display text-lg text-ink">{h.hourLabel}</span>
                         <span className="text-paper text-[11px] font-bold rounded px-1.5 py-0.5" style={{ background: scoreHex(h.score) }}>{h.score}</span>
                       </span>
@@ -594,19 +594,19 @@ export default async function SpotDashboard({
             </div>
           </div>
         ) : (
-          <div className="border border-ink/15 rounded-2xl bg-paper p-6 text-sm text-ink/50">La previsión meteorológica no está disponible ahora mismo. Vuelve a intentarlo en unos minutos.</div>
+          <div className="border border-ink/10 rounded-2xl bg-paper p-6 text-sm text-ink/50">La previsión meteorológica no está disponible ahora mismo. Vuelve a intentarlo en unos minutos.</div>
         )}
 
         {/* Qué buscar hoy — species intelligence from season + live conditions */}
         {speciesPicks.length > 0 && (
-          <div id="especies" className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-6 space-y-4 scroll-mt-28">
-            <div className="flex items-center justify-between gap-3 border-b border-ink/12 pb-4">
+          <div id="especies" className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-6 space-y-4 scroll-mt-28">
+            <div className="flex items-center justify-between gap-3 border-b border-ink/[0.07] pb-4">
               <h2 className="font-display uppercase text-2xl text-ink leading-none flex items-center gap-2"><span aria-hidden>🎯</span> Qué buscar hoy</h2>
-              <Link href="/especies" className="font-mono text-[11px] font-bold uppercase tracking-widest text-accent hover:underline whitespace-nowrap">Todas las fichas →</Link>
+              <Link href="/especies" className="text-[11px] font-semibold text-accent hover:underline whitespace-nowrap">Todas las fichas →</Link>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {speciesPicks.map((p, i) => (
-                <div key={p.species.id} className={`border rounded-xl p-4 flex flex-col gap-2.5 ${i === 0 ? 'border-accent/40 bg-accent/[0.04]' : 'border-ink/12 bg-paper'}`}>
+                <div key={p.species.id} className={`border rounded-xl p-4 flex flex-col gap-2.5 ${i === 0 ? 'border-accent/40 bg-accent/[0.04]' : 'border-ink/[0.07] bg-paper'}`}>
                   <div className="flex items-center justify-between gap-2">
                     <p className="font-display uppercase text-xl text-ink leading-none">{i === 0 && '⭐ '}{p.species.name}</p>
                     <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/40">#{i + 1}</span>
@@ -615,15 +615,15 @@ export default async function SpotDashboard({
                     {p.reasons.length ? `${p.reasons.join(', ')}.` : 'Opción secundaria en estas condiciones.'}
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    <Link href={buildHref({ especie: p.species.id, modo })} scroll={false} className="inline-flex items-center text-[11px] font-bold uppercase tracking-wide text-paper bg-ink hover:bg-accent px-3 py-1.5 rounded-lg transition-colors">
+                    <Link href={buildHref({ especie: p.species.id, modo })} scroll={false} className="inline-flex items-center text-[11px] font-semibold text-paper bg-ink hover:bg-accent px-3 py-1.5 rounded-lg transition-colors">
                       Puntuar para {p.species.name} →
                     </Link>
                     {isSpeciesZone(p.species.id, s.slug) ? (
-                      <Link href={`/pesca/${p.species.id}/${s.slug}`} className="inline-flex items-center text-[11px] font-bold uppercase tracking-wide text-ink border border-ink/15 px-3 py-1.5 rounded-lg hover:bg-ink hover:text-paper transition-colors">
+                      <Link href={`/pesca/${p.species.id}/${s.slug}`} className="inline-flex items-center text-[11px] font-semibold text-ink border border-ink/10 px-3 py-1.5 rounded-lg hover:bg-ink hover:text-paper transition-colors">
                         Guía en {s.name}
                       </Link>
                     ) : (
-                      <Link href={`/especies/${p.species.id}`} className="inline-flex items-center text-[11px] font-bold uppercase tracking-wide text-ink border border-ink/15 px-3 py-1.5 rounded-lg hover:bg-ink hover:text-paper transition-colors">
+                      <Link href={`/especies/${p.species.id}`} className="inline-flex items-center text-[11px] font-semibold text-ink border border-ink/10 px-3 py-1.5 rounded-lg hover:bg-ink hover:text-paper transition-colors">
                         Ficha
                       </Link>
                     )}
@@ -638,7 +638,7 @@ export default async function SpotDashboard({
         {/* 7-day hourly forecast with day selector */}
         {byDay.length > 0 && (
           <div id="prevision" className="space-y-3 scroll-mt-28">
-            <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3">Previsión hora a hora · 7 días</h2>
+            <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3">Previsión hora a hora · 7 días</h2>
             <p className="text-[12px] text-ink/50">Elige el día. «Activ.» es la actividad prevista de los peces{species.id !== 'general' ? ` (adaptada a ${species.name})` : ''} y «Cond.» las condiciones para {modality.name.toLowerCase()}; verde = mejor. Desliza la tabla para ver todas las horas.</p>
             <DayTabs labels={byDay.map((g, i) => `${i === bestDayIdx ? '⭐ ' : ''}${dayLabel(g.dateISO, i)}`)}>
               {byDay.map((g) => {
@@ -677,13 +677,13 @@ export default async function SpotDashboard({
                         )}
                       </span>
                       {sol && (
-                        <span className="inline-flex items-center gap-2 rounded-xl border border-ink/15 px-3 py-2" title="Cálculo astronómico propio de PescaPlus">
+                        <span className="inline-flex items-center gap-2 rounded-xl border border-ink/10 px-3 py-2" title="Cálculo astronómico propio de PescaPlus">
                           <FishRating value={sol.rating} />
                           <span className="font-mono text-[10px] uppercase tracking-widest text-ink/50">solunar (calculado)</span>
                         </span>
                       )}
                       {showTide && coef != null && (
-                        <span className="inline-flex items-center gap-2 rounded-xl border border-ink/15 px-3 py-2" title="Estimado del ciclo lunar (viva/muerta), no es el coeficiente oficial de la estación">
+                        <span className="inline-flex items-center gap-2 rounded-xl border border-ink/10 px-3 py-2" title="Estimado del ciclo lunar (viva/muerta), no es el coeficiente oficial de la estación">
                           <span className="font-display text-lg text-ink">{coef}</span>
                           <span className="font-mono text-[10px] uppercase tracking-widest text-ink/50">coef estimado · {coefficientLabel(coef)}</span>
                         </span>
@@ -692,7 +692,7 @@ export default async function SpotDashboard({
                         <DayAgreementChip promise={agreementPromise} dateISO={g.dateISO} />
                       </Suspense>
                       {navWins.map((w, i) => (
-                        <span key={i} className="inline-flex items-center gap-2 rounded-xl border border-ink/15 px-3 py-2" title="Tramo con viento y olas aptos para embarcación menor">
+                        <span key={i} className="inline-flex items-center gap-2 rounded-xl border border-ink/10 px-3 py-2" title="Tramo con viento y olas aptos para embarcación menor">
                           <span aria-hidden>🚤</span>
                           <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Navegación</span>
                           <span className="font-display text-lg text-ink">{fmtWindowRange(w.start, w.end, gStart)}</span>
@@ -703,7 +703,7 @@ export default async function SpotDashboard({
                     {/* Salida y regreso — the return leg is where trouble happens */}
                     {s.type === 'mar' && modality.id !== 'tierra' && (
                       outing ? (
-                        <div className="border border-ink/15 rounded-2xl bg-paper p-4 flex flex-wrap items-center gap-x-6 gap-y-2">
+                        <div className="border border-ink/10 rounded-2xl bg-paper p-4 flex flex-wrap items-center gap-x-6 gap-y-2">
                           <span className="inline-flex items-center gap-2">
                             <span aria-hidden>{modality.emoji}</span>
                             <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Salida</span>
@@ -722,14 +722,14 @@ export default async function SpotDashboard({
                       )
                     )}
 
-                    <div className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-5 space-y-3">
+                    <div className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-5 space-y-3">
                       <h3 className="font-display uppercase text-lg text-ink leading-none flex items-center gap-2"><span aria-hidden>📈</span> Actividad de pesca del día</h3>
                       <ActivityChart hours={g.hours} window={win} now={now} />
                       <p className="text-[11px] text-ink/40">Curva de puntuación 0-100 · banda verde: mejor ventana · punto: pico del día.</p>
                     </div>
 
                     <div className={`grid grid-cols-1 ${showTide ? 'lg:grid-cols-2' : ''} gap-6`}>
-                      <div className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-5 space-y-3">
+                      <div className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-5 space-y-3">
                         <h3 className="font-display uppercase text-lg text-ink leading-none flex items-center gap-2"><span aria-hidden>💨</span> Viento (km/h)</h3>
                         <WindChart hours={g.hours} sunrise={sol?.sunrise ?? null} sunset={sol?.sunset ?? null} periods={sol?.periods ?? []} now={now} />
                         <p className="text-[11px] text-ink/40">Barras: viento medio · línea: rachas · franjas verdes: periodos solunares · sombreado: noche.</p>
@@ -742,7 +742,7 @@ export default async function SpotDashboard({
                         />
                       </div>
                       {showTide && (
-                        <div className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-5 space-y-3">
+                        <div className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-5 space-y-3">
                           <h3 className="font-display uppercase text-lg text-ink leading-none flex items-center gap-2"><span aria-hidden>🌊</span> Marea</h3>
                           <TideChart extremes={dayExtremes} dayStart={gStart} now={now} />
                           <p className="text-[11px] text-ink/40">{TIDE_DATUM_NOTE}</p>
@@ -766,15 +766,15 @@ export default async function SpotDashboard({
 
         {/* Gear for current conditions */}
         {gearTips.length > 0 && (
-          <div id="equipo" className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-6 space-y-4 scroll-mt-28">
-            <h2 className="font-display uppercase text-2xl text-ink leading-none border-b border-ink/12 pb-4 flex items-center gap-2">
+          <div id="equipo" className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-6 space-y-4 scroll-mt-28">
+            <h2 className="font-display uppercase text-2xl text-ink leading-none border-b border-ink/[0.07] pb-4 flex items-center gap-2">
               <span aria-hidden>🎒</span> Equipo para estas condiciones
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {gearTips.map((t) => (
-                <div key={t.text} className="border border-ink/12 rounded-xl bg-paper p-4 flex flex-col justify-between gap-3">
+                <div key={t.text} className="border border-ink/[0.07] rounded-xl bg-paper p-4 flex flex-col justify-between gap-3">
                   <p className="text-sm text-ink/75 leading-relaxed">{t.text}</p>
-                  <Link href={t.href} className="self-start inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-paper bg-ink hover:bg-accent px-3.5 py-2 rounded-lg transition-colors">
+                  <Link href={t.href} className="self-start inline-flex items-center gap-1.5 text-sm font-semibold text-paper bg-ink hover:bg-accent px-3.5 py-2 rounded-lg transition-colors">
                     {t.label} →
                   </Link>
                 </div>
@@ -785,8 +785,8 @@ export default async function SpotDashboard({
 
         {/* Regulations — honest: official links, never invented bylaws */}
         {s.type === 'mar' && regulation && (
-          <div id="normativa" className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-6 space-y-4 scroll-mt-28">
-            <h2 className="font-display uppercase text-2xl text-ink leading-none border-b border-ink/12 pb-4 flex items-center gap-2">
+          <div id="normativa" className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-6 space-y-4 scroll-mt-28">
+            <h2 className="font-display uppercase text-2xl text-ink leading-none border-b border-ink/[0.07] pb-4 flex items-center gap-2">
               <span aria-hidden>📜</span> ¿Puedo pescar aquí? Normativa en {s.region}
             </h2>
             <ul className="space-y-2 text-[14px] text-ink/80 leading-relaxed">
@@ -827,20 +827,20 @@ export default async function SpotDashboard({
 
         {/* Sun & moon */}
         <div id="sol-luna" className="grid grid-cols-1 lg:grid-cols-3 gap-6 scroll-mt-28">
-          <div className="lg:col-span-2 border border-ink/15 rounded-2xl bg-paper shadow-hard p-6 space-y-4">
-            <h2 className="font-display uppercase text-2xl text-ink leading-none border-b border-ink/12 pb-4">Sol, luna y solunar</h2>
+          <div className="lg:col-span-2 border border-ink/10 rounded-2xl bg-paper shadow-hard p-6 space-y-4">
+            <h2 className="font-display uppercase text-2xl text-ink leading-none border-b border-ink/[0.07] pb-4">Sol, luna y solunar</h2>
             <div>
               <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50 mb-2">Periodos de máxima actividad</p>
               <div className="space-y-2">
                 {majors.map((p, i) => (
                   <div key={`ma${i}`} className="flex items-center gap-3">
-                    <span className="inline-flex items-center justify-center bg-accent text-paper text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full w-16">Mayor</span>
+                    <span className="inline-flex items-center justify-center bg-accent text-paper text-[10px] font-semibold st px-2 py-1 rounded-full w-16">Mayor</span>
                     <span className="font-display text-xl text-ink">{fmtTime(p.start)} – {fmtTime(p.end)}</span>
                   </div>
                 ))}
                 {minors.map((p, i) => (
                   <div key={`mi${i}`} className="flex items-center gap-3">
-                    <span className="inline-flex items-center justify-center border border-ink/20 text-ink/60 text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full w-16">Menor</span>
+                    <span className="inline-flex items-center justify-center border border-ink/12 text-ink/60 text-[10px] font-semibold st px-2 py-1 rounded-full w-16">Menor</span>
                     <span className="font-display text-xl text-ink/80">{fmtTime(p.start)} – {fmtTime(p.end)}</span>
                   </div>
                 ))}
@@ -854,23 +854,23 @@ export default async function SpotDashboard({
             </div>
             <SourceBadge source="PescaPlus (astronomía propia)" kind="calculado" extra="precisión ±2 min en salidas y puestas" />
           </div>
-          <div className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-6 flex flex-col items-center justify-center text-center gap-2">
+          <div className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-6 flex flex-col items-center justify-center text-center gap-2">
             <span className="text-5xl">🌙</span>
             <p className="font-bold text-ink text-lg">{d0.moonPhaseName}</p>
             <p className="font-mono text-[11px] uppercase tracking-widest text-ink/50">{Math.round(d0.moonIllumination * 100)}% iluminada</p>
-            <Link href="/calendario" className="mt-2 font-mono text-xs font-bold uppercase tracking-widest text-accent hover:underline">Ver calendario →</Link>
+            <Link href="/calendario" className="mt-2 text-xs font-semibold text-accent hover:underline">Ver calendario →</Link>
           </div>
         </div>
 
         {/* 7-day outlook */}
         <div className="space-y-4">
-          <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3">Próximos 7 días</h2>
+          <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3">Próximos 7 días</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
             {days.map((d, di) => {
               const dmajors = d.periods.filter((p) => p.kind === 'mayor')
               const isBest = di === bestDayIdx
               return (
-                <div key={d.date} className={`border rounded-xl p-3 space-y-2 text-center ${isBest ? 'border-accent bg-accent/[0.06]' : 'border-ink/12 bg-paper'}`}>
+                <div key={d.date} className={`border rounded-xl p-3 space-y-2 text-center ${isBest ? 'border-accent bg-accent/[0.06]' : 'border-ink/[0.07] bg-paper'}`}>
                   <p className="font-mono text-[11px] font-bold uppercase tracking-wide text-ink/60 capitalize">{isBest && '⭐ '}{fmtDayLabel(d.date)}</p>
                   <FishRating value={d.rating} className="justify-center" />
                   <div className="font-mono text-[11px] text-ink/60 space-y-0.5">
@@ -887,21 +887,21 @@ export default async function SpotDashboard({
 
         {/* Official AEMET coastal bulletin */}
         {aemet?.available && (
-          <div id="aemet" className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-6 space-y-4 scroll-mt-28">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-ink/12 pb-4">
+          <div id="aemet" className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-6 space-y-4 scroll-mt-28">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-ink/[0.07] pb-4">
               <h2 className="font-display uppercase text-2xl text-ink leading-none flex items-center gap-2">
                 <span aria-hidden>🏛️</span> El parte oficial de AEMET
               </h2>
-              <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border ${aemet.hasAviso ? 'border-red-700/40 text-red-800 bg-red-700/[0.06]' : 'border-accent/40 text-accent'}`}>
+              <span className={`text-[10px] font-semibold st px-2.5 py-1 rounded-full border${aemet.hasAviso ? 'border-red-700/40 text-red-800 bg-red-700/[0.06]' : 'border-accent/40 text-accent'}`}>
                 {aemet.hasAviso ? '⚠️ Con avisos' : '✓ Sin avisos'}
               </span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="border border-ink/12 rounded-xl bg-paper p-4 space-y-1.5">
+              <div className="border border-ink/[0.07] rounded-xl bg-paper p-4 space-y-1.5">
                 <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/45">{aemet.subzonaNombre || 'Aguas costeras'}</p>
                 <p className="text-[14px] text-ink/80 leading-relaxed">{aemet.subzonaTexto}</p>
               </div>
-              <div className="border border-ink/12 rounded-xl bg-paper p-4 space-y-1.5">
+              <div className="border border-ink/[0.07] rounded-xl bg-paper p-4 space-y-1.5">
                 <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/45">Situación general</p>
                 <p className="text-[14px] text-ink/80 leading-relaxed">{aemet.situacion || '—'}</p>
               </div>
@@ -925,11 +925,11 @@ export default async function SpotDashboard({
             </div>
             <p className="text-[16px] text-ink/85 leading-relaxed max-w-3xl first-letter:font-display first-letter:text-5xl first-letter:float-left first-letter:mr-2 first-letter:leading-[0.85]">{guide.intro}</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="border border-ink/12 rounded-2xl bg-paper p-5 space-y-2">
+              <div className="border border-ink/[0.07] rounded-2xl bg-paper p-5 space-y-2">
                 <h3 className="font-display uppercase text-xl text-ink leading-none flex items-center gap-2"><span aria-hidden>🐟</span> Qué se pesca</h3>
                 <p className="text-[14px] text-ink/75 leading-relaxed">{guide.species}</p>
               </div>
-              <div className="border border-ink/12 rounded-2xl bg-paper p-5 space-y-2">
+              <div className="border border-ink/[0.07] rounded-2xl bg-paper p-5 space-y-2">
                 <h3 className="font-display uppercase text-xl text-ink leading-none flex items-center gap-2"><span aria-hidden>🎣</span> Cómo se pesca</h3>
                 <p className="text-[14px] text-ink/75 leading-relaxed">{guide.techniques}</p>
               </div>
@@ -942,7 +942,7 @@ export default async function SpotDashboard({
               <h3 className="font-display uppercase text-xl text-ink leading-none mb-3">Consejos de la zona</h3>
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                 {guide.tips.map((t, i) => (
-                  <li key={i} className="flex items-start gap-2.5 border border-ink/12 rounded-xl bg-paper px-4 py-3 text-[13px] text-ink/75 leading-relaxed">
+                  <li key={i} className="flex items-start gap-2.5 border border-ink/[0.07] rounded-xl bg-paper px-4 py-3 text-[13px] text-ink/75 leading-relaxed">
                     <span className="text-accent font-bold flex-shrink-0" aria-hidden>{i + 1}.</span> {t}
                   </li>
                 ))}
@@ -952,7 +952,7 @@ export default async function SpotDashboard({
         )}
 
         {/* SEO copy + internal links */}
-        <div className="border-t border-ink/12 pt-8 space-y-3 text-[15px] text-ink/80 leading-relaxed">
+        <div className="border-t border-ink/[0.07] pt-8 space-y-3 text-[15px] text-ink/80 leading-relaxed">
           <h2 className="font-display uppercase text-2xl text-ink">Cómo leer la previsión de pesca de {s.name}</h2>
           <p>
             La <strong>puntuación de pesca</strong> combina la teoría solunar (posición de la luna), el viento, la tendencia de
@@ -977,11 +977,11 @@ export default async function SpotDashboard({
         <AlertSignup spotSlug={s.slug} spotName={s.name} isSea={s.type === 'mar'} />
 
         {/* Nearby zones — true nearest by distance */}
-        <div className="border-t border-ink/12 pt-8">
+        <div className="border-t border-ink/[0.07] pt-8">
           <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50 mb-3">Zonas cercanas</p>
           <div className="flex flex-wrap gap-2">
             {nearby.map((o) => (
-              <Link key={o.slug} href={`/mejores-horas/${o.slug}`} className="px-3 py-1.5 text-sm font-semibold text-ink border border-ink/15 rounded-full hover:bg-ink hover:text-paper transition-colors">
+              <Link key={o.slug} href={`/mejores-horas/${o.slug}`} className="px-3 py-1.5 text-sm font-semibold text-ink border border-ink/10 rounded-full hover:bg-ink hover:text-paper transition-colors">
                 {o.name} <span className="font-mono text-[10px] uppercase tracking-widest opacity-50">{o.region}</span>
               </Link>
             ))}

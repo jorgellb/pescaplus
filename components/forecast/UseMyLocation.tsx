@@ -35,7 +35,7 @@ export default function UseMyLocation({ className = '' }: { className?: string }
       <button
         onClick={locate}
         disabled={state === 'loading'}
-        className="inline-flex items-center gap-2 bg-accent text-paper px-4 py-2.5 text-xs font-bold uppercase tracking-wide border border-accent rounded-xl shadow-hard hover-shift hover:bg-ink hover:border-ink disabled:opacity-60 transition-colors"
+        className="inline-flex items-center gap-2 bg-accent text-paper px-4 py-2.5 text-sm font-semibold border border-accent rounded-full shadow-hard hover-shift hover:bg-ink hover:border-ink disabled:opacity-60 transition-colors"
       >
         📍 {state === 'loading' ? 'Localizando…' : 'Usar mi ubicación'}
       </button>

@@ -69,13 +69,13 @@ export default function NearMeDay({ spots, showNav }: { spots: SpotDayScore[]; s
   const rankedInterior = nearby.filter((s) => s.type === 'interior').slice(0, 4)
 
   return (
-    <div className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-4 sm:p-5 space-y-3">
+    <div className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-4 sm:p-5 space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="font-display uppercase text-xl sm:text-2xl leading-none">📍 Las mejores cerca de ti</h2>
         <button
           onClick={locate}
           disabled={state === 'loading'}
-          className="inline-flex items-center gap-2 bg-accent text-paper px-4 py-2 text-xs font-bold uppercase tracking-wide border border-accent rounded-xl shadow-hard hover-shift hover:bg-ink hover:border-ink disabled:opacity-60 transition-colors"
+          className="inline-flex items-center gap-2 bg-accent text-paper px-4 py-2 text-sm font-semibold border border-accent rounded-full shadow-hard hover-shift hover:bg-ink hover:border-ink disabled:opacity-60 transition-colors"
         >
           {state === 'loading' ? 'Localizando…' : pos ? 'Actualizar ubicación' : 'Usar mi ubicación'}
         </button>
@@ -132,7 +132,7 @@ function NearRow({ s, i, showNav }: { s: SpotDayScore & { km: number }; i: numbe
     <li>
       <Link
         href={`/mejores-horas/${s.slug}`}
-        className="flex items-center gap-3 border border-ink/12 rounded-xl px-3 py-2.5 bg-paper hover:border-accent transition-colors"
+        className="flex items-center gap-3 border border-ink/[0.07] rounded-xl px-3 py-2.5 bg-paper hover:border-accent transition-colors"
       >
         <span className="font-mono text-[11px] font-bold text-ink/40 w-5 text-right shrink-0">{i + 1}</span>
         <span

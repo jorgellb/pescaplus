@@ -204,7 +204,7 @@ export default function ChatWidget() {
         <button
           onClick={() => setOpen(true)}
           aria-label="Abrir asesor de pesca"
-          className="fixed bottom-4 right-4 z-[60] flex items-center gap-2 bg-ink text-paper pl-3.5 pr-4 py-3 rounded-full border border-ink/15 shadow-hard-md hover:bg-accent hover:border-accent transition-colors group"
+          className="fixed bottom-4 right-4 z-[60] flex items-center gap-2 bg-ink text-paper pl-3.5 pr-4 py-3 rounded-full border border-ink/10 shadow-hard-md hover:bg-accent hover:border-accent transition-colors group"
         >
           <span className="text-xl leading-none">🎣</span>
           <span className="font-mono text-[11px] font-bold uppercase tracking-widest hidden sm:inline">Asesor</span>
@@ -216,9 +216,9 @@ export default function ChatWidget() {
 
       {/* Chat panel */}
       {open && (
-        <div className="fixed z-[60] bottom-4 right-4 left-4 sm:left-auto sm:w-[380px] flex flex-col bg-paper border border-ink/15 rounded-2xl shadow-hard-md overflow-hidden max-h-[min(70vh,560px)] h-[70vh]">
+        <div className="fixed z-[60] bottom-4 right-4 left-4 sm:left-auto sm:w-[380px] flex flex-col bg-paper border border-ink/10 rounded-2xl shadow-hard-md overflow-hidden max-h-[min(70vh,560px)] h-[70vh]">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-ink/12 bg-ink text-paper">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-ink/[0.07] bg-ink text-paper">
             <div className="flex items-center gap-2 min-w-0">
               <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-paper/10 rounded-full text-base">🎣</span>
               <div className="min-w-0">
@@ -250,7 +250,7 @@ export default function ChatWidget() {
           <div ref={messagesRef} aria-live="polite" className="flex-1 overflow-y-auto p-3 space-y-3 bg-[#eae6db]">
             {messages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center gap-3 px-2">
-                <span className="text-4xl w-16 h-16 flex items-center justify-center bg-paper border border-ink/15 rounded-2xl shadow-hard">🎣</span>
+                <span className="text-4xl w-16 h-16 flex items-center justify-center bg-paper border border-ink/10 rounded-2xl shadow-hard">🎣</span>
                 <p className="text-[13px] text-ink/70 leading-relaxed max-w-[16rem]">
                   Hola 👋 Soy tu asesor de pesca. Pregúntame por equipo, técnicas o señuelos.
                 </p>
@@ -259,7 +259,7 @@ export default function ChatWidget() {
                     <button
                       key={q}
                       onClick={() => executeSendMessage(q)}
-                      className="w-full text-left px-3 py-2 bg-paper border border-ink/15 rounded-xl text-[12px] font-semibold text-ink hover:bg-ink hover:text-paper transition-colors"
+                      className="w-full text-left px-3 py-2 bg-paper border border-ink/10 rounded-xl text-[12px] font-semibold text-ink hover:bg-ink hover:text-paper transition-colors"
                     >
                       {q}
                     </button>
@@ -270,10 +270,10 @@ export default function ChatWidget() {
               messages.map((message, index) => (
                 <div key={index} className={`flex items-start gap-2 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   {message.role === 'assistant' && (
-                    <div className="flex-shrink-0 w-7 h-7 bg-paper border border-ink/15 rounded-full flex items-center justify-center text-xs">🎣</div>
+                    <div className="flex-shrink-0 w-7 h-7 bg-paper border border-ink/10 rounded-full flex items-center justify-center text-xs">🎣</div>
                   )}
                   <div className={`flex flex-col gap-1.5 max-w-[80%] ${message.role === 'user' ? 'items-end' : 'items-start'}`}>
-                    <div className={`w-full p-3 border border-ink/15 rounded-xl ${message.role === 'user' ? 'bg-accent text-paper' : 'bg-paper'}`}>
+                    <div className={`w-full p-3 border border-ink/10 rounded-xl ${message.role === 'user' ? 'bg-accent text-paper' : 'bg-paper'}`}>
                       {message.role === 'user' ? (
                         <p className="text-[13px] font-medium leading-relaxed whitespace-pre-wrap break-words">{message.content}</p>
                       ) : (
@@ -292,7 +292,7 @@ export default function ChatWidget() {
                             key={p.id}
                             href={`/products/${p.id}`}
                             onClick={() => setOpen(false)}
-                            className="flex items-center gap-2 bg-paper border border-ink/15 rounded-xl p-1.5 pr-3 hover:bg-ink/5 transition-colors"
+                            className="flex items-center gap-2 bg-paper border border-ink/10 rounded-xl p-1.5 pr-3 hover:bg-ink/5 transition-colors"
                           >
                             <span className="relative block w-9 h-9 flex-shrink-0 bg-ink/[0.05] rounded-lg overflow-hidden">
                               <ProductImage src={p.imageUrl} alt={p.title} sizes="40px" className="absolute inset-0 w-full h-full object-cover" />
@@ -313,8 +313,8 @@ export default function ChatWidget() {
             )}
             {loading && messages[messages.length - 1]?.role !== 'assistant' && (
               <div className="flex items-start gap-2 justify-start">
-                <div className="flex-shrink-0 w-7 h-7 bg-paper border border-ink/15 rounded-full flex items-center justify-center text-xs">🎣</div>
-                <div className="bg-paper border border-ink/15 rounded-xl p-3">
+                <div className="flex-shrink-0 w-7 h-7 bg-paper border border-ink/10 rounded-full flex items-center justify-center text-xs">🎣</div>
+                <div className="bg-paper border border-ink/10 rounded-xl p-3">
                   <div className="flex items-center gap-1.5">
                     <div className="w-1.5 h-1.5 rounded-full bg-accent animate-bounce" />
                     <div className="w-1.5 h-1.5 rounded-full bg-accent animate-bounce" style={{ animationDelay: '0.2s' }} />
@@ -326,7 +326,7 @@ export default function ChatWidget() {
           </div>
 
           {/* Input */}
-          <div className="p-2.5 border-t border-ink/12 bg-paper flex gap-2">
+          <div className="p-2.5 border-t border-ink/[0.07] bg-paper flex gap-2">
             <input
               ref={inputRef}
               type="text"
@@ -334,14 +334,14 @@ export default function ChatWidget() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Escribe tu consulta…"
-              className="flex-1 min-w-0 px-3 py-2.5 bg-paper border border-ink/15 rounded-xl text-ink placeholder-ink/40 focus:outline-none focus:border-accent text-[13px] transition-colors"
+              className="flex-1 min-w-0 px-3 py-2.5 bg-paper border border-ink/10 rounded-xl text-ink placeholder-ink/40 focus:outline-none focus:border-accent text-[13px] transition-colors"
               disabled={loading}
             />
             <button
               onClick={sendMessage}
               disabled={loading || !input.trim()}
               aria-label="Enviar"
-              className="flex-shrink-0 w-11 bg-ink text-paper flex items-center justify-center rounded-xl border border-ink/15 hover:bg-accent transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex-shrink-0 w-11 bg-ink text-paper flex items-center justify-center rounded-xl border border-ink/10 hover:bg-accent transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>
             </button>

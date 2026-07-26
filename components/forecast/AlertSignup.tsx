@@ -40,7 +40,7 @@ export default function AlertSignup({ spotSlug, spotName, isSea }: { spotSlug: s
   }
 
   return (
-    <form onSubmit={submit} className="border border-ink/15 rounded-2xl bg-paper p-5 space-y-3">
+    <form onSubmit={submit} className="border border-ink/10 rounded-2xl bg-paper p-5 space-y-3">
       <div className="flex items-center gap-2">
         <span className="text-xl" aria-hidden>🔔</span>
         <p className="font-display uppercase text-lg text-ink leading-none">Avísame cuando esté bueno</p>
@@ -57,10 +57,10 @@ export default function AlertSignup({ spotSlug, spotName, isSea }: { spotSlug: s
           maxLength={160}
           placeholder="tucorreo@ejemplo.com"
           aria-label="Tu email para las alertas"
-          className="flex-1 px-4 py-2.5 bg-paper border border-ink/15 rounded-xl text-ink placeholder-ink/40 focus:outline-none focus:border-accent text-sm"
+          className="flex-1 px-4 py-2.5 bg-paper border border-ink/10 rounded-xl text-ink placeholder-ink/40 focus:outline-none focus:border-accent text-sm"
         />
         {isSea && (
-          <select name="especie" aria-label="Especie (opcional)" className="px-3 py-2.5 bg-paper border border-ink/15 rounded-xl text-sm text-ink/80 focus:outline-none focus:border-accent">
+          <select name="especie" aria-label="Especie (opcional)" className="px-3 py-2.5 bg-paper border border-ink/10 rounded-xl text-sm text-ink/80 focus:outline-none focus:border-accent">
             <option value="">Cualquier especie</option>
             {SEA_SPECIES.map((sp) => (
               <option key={sp.id} value={sp.id}>{sp.name}</option>
@@ -70,7 +70,7 @@ export default function AlertSignup({ spotSlug, spotName, isSea }: { spotSlug: s
         <button
           type="submit"
           disabled={status === 'sending'}
-          className="bg-ink text-paper px-5 py-2.5 text-xs font-bold uppercase tracking-wide rounded-xl hover:bg-accent transition-colors disabled:opacity-50"
+          className="bg-ink text-paper px-5 py-2.5 text-sm font-semibold rounded-full hover:bg-accent transition-colors disabled:opacity-50"
         >
           {status === 'sending' ? 'Guardando…' : 'Activar alerta'}
         </button>

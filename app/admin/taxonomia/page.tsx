@@ -117,7 +117,7 @@ export default function TaxonomyAdminPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {cats.map((c) => (
-          <div key={c.id} className="rounded-xl border border-ink/15 bg-white p-4 space-y-3">
+          <div key={c.id} className="rounded-xl border border-ink/10 bg-white p-4 space-y-3">
             <div className="space-y-1">
               <label className="text-[10px] font-bold uppercase tracking-widest text-ink/40">
                 Categoría · <span className="font-mono">{c.id}</span>
@@ -139,8 +139,8 @@ export default function TaxonomyAdminPage() {
                     placeholder="Nombre de la subcategoría"
                     className={`${field} py-1.5 text-xs`}
                   />
-                  <button onClick={() => moveSub(c.id, i, -1)} disabled={i === 0} className="w-6 h-7 flex-shrink-0 rounded bg-white border border-ink/15 text-ink/50 hover:text-ink disabled:opacity-30 text-xs">↑</button>
-                  <button onClick={() => moveSub(c.id, i, 1)} disabled={i === c.subcategories.length - 1} className="w-6 h-7 flex-shrink-0 rounded bg-white border border-ink/15 text-ink/50 hover:text-ink disabled:opacity-30 text-xs">↓</button>
+                  <button onClick={() => moveSub(c.id, i, -1)} disabled={i === 0} className="w-6 h-7 flex-shrink-0 rounded bg-white border border-ink/10 text-ink/50 hover:text-ink disabled:opacity-30 text-xs">↑</button>
+                  <button onClick={() => moveSub(c.id, i, 1)} disabled={i === c.subcategories.length - 1} className="w-6 h-7 flex-shrink-0 rounded bg-white border border-ink/10 text-ink/50 hover:text-ink disabled:opacity-30 text-xs">↓</button>
                   <button onClick={() => removeSub(c.id, i)} className="w-6 h-7 flex-shrink-0 rounded bg-white border border-red-200 text-red-500 hover:bg-red-50 text-xs">✕</button>
                 </div>
               ))}

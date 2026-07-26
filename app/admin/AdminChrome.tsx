@@ -31,7 +31,7 @@ export default function AdminChrome({
   return (
     <div className="min-h-screen bg-paper text-ink flex flex-col selection:bg-accent selection:text-paper">
       {/* Top bar */}
-      <header className="sticky top-0 z-40 border-b border-ink/12 bg-paper">
+      <header className="sticky top-0 z-40 border-b border-ink/[0.07] bg-paper">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-6">
             <Link href="/admin" className="flex items-center gap-2">
@@ -71,7 +71,7 @@ export default function AdminChrome({
             </Link>
             <button
               onClick={logout}
-              className="text-xs font-bold text-ink/80 hover:text-ink bg-ink/5 hover:bg-ink/10 border border-ink/15 px-4 py-2 rounded-lg transition-all"
+              className="text-xs font-bold text-ink/80 hover:text-ink bg-ink/5 hover:bg-ink/10 border border-ink/10 px-4 py-2 rounded-lg transition-all"
             >
               Salir
             </button>

@@ -52,7 +52,7 @@ export default function AdminGuidesPage() {
         </div>
         <button
           onClick={() => setCreating(true)}
-          className="inline-flex items-center gap-2 bg-ink text-paper hover:bg-accent font-extrabold text-sm px-5 py-2.5 border border-ink/15 rounded-xl transition-colors"
+          className="inline-flex items-center gap-2 bg-ink text-paper hover:bg-accent font-extrabold text-sm px-5 py-2.5 border border-ink/10 rounded-xl transition-colors"
         >
           <span className="text-base leading-none">＋</span> Nueva guía
         </button>
@@ -61,14 +61,14 @@ export default function AdminGuidesPage() {
       {loading ? (
         <div className="py-24 text-center text-ink/60 text-sm">Cargando guías…</div>
       ) : guides.length === 0 ? (
-        <div className="py-20 text-center text-ink/60 text-sm border border-ink/15 bg-white rounded-2xl">
+        <div className="py-20 text-center text-ink/60 text-sm border border-ink/10 bg-white rounded-2xl">
           Aún no hay guías. Crea la primera con IA ✨
         </div>
       ) : (
-        <div className="overflow-x-auto border border-ink/15 rounded-2xl bg-white">
+        <div className="overflow-x-auto border border-ink/10 rounded-2xl bg-white">
           <table className="w-full text-sm min-w-[560px]">
             <thead>
-              <tr className="text-left text-[11px] uppercase tracking-widest text-ink/50 border-b border-ink/15">
+              <tr className="text-left text-[11px] uppercase tracking-widest text-ink/50 border-b border-ink/10">
                 <th className="px-4 py-3 font-bold">Título</th>
                 <th className="px-4 py-3 font-bold">Categoría</th>
                 <th className="px-4 py-3 font-bold">Estado</th>
@@ -91,7 +91,7 @@ export default function AdminGuidesPage() {
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-2">
                       <a href={`/guias/${g.id}`} target="_blank" className="text-xs font-semibold text-ink/70 hover:text-accent px-3 py-1.5">Ver</a>
-                      <button onClick={() => setEditing(g)} className="text-xs font-semibold text-ink/80 hover:text-accent bg-ink/5 border border-ink/15 px-3 py-1.5 rounded-lg">Editar</button>
+                      <button onClick={() => setEditing(g)} className="text-xs font-semibold text-ink/80 hover:text-accent bg-ink/5 border border-ink/10 px-3 py-1.5 rounded-lg">Editar</button>
                       <button onClick={() => remove(g)} className="text-xs font-semibold text-red-600 hover:text-red-700 bg-red-50 border border-red-200 px-3 py-1.5 rounded-lg">Eliminar</button>
                     </div>
                   </td>

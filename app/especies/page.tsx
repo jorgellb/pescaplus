@@ -17,7 +17,7 @@ export default function EspeciesHub() {
 
   return (
     <Layout>
-      <section className="bg-paper border-b border-ink/12">
+      <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
           <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3">● Guía de especies</p>
           <h1 className="font-display uppercase text-4xl sm:text-5xl md:text-6xl leading-[1.02] text-ink">Especies de mar</h1>
@@ -36,12 +36,12 @@ export default function EspeciesHub() {
               <Link
                 key={sp.id}
                 href={`/especies/${sp.id}`}
-                className="group border border-ink/15 rounded-2xl bg-paper shadow-hard hover-shift p-5 flex flex-col gap-3"
+                className="group border border-ink/10 rounded-2xl bg-paper shadow-hard hover-shift p-5 flex flex-col gap-3"
               >
                 <div className="flex items-center justify-between gap-2">
                   <h2 className="font-display uppercase text-2xl text-ink leading-none group-hover:text-accent transition-colors">{sp.name}</h2>
                   {inSeason && (
-                    <span className="flex-shrink-0 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-accent border border-accent/40 rounded-full px-2 py-0.5">
+                    <span className="flex-shrink-0 inline-flex items-center gap-1 text-[10px] font-semibold st text-accent border border-accent/40 rounded-full px-2 py-0.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-accent" /> Temporada
                     </span>
                   )}

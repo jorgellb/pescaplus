@@ -79,7 +79,7 @@ export default function OperatorDashboard({ operatorId, manageToken, verified, s
   }
 
   const L = 'font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50'
-  const I = 'mt-1 w-full border border-ink/20 rounded-xl bg-paper px-3 py-2 text-sm'
+  const I = 'mt-1 w-full border border-ink/12 rounded-xl bg-paper px-3 py-2 text-sm'
 
   return (
     <div className="space-y-8">
@@ -99,10 +99,10 @@ export default function OperatorDashboard({ operatorId, manageToken, verified, s
             <p className="text-sm text-ink/70">Los pescadores pueden reservar y pagar por adelantado. El dinero llega a tu cuenta y nosotros retenemos la comisión de la plataforma.</p>
           </div>
         ) : (
-          <div className="border border-ink/15 rounded-2xl bg-paper p-5 space-y-2">
+          <div className="border border-ink/10 rounded-2xl bg-paper p-5 space-y-2">
             <p className="font-display uppercase text-xl leading-none">💳 Activa los cobros online</p>
             <p className="text-sm text-ink/70">Conecta tu cuenta con Stripe para aceptar reservas pagadas por adelantado. Es gratis, tarda un par de minutos y el dinero va directo a tu banco. {operatorId && <span className="text-ink/50">Sin esto, seguirás recibiendo solicitudes de reserva por contacto.</span>}</p>
-            <button onClick={connectStripe} disabled={connecting} className="bg-accent text-paper px-5 py-2.5 text-xs font-bold uppercase tracking-wide rounded-xl hover:bg-ink disabled:opacity-60 transition-colors">{connecting ? 'Conectando…' : 'Conectar cobros con Stripe'}</button>
+            <button onClick={connectStripe} disabled={connecting} className="bg-accent text-paper px-5 py-2.5 text-sm font-semibold rounded-full hover:bg-ink disabled:opacity-60 transition-colors">{connecting ? 'Conectando…' : 'Conectar cobros con Stripe'}</button>
             {msg && <p className="text-sm text-red-700">{msg}</p>}
           </div>
         )
@@ -112,10 +112,10 @@ export default function OperatorDashboard({ operatorId, manageToken, verified, s
         <PhotoUploader operatorId={operatorId} manageToken={manageToken} photos={profile.photos} />
       </div>
 
-      <div className="border border-ink/15 rounded-2xl bg-paper p-5">
+      <div className="border border-ink/10 rounded-2xl bg-paper p-5">
         <div className="flex items-center justify-between gap-2">
           <p className="font-display uppercase text-xl leading-none">🪪 Tu ficha pública</p>
-          {!editProfile && <button onClick={() => { setPf(profile); setEditProfile(true) }} className="text-xs font-bold uppercase tracking-wide text-accent hover:underline">Editar</button>}
+          {!editProfile && <button onClick={() => { setPf(profile); setEditProfile(true) }} className="text-sm font-semibold text-accent hover:underline">Editar</button>}
         </div>
         {!editProfile ? (
           <p className="text-sm text-ink/70 mt-1">{profile.businessName || profile.name}{profile.boatName ? ` · ${profile.boatName}` : ''}{profile.boatType ? ` ${profile.boatType}` : ''}{profile.capacity ? ` · ${profile.capacity} plazas` : ''}{profile.bio ? ` — ${profile.bio}` : ''}</p>
@@ -157,8 +157,8 @@ export default function OperatorDashboard({ operatorId, manageToken, verified, s
             <label className="block"><span className={L}>Sobre ti / tu servicio</span><textarea value={pf.bio} onChange={(e) => setP('bio', e.target.value)} maxLength={800} rows={3} className={I} /></label>
             {msg && <p className="text-sm text-red-700">{msg}</p>}
             <div className="flex gap-2">
-              <button type="submit" disabled={savingProfile} className="bg-accent text-paper px-5 py-2.5 text-xs font-bold uppercase tracking-wide rounded-xl hover:bg-ink disabled:opacity-60 transition-colors">{savingProfile ? 'Guardando…' : 'Guardar ficha'}</button>
-              <button type="button" onClick={() => setEditProfile(false)} className="px-4 py-2 text-xs font-bold uppercase tracking-wide text-ink/50 hover:text-ink">Cancelar</button>
+              <button type="submit" disabled={savingProfile} className="bg-accent text-paper px-5 py-2.5 text-sm font-semibold rounded-full hover:bg-ink disabled:opacity-60 transition-colors">{savingProfile ? 'Guardando…' : 'Guardar ficha'}</button>
+              <button type="button" onClick={() => setEditProfile(false)} className="px-4 py-2 text-sm font-semibold text-ink/50 hover:text-ink">Cancelar</button>
             </div>
           </form>
         )}
@@ -168,7 +168,7 @@ export default function OperatorDashboard({ operatorId, manageToken, verified, s
         <p className="font-display uppercase text-xl leading-none">Tus chárters ({charters.length})</p>
         {charters.length === 0 && <p className="text-sm text-ink/60">Aún no has publicado ninguno.</p>}
         {charters.map((c) => (
-          <div key={c.id} className={`border rounded-2xl p-4 space-y-2 ${c.status === 'cancelled' ? 'border-ink/10 bg-ink/[0.02] opacity-70' : 'border-ink/15 bg-paper'}`}>
+          <div key={c.id} className={`border rounded-2xl p-4 space-y-2 ${c.status === 'cancelled' ? 'border-ink/10 bg-ink/[0.02] opacity-70' : 'border-ink/10 bg-paper'}`}>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="font-bold text-ink">{c.spotName} · <span className="capitalize">{c.dayLabel}</span> · {c.timeStart} · {c.pricePerPerson} €/pers · {c.placesTaken}/{c.maxPlaces}
                 <span className="ml-2 font-mono text-[10px] uppercase tracking-widest text-accent">{c.status === 'confirmed' ? 'confirmado' : c.status === 'cancelled' ? 'cancelado' : 'abierto'}</span></p>
@@ -177,10 +177,10 @@ export default function OperatorDashboard({ operatorId, manageToken, verified, s
                   {(c.seriesCount ?? 0) > 1 && (
                     <span className="text-[11px] font-semibold text-accent bg-accent/[0.09] px-2 py-0.5 rounded-full">🔁 serie de {c.seriesCount}</span>
                   )}
-                  <button onClick={() => respond(c.id, 'cancel')} disabled={busy === c.id + 'cancel'} className="font-mono text-[10px] uppercase tracking-wide text-red-700 hover:underline disabled:opacity-50">Cancelar esta</button>
+                  <button onClick={() => respond(c.id, 'cancel')} disabled={busy === c.id + 'cancel'} className="text-[10px] text-red-700 hover:underline disabled:opacity-50">Cancelar esta</button>
                   {(c.seriesCount ?? 0) > 1 && (
                     <button onClick={() => { if (confirm(`¿Cancelar las ${c.seriesCount} salidas de esta serie?`)) respond(c.id, 'cancelSeries') }}
-                      disabled={busy === c.id + 'cancelSeries'} className="font-mono text-[10px] uppercase tracking-wide text-red-700 hover:underline disabled:opacity-50">Cancelar la serie</button>
+                      disabled={busy === c.id + 'cancelSeries'} className="text-[10px] text-red-700 hover:underline disabled:opacity-50">Cancelar la serie</button>
                   )}
                 </span>
               )}

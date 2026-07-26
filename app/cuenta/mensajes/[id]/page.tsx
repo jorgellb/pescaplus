@@ -32,7 +32,7 @@ export default async function ThreadPage({ params }: { params: Promise<{ id: str
 
   return (
     <Layout>
-      <section className="bg-paper border-b border-ink/12">
+      <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6">
           <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-3">
             <Link href="/cuenta?tab=mensajes" className="hover:text-accent">← Mensajes</Link>

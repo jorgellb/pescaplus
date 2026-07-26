@@ -16,8 +16,8 @@ export default function DayTabs({ labels, children }: { labels: string[]; childr
             role="tab"
             aria-selected={i === active}
             onClick={() => setActive(i)}
-            className={`flex-shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-tight border transition-colors ${
-              i === active ? 'bg-ink text-paper border-ink' : 'bg-paper text-ink/70 border-ink/15 hover:bg-ink/5'
+            className={`flex-shrink-0 px-3.5 py-2 rounded-full text-xs font-semibold border transition-colors${
+              i === active ? 'bg-ink text-paper border-ink' : 'bg-paper text-ink/70 border-ink/10 hover:bg-ink/5'
             }`}
           >
             {l}

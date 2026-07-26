@@ -22,13 +22,13 @@ export default function MeetupShare({ waText }: { waText: string }) {
         href={`https://wa.me/?text=${encodeURIComponent(waText)}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-2 bg-accent text-paper px-4 py-2.5 text-xs font-bold uppercase tracking-wide border border-accent rounded-xl shadow-hard hover-shift hover:bg-ink hover:border-ink transition-colors"
+        className="inline-flex items-center gap-2 bg-accent text-paper px-4 py-2.5 text-sm font-semibold border border-accent rounded-full shadow-hard hover-shift hover:bg-ink hover:border-ink transition-colors"
       >
         💬 Compartir por WhatsApp
       </a>
       <button
         onClick={copy}
-        className="inline-flex items-center gap-2 bg-paper text-ink px-4 py-2.5 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl hover:bg-ink hover:text-paper transition-colors"
+        className="inline-flex items-center gap-2 bg-paper text-ink px-4 py-2.5 text-sm font-semibold border border-ink/10 rounded-full hover:bg-ink hover:text-paper transition-colors"
       >
         {copied ? '✓ Copiado' : '🔗 Copiar enlace'}
       </button>

@@ -15,7 +15,7 @@ export default async function EntrarPage({ searchParams }: { searchParams: Promi
   if (await getSessionUser()) redirect('/cuenta')
   return (
     <Layout>
-      <section className="bg-paper border-b border-ink/12">
+      <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
           <h1 className="font-display uppercase text-3xl sm:text-4xl md:text-5xl leading-[1.02] text-ink">Entrar en PescaPlus</h1>
           <p className="text-ink/60 text-sm max-w-2xl mt-3">Una sola cuenta para reservar salidas, apuntarte a quedadas y, si eres patrón, publicar y cobrar tus chárters.</p>

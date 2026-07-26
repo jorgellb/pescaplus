@@ -36,7 +36,7 @@ export default async function DondePescarPage({ searchParams }: Params) {
 
   return (
     <Layout>
-      <section className="bg-paper border-b border-ink/12">
+      <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3">● El mapa del día</p>
           <h1 className="font-display uppercase text-4xl sm:text-5xl md:text-6xl leading-[1.02] text-ink">¿Dónde pescar?</h1>
@@ -55,7 +55,7 @@ export default async function DondePescarPage({ searchParams }: Params) {
                 className={`shrink-0 px-3.5 py-2 rounded-xl border font-mono text-[11px] font-bold uppercase tracking-wide transition-colors ${
                   d === board.dateISO
                     ? 'bg-ink text-paper border-ink'
-                    : 'bg-paper text-ink/70 border-ink/15 hover:border-accent hover:text-accent'
+                    : 'bg-paper text-ink/70 border-ink/10 hover:border-accent hover:text-accent'
                 }`}
               >
                 {d === today ? 'Hoy' : fmtDayLabel(d)}
@@ -69,10 +69,10 @@ export default async function DondePescarPage({ searchParams }: Params) {
               <Link
                 key={m.id}
                 href={`/donde-pescar?dia=${board.dateISO}${m.id !== 'tierra' ? `&modo=${m.id}` : ''}`}
-                className={`px-3.5 py-2 rounded-xl border text-xs font-bold uppercase tracking-wide transition-colors ${
+                className={`px-3.5 py-2 rounded-xl border text-sm font-semibold transition-colors ${
                   m.id === board.modality.id
                     ? 'bg-accent text-paper border-accent'
-                    : 'bg-paper text-ink/70 border-ink/15 hover:border-accent hover:text-accent'
+                    : 'bg-paper text-ink/70 border-ink/10 hover:border-accent hover:text-accent'
                 }`}
               >
                 {m.emoji} {m.name}
@@ -104,7 +104,7 @@ export default async function DondePescarPage({ searchParams }: Params) {
             <NearMeDay spots={board.spots} showNav={showNav} />
 
             <div className="space-y-3">
-              <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3">
+              <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3">
                 🗺️ España, zona a zona
               </h2>
               <DayScoreMap spots={board.spots} showNav={showNav} />
@@ -119,7 +119,7 @@ export default async function DondePescarPage({ searchParams }: Params) {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
               <div className="lg:col-span-2 space-y-3">
-                <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3">
+                <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3">
                   🏆 Top 15 de la costa · <span className="capitalize">{dayName}</span>
                 </h2>
                 <ol className="space-y-2">
@@ -127,7 +127,7 @@ export default async function DondePescarPage({ searchParams }: Params) {
                     <li key={s.slug}>
                       <Link
                         href={`/mejores-horas/${s.slug}`}
-                        className="flex items-center gap-3 border border-ink/12 rounded-xl px-3.5 py-3 bg-paper hover:border-accent transition-colors"
+                        className="flex items-center gap-3 border border-ink/[0.07] rounded-xl px-3.5 py-3 bg-paper hover:border-accent transition-colors"
                       >
                         <span className="font-mono text-xs font-bold text-ink/40 w-6 text-right shrink-0">{i + 1}</span>
                         <span
@@ -158,7 +158,7 @@ export default async function DondePescarPage({ searchParams }: Params) {
               <div className="space-y-6">
                 {topInterior.length > 0 && (
                   <div className="space-y-3">
-                    <h2 className="font-display uppercase text-xl md:text-2xl leading-none border-b border-ink/12 pb-3">
+                    <h2 className="font-display uppercase text-xl md:text-2xl leading-none border-b border-ink/[0.07] pb-3">
                       🎣 Embalses
                     </h2>
                     <ol className="space-y-2">
@@ -166,7 +166,7 @@ export default async function DondePescarPage({ searchParams }: Params) {
                         <li key={s.slug}>
                           <Link
                             href={`/mejores-horas/${s.slug}`}
-                            className="flex items-center gap-3 border border-ink/12 rounded-xl px-3.5 py-2.5 bg-paper hover:border-accent transition-colors"
+                            className="flex items-center gap-3 border border-ink/[0.07] rounded-xl px-3.5 py-2.5 bg-paper hover:border-accent transition-colors"
                           >
                             <span
                               className="font-mono text-sm font-bold text-paper rounded-lg px-2 py-1 shrink-0"
@@ -210,7 +210,7 @@ export default async function DondePescarPage({ searchParams }: Params) {
           </>
         )}
 
-        <div className="border-t border-ink/12 pt-8 space-y-3 text-[15px] text-ink/80 leading-relaxed">
+        <div className="border-t border-ink/[0.07] pt-8 space-y-3 text-[15px] text-ink/80 leading-relaxed">
           <h2 className="font-display uppercase text-2xl text-ink">Cómo leer el mapa del día</h2>
           <p>
             Cada punto es una zona con su <strong>puntuación de 0 a 100</strong> para el día elegido: combinamos las

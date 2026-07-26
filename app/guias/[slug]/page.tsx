@@ -75,7 +75,7 @@ export default async function GuidePage({ params }: Params) {
 
         <div className="flex items-center gap-3 mb-4">
           {guide.typeFishing && (
-            <span className="bg-ink text-paper text-[11px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full">
+            <span className="bg-ink text-paper text-[11px] font-semibold st px-3 py-1.5 rounded-full">
               {fishingLabel(guide.typeFishing)}
             </span>
           )}
@@ -88,7 +88,7 @@ export default async function GuidePage({ params }: Params) {
         <p className="text-lg text-ink/70 mt-4 leading-snug">{guide.excerpt}</p>
 
         {guide.coverImage && (
-          <div className="relative aspect-[16/9] mt-8 border border-ink/15 rounded-xl shadow-hard overflow-hidden bg-ink/[0.05]">
+          <div className="relative aspect-[16/9] mt-8 border border-ink/10 rounded-xl shadow-hard overflow-hidden bg-ink/[0.05]">
             <ProductImage src={proxiedImage(guide.coverImage, guide.title)} alt={guide.coverImageAlt || guide.title} priority sizes="(max-width: 768px) 100vw, 768px" className="absolute inset-0 w-full h-full object-cover" />
           </div>
         )}
@@ -98,12 +98,12 @@ export default async function GuidePage({ params }: Params) {
           dangerouslySetInnerHTML={{ __html: renderDescription(guide.content) }}
         />
 
-        <div className="mt-12 pt-6 border-t border-ink/12 flex flex-wrap gap-3">
-          <Link href="/guias" className="bg-paper text-ink px-5 py-3 text-sm font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift">
+        <div className="mt-12 pt-6 border-t border-ink/[0.07] flex flex-wrap gap-3">
+          <Link href="/guias" className="bg-paper text-ink px-5 py-3 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift">
             ← Más guías
           </Link>
           {guide.typeFishing && (
-            <Link href={`/categories/${guide.typeFishing}`} className="bg-ink text-paper px-5 py-3 text-sm font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift hover:bg-accent hover:border-accent">
+            <Link href={`/categories/${guide.typeFishing}`} className="bg-ink text-paper px-5 py-3 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift hover:bg-accent hover:border-accent">
               Ver {fishingLabel(guide.typeFishing)} →
             </Link>
           )}

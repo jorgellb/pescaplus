@@ -38,7 +38,7 @@ export default function MessageThread({ threadId, initial, myRole }: { threadId:
 
   return (
     <div className="space-y-4">
-      <div className="space-y-2.5 max-h-[55vh] overflow-y-auto border border-ink/12 rounded-2xl bg-paper p-4">
+      <div className="space-y-2.5 max-h-[55vh] overflow-y-auto border border-ink/[0.07] rounded-2xl bg-paper p-4">
         {messages.length === 0 && <p className="text-sm text-ink/50 text-center py-6">Aún no hay mensajes. Escribe el primero 👇</p>}
         {messages.map((m) => {
           const mine = m.sender === myRole
@@ -56,8 +56,8 @@ export default function MessageThread({ threadId, initial, myRole }: { threadId:
       <form onSubmit={send} className="flex gap-2">
         <textarea value={body} onChange={(e) => setBody(e.target.value)} maxLength={2000} rows={2} placeholder="Escribe un mensaje…"
           onKeyDown={(e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) send(e) }}
-          className="flex-1 border border-ink/20 rounded-xl bg-paper px-3 py-2 text-sm resize-none" />
-        <button type="submit" disabled={sending || !body.trim()} className="self-end bg-accent text-paper px-5 py-2.5 text-xs font-bold uppercase tracking-wide rounded-xl hover:bg-ink disabled:opacity-50 transition-colors">{sending ? '…' : 'Enviar'}</button>
+          className="flex-1 border border-ink/12 rounded-xl bg-paper px-3 py-2 text-sm resize-none" />
+        <button type="submit" disabled={sending || !body.trim()} className="self-end bg-accent text-paper px-5 py-2.5 text-sm font-semibold rounded-full hover:bg-ink disabled:opacity-50 transition-colors">{sending ? '…' : 'Enviar'}</button>
       </form>
       {err && <p className="text-sm text-red-700">{err}</p>}
     </div>

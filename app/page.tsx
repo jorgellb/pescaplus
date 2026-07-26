@@ -104,7 +104,7 @@ export default async function Home() {
               <Link href="/mejores" className="bg-accent text-paper px-6 py-3.5 text-[15px] font-semibold rounded-full shadow-hard-accent hover:brightness-110 transition-all">
                 Ver la tienda
               </Link>
-              <Link href="/mejores-horas" className="bg-paper text-ink px-6 py-3.5 text-[15px] font-semibold rounded-full border border-ink/12 hover:border-accent hover:text-accent transition-colors">
+              <Link href="/mejores-horas" className="bg-paper text-ink px-6 py-3.5 text-[15px] font-semibold rounded-full border border-ink/[0.07] hover:border-accent hover:text-accent transition-colors">
                 ¿Cuándo salgo a pescar?
               </Link>
             </div>
@@ -113,13 +113,13 @@ export default async function Home() {
           <div className="lg:col-span-5">
             <div className="relative">
               {heroA && (
-                <div className="relative aspect-[4/5] border border-ink/15 rounded-xl shadow-hard-lg overflow-hidden bg-ink/[0.05]">
+                <div className="relative aspect-[4/5] border border-ink/10 rounded-xl shadow-hard-lg overflow-hidden bg-ink/[0.05]">
                   <ProductImage src={proxiedImage(heroA.imageUrl, heroA.title)} alt={heroA.title} priority sizes="(max-width: 1024px) 90vw, 40vw" className="absolute inset-0 w-full h-full object-cover" />
                   <Link href={`/products/${heroA.id}`} className="absolute inset-0" aria-label={heroA.title} />
                 </div>
               )}
               {heroB && (
-                <div className="hidden sm:block absolute -bottom-8 -left-8 w-40 aspect-square border border-ink/15 rounded-xl shadow-hard bg-ink/[0.05] overflow-hidden">
+                <div className="hidden sm:block absolute -bottom-8 -left-8 w-40 aspect-square border border-ink/10 rounded-xl shadow-hard bg-ink/[0.05] overflow-hidden">
                   <ProductImage src={proxiedImage(heroB.imageUrl, heroB.title)} alt={heroB.title} sizes="200px" className="absolute inset-0 w-full h-full object-cover" />
                 </div>
               )}
@@ -196,11 +196,11 @@ export default async function Home() {
 
       {/* FEATURED */}
       {featured.length > 0 && (
-        <section className="bg-ink text-paper border-y border-ink/12 py-16">
+        <section className="bg-ink text-paper border-y border-ink/[0.07] py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-end justify-between mb-8 gap-4 border-b border-paper/15 pb-4">
               <h2 className="font-display text-3xl md:text-4xl">Lo más buscado</h2>
-              <Link href="/mejores" className="font-mono text-xs font-bold uppercase tracking-widest text-accent hover:underline whitespace-nowrap">Guías de compra →</Link>
+              <Link href="/mejores" className="text-xs font-semibold text-accent hover:underline whitespace-nowrap">Guías de compra →</Link>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
               {featured.map((p) => (
@@ -240,7 +240,7 @@ export default async function Home() {
           </div>
           <div className="lg:col-span-5 grid grid-cols-2 gap-4">
             {collage.map((p, i) => (
-              <div key={p.id} className={`relative aspect-[3/4] border border-ink/15 rounded-xl overflow-hidden bg-ink/[0.05] shadow-hard ${i === 1 ? 'mt-8' : ''}`}>
+              <div key={p.id} className={`relative aspect-[3/4] border border-ink/10 rounded-xl overflow-hidden bg-ink/[0.05] shadow-hard ${i === 1 ? 'mt-8' : ''}`}>
                 <ProductImage src={proxiedImage(p.imageUrl, p.title)} alt={p.title} sizes="(max-width: 1024px) 45vw, 20vw" className="absolute inset-0 w-full h-full object-cover" />
                 <Link href={`/products/${p.id}`} className="absolute inset-0" aria-label={p.title} />
               </div>
@@ -251,14 +251,14 @@ export default async function Home() {
 
       {/* BEST PRICE / OFFERS */}
       {bestPrice.length > 0 && (
-        <section className="border-y border-ink/12 bg-[#eae6db]/60">
+        <section className="border-y border-ink/[0.07] bg-[#eae6db]/60">
           <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
-            <div className="flex items-end justify-between mb-8 gap-4 border-b border-ink/15 pb-4">
+            <div className="flex items-end justify-between mb-8 gap-4 border-b border-ink/10 pb-4">
               <div>
                 <h2 className="font-display text-3xl md:text-4xl">Los mejores precios en pesca</h2>
                 <p className="text-sm text-ink/60 mt-2">Chollos y ofertas en material de pesca online — calidad probada, sin pagar de más.</p>
               </div>
-              <Link href="/search?q=oferta" className="font-mono text-xs font-bold uppercase tracking-widest text-accent hover:underline whitespace-nowrap hidden sm:block">Ver más →</Link>
+              <Link href="/search?q=oferta" className="text-xs font-semibold text-accent hover:underline whitespace-nowrap hidden sm:block">Ver más →</Link>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
               {bestPrice.map((p) => (
@@ -272,13 +272,13 @@ export default async function Home() {
       {/* GUÍAS DE COMPRA (roundups) */}
       {topRoundups.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
-          <div className="flex items-end justify-between mb-8 gap-4 border-b border-ink/12 pb-4">
+          <div className="flex items-end justify-between mb-8 gap-4 border-b border-ink/[0.07] pb-4">
             <h2 className="font-display text-3xl md:text-4xl">Guías de compra</h2>
-            <Link href="/mejores" className="font-mono text-xs font-bold uppercase tracking-widest text-accent hover:underline whitespace-nowrap">Ver todas →</Link>
+            <Link href="/mejores" className="text-xs font-semibold text-accent hover:underline whitespace-nowrap">Ver todas →</Link>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
             {topRoundups.map((r) => (
-              <Link key={r.slug} href={`/mejores/${r.slug}`} className="group flex flex-col border border-ink/12 rounded-xl overflow-hidden bg-paper shadow-hard hover-shift">
+              <Link key={r.slug} href={`/mejores/${r.slug}`} className="group flex flex-col border border-ink/[0.07] rounded-xl overflow-hidden bg-paper shadow-hard hover-shift">
                 <div className="relative aspect-[16/10] bg-ink/[0.05] border-b border-ink/10 overflow-hidden">
                   <ProductImage src={r.cover} alt={`Mejores ${r.name}`} sizes="(max-width: 768px) 50vw, 33vw" className="absolute inset-0 w-full h-full object-cover" />
                 </div>
@@ -294,14 +294,14 @@ export default async function Home() {
 
       {/* VALUE PROPS */}
       <section className="max-w-7xl mx-auto px-4 pb-16 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-0 border border-ink/15 rounded-xl shadow-hard-md overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-0 border border-ink/10 rounded-xl shadow-hard-md overflow-hidden">
           {[
             { n: '01', t: 'Mejores precios', d: 'Material de pesca barato y ofertas reales: comparamos para que compres siempre al mejor precio.' },
             { n: '02', t: 'Envío a España', d: 'Enviamos a toda España con seguimiento del pedido. Pago protegido de principio a fin.' },
             { n: '03', t: 'Selección experta', d: 'Filtramos por ventas y valoraciones reales. Solo lo que de verdad merece la pena.' },
             { n: '04', t: 'Asesor de pesca', d: 'Resolvemos tus dudas de aparejos, técnicas y montajes por modalidad, gratis.' },
           ].map((f, i) => (
-            <div key={f.n} className={`p-7 border-ink/12 ${i < 3 ? 'border-b md:border-b-0 md:border-r' : ''}`}>
+            <div key={f.n} className={`p-7 border-ink/[0.07] ${i < 3 ? 'border-b md:border-b-0 md:border-r' : ''}`}>
               <span className="font-display text-5xl text-accent leading-none">{f.n}</span>
               <h3 className="font-display uppercase text-xl mt-4 leading-none">{f.t}</h3>
               <p className="text-sm text-ink/70 mt-3 leading-relaxed">{f.d}</p>
@@ -312,11 +312,11 @@ export default async function Home() {
 
       {/* BLOG */}
       {latestGuides.length > 0 && (
-        <section className="border-t border-ink/12 bg-ink text-paper py-16">
+        <section className="border-t border-ink/[0.07] bg-ink text-paper py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-end justify-between mb-8 gap-4 border-b border-paper/15 pb-4">
               <h2 className="font-display text-3xl md:text-4xl">Consejos y guías de pesca</h2>
-              <Link href="/guias" className="font-mono text-xs font-bold uppercase tracking-widest text-accent hover:underline whitespace-nowrap">Ver blog →</Link>
+              <Link href="/guias" className="text-xs font-semibold text-accent hover:underline whitespace-nowrap">Ver blog →</Link>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {latestGuides.map((g) => (
@@ -341,7 +341,7 @@ export default async function Home() {
         <h2 className="font-display text-3xl md:text-4xl mb-8">Preguntas frecuentes</h2>
         <div className="space-y-3">
           {FAQS.map((f, i) => (
-            <details key={i} className="border border-ink/12 rounded-xl bg-paper group">
+            <details key={i} className="border border-ink/[0.07] rounded-xl bg-paper group">
               <summary className="cursor-pointer list-none px-5 py-4 flex items-center justify-between gap-3 font-bold text-ink">
                 <span>{f.q}</span>
                 <span className="text-accent text-xl group-open:rotate-45 transition-transform">+</span>

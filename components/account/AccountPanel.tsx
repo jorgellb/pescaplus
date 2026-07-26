@@ -32,7 +32,7 @@ export default function AccountPanel({ user, avatarChoices, bookings, rsvps, thr
   const totalUnread = threads.reduce((s, t) => s + t.unread, 0)
   const [busy, setBusy] = useState<string | null>(null)
   const [err, setErr] = useState('')
-  const tabCls = (t: string) => `px-4 py-2.5 text-xs font-bold uppercase tracking-wide rounded-xl transition-colors ${tab === t ? 'bg-accent text-paper' : 'text-ink/60 hover:text-ink hover:bg-ink/5'}`
+  const tabCls = (t: string) => `px-4 py-2.5 text-sm font-semibold rounded-full transition-colors ${tab === t ? 'bg-accent text-paper' : 'text-ink/60 hover:text-ink hover:bg-ink/5'}`
 
   const act = async (key: string, url: string, body: object) => {
     setBusy(key); setErr('')
@@ -66,7 +66,7 @@ export default function AccountPanel({ user, avatarChoices, bookings, rsvps, thr
             {bookings.map((b) => {
               const st = BOOKING_STATUS[b.status] ?? { label: b.status, cls: 'text-ink/50' }
               return (
-                <div key={b.id} className={`border rounded-2xl p-4 ${b.isPast ? 'border-ink/10 bg-ink/[0.02]' : 'border-ink/15 bg-paper'}`}>
+                <div key={b.id} className={`border rounded-2xl p-4 ${b.isPast ? 'border-ink/10 bg-ink/[0.02]' : 'border-ink/10 bg-paper'}`}>
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
                       <Link href={`/charters/${b.charterId}`} className="font-bold text-ink hover:text-accent">{b.spotName}</Link>
@@ -76,7 +76,7 @@ export default function AccountPanel({ user, avatarChoices, bookings, rsvps, thr
                   </div>
                   {b.canReview && <div className="mt-1"><ReviewForm charterId={b.charterId} initialRating={b.reviewedRating} done={b.reviewedRating > 0} pending={b.reviewPending} /></div>}
                   {!b.isPast && (b.status === 'requested' || b.status === 'accepted') && (
-                    <button onClick={() => cancelBooking(b.id)} disabled={busy === 'b' + b.id} className="mt-1.5 font-mono text-[10px] uppercase tracking-wide text-red-700 hover:underline disabled:opacity-50">Cancelar reserva</button>
+                    <button onClick={() => cancelBooking(b.id)} disabled={busy === 'b' + b.id} className="mt-1.5 text-[10px] text-red-700 hover:underline disabled:opacity-50">Cancelar reserva</button>
                   )}
                   {!b.isPast && b.status === 'paid' && (
                     <p className="mt-1.5 font-mono text-[10px] uppercase tracking-wide text-ink/40">Para cancelar una reserva pagada, contacta con el patrón.</p>
@@ -92,24 +92,24 @@ export default function AccountPanel({ user, avatarChoices, bookings, rsvps, thr
               <p className="text-sm text-ink/60">No estás apuntado a ninguna quedada. <Link href="/quedadas" className="text-accent font-bold hover:underline">Ver quedadas →</Link></p>
             )}
             {rsvps.map((r) => (
-              <div key={r.id} className="border border-ink/15 rounded-2xl bg-paper p-4 flex flex-wrap items-center justify-between gap-2">
+              <div key={r.id} className="border border-ink/10 rounded-2xl bg-paper p-4 flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <Link href={`/quedadas/${r.meetupId}`} className="font-bold text-ink hover:text-accent">{r.spotName}</Link>
                   <p className="text-[13px] text-ink/65 capitalize">{r.dayLabel} · {r.kind === 'llamada' ? '¿quién se apunta?' : 'quedada'}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className={`font-mono text-[10px] uppercase tracking-widest ${r.status === 'wait' ? 'text-amber-700' : 'text-accent'}`}>{r.status === 'wait' ? 'En lista de espera' : 'Apuntado ✓'}</span>
-                  <button onClick={() => leaveMeetup(r.id)} disabled={busy === 'r' + r.id} className="font-mono text-[10px] uppercase tracking-wide text-red-700 hover:underline disabled:opacity-50">Salir</button>
+                  <button onClick={() => leaveMeetup(r.id)} disabled={busy === 'r' + r.id} className="text-[10px] text-red-700 hover:underline disabled:opacity-50">Salir</button>
                 </div>
               </div>
             ))}
           </div>
 
           {!hasOperator && (
-            <div className="border border-ink/15 rounded-2xl bg-paper p-5">
+            <div className="border border-ink/10 rounded-2xl bg-paper p-5">
               <p className="font-display uppercase text-lg leading-none">⚓ ¿Eres patrón profesional?</p>
               <p className="text-sm text-ink/70 mt-1">Ofrece tus salidas, recibe reservas y cobra por adelantado. Verificamos tu licencia y seguro.</p>
-              <Link href="/charters/operador" className="inline-block mt-3 bg-accent text-paper px-5 py-2.5 text-xs font-bold uppercase tracking-wide rounded-xl hover:bg-ink transition-colors">Darme de alta como patrón</Link>
+              <Link href="/charters/operador" className="inline-block mt-3 bg-accent text-paper px-5 py-2.5 text-sm font-semibold rounded-full hover:bg-ink transition-colors">Darme de alta como patrón</Link>
             </div>
           )}
         </div>
@@ -120,7 +120,7 @@ export default function AccountPanel({ user, avatarChoices, bookings, rsvps, thr
           <p className="font-display uppercase text-xl leading-none">Conversaciones ({threads.length})</p>
           {threads.length === 0 && <p className="text-sm text-ink/60">No tienes mensajes. Puedes escribir a un patrón desde la ficha de su chárter.</p>}
           {threads.map((t) => (
-            <Link key={t.id} href={`/cuenta/mensajes/${t.id}`} className={`block border rounded-2xl p-4 transition-colors hover:border-accent/50 ${t.unread > 0 ? 'border-accent/40 bg-accent/[0.05]' : 'border-ink/15 bg-paper'}`}>
+            <Link key={t.id} href={`/cuenta/mensajes/${t.id}`} className={`block border rounded-2xl p-4 transition-colors hover:border-accent/50 ${t.unread > 0 ? 'border-accent/40 bg-accent/[0.05]' : 'border-ink/10 bg-paper'}`}>
               <div className="flex items-center justify-between gap-2">
                 <span className="font-bold text-ink">{t.otherName}</span>
                 {t.unread > 0 && <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 bg-red-600 text-paper text-[10px] font-bold rounded-full">{t.unread}</span>}
@@ -136,7 +136,7 @@ export default function AccountPanel({ user, avatarChoices, bookings, rsvps, thr
 
       {tab === 'perfil' && (
         <div className="space-y-4">
-          <div className="border border-ink/15 rounded-2xl bg-paper p-5 max-w-xl">
+          <div className="border border-ink/10 rounded-2xl bg-paper p-5 max-w-xl">
             <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Tu reputación como pescador</p>
             {user.reviewCount > 0 ? (
               <>
@@ -163,7 +163,7 @@ export default function AccountPanel({ user, avatarChoices, bookings, rsvps, thr
           </div>
           <ProfileForm user={user} avatarChoices={avatarChoices} />
           <form action="/api/auth/logout" method="post">
-            <button type="submit" className="text-xs font-bold uppercase tracking-wide text-red-700 hover:underline">Cerrar sesión</button>
+            <button type="submit" className="text-sm font-semibold text-red-700 hover:underline">Cerrar sesión</button>
           </form>
         </div>
       )}

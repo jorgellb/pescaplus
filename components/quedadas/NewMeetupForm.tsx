@@ -91,7 +91,7 @@ export default function NewMeetupForm({ spots, species, defaultSpot, defaultKind
   }
 
   const labelCls = 'font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50'
-  const inputCls = 'mt-1 w-full border border-ink/20 rounded-xl bg-paper px-3 py-2 text-sm'
+  const inputCls = 'mt-1 w-full border border-ink/12 rounded-xl bg-paper px-3 py-2 text-sm'
 
   return (
     <form onSubmit={submit} className="space-y-4">
@@ -105,7 +105,7 @@ export default function NewMeetupForm({ spots, species, defaultSpot, defaultKind
             key={o.id}
             type="button"
             onClick={() => setKind(o.id)}
-            className={`text-left rounded-xl border px-3.5 py-2.5 transition-colors ${kind === o.id ? 'bg-accent/[0.08] border-accent' : 'bg-paper border-ink/15 hover:border-accent/50'}`}
+            className={`text-left rounded-xl border px-3.5 py-2.5 transition-colors ${kind === o.id ? 'bg-accent/[0.08] border-accent' : 'bg-paper border-ink/10 hover:border-accent/50'}`}
           >
             <span className="block text-sm font-bold text-ink">{o.t}</span>
             <span className="block font-mono text-[10px] uppercase tracking-widest text-ink/45">{o.d}</span>
@@ -232,7 +232,7 @@ export default function NewMeetupForm({ spots, species, defaultSpot, defaultKind
       {/* Honeypot */}
       <input type="text" tabIndex={-1} autoComplete="off" value={form.website} onChange={(e) => set('website', e.target.value)} className="hidden" aria-hidden />
 
-      <p className="text-[12px] text-ink/55 leading-relaxed border border-ink/12 rounded-xl bg-ink/[0.02] p-3">
+      <p className="text-[12px] text-ink/55 leading-relaxed border border-ink/[0.07] rounded-xl bg-ink/[0.02] p-3">
         ⚠️ Las quedadas son para <strong>compartir gastos, sin ánimo de lucro</strong>. Si cobras por llevar gente a pescar
         necesitas licencia y seguro de actividad náutica comercial. Cada participante debe llevar su licencia de pesca. Sal
         con seguridad: chaleco, avisa a alguien en tierra y no salgas solo en kayak o barco.
@@ -243,7 +243,7 @@ export default function NewMeetupForm({ spots, species, defaultSpot, defaultKind
       <button
         type="submit"
         disabled={state === 'saving'}
-        className="inline-flex items-center gap-2 bg-accent text-paper px-6 py-3 text-sm font-bold uppercase tracking-wide border border-accent rounded-xl shadow-hard hover-shift hover:bg-ink hover:border-ink disabled:opacity-60 transition-colors"
+        className="inline-flex items-center gap-2 bg-accent text-paper px-6 py-3 text-sm font-semibold border border-accent rounded-full shadow-hard hover-shift hover:bg-ink hover:border-ink disabled:opacity-60 transition-colors"
       >
         {state === 'saving' ? 'Publicando…' : kind === 'llamada' ? 'Lanzar llamada' : 'Publicar quedada'}
       </button>

@@ -91,8 +91,8 @@ export default function MeetupList({ meetups }: { meetups: MeetupCard[] }) {
           <button
             key={m.id}
             onClick={() => setModality(m.id)}
-            className={`px-3.5 py-2 rounded-xl border text-xs font-bold uppercase tracking-wide transition-colors ${
-              modality === m.id ? 'bg-accent text-paper border-accent' : 'bg-paper text-ink/70 border-ink/15 hover:border-accent hover:text-accent'
+            className={`px-3.5 py-2 rounded-xl border text-sm font-semibold transition-colors ${
+              modality === m.id ? 'bg-accent text-paper border-accent' : 'bg-paper text-ink/70 border-ink/10 hover:border-accent hover:text-accent'
             }`}
           >
             {m.label}
@@ -101,21 +101,21 @@ export default function MeetupList({ meetups }: { meetups: MeetupCard[] }) {
         <button
           onClick={locate}
           disabled={locating}
-          className="px-3.5 py-2 rounded-xl border text-xs font-bold uppercase tracking-wide bg-paper text-ink/70 border-ink/15 hover:border-accent hover:text-accent disabled:opacity-60 transition-colors"
+          className="px-3.5 py-2 rounded-xl border text-sm font-semibold bg-paper text-ink/70 border-ink/10 hover:border-accent hover:text-accent disabled:opacity-60 transition-colors"
         >
           📍 {locating ? 'Localizando…' : pos ? 'Cerca de mí ✓' : 'Cerca de mí'}
         </button>
       </div>
 
       {shown.length === 0 ? (
-        <p className="text-sm text-ink/60 border border-ink/12 rounded-2xl p-5 bg-paper">No hay quedadas con este filtro.</p>
+        <p className="text-sm text-ink/60 border border-ink/[0.07] rounded-2xl p-5 bg-paper">No hay quedadas con este filtro.</p>
       ) : (
         <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {shown.map((m) => {
             const full = m.placesTaken >= m.maxPlaces
             return (
               <li key={m.id}>
-                <Link href={`/quedadas/${m.id}`} className="block border border-ink/12 rounded-2xl bg-paper p-4 hover:border-accent transition-colors h-full">
+                <Link href={`/quedadas/${m.id}`} className="block border border-ink/[0.07] rounded-2xl bg-paper p-4 hover:border-accent transition-colors h-full">
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">
                       {MOD.find((x) => x.id === m.modality)?.label ?? m.modality} · <span className="capitalize">{m.dayLabel}</span> · {m.timeStart}

@@ -33,13 +33,13 @@ export default function ContactForm() {
 
   if (status === 'sent') {
     return (
-      <div className="border border-ink/15 rounded-xl shadow-hard bg-paper p-8 text-center space-y-3">
+      <div className="border border-ink/10 rounded-xl shadow-hard bg-paper p-8 text-center space-y-3">
         <span className="inline-block text-4xl">✅</span>
         <h2 className="font-display uppercase text-2xl text-ink">Mensaje enviado</h2>
         <p className="text-ink/60 text-sm">Gracias por escribirnos. Te responderemos lo antes posible.</p>
         <button
           onClick={() => setStatus('idle')}
-          className="mt-2 inline-block bg-paper text-ink px-5 py-2.5 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl hover:bg-ink hover:text-paper transition-colors"
+          className="mt-2 inline-block bg-paper text-ink px-5 py-2.5 text-sm font-semibold border border-ink/10 rounded-full hover:bg-ink hover:text-paper transition-colors"
         >
           Enviar otro
         </button>
@@ -48,10 +48,10 @@ export default function ContactForm() {
   }
 
   const inputCls =
-    'w-full px-4 py-3 bg-paper border border-ink/15 rounded-xl text-ink placeholder-ink/40 focus:outline-none focus:border-accent text-sm transition-colors'
+    'w-full px-4 py-3 bg-paper border border-ink/10 rounded-xl text-ink placeholder-ink/40 focus:outline-none focus:border-accent text-sm transition-colors'
 
   return (
-    <form onSubmit={handleSubmit} className="border border-ink/15 rounded-xl shadow-hard bg-paper p-5 sm:p-7 space-y-4">
+    <form onSubmit={handleSubmit} className="border border-ink/10 rounded-xl shadow-hard bg-paper p-5 sm:p-7 space-y-4">
       {/* Honeypot — hidden from humans */}
       <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
 
@@ -82,7 +82,7 @@ export default function ContactForm() {
         <button
           type="submit"
           disabled={status === 'sending'}
-          className="bg-ink text-paper px-6 py-3 text-sm font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover:bg-accent hover:border-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-ink text-paper px-6 py-3 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover:bg-accent hover:border-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {status === 'sending' ? 'Enviando…' : 'Enviar mensaje'}
         </button>

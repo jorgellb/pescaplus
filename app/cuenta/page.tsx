@@ -123,7 +123,7 @@ export default async function CuentaPage({ searchParams }: { searchParams: Promi
 
   return (
     <Layout>
-      <section className="bg-paper border-b border-ink/12">
+      <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
           <div className="flex items-center gap-3">
             <span className="text-4xl">{user.avatar || '🎣'}</span>
@@ -154,7 +154,7 @@ export default async function CuentaPage({ searchParams }: { searchParams: Promi
 
 function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
-    <div className={`border rounded-2xl p-3 ${accent ? 'border-accent/30 bg-accent/[0.06]' : 'border-ink/15 bg-paper'}`}>
+    <div className={`border rounded-2xl p-3 ${accent ? 'border-accent/30 bg-accent/[0.06]' : 'border-ink/10 bg-paper'}`}>
       <p className="font-mono text-[10px] uppercase tracking-widest text-ink/50">{label}</p>
       <p className={`font-display text-lg leading-tight mt-0.5 ${accent ? 'text-accent' : 'text-ink'}`}>{value}</p>
     </div>

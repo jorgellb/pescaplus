@@ -19,7 +19,7 @@ interface Settings {
 }
 
 const field =
-  'w-full px-3 py-2.5 bg-paper border border-ink/15 rounded-lg text-ink placeholder-ink/40 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 text-sm transition-all'
+  'w-full px-3 py-2.5 bg-paper border border-ink/10 rounded-lg text-ink placeholder-ink/40 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 text-sm transition-all'
 const labelCls = 'text-[11px] font-bold uppercase tracking-widest text-ink/60'
 
 export default function AdminSettingsPage() {
@@ -161,7 +161,7 @@ export default function AdminSettingsPage() {
       </section>
 
       {/* Editable settings */}
-      <section className="space-y-4 p-5 rounded-2xl border border-ink/15 bg-white">
+      <section className="space-y-4 p-5 rounded-2xl border border-ink/10 bg-white">
         <h2 className="text-xs font-bold uppercase tracking-widest text-ink/60">Valores por defecto</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1">
@@ -217,7 +217,7 @@ export default function AdminSettingsPage() {
       </section>
 
       {/* Catalog maintenance */}
-      <section className="space-y-4 p-5 rounded-2xl border border-ink/15 bg-white">
+      <section className="space-y-4 p-5 rounded-2xl border border-ink/10 bg-white">
         <h2 className="text-xs font-bold uppercase tracking-widest text-ink/60">Mantenimiento del catálogo</h2>
         <div className="flex flex-wrap gap-3">
           <button
@@ -228,7 +228,7 @@ export default function AdminSettingsPage() {
           </button>
           <button
             onClick={exportCatalog}
-            className="text-sm font-semibold text-ink bg-ink/5 hover:bg-ink/10 border border-ink/15 px-4 py-2.5 rounded-xl transition-all"
+            className="text-sm font-semibold text-ink bg-ink/5 hover:bg-ink/10 border border-ink/10 px-4 py-2.5 rounded-xl transition-all"
           >
             ⬇️ Exportar catálogo (JSON)
           </button>
@@ -242,7 +242,7 @@ export default function AdminSettingsPage() {
       </section>
 
       {/* Product feeds */}
-      <section className="space-y-4 p-5 rounded-2xl border border-ink/15 bg-white">
+      <section className="space-y-4 p-5 rounded-2xl border border-ink/10 bg-white">
         <h2 className="text-xs font-bold uppercase tracking-widest text-ink/60">Feeds de producto (shopping)</h2>
         <p className="text-sm text-ink/60">
           Importa estos feeds en las plataformas para vender tu catálogo. Se generan al vuelo desde tu catálogo actual
@@ -270,7 +270,7 @@ function FeedRow({
 }) {
   const url = `${origin}${path}`
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center gap-2 justify-between p-3 border border-ink/15 rounded-xl bg-paper">
+    <div className="flex flex-col sm:flex-row sm:items-center gap-2 justify-between p-3 border border-ink/10 rounded-xl bg-paper">
       <div className="min-w-0">
         <p className="text-sm font-bold text-ink">{label}</p>
         <p className="font-mono text-[11px] text-ink/50 truncate">{url || path}</p>
@@ -287,7 +287,7 @@ function FeedRow({
         </a>
         <button
           onClick={() => onCopy(url)}
-          className="text-xs font-bold text-ink bg-ink/5 border border-ink/15 hover:bg-ink/10 px-3 py-2 rounded-lg transition-colors"
+          className="text-xs font-bold text-ink bg-ink/5 border border-ink/10 hover:bg-ink/10 px-3 py-2 rounded-lg transition-colors"
         >
           Copiar URL
         </button>
@@ -298,7 +298,7 @@ function FeedRow({
 
 function IntegrationRow({ title, ok, detail }: { title: string; ok: boolean; detail: string }) {
   return (
-    <div className="flex items-start gap-3 p-3.5 rounded-xl border border-ink/15 bg-paper">
+    <div className="flex items-start gap-3 p-3.5 rounded-xl border border-ink/10 bg-paper">
       <span className={`mt-0.5 w-2.5 h-2.5 rounded-full flex-shrink-0 ${ok ? 'bg-emerald-500' : 'bg-ink/30'}`} />
       <div className="min-w-0">
         <p className="text-sm font-semibold text-ink">{title}</p>

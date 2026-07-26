@@ -21,7 +21,7 @@ export default async function NuevaQuedadaPage({ searchParams }: Params) {
 
   return (
     <Layout>
-      <section className="bg-paper border-b border-ink/12">
+      <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
           <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-5">
             <Link href="/quedadas" className="hover:text-accent">Quedadas</Link> <span className="mx-1">/</span>{' '}

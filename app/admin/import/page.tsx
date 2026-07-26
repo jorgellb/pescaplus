@@ -141,12 +141,12 @@ export default function AdminImportPage() {
       {/* Search bar */}
       <form
         onSubmit={search}
-        className="flex flex-col sm:flex-row gap-3 p-4 rounded-2xl border border-ink/15 bg-white"
+        className="flex flex-col sm:flex-row gap-3 p-4 rounded-2xl border border-ink/10 bg-white"
       >
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="px-3 py-2.5 bg-paper border border-ink/15 rounded-lg text-ink text-sm focus:outline-none focus:border-accent"
+          className="px-3 py-2.5 bg-paper border border-ink/10 rounded-lg text-ink text-sm focus:outline-none focus:border-accent"
         >
           {FISHING_TYPES.map((t) => (
             <option key={t.id} value={t.id}>
@@ -158,7 +158,7 @@ export default function AdminImportPage() {
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
           placeholder="Palabra clave opcional (ej: carrete estanco)…"
-          className="flex-1 px-3 py-2.5 bg-paper border border-ink/15 rounded-lg text-ink placeholder-ink/40 text-sm focus:outline-none focus:border-accent"
+          className="flex-1 px-3 py-2.5 bg-paper border border-ink/10 rounded-lg text-ink placeholder-ink/40 text-sm focus:outline-none focus:border-accent"
         />
         <button
           type="submit"
@@ -177,7 +177,7 @@ export default function AdminImportPage() {
       {loading ? (
         <div className="py-24 text-center text-ink/60 text-sm">Consultando AliExpress…</div>
       ) : searched && results.length === 0 && !error ? (
-        <div className="py-20 text-center text-ink/60 text-sm border border-ink/15 rounded-2xl bg-white">
+        <div className="py-20 text-center text-ink/60 text-sm border border-ink/10 rounded-2xl bg-white">
           Sin resultados. Prueba otra categoría o palabra clave.
         </div>
       ) : (
@@ -191,7 +191,7 @@ export default function AdminImportPage() {
             return (
               <div
                 key={p.id}
-                className="rounded-xl overflow-hidden border border-ink/15 bg-white flex flex-col"
+                className="rounded-xl overflow-hidden border border-ink/10 bg-white flex flex-col"
               >
                 <div className="relative aspect-[4/3] bg-paper">
                   <ProductImage src={p.imageUrl} alt={p.title} className="absolute inset-0 w-full h-full object-cover" />
@@ -243,7 +243,7 @@ export default function AdminImportPage() {
               <button
                 onClick={loadMore}
                 disabled={loadingMore}
-                className="bg-white text-ink border border-ink/20 hover:bg-ink hover:text-paper font-bold text-sm px-8 py-3 rounded-xl active:scale-[0.98] transition-all disabled:opacity-40"
+                className="bg-white text-ink border border-ink/12 hover:bg-ink hover:text-paper font-bold text-sm px-8 py-3 rounded-xl active:scale-[0.98] transition-all disabled:opacity-40"
               >
                 {loadingMore ? 'Cargando más…' : 'Cargar más resultados ↓'}
               </button>

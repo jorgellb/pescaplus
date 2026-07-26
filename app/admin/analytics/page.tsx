@@ -50,7 +50,7 @@ export default function AdminAnalyticsPage() {
       </div>
 
       {stats.total === 0 ? (
-        <div className="py-20 text-center border border-ink/15 rounded-2xl bg-white space-y-3">
+        <div className="py-20 text-center border border-ink/10 rounded-2xl bg-white space-y-3">
           <span className="text-5xl">📊</span>
           <p className="text-ink/80 font-semibold">Aún no hay clics registrados</p>
           <p className="text-sm text-ink/50 max-w-md mx-auto">
@@ -69,7 +69,7 @@ export default function AdminAnalyticsPage() {
           </div>
 
           {/* Daily bar chart (single series) */}
-          <section className="rounded-2xl border border-ink/15 bg-white p-5">
+          <section className="rounded-2xl border border-ink/10 bg-white p-5">
             <h2 className="text-sm font-bold text-ink mb-4">Clics por día (últimos 14)</h2>
             <div className="flex items-end gap-1.5 h-40" role="img" aria-label="Clics por día, últimos 14 días">
               {stats.byDay.map((d) => {
@@ -91,7 +91,7 @@ export default function AdminAnalyticsPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Top products */}
-            <section className="rounded-2xl border border-ink/15 bg-white p-5">
+            <section className="rounded-2xl border border-ink/10 bg-white p-5">
               <h2 className="text-sm font-bold text-ink mb-4">Productos más clicados</h2>
               <div className="space-y-3">
                 {stats.byProduct.map((p) => (
@@ -109,7 +109,7 @@ export default function AdminAnalyticsPage() {
             </section>
 
             {/* By category */}
-            <section className="rounded-2xl border border-ink/15 bg-white p-5">
+            <section className="rounded-2xl border border-ink/10 bg-white p-5">
               <h2 className="text-sm font-bold text-ink mb-4">Clics por categoría</h2>
               <div className="space-y-3">
                 {stats.byCategory.map((c) => (
@@ -134,8 +134,8 @@ export default function AdminAnalyticsPage() {
 
 function Kpi({ label, value, icon, small }: { label: string; value: string; icon: string; small?: boolean }) {
   return (
-    <div className="rounded-2xl border border-ink/15 bg-white p-4 flex items-center gap-3">
-      <span className="text-2xl p-2.5 bg-paper rounded-xl border border-ink/15">{icon}</span>
+    <div className="rounded-2xl border border-ink/10 bg-white p-4 flex items-center gap-3">
+      <span className="text-2xl p-2.5 bg-paper rounded-xl border border-ink/10">{icon}</span>
       <div className="min-w-0">
         <p className={`font-extrabold text-ink leading-none truncate ${small ? 'text-base' : 'text-xl'}`}>{value}</p>
         <p className="text-[11px] uppercase tracking-widest text-ink/50 mt-1">{label}</p>

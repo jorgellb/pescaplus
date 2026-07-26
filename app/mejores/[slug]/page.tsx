@@ -90,7 +90,7 @@ export default async function RoundupPage({ params }: Params) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
 
       {/* HERO */}
-      <section className="bg-paper border-b border-ink/12">
+      <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
           <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-5">
             <Link href="/" className="hover:text-accent">Inicio</Link> <span className="mx-1">/</span>{' '}
@@ -101,10 +101,10 @@ export default async function RoundupPage({ params }: Params) {
           <h1 className="font-display uppercase text-4xl md:text-6xl leading-[0.9] text-ink">{h1}</h1>
           <p className="text-ink/70 text-sm md:text-base max-w-2xl mt-4 leading-relaxed">{intro}</p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link href={`/categories/${slug}`} className="inline-flex items-center gap-2 bg-ink text-paper px-5 py-3 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift">
+            <Link href={`/categories/${slug}`} className="inline-flex items-center gap-2 bg-ink text-paper px-5 py-3 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift">
               <CategoryIcon id={type.id} className="w-4 h-4" strokeWidth={1.9} /> Ver toda la categoría
             </Link>
-            <AsesorButton className="bg-paper text-ink px-5 py-3 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift">🎣 Asesor de pesca</AsesorButton>
+            <AsesorButton className="bg-paper text-ink px-5 py-3 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift">🎣 Asesor de pesca</AsesorButton>
           </div>
         </div>
       </section>
@@ -112,10 +112,10 @@ export default async function RoundupPage({ params }: Params) {
       {/* RANKING */}
       <section className="max-w-4xl mx-auto px-4 sm:px-6 py-10 space-y-5">
         {items.map((it) => (
-          <article key={it.product.id} className="flex flex-col sm:flex-row gap-4 border border-ink/15 rounded-xl shadow-hard bg-paper p-4">
+          <article key={it.product.id} className="flex flex-col sm:flex-row gap-4 border border-ink/10 rounded-xl shadow-hard bg-paper p-4">
             <div className="flex items-center gap-4 sm:flex-col sm:items-center sm:justify-start">
               <span className="font-display text-4xl md:text-5xl leading-none text-accent w-12 text-center">{String(it.rank).padStart(2, '0')}</span>
-              <Link href={`/products/${it.product.id}`} className="relative block w-24 h-24 flex-shrink-0 bg-ink/[0.05] border border-ink/15 rounded-xl overflow-hidden">
+              <Link href={`/products/${it.product.id}`} className="relative block w-24 h-24 flex-shrink-0 bg-ink/[0.05] border border-ink/10 rounded-xl overflow-hidden">
                 <ProductImage src={it.product.imageUrl} alt={it.product.title} sizes="96px" className="absolute inset-0 w-full h-full object-cover" />
               </Link>
             </div>
@@ -130,7 +130,7 @@ export default async function RoundupPage({ params }: Params) {
                   href={`/go/${it.product.id}`}
                   target="_blank"
                   rel="noopener noreferrer sponsored"
-                  className="bg-ink text-paper px-4 py-2.5 text-xs font-bold uppercase tracking-tight border border-ink/15 rounded-xl hover:bg-accent hover:border-accent transition-colors whitespace-nowrap"
+                  className="bg-ink text-paper px-4 py-2.5 text-xs font-semibold border border-ink/10 rounded-full hover:bg-accent hover:border-accent transition-colors whitespace-nowrap"
                 >
                   Ver oferta →
                 </a>
@@ -142,8 +142,8 @@ export default async function RoundupPage({ params }: Params) {
 
       {/* HOW TO CHOOSE */}
       <section className="max-w-4xl mx-auto px-4 sm:px-6 pb-10">
-        <div className="border border-ink/15 rounded-xl shadow-hard bg-paper p-6 md:p-8">
-          <h2 className="font-display uppercase text-2xl md:text-3xl leading-none text-ink border-b border-ink/12 pb-3 mb-5">
+        <div className="border border-ink/10 rounded-xl shadow-hard bg-paper p-6 md:p-8">
+          <h2 className="font-display uppercase text-2xl md:text-3xl leading-none text-ink border-b border-ink/[0.07] pb-3 mb-5">
             Cómo elegir {roundup.type.name.toLowerCase()}
           </h2>
           <ul className="space-y-3">
@@ -162,7 +162,7 @@ export default async function RoundupPage({ params }: Params) {
         <h2 className="font-display uppercase text-2xl md:text-3xl leading-none text-ink mb-5">Preguntas frecuentes</h2>
         <div className="space-y-3">
           {faq.map((f, i) => (
-            <details key={i} className="border border-ink/15 rounded-xl bg-paper group">
+            <details key={i} className="border border-ink/10 rounded-xl bg-paper group">
               <summary className="cursor-pointer list-none px-5 py-4 flex items-center justify-between gap-3 font-bold text-ink text-sm">
                 <span>{f.q}</span>
                 <span className="text-accent text-lg group-open:rotate-45 transition-transform">+</span>
@@ -179,7 +179,7 @@ export default async function RoundupPage({ params }: Params) {
           <h2 className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50 mb-4">Otras guías de compra</h2>
           <div className="flex flex-wrap gap-2">
             {others.map((o) => (
-              <Link key={o.slug} href={`/mejores/${o.slug}`} className="px-4 py-2 bg-paper border border-ink/15 rounded-xl text-xs font-bold uppercase tracking-tight text-ink hover:bg-ink hover:text-paper transition-colors">
+              <Link key={o.slug} href={`/mejores/${o.slug}`} className="px-4 py-2 bg-paper border border-ink/10 rounded-full text-xs font-semibold text-ink hover:bg-ink hover:text-paper transition-colors">
                 Mejores {o.name}
               </Link>
             ))}

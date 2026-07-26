@@ -18,7 +18,7 @@ export default async function MejoresHub() {
 
   return (
     <Layout>
-      <section className="bg-paper border-b border-ink/12">
+      <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-4">● Guías de compra {ROUNDUP_YEAR}</p>
           <h1 className="font-display uppercase text-5xl md:text-7xl leading-[0.88] text-ink max-w-3xl">
@@ -36,11 +36,11 @@ export default async function MejoresHub() {
             <Link
               key={p.slug}
               href={`/mejores/${p.slug}`}
-              className="group flex flex-col border border-ink/15 rounded-xl shadow-hard bg-paper hover-shift overflow-hidden"
+              className="group flex flex-col border border-ink/10 rounded-xl shadow-hard bg-paper hover-shift overflow-hidden"
             >
-              <div className="relative aspect-[16/10] bg-ink/[0.05] border-b border-ink/12 overflow-hidden">
+              <div className="relative aspect-[16/10] bg-ink/[0.05] border-b border-ink/[0.07] overflow-hidden">
                 <ProductImage src={p.cover} alt={p.name} sizes="(max-width: 640px) 100vw, 33vw" className="absolute inset-0 w-full h-full object-cover" />
-                <span className="absolute top-2 left-2 inline-flex items-center gap-1.5 bg-paper text-ink px-2.5 py-1 border border-ink/15 rounded-xl text-[11px] font-bold uppercase tracking-tight">
+                <span className="absolute top-2 left-2 inline-flex items-center gap-1.5 bg-paper text-ink px-2.5 py-1 border border-ink/10 rounded-full text-[11px] font-semibold">
                   <CategoryIcon id={p.slug} className="w-3.5 h-3.5" strokeWidth={2} /> {p.count} modelos
                 </span>
               </div>

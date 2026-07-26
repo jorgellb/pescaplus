@@ -173,7 +173,7 @@ export default function PhotoUploader({ operatorId, manageToken, photos: initial
       {showUrl && !full && (
         <div className="flex gap-2">
           <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://…"
-            className="flex-1 border border-ink/12 rounded-xl bg-paper px-3 py-2 text-sm focus:outline-none focus:border-accent" />
+            className="flex-1 border border-ink/[0.07] rounded-xl bg-paper px-3 py-2 text-sm focus:outline-none focus:border-accent" />
           <button type="button" onClick={addUrl} disabled={busy}
             className="bg-ink text-paper px-4 py-2 text-sm font-semibold rounded-xl disabled:opacity-60">Añadir</button>
         </div>

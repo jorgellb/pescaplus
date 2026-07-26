@@ -49,7 +49,7 @@ export default function AdminLogin({ usingDefaultPassword }: { usingDefaultPassw
 
         <form
           onSubmit={submit}
-          className="space-y-4 p-6 rounded-2xl bg-white border border-ink/15 backdrop-blur-md shadow-2xl shadow-black/40"
+          className="space-y-4 p-6 rounded-2xl bg-white border border-ink/10 backdrop-blur-md shadow-2xl shadow-black/40"
         >
           <div className="space-y-1.5">
             <label htmlFor="admin-password" className="text-xs font-bold uppercase tracking-widest text-ink/60">
@@ -62,7 +62,7 @@ export default function AdminLogin({ usingDefaultPassword }: { usingDefaultPassw
               onChange={(e) => setPassword(e.target.value)}
               autoFocus
               placeholder="••••••••"
-              className="w-full px-4 py-3 bg-paper border border-ink/15 rounded-xl text-ink placeholder-ink/40 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 text-sm transition-all"
+              className="w-full px-4 py-3 bg-paper border border-ink/10 rounded-xl text-ink placeholder-ink/40 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 text-sm transition-all"
             />
           </div>
 

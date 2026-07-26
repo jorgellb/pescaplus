@@ -15,7 +15,7 @@ export default function AskOperator({ charterId, loggedIn, isOwner }: { charterI
 
   if (!loggedIn) {
     return (
-      <Link href="/entrar" className="inline-flex items-center gap-1.5 border border-ink/20 text-ink px-4 py-2 text-xs font-bold uppercase tracking-wide rounded-xl hover:bg-ink hover:text-paper transition-colors">
+      <Link href="/entrar" className="inline-flex items-center gap-1.5 border border-ink/12 text-ink px-4 py-2 text-sm font-semibold rounded-full hover:bg-ink hover:text-paper transition-colors">
         💬 Inicia sesión para escribir al patrón
       </Link>
     )
@@ -33,7 +33,7 @@ export default function AskOperator({ charterId, loggedIn, isOwner }: { charterI
 
   return (
     <div>
-      <button onClick={open} disabled={busy} className="inline-flex items-center gap-1.5 border border-accent/40 text-accent px-4 py-2 text-xs font-bold uppercase tracking-wide rounded-xl hover:bg-accent hover:text-paper disabled:opacity-60 transition-colors">
+      <button onClick={open} disabled={busy} className="inline-flex items-center gap-1.5 border border-accent/40 text-accent px-4 py-2 text-sm font-semibold rounded-full hover:bg-accent hover:text-paper disabled:opacity-60 transition-colors">
         💬 {busy ? 'Abriendo…' : 'Preguntar al patrón'}
       </button>
       {err && <p className="text-sm text-red-700 mt-1">{err}</p>}

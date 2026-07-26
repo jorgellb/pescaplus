@@ -16,7 +16,7 @@ const SORT_OPTIONS: { key: SortKey; label: string }[] = [
 ]
 
 const inputCls =
-  'w-full px-4 py-3 bg-paper border border-ink/15 rounded-xl text-ink placeholder-ink/40 focus:outline-none focus:border-accent text-sm transition-colors'
+  'w-full px-4 py-3 bg-paper border border-ink/10 rounded-xl text-ink placeholder-ink/40 focus:outline-none focus:border-accent text-sm transition-colors'
 
 export default function CategoryBrowser({
   category,
@@ -92,7 +92,7 @@ export default function CategoryBrowser({
             placeholder="Buscar en esta categoría…"
             className={inputCls}
           />
-          <button type="submit" className="bg-ink text-paper px-5 py-3 text-sm font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover:bg-accent hover:border-accent transition-colors whitespace-nowrap">
+          <button type="submit" className="bg-ink text-paper px-5 py-3 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover:bg-accent hover:border-accent transition-colors whitespace-nowrap">
             Buscar
           </button>
         </form>
@@ -101,7 +101,7 @@ export default function CategoryBrowser({
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as SortKey)}
-            className="bg-paper border border-ink/15 rounded-xl px-3 py-3 text-ink text-sm focus:outline-none cursor-pointer"
+            className="bg-paper border border-ink/10 rounded-xl px-3 py-3 text-ink text-sm focus:outline-none cursor-pointer"
           >
             {SORT_OPTIONS.map((o) => (
               <option key={o.key} value={o.key}>{o.label}</option>
@@ -117,7 +117,7 @@ export default function CategoryBrowser({
             <Link
               key={s.id}
               href={`/categories/${category}/${s.id}`}
-              className="px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-tight border border-ink/15 rounded-full bg-paper text-ink hover:bg-ink hover:text-paper transition-colors"
+              className="px-3.5 py-1.5 text-[11px] font-semibold border border-ink/10 rounded-full bg-paper text-ink hover:bg-ink hover:text-paper transition-colors"
             >
               {s.name} <span className="opacity-50">{s.count}</span>
             </Link>
@@ -137,11 +137,11 @@ export default function CategoryBrowser({
           <p className="font-mono text-xs uppercase tracking-widest text-ink/50">Buscando…</p>
         </div>
       ) : sortedProducts.length === 0 ? (
-        <div className="text-center py-16 border border-ink/15 rounded-xl shadow-hard bg-paper max-w-lg mx-auto px-8 space-y-4">
+        <div className="text-center py-16 border border-ink/10 rounded-xl shadow-hard bg-paper max-w-lg mx-auto px-8 space-y-4">
           <span className="inline-block text-5xl">⚓</span>
           <h3 className="font-display uppercase text-2xl text-ink">Sin productos</h3>
           <p className="text-sm text-ink/60 max-w-sm mx-auto">Prueba con otras palabras clave o restablece el filtro.</p>
-          <button onClick={reset} className="bg-ink text-paper px-5 py-2.5 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl hover:bg-accent transition-colors">
+          <button onClick={reset} className="bg-ink text-paper px-5 py-2.5 text-sm font-semibold border border-ink/10 rounded-full hover:bg-accent transition-colors">
             Ver todos
           </button>
         </div>

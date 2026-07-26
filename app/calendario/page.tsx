@@ -44,7 +44,7 @@ export default function CalendarioPage() {
 
   return (
     <Layout>
-      <section className="bg-paper border-b border-ink/12">
+      <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
           <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3">● Herramienta de pescador</p>
           <h1 className="font-display uppercase text-4xl sm:text-5xl md:text-6xl leading-[1.02] text-ink">Calendario del pescador</h1>
@@ -59,7 +59,7 @@ export default function CalendarioPage() {
       <section className="max-w-5xl mx-auto px-4 py-10 sm:px-6 space-y-12">
         {/* Moon calendar */}
         <div className="space-y-4">
-          <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3 capitalize">
+          <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3 capitalize">
             Fases de la luna · {MONTH_NAMES[currentMonthIdx]} {y}
           </h2>
           <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
@@ -73,7 +73,7 @@ export default function CalendarioPage() {
                 <div
                   key={c.iso}
                   className={`aspect-square rounded-xl border flex flex-col items-center justify-center gap-0.5 ${
-                    c.isToday ? 'border-accent bg-accent/10' : c.prime ? 'border-accent/30 bg-accent/[0.04]' : 'border-ink/12 bg-paper'
+                    c.isToday ? 'border-accent bg-accent/10' : c.prime ? 'border-accent/30 bg-accent/[0.04]' : 'border-ink/[0.07] bg-paper'
                   }`}
                 >
                   <span className="text-[11px] font-bold text-ink/60">{c.day}</span>
@@ -99,10 +99,10 @@ export default function CalendarioPage() {
 
         {/* Best months by species */}
         <div className="space-y-4">
-          <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3">Mejores meses por especie</h2>
+          <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3">Mejores meses por especie</h2>
           <div className="space-y-3">
             {SPECIES_SEASONS.map((sp) => (
-              <div key={sp.name} className="border border-ink/12 rounded-xl bg-paper p-4">
+              <div key={sp.name} className="border border-ink/[0.07] rounded-xl bg-paper p-4">
                 <div className="flex items-center justify-between gap-3 mb-2">
                   <h3 className="font-bold text-ink">
                     {sp.category ? (
@@ -138,7 +138,7 @@ export default function CalendarioPage() {
         </div>
 
         {/* Vedas note */}
-        <div className="border border-ink/15 rounded-2xl bg-paper p-6 space-y-3">
+        <div className="border border-ink/10 rounded-2xl bg-paper p-6 space-y-3">
           <h2 className="font-display uppercase text-2xl text-ink leading-none">Vedas, tallas y licencias</h2>
           <p className="text-[15px] text-ink/80 leading-relaxed">
             Las <strong>vedas</strong> (épocas de veda de freza), las <strong>tallas mínimas</strong> y la{' '}

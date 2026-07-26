@@ -20,9 +20,9 @@ export default function NotFound() {
             name="q"
             placeholder="Buscar aparejos…"
             aria-label="Buscar productos"
-            className="flex-1 px-4 py-3 bg-paper border border-ink/15 rounded-xl text-ink placeholder-ink/40 focus:outline-none focus:border-accent text-sm"
+            className="flex-1 px-4 py-3 bg-paper border border-ink/10 rounded-xl text-ink placeholder-ink/40 focus:outline-none focus:border-accent text-sm"
           />
-          <button className="bg-ink text-paper px-6 py-3 text-sm font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover:bg-accent hover:border-accent transition-colors">
+          <button className="bg-ink text-paper px-6 py-3 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover:bg-accent hover:border-accent transition-colors">
             Buscar
           </button>
         </form>
@@ -30,7 +30,7 @@ export default function NotFound() {
         <div className="flex flex-wrap gap-2 justify-center pt-2">
           <Link
             href="/"
-            className="px-4 py-2 text-xs font-bold uppercase tracking-tight bg-ink text-paper border border-ink/15 rounded-full hover:bg-accent hover:border-accent transition-colors"
+            className="px-4 py-2 text-xs font-semibold bg-ink text-paper border border-ink/10 rounded-full hover:bg-accent hover:border-accent transition-colors"
           >
             Inicio
           </Link>
@@ -38,7 +38,7 @@ export default function NotFound() {
             <Link
               key={t.id}
               href={`/categories/${t.id}`}
-              className="px-4 py-2 text-xs font-bold uppercase tracking-tight text-ink border border-ink/15 rounded-full hover:bg-ink hover:text-paper transition-colors"
+              className="px-4 py-2 text-xs font-semibold text-ink border border-ink/10 rounded-full hover:bg-ink hover:text-paper transition-colors"
             >
               {t.name}
             </Link>

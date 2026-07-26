@@ -58,7 +58,7 @@ export default async function CompararPage({ searchParams }: SP) {
 
   return (
     <Layout>
-      <section className="bg-paper border-b border-ink/12">
+      <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
           <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-5">
             <Link href="/" className="hover:text-accent">Inicio</Link> <span className="mx-1">/</span>{' '}
@@ -89,7 +89,7 @@ export default async function CompararPage({ searchParams }: SP) {
               <Link
                 key={n.slug}
                 href={`/mejores-horas/comparar${zonesParam([...slugs, n.slug])}`}
-                className="inline-flex items-center gap-1.5 border border-ink/15 rounded-full px-3.5 py-1.5 text-sm font-semibold text-ink/70 hover:bg-ink hover:text-paper transition-colors"
+                className="inline-flex items-center gap-1.5 border border-ink/10 rounded-full px-3.5 py-1.5 text-sm font-semibold text-ink/70 hover:bg-ink hover:text-paper transition-colors"
               >
                 + {n.name}
               </Link>
@@ -106,7 +106,7 @@ export default async function CompararPage({ searchParams }: SP) {
 
       <section className="max-w-6xl mx-auto px-4 py-10 sm:px-6 space-y-8">
         {zones.length === 0 ? (
-          <div className="border border-ink/15 rounded-2xl bg-paper p-8 text-center space-y-3">
+          <div className="border border-ink/10 rounded-2xl bg-paper p-8 text-center space-y-3">
             <span className="text-4xl inline-block">⚖️</span>
             <p className="text-ink/60 text-sm max-w-md mx-auto">Elige zonas para comparar. Consejo: abre una localidad en <Link href="/mejores-horas" className="text-accent underline">Mejores horas</Link> y pulsa «Comparar con zonas cercanas».</p>
           </div>
@@ -123,18 +123,18 @@ export default async function CompararPage({ searchParams }: SP) {
                     <span className="text-paper text-xs font-bold rounded px-2 py-0.5" style={{ background: scoreHex(best.score) }}>{best.score}</span>
                   </span>
                 )}
-                <Link href={`/mejores-horas/${best.slug}/plan?dia=${best.dateISO}`} className="inline-flex items-center gap-2 bg-ink text-paper px-4 py-2 text-xs font-bold uppercase tracking-wide rounded-xl hover:bg-accent transition-colors">
+                <Link href={`/mejores-horas/${best.slug}/plan?dia=${best.dateISO}`} className="inline-flex items-center gap-2 bg-ink text-paper px-4 py-2 text-sm font-semibold rounded-full hover:bg-accent transition-colors">
                   🧾 Generar plan →
                 </Link>
               </div>
             )}
 
             {/* Comparison table */}
-            <div className="border border-ink/15 rounded-2xl overflow-hidden">
+            <div className="border border-ink/10 rounded-2xl overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse min-w-[560px]">
                   <thead>
-                    <tr className="border-b border-ink/12">
+                    <tr className="border-b border-ink/[0.07]">
                       <th className="text-left font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50 px-4 py-3">Día</th>
                       {zones.map((z) => (
                         <th key={z.spot.slug} className="text-left px-4 py-3">

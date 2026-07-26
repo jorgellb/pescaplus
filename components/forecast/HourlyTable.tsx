@@ -11,7 +11,7 @@ function WindArrow({ deg }: { deg: number | null }) {
   )
 }
 
-const LABEL = 'sticky left-0 z-10 bg-paper text-left font-mono text-[10px] font-bold uppercase tracking-wide text-ink/50 px-2 py-1 whitespace-nowrap border-r border-ink/12'
+const LABEL = 'sticky left-0 z-10 bg-paper text-left font-mono text-[10px] font-bold uppercase tracking-wide text-ink/50 px-2 py-1 whitespace-nowrap border-r border-ink/[0.07]'
 const CELL = 'text-center px-1 py-1 text-[11px] tabular-nums border-l border-ink/[0.06]'
 
 export default function HourlyTable({
@@ -38,14 +38,14 @@ export default function HourlyTable({
   const colBg = (h: HourPoint) => (h.isNow ? 'bg-accent/[0.08]' : h.solunar ? 'bg-accent/[0.04]' : !h.isDay ? 'bg-ink/[0.03]' : '')
 
   return (
-    <div className="border border-ink/12 rounded-xl overflow-hidden">
+    <div className="border border-ink/[0.07] rounded-xl overflow-hidden">
       <div className="overflow-x-auto">
         <table className="border-collapse w-max">
           <thead>
             <tr>
               <th className={`${LABEL} align-bottom`}></th>
               {groups.map((g) => (
-                <th key={g.date} colSpan={g.span} className="text-left font-display uppercase text-sm text-ink px-2 py-1.5 border-l border-ink/12 whitespace-nowrap capitalize">
+                <th key={g.date} colSpan={g.span} className="text-left font-display uppercase text-sm text-ink px-2 py-1.5 border-l border-ink/[0.07] whitespace-nowrap capitalize">
                   {fmtDayLabel(g.date)}
                 </th>
               ))}

@@ -23,7 +23,7 @@ export default function RecentlyViewed({
 
   return (
     <section className="space-y-6 mb-20">
-      <h2 className="font-display uppercase text-2xl sm:text-3xl md:text-4xl leading-none border-b border-ink/12 pb-4">{title}</h2>
+      <h2 className="font-display uppercase text-2xl sm:text-3xl md:text-4xl leading-none border-b border-ink/[0.07] pb-4">{title}</h2>
       <div className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-none">
         {items.map((p) => (
           <Link key={p.id} href={`/products/${p.id}`} className="flex-shrink-0 w-40 sm:w-48 group">

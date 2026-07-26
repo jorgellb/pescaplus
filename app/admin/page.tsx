@@ -193,9 +193,9 @@ export default function AdminProductsPage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Filtrar por título…"
-          className="w-full sm:max-w-xs px-4 py-2.5 bg-paper border border-ink/15 rounded-xl text-ink placeholder-ink/40 focus:outline-none focus:border-accent text-sm transition-all"
+          className="w-full sm:max-w-xs px-4 py-2.5 bg-paper border border-ink/10 rounded-xl text-ink placeholder-ink/40 focus:outline-none focus:border-accent text-sm transition-all"
         />
-        <div className="inline-flex rounded-xl border border-ink/15 overflow-hidden text-xs font-bold">
+        <div className="inline-flex rounded-xl border border-ink/10 overflow-hidden text-xs font-bold">
           {([
             ['all', 'Todos'],
             ['yes', 'Optimizados'],
@@ -231,7 +231,7 @@ export default function AdminProductsPage() {
           </div>
           <div className="flex items-center gap-2">
             {!bulk && (
-              <button onClick={() => setSelected(new Set())} className="text-xs font-semibold text-ink/70 hover:text-ink px-3 py-2 rounded-lg border border-ink/15">
+              <button onClick={() => setSelected(new Set())} className="text-xs font-semibold text-ink/70 hover:text-ink px-3 py-2 rounded-lg border border-ink/10">
                 Quitar selección
               </button>
             )}
@@ -250,14 +250,14 @@ export default function AdminProductsPage() {
       {loading ? (
         <div className="py-24 text-center text-ink/60 text-sm">Cargando productos…</div>
       ) : filtered.length === 0 ? (
-        <div className="py-20 text-center text-ink/60 text-sm border border-ink/15 rounded-2xl bg-white">
+        <div className="py-20 text-center text-ink/60 text-sm border border-ink/10 rounded-2xl bg-white">
           No hay productos que coincidan.
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-ink/15 bg-white">
+        <div className="overflow-x-auto rounded-2xl border border-ink/10 bg-white">
           <table className="w-full text-sm min-w-[640px]">
             <thead>
-              <tr className="text-left text-[11px] uppercase tracking-widest text-ink/50 border-b border-ink/15">
+              <tr className="text-left text-[11px] uppercase tracking-widest text-ink/50 border-b border-ink/10">
                 <th className="pl-4 pr-1 py-3 w-8">
                   <input
                     type="checkbox"
@@ -276,7 +276,7 @@ export default function AdminProductsPage() {
             </thead>
             <tbody>
               {filtered.map((p) => (
-                <tr key={p.id} className={`border-b border-ink/15 last:border-0 hover:bg-white/[0.02] ${selected.has(p.id) ? 'bg-accent/5' : ''}`}>
+                <tr key={p.id} className={`border-b border-ink/10 last:border-0 hover:bg-white/[0.02] ${selected.has(p.id) ? 'bg-accent/5' : ''}`}>
                   <td className="pl-4 pr-1 py-3">
                     <input
                       type="checkbox"
@@ -288,16 +288,16 @@ export default function AdminProductsPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="relative w-11 h-11 rounded-lg overflow-hidden bg-paper border border-ink/15 flex-shrink-0">
+                      <div className="relative w-11 h-11 rounded-lg overflow-hidden bg-paper border border-ink/10 flex-shrink-0">
                         <ProductImage src={p.imageUrl} alt={p.title} className="absolute inset-0 w-full h-full object-cover" />
                       </div>
                       <div className="min-w-0">
                         <p className="font-semibold text-ink truncate max-w-[280px]">{p.title}</p>
                         <div className="flex items-center gap-2 mt-0.5">
                           {p.aiOptimized ? (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-accent bg-accent/10 border border-accent/30 px-1.5 py-0.5 rounded">✓ Optimizado</span>
+                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-accent bg-accent/10 border border-accent/30 px-1.5 py-0.5 rounded">✓ Optimizado</span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-amber-700 bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 rounded">Sin optimizar</span>
+                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-700 bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 rounded">Sin optimizar</span>
                           )}
                           <span className="text-[11px] text-ink/50">{p.inStock ? 'En stock' : 'Sin stock'}</span>
                         </div>
@@ -320,7 +320,7 @@ export default function AdminProductsPage() {
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => setEditing(p)}
-                        className="text-xs font-semibold text-ink/80 hover:text-accent bg-ink/5 hover:bg-ink/10 border border-ink/15 px-3 py-1.5 rounded-lg transition-all"
+                        className="text-xs font-semibold text-ink/80 hover:text-accent bg-ink/5 hover:bg-ink/10 border border-ink/10 px-3 py-1.5 rounded-lg transition-all"
                       >
                         Editar
                       </button>
@@ -348,8 +348,8 @@ export default function AdminProductsPage() {
 
 function StatCard({ label, value, icon }: { label: string; value: string; icon: string }) {
   return (
-    <div className="rounded-2xl border border-ink/15 bg-white p-4 flex items-center gap-3">
-      <span className="text-2xl p-2.5 bg-paper rounded-xl border border-ink/15">{icon}</span>
+    <div className="rounded-2xl border border-ink/10 bg-white p-4 flex items-center gap-3">
+      <span className="text-2xl p-2.5 bg-paper rounded-xl border border-ink/10">{icon}</span>
       <div>
         <p className="text-xl font-extrabold text-ink leading-none">{value}</p>
         <p className="text-[11px] uppercase tracking-widest text-ink/50 mt-1">{label}</p>

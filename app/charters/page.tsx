@@ -43,13 +43,13 @@ export default async function ChartersHub({ searchParams }: Params) {
   const spots = FISHING_SPOTS.map((s) => ({ slug: s.slug, name: s.name }))
   return (
     <Layout>
-      <section className="bg-paper border-b border-ink/12">
+      <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
           <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3">⚓ Chárters con patrón profesional</p>
           <h1 className="font-display uppercase text-4xl sm:text-5xl md:text-6xl leading-[1.02] text-ink">Sal a pescar con un profesional</h1>
           <p className="text-ink/60 text-sm max-w-2xl mt-3">Reserva plaza en salidas de pesca con <strong className="text-ink">patrón profesional verificado</strong> (licencia y seguro comprobados). Con la previsión y la seguridad del día al lado.</p>
           <div className="mt-6">
-            <Link href="/charters/operador" className="inline-flex items-center gap-2 bg-ink text-paper px-6 py-3 text-sm font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift hover:bg-accent hover:border-accent">
+            <Link href="/charters/operador" className="inline-flex items-center gap-2 bg-ink text-paper px-6 py-3 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift hover:bg-accent hover:border-accent">
               ⚓ ¿Eres patrón? Ofrece tus salidas
             </Link>
           </div>

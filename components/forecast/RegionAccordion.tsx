@@ -36,7 +36,7 @@ export default function RegionAccordion() {
           key={region}
           id={`zona-${regionSlug(region)}`}
           open={i === 0}
-          className="group border border-ink/15 rounded-2xl bg-paper overflow-hidden scroll-mt-24 open:shadow-hard transition-shadow"
+          className="group border border-ink/10 rounded-2xl bg-paper overflow-hidden scroll-mt-24 open:shadow-hard transition-shadow"
         >
           <summary className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3.5 cursor-pointer select-none list-none [&::-webkit-details-marker]:hidden hover:bg-ink/[0.03] transition-colors">
             <span className="flex items-center gap-3 min-w-0">
@@ -45,11 +45,11 @@ export default function RegionAccordion() {
                 aria-hidden
               />
               <span className="font-display uppercase text-lg sm:text-xl text-ink leading-none truncate">{region}</span>
-              <span className="flex-shrink-0 font-mono text-[10px] font-bold uppercase tracking-widest text-ink/45 border border-ink/15 rounded-full px-2 py-0.5">
+              <span className="flex-shrink-0 font-mono text-[10px] font-bold uppercase tracking-widest text-ink/45 border border-ink/10 rounded-full px-2 py-0.5">
                 {spots.length} {spots.length === 1 ? 'zona' : 'zonas'}
               </span>
             </span>
-            <span className="flex-shrink-0 w-7 h-7 flex items-center justify-center border border-ink/15 rounded-full text-accent text-lg leading-none transition-transform group-open:rotate-45">
+            <span className="flex-shrink-0 w-7 h-7 flex items-center justify-center border border-ink/10 rounded-full text-accent text-lg leading-none transition-transform group-open:rotate-45">
               +
             </span>
           </summary>
@@ -59,7 +59,7 @@ export default function RegionAccordion() {
                 <Link
                   key={s.slug}
                   href={`/mejores-horas/${s.slug}`}
-                  className="px-3 py-1.5 text-sm font-semibold text-ink border border-ink/15 rounded-full hover:bg-ink hover:text-paper transition-colors"
+                  className="px-3 py-1.5 text-sm font-semibold text-ink border border-ink/10 rounded-full hover:bg-ink hover:text-paper transition-colors"
                 >
                   {s.name}
                 </Link>

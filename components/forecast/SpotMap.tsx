@@ -19,7 +19,7 @@ const REGIONS_WITH_SPOTS = new Set(FISHING_SPOTS.map((s) => s.region))
 
 export default function SpotMap() {
   return (
-    <div className="border border-ink/15 rounded-2xl bg-paper shadow-hard overflow-hidden">
+    <div className="border border-ink/10 rounded-2xl bg-paper shadow-hard overflow-hidden">
       <div className="p-4 sm:p-6">
         <svg viewBox={`0 0 ${MAP_W} ${MAP_H}`} className="w-full h-auto" role="img" aria-label="Mapa de España con las zonas de pesca">
           <style>{`

@@ -174,8 +174,8 @@ export default function GuideEditor({ initial, onClose, onSaved }: GuideEditorPr
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ink/30 backdrop-blur-sm p-4 sm:p-8" onClick={onClose}>
-      <div className="w-full max-w-3xl my-4 bg-white border border-ink/15 rounded-xl shadow-hard-lg" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-ink/12 sticky top-0 bg-white z-10">
+      <div className="w-full max-w-3xl my-4 bg-white border border-ink/10 rounded-xl shadow-hard-lg" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-ink/[0.07] sticky top-0 bg-white z-10">
           <h2 className="font-display uppercase text-xl text-ink">{initial ? 'Editar guía' : 'Nueva guía'}</h2>
           <button onClick={onClose} className="text-ink/50 hover:text-ink text-xl">✕</button>
         </div>
@@ -206,7 +206,7 @@ export default function GuideEditor({ initial, onClose, onSaved }: GuideEditorPr
                 <button
                   onClick={rewriteWithAI}
                   disabled={rewriteLoading || !rewritePrompt.trim() || !form.title.trim()}
-                  className="whitespace-nowrap bg-paper hover:bg-ink hover:text-paper text-ink border border-ink/20 font-bold text-sm px-4 py-2.5 transition-colors disabled:opacity-40"
+                  className="whitespace-nowrap bg-paper hover:bg-ink hover:text-paper text-ink border border-ink/12 font-bold text-sm px-4 py-2.5 transition-colors disabled:opacity-40"
                 >
                   {rewriteLoading ? 'Reescribiendo…' : 'Reescribir ↻'}
                 </button>
@@ -255,7 +255,7 @@ export default function GuideEditor({ initial, onClose, onSaved }: GuideEditorPr
               <button onClick={() => setShowPreview((v) => !v)} className="text-xs font-bold text-accent hover:underline">{showPreview ? 'Editar' : 'Vista previa'}</button>
             </div>
             {showPreview ? (
-              <div className="min-h-[12rem] p-4 border border-ink/15 bg-paper text-sm text-ink/80 [&_strong]:text-ink [&_a]:text-accent [&_a]:underline [&_ul]:list-disc [&_ul]:pl-5" dangerouslySetInnerHTML={{ __html: renderDescription(form.content) || '<span class="text-ink/40">Nada que previsualizar…</span>' }} />
+              <div className="min-h-[12rem] p-4 border border-ink/10 bg-paper text-sm text-ink/80 [&_strong]:text-ink [&_a]:text-accent [&_a]:underline [&_ul]:list-disc [&_ul]:pl-5" dangerouslySetInnerHTML={{ __html: renderDescription(form.content) || '<span class="text-ink/40">Nada que previsualizar…</span>' }} />
             ) : (
               <>
                 <div className="flex flex-wrap gap-1.5">
@@ -269,7 +269,7 @@ export default function GuideEditor({ initial, onClose, onSaved }: GuideEditorPr
             )}
           </div>
 
-          <div className="grid grid-cols-1 gap-3 p-4 border border-ink/15 bg-paper">
+          <div className="grid grid-cols-1 gap-3 p-4 border border-ink/10 bg-paper">
             <p className="text-xs font-bold uppercase tracking-widest text-ink/50">SEO</p>
             <div className="space-y-1">
               <label className={labelCls}>Título SEO</label>
@@ -289,9 +289,9 @@ export default function GuideEditor({ initial, onClose, onSaved }: GuideEditorPr
           {error && <p className="text-xs text-red-600 bg-red-50 border border-red-200 px-3 py-2">{error}</p>}
         </div>
 
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-ink/12 sticky bottom-0 bg-white">
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-ink/[0.07] sticky bottom-0 bg-white">
           <button onClick={onClose} className="text-sm font-semibold text-ink/60 hover:text-ink px-4 py-2.5">Cancelar</button>
-          <button onClick={save} disabled={saving} className="bg-ink text-paper hover:bg-accent font-bold text-sm px-6 py-2.5 border border-ink/15 rounded-xl transition-colors disabled:opacity-40">
+          <button onClick={save} disabled={saving} className="bg-ink text-paper hover:bg-accent font-bold text-sm px-6 py-2.5 border border-ink/10 rounded-xl transition-colors disabled:opacity-40">
             {saving ? 'Guardando…' : initial ? 'Guardar' : 'Crear guía'}
           </button>
         </div>

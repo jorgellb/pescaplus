@@ -105,7 +105,7 @@ export default async function SpeciesZonePage({ params }: Params) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
 
-      <section className="bg-paper border-b border-ink/12">
+      <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
           <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-5">
             <Link href="/" className="hover:text-accent">Inicio</Link> <span className="mx-1">/</span>{' '}
@@ -131,7 +131,7 @@ export default async function SpeciesZonePage({ params }: Params) {
               { k: 'Técnica', v: sp.technique.split(';')[0] },
               { k: 'Mejores horas', v: sp.hours.split(';')[0] },
             ].map((f) => (
-              <div key={f.k} className="border border-ink/12 rounded-xl bg-paper px-3 py-2.5">
+              <div key={f.k} className="border border-ink/[0.07] rounded-xl bg-paper px-3 py-2.5">
                 <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/40">{f.k}</p>
                 <p className="text-sm font-bold text-ink mt-1 leading-tight capitalize">{f.v}</p>
               </div>
@@ -141,13 +141,13 @@ export default async function SpeciesZonePage({ params }: Params) {
           <div className="flex flex-wrap gap-3 mt-6">
             <Link
               href={`/mejores-horas/${spot.slug}?especie=${sp.id}`}
-              className="inline-flex items-center gap-2 bg-accent text-paper px-5 py-2.5 text-xs font-bold uppercase tracking-wide border border-accent rounded-xl shadow-hard hover-shift hover:bg-ink hover:border-ink"
+              className="inline-flex items-center gap-2 bg-accent text-paper px-5 py-2.5 text-sm font-semibold border border-accent rounded-full shadow-hard hover-shift hover:bg-ink hover:border-ink"
             >
               📈 Ver mejores horas para {n} en {spot.name}
             </Link>
             <Link
               href={`/mejores-horas/${spot.slug}/planificador`}
-              className="inline-flex items-center gap-2 bg-paper text-ink px-5 py-2.5 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift hover:bg-ink hover:text-paper"
+              className="inline-flex items-center gap-2 bg-paper text-ink px-5 py-2.5 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift hover:bg-ink hover:text-paper"
             >
               📅 Planificador anual
             </Link>
@@ -158,12 +158,12 @@ export default async function SpeciesZonePage({ params }: Params) {
       <section className="max-w-4xl mx-auto px-4 sm:px-6 py-10 space-y-10">
         {/* CUÁNDO */}
         <div className="space-y-3">
-          <h2 className="font-display uppercase text-2xl md:text-3xl text-ink border-b border-ink/12 pb-3">¿Cuándo pescar {n} en {spot.name}?</h2>
+          <h2 className="font-display uppercase text-2xl md:text-3xl text-ink border-b border-ink/[0.07] pb-3">¿Cuándo pescar {n} en {spot.name}?</h2>
           <div className="flex flex-wrap gap-1.5">
             {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => {
               const on = sp.bestMonths.includes(m)
               return (
-                <span key={m} className={`font-mono text-[11px] font-bold uppercase tracking-wide rounded-lg px-2.5 py-1.5 border ${on ? 'bg-accent text-paper border-accent' : 'bg-paper text-ink/40 border-ink/12'}`}>
+                <span key={m} className={`font-mono text-[11px] font-bold uppercase tracking-wide rounded-lg px-2.5 py-1.5 border ${on ? 'bg-accent text-paper border-accent' : 'bg-paper text-ink/40 border-ink/[0.07]'}`}>
                   {MONTHS_SHORT[m - 1]}
                 </span>
               )
@@ -180,7 +180,7 @@ export default async function SpeciesZonePage({ params }: Params) {
 
         {/* CÓMO */}
         <div className="space-y-3">
-          <h2 className="font-display uppercase text-2xl md:text-3xl text-ink border-b border-ink/12 pb-3">¿Cómo pescar {n} aquí?</h2>
+          <h2 className="font-display uppercase text-2xl md:text-3xl text-ink border-b border-ink/[0.07] pb-3">¿Cómo pescar {n} aquí?</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {[
               { k: 'Dónde buscarla', v: sp.habitat },
@@ -190,7 +190,7 @@ export default async function SpeciesZonePage({ params }: Params) {
               { k: 'Mejores horas', v: sp.hours },
               { k: 'Mareas y costa', v: `${facts.tides}${facts.orientation ? `. Costa al ${facts.orientation}` : ''}` },
             ].map((f) => (
-              <div key={f.k} className="border border-ink/12 rounded-xl bg-paper p-4">
+              <div key={f.k} className="border border-ink/[0.07] rounded-xl bg-paper p-4">
                 <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent mb-1">{f.k}</p>
                 <p className="text-[14px] text-ink/85 leading-relaxed">{f.v}</p>
               </div>
@@ -200,14 +200,14 @@ export default async function SpeciesZonePage({ params }: Params) {
 
         {/* CONDICIONES */}
         <div className="space-y-3">
-          <h2 className="font-display uppercase text-2xl md:text-3xl text-ink border-b border-ink/12 pb-3">Condiciones y previsión en {spot.name}</h2>
+          <h2 className="font-display uppercase text-2xl md:text-3xl text-ink border-b border-ink/[0.07] pb-3">Condiciones y previsión en {spot.name}</h2>
           <p className="text-[15px] text-ink/80 leading-relaxed">
             La {n} responde mejor {waveWord} y con {windWord}. En {spot.name} eso depende del día: nuestra previsión cruza viento, oleaje,
             mareas y solunar para puntuar cada hora pensando en esta especie. Antes de coger los bártulos, mira la ventana del día.
           </p>
           <Link
             href={`/mejores-horas/${spot.slug}?especie=${sp.id}`}
-            className="inline-flex items-center gap-2 bg-ink text-paper px-5 py-2.5 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift hover:bg-accent hover:border-accent"
+            className="inline-flex items-center gap-2 bg-ink text-paper px-5 py-2.5 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift hover:bg-accent hover:border-accent"
           >
             📈 Previsión hora a hora para {n} en {spot.name}
           </Link>
@@ -215,7 +215,7 @@ export default async function SpeciesZonePage({ params }: Params) {
 
         {/* NORMATIVA */}
         <div className="space-y-3">
-          <h2 className="font-display uppercase text-2xl md:text-3xl text-ink border-b border-ink/12 pb-3">Talla mínima y normativa</h2>
+          <h2 className="font-display uppercase text-2xl md:text-3xl text-ink border-b border-ink/[0.07] pb-3">Talla mínima y normativa</h2>
           <p className="text-[15px] text-ink/80 leading-relaxed">
             Talla orientativa: <strong className="text-ink">{sp.minSizeNote}</strong>. La talla mínima legal y las vedas las fija{' '}
             {regulation ? (
@@ -233,10 +233,10 @@ export default async function SpeciesZonePage({ params }: Params) {
 
         {/* EQUIPO */}
         <div className="space-y-3">
-          <h2 className="font-display uppercase text-2xl md:text-3xl text-ink border-b border-ink/12 pb-3">Equipo para la {n}</h2>
+          <h2 className="font-display uppercase text-2xl md:text-3xl text-ink border-b border-ink/[0.07] pb-3">Equipo para la {n}</h2>
           <div className="flex flex-wrap gap-2">
             {sp.gearCats.map((c) => (
-              <Link key={c} href={`/categories/${c}`} className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-paper bg-ink hover:bg-accent px-3.5 py-2 rounded-lg transition-colors">
+              <Link key={c} href={`/categories/${c}`} className="inline-flex items-center gap-1.5 text-sm font-semibold text-paper bg-ink hover:bg-accent px-3.5 py-2 rounded-lg transition-colors">
                 {categoryName(taxonomy, c)} →
               </Link>
             ))}
@@ -245,10 +245,10 @@ export default async function SpeciesZonePage({ params }: Params) {
 
         {/* FAQ */}
         <div className="space-y-3">
-          <h2 className="font-display uppercase text-2xl md:text-3xl text-ink border-b border-ink/12 pb-3">Preguntas frecuentes</h2>
+          <h2 className="font-display uppercase text-2xl md:text-3xl text-ink border-b border-ink/[0.07] pb-3">Preguntas frecuentes</h2>
           <div className="space-y-2">
             {faqs.map((f) => (
-              <details key={f.q} className="group border border-ink/12 rounded-xl bg-paper px-4 py-3 [&_summary]:list-none">
+              <details key={f.q} className="group border border-ink/[0.07] rounded-xl bg-paper px-4 py-3 [&_summary]:list-none">
                 <summary className="flex items-center justify-between gap-3 cursor-pointer text-[15px] font-bold text-ink">
                   {f.q}
                   <span className="flex-shrink-0 text-accent transition-transform group-open:rotate-45 text-lg leading-none">+</span>
@@ -260,13 +260,13 @@ export default async function SpeciesZonePage({ params }: Params) {
         </div>
 
         {/* INTERLINKS */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 border-t border-ink/12 pt-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 border-t border-ink/[0.07] pt-8">
           {otherSpecies.length > 0 && (
             <div className="space-y-3">
               <h2 className="font-display uppercase text-xl text-ink">Otras especies en {spot.name}</h2>
               <div className="flex flex-wrap gap-2">
                 {otherSpecies.map((x) => (
-                  <Link key={x.id} href={`/pesca/${x.id}/${spot.slug}`} className="px-3 py-1.5 text-sm font-semibold text-ink border border-ink/15 rounded-full hover:bg-ink hover:text-paper transition-colors">
+                  <Link key={x.id} href={`/pesca/${x.id}/${spot.slug}`} className="px-3 py-1.5 text-sm font-semibold text-ink border border-ink/10 rounded-full hover:bg-ink hover:text-paper transition-colors">
                     {x.name}
                   </Link>
                 ))}
@@ -278,7 +278,7 @@ export default async function SpeciesZonePage({ params }: Params) {
               <h2 className="font-display uppercase text-xl text-ink">{sp.name} en otras zonas</h2>
               <div className="flex flex-wrap gap-2">
                 {otherZones.map((z) => (
-                  <Link key={z.slug} href={`/pesca/${sp.id}/${z.slug}`} className="px-3 py-1.5 text-sm font-semibold text-ink border border-ink/15 rounded-full hover:bg-ink hover:text-paper transition-colors">
+                  <Link key={z.slug} href={`/pesca/${sp.id}/${z.slug}`} className="px-3 py-1.5 text-sm font-semibold text-ink border border-ink/10 rounded-full hover:bg-ink hover:text-paper transition-colors">
                     {z.name}
                   </Link>
                 ))}
@@ -287,7 +287,7 @@ export default async function SpeciesZonePage({ params }: Params) {
           )}
         </div>
 
-        <p className="text-[13px] text-ink/55 leading-relaxed border-t border-ink/12 pt-6">
+        <p className="text-[13px] text-ink/55 leading-relaxed border-t border-ink/[0.07] pt-6">
           ¿Buscas más? Ficha completa de la <Link href={`/especies/${sp.id}`} className="text-accent underline">{n}</Link>, previsión de{' '}
           <Link href={`/mejores-horas/${spot.slug}`} className="text-accent underline">pesca en {spot.name}</Link> y el mapa del día en{' '}
           <Link href="/donde-pescar" className="text-accent underline">¿dónde pescar?</Link>.

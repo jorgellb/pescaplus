@@ -74,14 +74,14 @@ export default async function CharterPage({ params, searchParams }: { params: Pr
 
   return (
     <Layout>
-      <section className="bg-paper border-b border-ink/12">
+      <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
           <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-5">
             <Link href="/charters" className="hover:text-accent">Chárters</Link> <span className="mx-1">/</span> <span className="text-ink">{spot?.name ?? charter.spotSlug}</span>
           </nav>
           {cancelled && <div className="border border-red-700/40 rounded-xl bg-red-700/[0.07] p-3 mb-5 text-sm font-bold text-red-900">Este chárter se ha cancelado.</div>}
           {pagado === '1' && <div className="border border-accent/40 rounded-xl bg-accent/[0.08] p-3 mb-5 text-sm font-bold text-ink">✅ ¡Pago completado! Tu plaza está reservada. El patrón recibirá tu reserva y te contactará con los detalles de la salida.</div>}
-          {cancelado === '1' && <div className="border border-ink/20 rounded-xl bg-ink/[0.03] p-3 mb-5 text-sm text-ink/70">Has cancelado el pago. Tu plaza no se ha reservado; puedes intentarlo de nuevo cuando quieras.</div>}
+          {cancelado === '1' && <div className="border border-ink/12 rounded-xl bg-ink/[0.03] p-3 mb-5 text-sm text-ink/70">Has cancelado el pago. Tu plaza no se ha reservado; puedes intentarlo de nuevo cuando quieras.</div>}
           <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3">{MOD_LABEL[charter.modality]}{sp ? ` · a por ${sp.name.toLowerCase()}` : ''}</p>
           <h1 className="font-display text-3xl sm:text-4xl md:text-5xl text-ink">{charter.highlights || `Pesca en ${spot?.name ?? charter.spotSlug}`}</h1>
           <p className="text-ink/60 text-[15px] mt-2 flex items-center gap-1.5">
@@ -154,7 +154,7 @@ export default async function CharterPage({ params, searchParams }: { params: Pr
 
         {/* Previsión del día */}
         {outlook && (
-          <div className={`border rounded-2xl p-4 ${outlook.danger ? 'border-red-700/40 bg-red-700/[0.07]' : 'border-ink/15 bg-paper'}`}>
+          <div className={`border rounded-2xl p-4 ${outlook.danger ? 'border-red-700/40 bg-red-700/[0.07]' : 'border-ink/10 bg-paper'}`}>
             <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">🌊 Previsión del día en {spot?.name}</p>
             {outlook.danger
               ? <p className="text-[14px] text-red-900 mt-1">⚠️ Condiciones exigentes o no navegables ese día. El patrón decide si la salida es segura.</p>
@@ -169,10 +169,10 @@ export default async function CharterPage({ params, searchParams }: { params: Pr
           : <RequestBooking id={charter.id} full={full} price={charter.pricePerPerson} />)}
 
         {reviews.length > 0 && (
-          <div className="space-y-3 border-t border-ink/12 pt-6">
+          <div className="space-y-3 border-t border-ink/[0.07] pt-6">
             <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">⭐ Opiniones de pescadores ({charter.operator.reviewCount})</p>
             {reviews.map((r) => (
-              <div key={r.id} className="border border-ink/12 rounded-2xl bg-paper p-4">
+              <div key={r.id} className="border border-ink/[0.07] rounded-2xl bg-paper p-4">
                 <div className="flex items-center gap-2">
                   <span className="text-xl">{r.authorAvatar}</span>
                   <span className="font-bold text-ink text-sm">{r.authorName}</span>
@@ -184,7 +184,7 @@ export default async function CharterPage({ params, searchParams }: { params: Pr
           </div>
         )}
 
-        <p className="text-[12px] text-ink/50 leading-relaxed border-t border-ink/12 pt-6">
+        <p className="text-[12px] text-ink/50 leading-relaxed border-t border-ink/[0.07] pt-6">
           Salida con patrón profesional verificado. Cada participante debe llevar su documentación.{charter.operator.stripeReady
             ? ' El pago se procesa de forma segura con Stripe; PescaPlus retiene una comisión de servicio y el resto llega al patrón.'
             : ' Coordinas el pago directamente con el patrón tras confirmar la plaza.'}

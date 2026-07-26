@@ -48,7 +48,7 @@ export default async function QuedadasHub() {
 
   return (
     <Layout>
-      <section className="bg-paper border-b border-ink/12">
+      <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
           <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3">● Comunidad de pescadores</p>
           <h1 className="font-display uppercase text-4xl sm:text-5xl md:text-6xl leading-[1.02] text-ink">Quedadas de pesca</h1>
@@ -57,10 +57,10 @@ export default async function QuedadasHub() {
             Elige por zona, especie y nivel; te enseñamos la previsión y la seguridad del día. Conoce gente y no salgas solo.
           </p>
           <div className="flex flex-wrap gap-3 mt-6">
-            <Link href="/quedadas/nueva" className="inline-flex items-center gap-2 bg-accent text-paper px-6 py-3 text-sm font-bold uppercase tracking-wide border border-accent rounded-xl shadow-hard hover-shift hover:bg-ink hover:border-ink">
+            <Link href="/quedadas/nueva" className="inline-flex items-center gap-2 bg-accent text-paper px-6 py-3 text-sm font-semibold border border-accent rounded-full shadow-hard hover-shift hover:bg-ink hover:border-ink">
               ➕ Organizar una quedada
             </Link>
-            <Link href="/quedadas/nueva?tipo=llamada" className="inline-flex items-center gap-2 bg-paper text-ink px-6 py-3 text-sm font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift hover:bg-ink hover:text-paper">
+            <Link href="/quedadas/nueva?tipo=llamada" className="inline-flex items-center gap-2 bg-paper text-ink px-6 py-3 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift hover:bg-ink hover:text-paper">
               🙋 ¿Quién se apunta?
             </Link>
           </div>
@@ -69,11 +69,11 @@ export default async function QuedadasHub() {
 
       <section className="max-w-5xl mx-auto px-4 sm:px-6 py-10 space-y-10">
         <div>
-          <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3 mb-5">Próximas salidas</h2>
+          <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3 mb-5">Próximas salidas</h2>
           {quedadaCards.length === 0 ? (
-            <div className="border border-ink/12 rounded-2xl bg-paper p-6 text-center space-y-3">
+            <div className="border border-ink/[0.07] rounded-2xl bg-paper p-6 text-center space-y-3">
               <p className="text-ink/70">Aún no hay salidas concretas. ¡Organiza la primera en tu zona!</p>
-              <Link href="/quedadas/nueva" className="inline-flex items-center gap-2 bg-ink text-paper px-5 py-2.5 text-xs font-bold uppercase tracking-wide rounded-xl hover:bg-accent transition-colors">
+              <Link href="/quedadas/nueva" className="inline-flex items-center gap-2 bg-ink text-paper px-5 py-2.5 text-sm font-semibold rounded-full hover:bg-accent transition-colors">
                 Organizar quedada
               </Link>
             </div>
@@ -83,14 +83,14 @@ export default async function QuedadasHub() {
         </div>
 
         <div>
-          <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3 mb-2 flex items-center gap-2">
+          <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3 mb-2 flex items-center gap-2">
             <span aria-hidden>🙋</span> ¿Quién se apunta?
           </h2>
           <p className="text-sm text-ink/60 mb-5">Pescadores buscando compañía en su zona, sin hora fija. Apúntate y, cuando seáis suficientes, os coordináis.</p>
           {llamadaCards.length === 0 ? (
-            <div className="border border-ink/12 rounded-2xl bg-paper p-6 text-center space-y-3">
+            <div className="border border-ink/[0.07] rounded-2xl bg-paper p-6 text-center space-y-3">
               <p className="text-ink/70">Nadie ha lanzado una llamada todavía. Dila tú: aunque no haya quedada, di dónde quieres pescar y que se sumen.</p>
-              <Link href="/quedadas/nueva?tipo=llamada" className="inline-flex items-center gap-2 bg-ink text-paper px-5 py-2.5 text-xs font-bold uppercase tracking-wide rounded-xl hover:bg-accent transition-colors">
+              <Link href="/quedadas/nueva?tipo=llamada" className="inline-flex items-center gap-2 bg-ink text-paper px-5 py-2.5 text-sm font-semibold rounded-full hover:bg-accent transition-colors">
                 Lanzar una llamada
               </Link>
             </div>
@@ -99,7 +99,7 @@ export default async function QuedadasHub() {
           )}
         </div>
 
-        <p className="text-[12px] text-ink/50 leading-relaxed border-t border-ink/12 pt-6">
+        <p className="text-[12px] text-ink/50 leading-relaxed border-t border-ink/[0.07] pt-6">
           Las quedadas son para compartir gastos, sin ánimo de lucro. Cada participante necesita su licencia de pesca.
           ¿Buscas un chárter con patrón profesional? Eso llegará pronto a PescaPlus.
         </p>

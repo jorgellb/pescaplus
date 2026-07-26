@@ -29,11 +29,11 @@ export default function PayBooking({ id, full, price }: { id: string; full: bool
   }
 
   const labelCls = 'font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50'
-  const inputCls = 'mt-1 w-full border border-ink/20 rounded-xl bg-paper px-3 py-2 text-sm'
+  const inputCls = 'mt-1 w-full border border-ink/12 rounded-xl bg-paper px-3 py-2 text-sm'
 
   if (full) {
     return (
-      <div className="border border-ink/15 rounded-2xl bg-paper p-4">
+      <div className="border border-ink/10 rounded-2xl bg-paper p-4">
         <p className="font-display uppercase text-lg leading-none">Chárter completo</p>
         <p className="text-[13px] text-ink/60 mt-1">Ya no quedan plazas para esta salida. Echa un vistazo a otros chárters disponibles.</p>
       </div>
@@ -58,7 +58,7 @@ export default function PayBooking({ id, full, price }: { id: string; full: bool
         <input value={form.message} onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))} maxLength={400} placeholder="nivel, dudas…" className={inputCls} /></label>
       <input type="text" tabIndex={-1} autoComplete="off" value={form.website} onChange={(e) => setForm((f) => ({ ...f, website: e.target.value }))} className="hidden" aria-hidden />
       {state === 'error' && <p className="text-sm text-red-700">{msg}</p>}
-      <button type="submit" disabled={state === 'loading'} className="inline-flex items-center gap-2 bg-accent text-paper px-5 py-2.5 text-xs font-bold uppercase tracking-wide border border-accent rounded-xl shadow-hard hover-shift hover:bg-ink hover:border-ink disabled:opacity-60 transition-colors">
+      <button type="submit" disabled={state === 'loading'} className="inline-flex items-center gap-2 bg-accent text-paper px-5 py-2.5 text-sm font-semibold border border-accent rounded-full shadow-hard hover-shift hover:bg-ink hover:border-ink disabled:opacity-60 transition-colors">
         {state === 'loading' ? 'Redirigiendo a pago…' : `Reservar y pagar ${total} €`}
       </button>
       <p className="font-mono text-[10px] uppercase tracking-wide text-ink/40">{price} €/persona · pago procesado por Stripe</p>

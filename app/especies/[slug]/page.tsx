@@ -59,7 +59,7 @@ export default async function SpeciesPage({ params }: Params) {
     <Layout>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
 
-      <section className="bg-paper border-b border-ink/12">
+      <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
           <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-5">
             <Link href="/" className="hover:text-accent">Inicio</Link> <span className="mx-1">/</span>{' '}
@@ -69,11 +69,11 @@ export default async function SpeciesPage({ params }: Params) {
           <div className="flex flex-wrap items-center gap-3 mb-3">
             <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent">● Ficha de especie</p>
             {inSeason ? (
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 uppercase tracking-widest rounded-full border border-accent/40 text-accent">
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1 st rounded-full border border-accent/40 text-accent">
                 <span className="w-1.5 h-1.5 rounded-full bg-accent" /> En temporada
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 uppercase tracking-widest rounded-full border border-ink/20 text-ink/50">
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1 st rounded-full border border-ink/12 text-ink/50">
                 Fuera de su mejor época
               </span>
             )}
@@ -88,7 +88,7 @@ export default async function SpeciesPage({ params }: Params) {
       <section className="max-w-5xl mx-auto px-4 py-10 sm:px-6 space-y-10">
         {/* Season strip */}
         <div className="space-y-3">
-          <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3">Mejores meses</h2>
+          <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3">Mejores meses</h2>
           <div className="grid grid-cols-12 gap-1">
             {MONTHS_SHORT.map((mo, idx) => {
               const good = sp.bestMonths.includes(idx + 1)
@@ -109,8 +109,8 @@ export default async function SpeciesPage({ params }: Params) {
         {/* Fact sheet */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="space-y-3">
-            <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3">Ficha técnica</h2>
-            <dl className="divide-y divide-ink/10 border border-ink/12 rounded-xl overflow-hidden">
+            <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3">Ficha técnica</h2>
+            <dl className="divide-y divide-ink/10 border border-ink/[0.07] rounded-xl overflow-hidden">
               <Row icon="🌡️" label="Tª del agua" value={`${sp.seaTempC[0]}–${sp.seaTempC[1]}°C`} />
               <Row icon="🪸" label="Hábitat" value={sp.habitat} />
               <Row icon="📏" label="Profundidad" value={sp.depth} />
@@ -124,8 +124,8 @@ export default async function SpeciesPage({ params }: Params) {
           </div>
 
           <div className="space-y-3">
-            <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3">Cómo pescarla</h2>
-            <div className="border border-ink/12 rounded-xl bg-paper p-5 space-y-4">
+            <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3">Cómo pescarla</h2>
+            <div className="border border-ink/[0.07] rounded-xl bg-paper p-5 space-y-4">
               <div>
                 <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50 mb-1">Técnicas</p>
                 <p className="text-[15px] text-ink/80 leading-relaxed">{sp.technique}.</p>
@@ -136,7 +136,7 @@ export default async function SpeciesPage({ params }: Params) {
               </div>
               <div className="flex flex-wrap gap-2 pt-1">
                 {sp.gearCats.map((c) => (
-                  <Link key={c} href={`/categories/${c}`} className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-paper bg-ink hover:bg-accent px-3.5 py-2 rounded-lg transition-colors">
+                  <Link key={c} href={`/categories/${c}`} className="inline-flex items-center gap-1.5 text-sm font-semibold text-paper bg-ink hover:bg-accent px-3.5 py-2 rounded-lg transition-colors">
                     {categoryName(taxonomy, c)} →
                   </Link>
                 ))}
@@ -148,11 +148,11 @@ export default async function SpeciesPage({ params }: Params) {
         {/* Where */}
         {spots.length > 0 && (
           <div className="space-y-3">
-            <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3">Dónde se busca</h2>
+            <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3">Dónde se busca</h2>
             <p className="text-sm text-ink/60">Guías de cómo pescar {sp.name.toLowerCase()} zona a zona — temporada, técnica y mejores horas de cada localidad:</p>
             <div className="flex flex-wrap gap-2">
               {spots.map((s) => (
-                <Link key={s.slug} href={`/pesca/${sp.id}/${s.slug}`} className="px-3 py-1.5 text-sm font-semibold text-ink border border-ink/15 rounded-full hover:bg-ink hover:text-paper transition-colors">
+                <Link key={s.slug} href={`/pesca/${sp.id}/${s.slug}`} className="px-3 py-1.5 text-sm font-semibold text-ink border border-ink/10 rounded-full hover:bg-ink hover:text-paper transition-colors">
                   {s.name} <span className="font-mono text-[10px] uppercase tracking-widest opacity-50">{s.region}</span>
                 </Link>
               ))}
@@ -161,14 +161,14 @@ export default async function SpeciesPage({ params }: Params) {
         )}
 
         {/* Cross links */}
-        <div className="border-t border-ink/12 pt-8 flex flex-wrap gap-3">
-          <Link href={`/mejores-horas`} className="inline-flex items-center gap-2 bg-ink text-paper px-5 py-3 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift hover:bg-accent hover:border-accent">
+        <div className="border-t border-ink/[0.07] pt-8 flex flex-wrap gap-3">
+          <Link href={`/mejores-horas`} className="inline-flex items-center gap-2 bg-ink text-paper px-5 py-3 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift hover:bg-accent hover:border-accent">
             🕐 Mejores horas por localidad
           </Link>
-          <Link href="/calendario" className="inline-flex items-center gap-2 bg-paper text-ink px-5 py-3 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift">
+          <Link href="/calendario" className="inline-flex items-center gap-2 bg-paper text-ink px-5 py-3 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift">
             🌙 Calendario del pescador
           </Link>
-          <Link href="/advice" className="inline-flex items-center gap-2 bg-paper text-ink px-5 py-3 text-xs font-bold uppercase tracking-wide border border-ink/15 rounded-xl shadow-hard hover-shift">
+          <Link href="/advice" className="inline-flex items-center gap-2 bg-paper text-ink px-5 py-3 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift">
             🎣 Preguntar al asesor
           </Link>
         </div>
@@ -178,7 +178,7 @@ export default async function SpeciesPage({ params }: Params) {
           <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50 mb-3">Otras especies</p>
           <div className="flex flex-wrap gap-2">
             {SEA_SPECIES.filter((o) => o.id !== sp.id).map((o) => (
-              <Link key={o.id} href={`/especies/${o.id}`} className="px-3 py-1.5 text-xs font-bold text-ink border border-ink/15 rounded-full hover:bg-ink hover:text-paper transition-colors">
+              <Link key={o.id} href={`/especies/${o.id}`} className="px-3 py-1.5 text-xs font-bold text-ink border border-ink/10 rounded-full hover:bg-ink hover:text-paper transition-colors">
                 {o.name}
               </Link>
             ))}

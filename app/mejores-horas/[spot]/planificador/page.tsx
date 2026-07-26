@@ -84,7 +84,7 @@ export default async function PlanificadorPage({ params }: { params: Promise<{ s
 
   return (
     <Layout>
-      <section className="bg-paper border-b border-ink/12 print:border-0">
+      <section className="bg-paper border-b border-ink/[0.07] print:border-0">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 print:py-4">
           <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-5 print:hidden">
             <Link href="/mejores-horas" className="hover:text-accent">Mejores horas</Link> <span className="mx-1">/</span>{' '}
@@ -126,7 +126,7 @@ export default async function PlanificadorPage({ params }: { params: Promise<{ s
             const inSeason = zoneSpecies.filter((sp) => sp.bestMonths.includes(monthIdx + 1)).slice(0, 4)
             const offset = list[0].weekday
             return (
-              <div key={key} className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-4 sm:p-5 space-y-3 break-inside-avoid">
+              <div key={key} className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-4 sm:p-5 space-y-3 break-inside-avoid">
                 <div className="flex items-baseline justify-between border-b border-ink/10 pb-2">
                   <h2 className="font-display uppercase text-xl text-ink leading-none">
                     {MONTH_NAMES[monthIdx]} <span className="text-ink/40">{year}</span>

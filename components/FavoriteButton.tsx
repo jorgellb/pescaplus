@@ -45,8 +45,8 @@ export default function FavoriteButton({
         onClick={onClick}
         aria-pressed={mounted ? fav : undefined}
         aria-label={label}
-        className={`inline-flex items-center justify-center gap-2 px-6 py-3.5 font-bold uppercase text-sm tracking-tight border rounded-xl transition-colors ${
-          fav ? 'bg-accent text-paper border-accent' : 'bg-paper text-ink border-ink/15 hover:bg-ink hover:text-paper'
+        className={`inline-flex items-center justify-center gap-2 px-6 py-3.5 font-semibold text-sm border rounded-full transition-colors${
+          fav ? 'bg-accent text-paper border-accent' : 'bg-paper text-ink border-ink/10 hover:bg-ink hover:text-paper'
         } ${className}`}
       >
         <Heart filled={fav} />
@@ -62,7 +62,7 @@ export default function FavoriteButton({
       aria-label={label}
       title={label}
       className={`inline-flex items-center justify-center w-9 h-9 rounded-full border transition-colors ${
-        fav ? 'bg-accent text-paper border-accent' : 'bg-paper/90 text-ink border-ink/15 hover:bg-ink hover:text-paper backdrop-blur-sm'
+        fav ? 'bg-accent text-paper border-accent' : 'bg-paper/90 text-ink border-ink/10 hover:bg-ink hover:text-paper backdrop-blur-sm'
       } ${className}`}
     >
       <Heart filled={fav} />

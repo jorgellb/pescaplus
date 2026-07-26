@@ -47,14 +47,14 @@ export default function ZoneAlertSignup({ spotSlug, spotName }: { spotSlug: stri
           onChange={(e) => setEmail(e.target.value)}
           placeholder="tu@email.com"
           maxLength={160}
-          className="mt-1 w-full border border-ink/20 rounded-xl bg-paper px-3 py-2 text-sm"
+          className="mt-1 w-full border border-ink/12 rounded-xl bg-paper px-3 py-2 text-sm"
         />
       </label>
       <input type="text" tabIndex={-1} autoComplete="off" value={website} onChange={(e) => setWebsite(e.target.value)} className="hidden" aria-hidden />
       <button
         type="submit"
         disabled={state === 'saving'}
-        className="bg-ink text-paper px-4 py-2 text-xs font-bold uppercase tracking-wide rounded-xl hover:bg-accent disabled:opacity-60 transition-colors"
+        className="bg-ink text-paper px-4 py-2 text-sm font-semibold rounded-full hover:bg-accent disabled:opacity-60 transition-colors"
       >
         {state === 'saving' ? 'Guardando…' : 'Avisarme'}
       </button>

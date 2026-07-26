@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function DiarioPage() {
   return (
     <Layout>
-      <section className="bg-paper border-b border-ink/12">
+      <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
           <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3">● Herramienta de pescador</p>
           <h1 className="font-display uppercase text-4xl sm:text-5xl leading-[1.02] text-ink">Diario de capturas</h1>

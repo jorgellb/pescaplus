@@ -8,7 +8,7 @@ export default async function AdminOperatorsPage() {
   const pending = operators.filter((o) => !o.verified).length
   return (
     <div className="space-y-6">
-      <div className="flex items-end justify-between gap-4 border-b border-ink/12 pb-4">
+      <div className="flex items-end justify-between gap-4 border-b border-ink/[0.07] pb-4">
         <div>
           <h1 className="font-display uppercase text-3xl md:text-4xl text-ink leading-none">Operadores</h1>
           <p className="text-ink/60 text-sm mt-1">Verifica titulación y seguro antes de que puedan publicar chárters de pago.</p>

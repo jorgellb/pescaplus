@@ -29,8 +29,8 @@ export default function OperatorVerify({ operators }: { operators: Op[] }) {
             </div>
             <div className="flex gap-2">
               {!o.verified
-                ? <button onClick={() => act(o.id, true)} disabled={busy === o.id} className="bg-accent text-paper px-4 py-2 text-xs font-bold uppercase tracking-wide rounded-xl hover:bg-ink disabled:opacity-60">Verificar</button>
-                : <button onClick={() => act(o.id, false)} disabled={busy === o.id} className="bg-paper text-red-700 border border-red-700/40 px-4 py-2 text-xs font-bold uppercase tracking-wide rounded-xl hover:bg-red-700 hover:text-paper disabled:opacity-60">Revocar</button>}
+                ? <button onClick={() => act(o.id, true)} disabled={busy === o.id} className="bg-accent text-paper px-4 py-2 text-sm font-semibold rounded-full hover:bg-ink disabled:opacity-60">Verificar</button>
+                : <button onClick={() => act(o.id, false)} disabled={busy === o.id} className="bg-paper text-red-700 border border-red-700/40 px-4 py-2 text-sm font-semibold rounded-full hover:bg-red-700 hover:text-paper disabled:opacity-60">Revocar</button>}
             </div>
           </div>
         </div>

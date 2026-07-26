@@ -52,7 +52,7 @@ export default async function ProductPage({ params }: Params) {
           <span className="text-6xl inline-block">🪝</span>
           <h1 className="font-display uppercase text-4xl text-ink">Aparejo no encontrado</h1>
           <p className="text-ink/60 text-sm max-w-sm mx-auto">El producto no existe o ha sido retirado del catálogo.</p>
-          <Link href="/" className="inline-block bg-ink text-paper px-6 py-3 text-sm font-bold uppercase border border-ink/15 rounded-xl shadow-hard hover-shift">
+          <Link href="/" className="inline-block bg-ink text-paper px-6 py-3 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift">
             Volver al inicio
           </Link>
         </div>
@@ -168,13 +168,13 @@ export default async function ProductPage({ params }: Params) {
           <div className="lg:col-span-7 flex flex-col">
             <div className="space-y-5">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex bg-ink text-paper text-[11px] font-bold px-3 py-1.5 uppercase tracking-widest rounded-full">{modalityLabel}</span>
+                <span className="inline-flex bg-ink text-paper text-[11px] font-semibold px-3 py-1.5 st rounded-full">{modalityLabel}</span>
                 {product.inStock ? (
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 uppercase tracking-widest rounded-full border border-accent/40 text-accent">
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 st rounded-full border border-accent/40 text-accent">
                     <span className="w-1.5 h-1.5 rounded-full bg-accent" /> Disponible
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 uppercase tracking-widest rounded-full border border-ink/20 text-ink/50">
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 st rounded-full border border-ink/12 text-ink/50">
                     <span className="w-1.5 h-1.5 rounded-full bg-ink/40" /> No disponible
                   </span>
                 )}
@@ -189,11 +189,11 @@ export default async function ProductPage({ params }: Params) {
               </div>
 
               <div className="space-y-1.5">
-                <div className="inline-flex items-baseline gap-2 border border-ink/15 rounded-xl shadow-hard px-5 py-3 bg-paper">
+                <div className="inline-flex items-baseline gap-2 border border-ink/10 rounded-xl shadow-hard px-5 py-3 bg-paper">
                   <span className="font-display text-5xl leading-none text-ink">{product.price.toFixed(2)}</span>
                   <span className="font-display text-2xl text-ink/60">{product.currency === 'EUR' ? '€' : product.currency}</span>
                 </div>
-                <p className="font-mono text-[11px] uppercase tracking-wide text-ink/40">
+                <p className="text-[12px] text-ink/45">
                   Precio orientativo · puede variar en la tienda del vendedor
                 </p>
               </div>
@@ -213,7 +213,7 @@ export default async function ProductPage({ params }: Params) {
                   <Link
                     key={cat}
                     href={`/categories/${cat}`}
-                    className="px-3 py-1 text-xs font-bold text-ink border border-ink/15 rounded-full hover:bg-ink hover:text-paper transition-colors"
+                    className="px-3 py-1 text-xs font-bold text-ink border border-ink/10 rounded-full hover:bg-ink hover:text-paper transition-colors"
                   >
                     {categoryName(taxonomy, cat)}
                   </Link>
@@ -227,20 +227,20 @@ export default async function ProductPage({ params }: Params) {
                   href={`/go/${product.id}`}
                   target="_blank"
                   rel="noopener noreferrer sponsored"
-                  className="w-full flex items-center justify-center gap-2 bg-ink text-paper px-8 py-5 font-display uppercase text-2xl border border-ink/15 rounded-xl shadow-hard-md hover-shift hover:bg-accent hover:border-accent"
+                  className="w-full flex items-center justify-center gap-2 bg-ink text-paper px-8 py-5 font-display uppercase text-2xl border border-ink/10 rounded-xl shadow-hard-md hover-shift hover:bg-accent hover:border-accent"
                 >
                   Comprar ahora →
                 </a>
               ) : (
-                <div className="w-full flex flex-col items-center justify-center gap-1 bg-ink/5 text-ink/50 px-8 py-5 border border-ink/15 rounded-xl cursor-not-allowed">
+                <div className="w-full flex flex-col items-center justify-center gap-1 bg-ink/5 text-ink/50 px-8 py-5 border border-ink/10 rounded-xl cursor-not-allowed">
                   <span className="font-display uppercase text-2xl leading-none">No disponible</span>
-                  <span className="font-mono text-[11px] uppercase tracking-wide">Vuelve a consultarlo pronto</span>
+                  <span className="text-[13px]">Vuelve a consultarlo pronto</span>
                 </div>
               )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <AsesorButton
                   ask={`¿Es buena opción el/la "${product.title}"? ¿Para qué tipo de pesca lo recomiendas y cómo lo uso?`}
-                  className="w-full flex items-center justify-center gap-2 bg-paper text-ink px-6 py-3.5 font-bold uppercase text-sm tracking-tight border border-ink/15 rounded-xl hover:bg-ink hover:text-paper transition-colors"
+                  className="w-full flex items-center justify-center gap-2 bg-paper text-ink px-6 py-3.5 font-semibold text-sm border border-ink/10 rounded-full hover:bg-ink hover:text-paper transition-colors"
                 >
                   🎣 Preguntar
                 </AsesorButton>
@@ -248,11 +248,11 @@ export default async function ProductPage({ params }: Params) {
               </div>
               <Link
                 href={`/categories/${product.typeFishing}`}
-                className="block text-center font-mono text-xs font-bold uppercase tracking-widest text-accent hover:underline"
+                className="block text-center text-xs font-semibold text-accent hover:underline"
               >
                 Ver todo en {modalityLabel} →
               </Link>
-              <p className="font-mono text-[11px] uppercase tracking-wide text-ink/40 text-center">Compra 100% segura · Envío con seguimiento</p>
+              <p className="text-[12px] text-ink/45 text-center">Compra 100% segura · Envío con seguimiento</p>
             </div>
           </div>
         </div>
@@ -260,9 +260,9 @@ export default async function ProductPage({ params }: Params) {
         {/* Trust badges */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-14">
           {trustBadges.map((b) => (
-            <div key={b.label} className="flex items-center gap-3 border border-ink/12 rounded-xl bg-paper px-4 py-3">
+            <div key={b.label} className="flex items-center gap-3 border border-ink/[0.07] rounded-xl bg-paper px-4 py-3">
               <span className="text-2xl leading-none">{b.icon}</span>
-              <span className="font-mono text-[11px] font-bold uppercase tracking-wide text-ink/70 leading-tight">{b.label}</span>
+              <span className="text-[13px] font-semibold text-ink/75 leading-tight">{b.label}</span>
             </div>
           ))}
         </div>
@@ -270,8 +270,8 @@ export default async function ProductPage({ params }: Params) {
         {/* Details + FAQ */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 mb-20">
           <div className="space-y-4">
-            <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3">Ficha técnica</h2>
-            <dl className="divide-y divide-ink/10 border border-ink/12 rounded-xl overflow-hidden">
+            <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3">Ficha técnica</h2>
+            <dl className="divide-y divide-ink/10 border border-ink/[0.07] rounded-xl overflow-hidden">
               {specs.map((s) => (
                 <div key={s.label} className="flex items-baseline justify-between gap-4 px-4 py-3 bg-paper">
                   <dt className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50 flex-shrink-0">{s.label}</dt>
@@ -282,10 +282,10 @@ export default async function ProductPage({ params }: Params) {
           </div>
 
           <div className="space-y-4">
-            <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3">Preguntas frecuentes</h2>
+            <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3">Preguntas frecuentes</h2>
             <div className="space-y-2">
               {faqs.map((f) => (
-                <details key={f.q} className="group border border-ink/12 rounded-xl bg-paper px-4 py-3 [&_summary]:list-none">
+                <details key={f.q} className="group border border-ink/[0.07] rounded-xl bg-paper px-4 py-3 [&_summary]:list-none">
                   <summary className="flex items-center justify-between gap-3 cursor-pointer text-sm font-bold text-ink">
                     {f.q}
                     <span className="flex-shrink-0 text-accent transition-transform group-open:rotate-45 text-lg leading-none">+</span>
@@ -299,9 +299,9 @@ export default async function ProductPage({ params }: Params) {
 
         {related.length > 0 && (
           <div className="space-y-6">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-4 border-b border-ink/12 pb-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-4 border-b border-ink/[0.07] pb-4">
               <h2 className="font-display uppercase text-2xl sm:text-3xl md:text-4xl leading-none break-words">Relacionados en {modalityLabel}</h2>
-              <Link href={`/categories/${product.typeFishing}`} className="font-mono text-xs font-bold uppercase tracking-widest text-accent hover:underline whitespace-nowrap">Ver toda la categoría →</Link>
+              <Link href={`/categories/${product.typeFishing}`} className="text-xs font-semibold text-accent hover:underline whitespace-nowrap">Ver toda la categoría →</Link>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {related.map((rp) => (

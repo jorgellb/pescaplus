@@ -17,8 +17,8 @@ export default function SpotFavButton({ slug, name }: { slug: string; name: stri
       onClick={() => setFav(toggleSpotFavorite(slug))}
       aria-pressed={fav}
       aria-label={fav ? `Quitar ${name} de tus zonas` : `Guardar ${name} en tus zonas`}
-      className={`inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold uppercase tracking-wide border rounded-xl shadow-hard hover-shift transition-colors ${
-        fav ? 'bg-accent text-paper border-accent' : 'bg-paper text-ink border-ink/15 hover:bg-ink hover:text-paper'
+      className={`inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border rounded-xl shadow-hard hover-shift transition-colors ${
+        fav ? 'bg-accent text-paper border-accent' : 'bg-paper text-ink border-ink/10 hover:bg-ink hover:text-paper'
       }`}
     >
       {fav ? '★ Zona guardada' : '☆ Guardar zona'}

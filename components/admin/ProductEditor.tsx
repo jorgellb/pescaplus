@@ -356,10 +356,10 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
       onClick={onClose}
     >
       <div
-        className="w-full max-w-3xl my-4 rounded-2xl bg-white border border-ink/15 shadow-2xl"
+        className="w-full max-w-3xl my-4 rounded-2xl bg-white border border-ink/10 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-ink/15 sticky top-0 bg-white rounded-t-2xl z-10">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-ink/10 sticky top-0 bg-white rounded-t-2xl z-10">
           <h2 className="text-lg font-extrabold text-ink">{initial ? 'Editar producto' : 'Nuevo producto'}</h2>
           <button onClick={onClose} className="text-ink/60 hover:text-ink/80 text-xl leading-none">✕</button>
         </div>
@@ -401,7 +401,7 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
                 <button
                   onClick={rewriteWithAI}
                   disabled={rewriteLoading || !rewritePrompt.trim() || !form.title.trim()}
-                  className="whitespace-nowrap bg-paper hover:bg-ink hover:text-paper text-ink border border-ink/20 font-bold text-sm px-4 py-2.5 rounded-lg active:scale-[0.98] transition-all disabled:opacity-40"
+                  className="whitespace-nowrap bg-paper hover:bg-ink hover:text-paper text-ink border border-ink/12 font-bold text-sm px-4 py-2.5 rounded-lg active:scale-[0.98] transition-all disabled:opacity-40"
                 >
                   {rewriteLoading ? 'Reescribiendo…' : 'Reescribir ↻'}
                 </button>
@@ -425,7 +425,7 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
 
           {/* Core fields */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="relative aspect-square rounded-xl overflow-hidden bg-paper border border-ink/15">
+            <div className="relative aspect-square rounded-xl overflow-hidden bg-paper border border-ink/10">
               <ProductImage src={form.images[0]?.url ?? ''} alt={form.title || 'Vista previa'} className="absolute inset-0 w-full h-full object-cover" />
             </div>
             <div className="sm:col-span-2 space-y-3">
@@ -458,7 +458,7 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
                       type="button"
                       onClick={() => toggleCategory(t.id)}
                       className={`px-2.5 py-1.5 text-[11px] font-bold rounded-lg border transition-colors ${
-                        on ? 'bg-ink text-white border-ink' : 'bg-white text-ink/60 border-ink/20 hover:border-ink/40'
+                        on ? 'bg-ink text-white border-ink' : 'bg-white text-ink/60 border-ink/12 hover:border-ink/40'
                       }`}
                       title={on ? 'Quitar de esta categoría' : 'Añadir a esta categoría'}
                     >
@@ -488,7 +488,7 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
           {/* Subcategories (multi, per selected category) */}
           <div className="space-y-2">
             <label className={labelCls}>Subcategorías (marca dónde va, dentro de cada categoría)</label>
-            <div className="space-y-2.5 rounded-xl border border-ink/12 bg-paper p-3">
+            <div className="space-y-2.5 rounded-xl border border-ink/[0.07] bg-paper p-3">
               {form.categories.map((catId) => {
                 const cat = tax.find((c) => c.id === catId)
                 const subs = cat?.subcategories ?? []
@@ -504,7 +504,7 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
                           type="button"
                           onClick={() => toggleSub(s.id)}
                           className={`px-2.5 py-1 text-[11px] font-bold rounded-lg border transition-colors ${
-                            on ? 'bg-accent text-paper border-accent' : 'bg-white text-ink/60 border-ink/20 hover:border-ink/40'
+                            on ? 'bg-accent text-paper border-accent' : 'bg-white text-ink/60 border-ink/12 hover:border-ink/40'
                           }`}
                         >
                           {s.name}
@@ -541,8 +541,8 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
             </div>
             <div className="space-y-2">
               {form.images.map((row, i) => (
-                <div key={i} className="flex items-start gap-2 p-2 rounded-xl border border-ink/15 bg-paper">
-                  <div className="relative w-14 h-14 flex-shrink-0 rounded-lg overflow-hidden bg-white border border-ink/15">
+                <div key={i} className="flex items-start gap-2 p-2 rounded-xl border border-ink/10 bg-paper">
+                  <div className="relative w-14 h-14 flex-shrink-0 rounded-lg overflow-hidden bg-white border border-ink/10">
                     <ProductImage src={row.url} alt="" className="absolute inset-0 w-full h-full object-cover" />
                     {i === 0 && <span className="absolute bottom-0 inset-x-0 bg-ink text-ink text-[8px] font-bold text-center py-0.5">PRINCIPAL</span>}
                   </div>
@@ -551,8 +551,8 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
                     <input value={row.alt} onChange={(e) => setImage(i, { alt: e.target.value })} placeholder="Texto ALT (describe la imagen para SEO/accesibilidad)" className={`${field} py-1.5 text-xs`} />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <button onClick={() => moveImage(i, -1)} disabled={i === 0} className="w-6 h-6 rounded bg-white border border-ink/15 text-ink/50 hover:text-ink disabled:opacity-30 text-xs">↑</button>
-                    <button onClick={() => moveImage(i, 1)} disabled={i === form.images.length - 1} className="w-6 h-6 rounded bg-white border border-ink/15 text-ink/50 hover:text-ink disabled:opacity-30 text-xs">↓</button>
+                    <button onClick={() => moveImage(i, -1)} disabled={i === 0} className="w-6 h-6 rounded bg-white border border-ink/10 text-ink/50 hover:text-ink disabled:opacity-30 text-xs">↑</button>
+                    <button onClick={() => moveImage(i, 1)} disabled={i === form.images.length - 1} className="w-6 h-6 rounded bg-white border border-ink/10 text-ink/50 hover:text-ink disabled:opacity-30 text-xs">↓</button>
                     <button onClick={() => removeImage(i)} className="w-6 h-6 rounded bg-white border border-red-200 text-red-500 hover:bg-red-50 text-xs">✕</button>
                   </div>
                 </div>
@@ -574,16 +574,16 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
             </div>
             {showPreview ? (
               <div
-                className="min-h-[8rem] p-3 rounded-lg border border-ink/15 bg-paper text-sm text-ink/50 [&_a]:text-accent [&_a]:underline [&_strong]:text-ink [&_ul]:list-disc [&_ul]:pl-5"
+                className="min-h-[8rem] p-3 rounded-lg border border-ink/10 bg-paper text-sm text-ink/50 [&_a]:text-accent [&_a]:underline [&_strong]:text-ink [&_ul]:list-disc [&_ul]:pl-5"
                 dangerouslySetInnerHTML={{ __html: renderDescription(form.description) || '<span class="text-ink/60">Nada que previsualizar…</span>' }}
               />
             ) : (
               <>
                 <div className="flex flex-wrap gap-1.5">
-                  <button onClick={() => surround('**', '**', 'negrita')} className="px-2.5 py-1 text-xs font-bold rounded border border-ink/15 bg-white hover:bg-paper text-ink/80">B</button>
-                  <button onClick={() => surround('_', '_', 'cursiva')} className="px-2.5 py-1 text-xs italic rounded border border-ink/15 bg-white hover:bg-paper text-ink/80">i</button>
-                  <button onClick={() => surround('[', '](https://)', 'texto del enlace')} className="px-2.5 py-1 text-xs rounded border border-ink/15 bg-white hover:bg-paper text-ink/80">🔗 Enlace</button>
-                  <button onClick={bulletLines} className="px-2.5 py-1 text-xs rounded border border-ink/15 bg-white hover:bg-paper text-ink/80">• Lista</button>
+                  <button onClick={() => surround('**', '**', 'negrita')} className="px-2.5 py-1 text-xs font-bold rounded border border-ink/10 bg-white hover:bg-paper text-ink/80">B</button>
+                  <button onClick={() => surround('_', '_', 'cursiva')} className="px-2.5 py-1 text-xs italic rounded border border-ink/10 bg-white hover:bg-paper text-ink/80">i</button>
+                  <button onClick={() => surround('[', '](https://)', 'texto del enlace')} className="px-2.5 py-1 text-xs rounded border border-ink/10 bg-white hover:bg-paper text-ink/80">🔗 Enlace</button>
+                  <button onClick={bulletLines} className="px-2.5 py-1 text-xs rounded border border-ink/10 bg-white hover:bg-paper text-ink/80">• Lista</button>
                 </div>
                 <textarea
                   ref={descRef}
@@ -601,7 +601,7 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
           </div>
 
           {/* SEO */}
-          <div className="space-y-3 p-4 rounded-xl border border-ink/15 bg-paper">
+          <div className="space-y-3 p-4 rounded-xl border border-ink/10 bg-paper">
             <p className="text-xs font-bold uppercase tracking-widest text-ink/50">SEO</p>
             <div className="space-y-1">
               <label className={labelCls}>Título SEO (meta title, ~60 car.)</label>
@@ -624,7 +624,7 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
           {error && <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>}
         </div>
 
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-ink/15 sticky bottom-0 bg-white rounded-b-2xl">
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-ink/10 sticky bottom-0 bg-white rounded-b-2xl">
           <button onClick={onClose} className="text-sm font-semibold text-ink/50 hover:text-ink px-4 py-2.5 rounded-lg transition-colors">Cancelar</button>
           <button
             onClick={save}

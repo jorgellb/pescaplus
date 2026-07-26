@@ -34,10 +34,10 @@ export default function RequestBooking({ id, full, price }: { id: string; full: 
   }
 
   const labelCls = 'font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50'
-  const inputCls = 'mt-1 w-full border border-ink/20 rounded-xl bg-paper px-3 py-2 text-sm'
+  const inputCls = 'mt-1 w-full border border-ink/12 rounded-xl bg-paper px-3 py-2 text-sm'
 
   return (
-    <form onSubmit={submit} className="space-y-3 border border-ink/15 rounded-2xl bg-paper p-4">
+    <form onSubmit={submit} className="space-y-3 border border-ink/10 rounded-2xl bg-paper p-4">
       <p className="font-display uppercase text-lg leading-none">{full ? 'Solicitar plaza (completo — lista de interés)' : 'Solicitar plaza'}</p>
       <p className="text-[13px] text-ink/60">
         Envías una solicitud; el patrón confirma y coordináis el pago. <strong>El pago online con tarjeta llegará muy pronto.</strong>
@@ -54,7 +54,7 @@ export default function RequestBooking({ id, full, price }: { id: string; full: 
         <input value={form.message} onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))} maxLength={400} placeholder="nivel, dudas…" className={inputCls} /></label>
       <input type="text" tabIndex={-1} autoComplete="off" value={form.website} onChange={(e) => setForm((f) => ({ ...f, website: e.target.value }))} className="hidden" aria-hidden />
       {state === 'error' && <p className="text-sm text-red-700">{msg}</p>}
-      <button type="submit" disabled={state === 'saving'} className="inline-flex items-center gap-2 bg-accent text-paper px-5 py-2.5 text-xs font-bold uppercase tracking-wide border border-accent rounded-xl shadow-hard hover-shift hover:bg-ink hover:border-ink disabled:opacity-60 transition-colors">
+      <button type="submit" disabled={state === 'saving'} className="inline-flex items-center gap-2 bg-accent text-paper px-5 py-2.5 text-sm font-semibold border border-accent rounded-full shadow-hard hover-shift hover:bg-ink hover:border-ink disabled:opacity-60 transition-colors">
         {state === 'saving' ? 'Enviando…' : `Solicitar (${price} €/persona)`}
       </button>
     </form>

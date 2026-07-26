@@ -109,7 +109,7 @@ export default async function PlanPage({ params, searchParams }: Params) {
 
   return (
     <Layout>
-      <section className="bg-paper border-b border-ink/12 print:border-0">
+      <section className="bg-paper border-b border-ink/[0.07] print:border-0">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 print:py-4">
           <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-5 print:hidden">
             <Link href="/" className="hover:text-accent">Inicio</Link> <span className="mx-1">/</span>{' '}
@@ -128,8 +128,8 @@ export default async function PlanPage({ params, searchParams }: Params) {
               <Link
                 key={d}
                 href={`/mejores-horas/${s.slug}/plan?dia=${d}${especie ? `&especie=${especie}` : ''}${modo ? `&modo=${modo}` : ''}`}
-                className={`flex-shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-tight border transition-colors capitalize ${
-                  i === dayIdx ? 'bg-ink text-paper border-ink' : 'bg-paper text-ink/70 border-ink/15 hover:bg-ink/5'
+                className={`flex-shrink-0 px-3.5 py-2 rounded-full text-xs font-semibold border transition-colors capitalize${
+                  i === dayIdx ? 'bg-ink text-paper border-ink' : 'bg-paper text-ink/70 border-ink/10 hover:bg-ink/5'
                 }`}
               >
                 {i === 0 ? 'Hoy' : i === 1 ? 'Mañana' : fmtDayLabel(d)}
@@ -145,7 +145,7 @@ export default async function PlanPage({ params, searchParams }: Params) {
 
       <section className="max-w-4xl mx-auto px-4 py-8 sm:px-6 space-y-8 print:py-2">
         {hours.length === 0 ? (
-          <div className="border border-ink/15 rounded-2xl bg-paper p-6 text-sm text-ink/50">
+          <div className="border border-ink/10 rounded-2xl bg-paper p-6 text-sm text-ink/50">
             La previsión de este día no está disponible ahora mismo. Vuelve a intentarlo en unos minutos.
           </div>
         ) : (
@@ -161,7 +161,7 @@ export default async function PlanPage({ params, searchParams }: Params) {
                   </span>
                 )}
                 {outing && (
-                  <span className="inline-flex items-center gap-2 rounded-xl border border-ink/15 px-3.5 py-2">
+                  <span className="inline-flex items-center gap-2 rounded-xl border border-ink/10 px-3.5 py-2">
                     <span aria-hidden>{modality.emoji}</span>
                     <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Salida {fmtTime(outing.departure)} · regreso {outing.returnBy >= dayStart + 24 * 3600000 ? '24:00' : fmtTime(outing.returnBy)}</span>
                   </span>
@@ -190,12 +190,12 @@ export default async function PlanPage({ params, searchParams }: Params) {
 
             {/* Timeline */}
             <div className="space-y-3">
-              <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/12 pb-3">Cronograma del día</h2>
-              <ol className="relative border-l-2 border-ink/12 ml-3 space-y-4 pt-1">
+              <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3">Cronograma del día</h2>
+              <ol className="relative border-l-2 border-ink/[0.07] ml-3 space-y-4 pt-1">
                 {timeline.map((t, i) => (
                   <li key={i} className="ml-5 relative">
                     <span className={`absolute -left-[27px] top-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center text-[8px] ${t.highlight ? 'bg-accent border-accent' : 'bg-paper border-ink/30'}`} aria-hidden />
-                    <div className={`rounded-xl border px-4 py-3 ${t.highlight ? 'border-accent/40 bg-accent/[0.05]' : 'border-ink/12 bg-paper'}`}>
+                    <div className={`rounded-xl border px-4 py-3 ${t.highlight ? 'border-accent/40 bg-accent/[0.05]' : 'border-ink/[0.07] bg-paper'}`}>
                       <p className="flex items-center gap-2 font-bold text-ink text-sm">
                         <span aria-hidden>{t.icon}</span>
                         <span className="font-display text-lg">{fmtTime(t.time)}</span>
@@ -211,22 +211,22 @@ export default async function PlanPage({ params, searchParams }: Params) {
             {/* Species + gear checklist */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {picks.length > 0 && (
-                <div className="border border-ink/15 rounded-2xl bg-paper p-5 space-y-3">
-                  <h2 className="font-display uppercase text-xl text-ink leading-none border-b border-ink/12 pb-3">🎯 Objetivo del día</h2>
+                <div className="border border-ink/10 rounded-2xl bg-paper p-5 space-y-3">
+                  <h2 className="font-display uppercase text-xl text-ink leading-none border-b border-ink/[0.07] pb-3">🎯 Objetivo del día</h2>
                   {(targetSpecies ? [{ species: targetSpecies, reasons: picks.find((p) => p.species.id === targetSpecies.id)?.reasons ?? [] }] : picks).map((p) => (
                     <div key={p.species.id} className="space-y-1.5">
                       <p className="font-display uppercase text-lg text-ink">{p.species.name}</p>
                       {p.reasons.length > 0 && <p className="text-[13px] text-ink/65">{p.reasons.join(', ')}.</p>}
                       <p className="text-[13px] text-ink/75"><strong>Técnica:</strong> {p.species.technique}.</p>
                       <p className="text-[13px] text-ink/75"><strong>Cebos:</strong> {p.species.baits}.</p>
-                      <Link href={`/especies/${p.species.id}`} className="inline-block font-mono text-[11px] font-bold uppercase tracking-widest text-accent hover:underline print:hidden">Ficha completa →</Link>
+                      <Link href={`/especies/${p.species.id}`} className="inline-block text-[11px] font-semibold text-accent hover:underline print:hidden">Ficha completa →</Link>
                     </div>
                   ))}
                 </div>
               )}
 
-              <div className="border border-ink/15 rounded-2xl bg-paper p-5 space-y-3">
-                <h2 className="font-display uppercase text-xl text-ink leading-none border-b border-ink/12 pb-3">🎒 Checklist de equipo</h2>
+              <div className="border border-ink/10 rounded-2xl bg-paper p-5 space-y-3">
+                <h2 className="font-display uppercase text-xl text-ink leading-none border-b border-ink/[0.07] pb-3">🎒 Checklist de equipo</h2>
                 <ul className="space-y-2 text-[14px] text-ink/80">
                   {gearTips.map((t) => (
                     <li key={t.text} className="flex items-start gap-2.5">
@@ -265,7 +265,7 @@ export default async function PlanPage({ params, searchParams }: Params) {
             </div>
 
             {/* Safety footer */}
-            <div className="border border-ink/15 rounded-2xl bg-paper p-5 space-y-2">
+            <div className="border border-ink/10 rounded-2xl bg-paper p-5 space-y-2">
               <h2 className="font-display uppercase text-xl text-ink leading-none">🦺 Seguridad</h2>
               <p className="text-[13px] text-ink/70 leading-relaxed">
                 Emergencias: <strong>112</strong>{s.type === 'mar' ? <> · Salvamento Marítimo: <strong>900 202 202</strong></> : null}. Avisa de tu plan a alguien,
@@ -276,7 +276,7 @@ export default async function PlanPage({ params, searchParams }: Params) {
             </div>
 
             <div className="print:hidden">
-              <Link href={`/mejores-horas/${s.slug}${especie || modo ? `?${new URLSearchParams({ ...(especie ? { especie } : {}), ...(modo ? { modo } : {}) })}` : ''}`} className="font-mono text-xs font-bold uppercase tracking-widest text-accent hover:underline">
+              <Link href={`/mejores-horas/${s.slug}${especie || modo ? `?${new URLSearchParams({ ...(especie ? { especie } : {}), ...(modo ? { modo } : {}) })}` : ''}`} className="text-xs font-semibold text-accent hover:underline">
                 ← Volver a la previsión completa de {s.name}
               </Link>
             </div>

@@ -36,17 +36,17 @@ export default function ProductCard({
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
         />
         <Link href={`/products/${id}`} className="absolute inset-0 z-10" aria-label={title} />
-        <span className="absolute top-2.5 left-2.5 z-20 pointer-events-none bg-ink/85 text-paper text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full backdrop-blur-sm">
+        <span className="absolute top-2.5 left-2.5 z-20 pointer-events-none bg-ink/85 text-paper text-[10px] font-semibold st px-2.5 py-1 rounded-full backdrop-blur-sm">
           {fishingLabel(typeFishing)}
         </span>
         {videoUrl && !soldOut && (
           <div className="absolute top-2.5 right-2.5 z-20 pointer-events-none">
-            <span className="bg-paper/90 text-ink text-[10px] font-bold uppercase px-2 py-1 rounded-full shadow-sm backdrop-blur-sm">▶ Vídeo</span>
+            <span className="bg-paper/90 text-ink text-[10px] font-semibold px-2 py-1 rounded-full shadow-sm backdrop-blur-sm">▶ Vídeo</span>
           </div>
         )}
         {soldOut && (
           <div className="absolute top-2.5 right-2.5 z-20 pointer-events-none">
-            <span className="bg-ink/85 text-paper text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full backdrop-blur-sm">Agotado</span>
+            <span className="bg-ink/85 text-paper text-[10px] font-semibold st px-2 py-1 rounded-full backdrop-blur-sm">Agotado</span>
           </div>
         )}
         <FavoriteButton product={{ id, title, price, currency, imageUrl: src }} className="absolute bottom-2.5 right-2.5 z-20 shadow-sm" />
@@ -73,7 +73,7 @@ export default function ProductCard({
           {soldOut ? (
             <Link
               href={`/products/${id}`}
-              className="relative z-20 inline-flex items-center text-xs font-bold uppercase tracking-wide text-ink border border-ink/20 px-3.5 py-2 rounded-lg hover:bg-ink hover:text-paper transition-colors"
+              className="relative z-20 inline-flex items-center text-sm font-semibold text-ink border border-ink/12 px-3.5 py-2 rounded-lg hover:bg-ink hover:text-paper transition-colors"
             >
               Ver ficha
             </Link>
@@ -82,7 +82,7 @@ export default function ProductCard({
               href={`/go/${id}`}
               target="_blank"
               rel="noopener noreferrer sponsored"
-              className="relative z-20 inline-flex items-center text-xs font-bold uppercase tracking-wide text-paper bg-ink hover:bg-accent px-3.5 py-2 rounded-lg transition-colors"
+              className="relative z-20 inline-flex items-center text-sm font-semibold text-paper bg-ink hover:bg-accent px-3.5 py-2 rounded-lg transition-colors"
             >
               Comprar
             </a>

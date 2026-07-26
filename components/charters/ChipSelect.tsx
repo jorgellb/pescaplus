@@ -47,7 +47,7 @@ export default function ChipSelect({ label, hint, icon, options, value, onChange
               onClick={() => toggle(o.id)}
               aria-pressed={on}
               className={`inline-flex items-center gap-2 border rounded-full px-3 py-1.5 text-[13.5px] transition-colors ${
-                on ? 'bg-accent text-paper border-accent' : 'bg-paper text-ink/75 border-ink/12 hover:border-accent/50 hover:text-ink'
+                on ? 'bg-accent text-paper border-accent' : 'bg-paper text-ink/75 border-ink/[0.07] hover:border-accent/50 hover:text-ink'
               }`}
             >
               <CharterIcon name={o.icon} className="w-4 h-4 shrink-0 opacity-80" />

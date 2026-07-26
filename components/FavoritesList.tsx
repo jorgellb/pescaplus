@@ -21,11 +21,11 @@ export default function FavoritesList() {
 
   if (items.length === 0) {
     return (
-      <div className="text-center py-16 border border-ink/15 rounded-xl shadow-hard bg-paper max-w-lg mx-auto px-8 space-y-4">
+      <div className="text-center py-16 border border-ink/10 rounded-xl shadow-hard bg-paper max-w-lg mx-auto px-8 space-y-4">
         <span className="inline-block text-5xl">💚</span>
         <h2 className="font-display uppercase text-2xl text-ink">Aún no tienes favoritos</h2>
         <p className="text-sm text-ink/60">Pulsa el corazón en cualquier producto para guardarlo aquí y encontrarlo fácilmente.</p>
-        <Link href="/categories/canas" className="inline-block bg-ink text-paper px-6 py-3 text-sm font-bold uppercase border border-ink/15 rounded-xl shadow-hard hover-shift">
+        <Link href="/categories/canas" className="inline-block bg-ink text-paper px-6 py-3 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift">
           Explorar catálogo
         </Link>
       </div>
@@ -49,7 +49,7 @@ export default function FavoritesList() {
               <span className="font-display text-[26px] leading-none text-ink">
                 {p.price.toFixed(2)}<span className="text-sm align-top">{p.currency === 'EUR' ? '€' : ` ${p.currency}`}</span>
               </span>
-              <a href={`/go/${p.id}`} target="_blank" rel="noopener noreferrer sponsored" className="relative z-20 inline-flex items-center text-xs font-bold uppercase tracking-wide text-paper bg-ink hover:bg-accent px-3.5 py-2 rounded-lg transition-colors">
+              <a href={`/go/${p.id}`} target="_blank" rel="noopener noreferrer sponsored" className="relative z-20 inline-flex items-center text-sm font-semibold text-paper bg-ink hover:bg-accent px-3.5 py-2 rounded-lg transition-colors">
                 Comprar
               </a>
             </div>

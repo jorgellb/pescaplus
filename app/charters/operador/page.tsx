@@ -42,7 +42,7 @@ export default async function OperatorPage({ searchParams }: Params) {
     const charters = await listChartersByOperator(operator.id)
     return (
       <Layout>
-        <section className="bg-paper border-b border-ink/12">
+        <section className="bg-paper border-b border-ink/[0.07]">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
             <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3">⚓ Panel de operador{operator.verified ? ' · verificado ✓' : ' · pendiente'}</p>
             <h1 className="font-display uppercase text-3xl sm:text-4xl leading-[1.02] text-ink">{operator.businessName || operator.name}</h1>
@@ -70,7 +70,7 @@ export default async function OperatorPage({ searchParams }: Params) {
 
   return (
     <Layout>
-      <section className="bg-paper border-b border-ink/12">
+      <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
           <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-5"><Link href="/charters" className="hover:text-accent">Chárters</Link> <span className="mx-1">/</span> <span className="text-ink">Operador</span></nav>
           <h1 className="font-display uppercase text-3xl sm:text-4xl md:text-5xl leading-[1.02] text-ink">¿Eres patrón profesional?</h1>

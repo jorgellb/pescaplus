@@ -33,7 +33,7 @@ export default function CharterFilters({ initial, spots, resultCount }: {
   ].filter(Boolean).length
 
   const L = 'text-[12px] font-semibold uppercase tracking-wide text-ink/50'
-  const I = 'mt-1 w-full border border-ink/12 rounded-xl bg-paper px-3 py-2.5 text-sm focus:outline-none focus:border-accent'
+  const I = 'mt-1 w-full border border-ink/[0.07] rounded-xl bg-paper px-3 py-2.5 text-sm focus:outline-none focus:border-accent'
 
   return (
     <form onSubmit={(e) => { e.preventDefault(); apply() }}

@@ -24,7 +24,7 @@ export default function DayScoreMap({ spots, showNav }: { spots: SpotDayScore[];
   const ordered = [...spots].sort((a, b) => a.score - b.score)
   const hasUnknown = spots.some((s) => s.waveUnknown)
   return (
-    <div className="border border-ink/15 rounded-2xl bg-paper shadow-hard overflow-hidden">
+    <div className="border border-ink/10 rounded-2xl bg-paper shadow-hard overflow-hidden">
       <div className="p-4 sm:p-6">
         <svg viewBox={`0 0 ${MAP_W} ${MAP_H}`} className="w-full h-auto" role="img" aria-label="Mapa de España coloreado por puntuación de pesca del día">
           <style>{`

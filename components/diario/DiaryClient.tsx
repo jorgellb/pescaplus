@@ -168,12 +168,12 @@ export default function DiaryClient() {
     URL.revokeObjectURL(url)
   }
 
-  if (!ready) return <div className="border border-ink/15 rounded-2xl bg-paper p-6 text-sm text-ink/50">Cargando tu diario…</div>
+  if (!ready) return <div className="border border-ink/10 rounded-2xl bg-paper p-6 text-sm text-ink/50">Cargando tu diario…</div>
 
   return (
     <div className="space-y-6">
       {/* Add form */}
-      <div className="border border-ink/15 rounded-2xl bg-paper shadow-hard p-4 sm:p-5 space-y-3">
+      <div className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-4 sm:p-5 space-y-3">
         <h2 className="font-display uppercase text-xl leading-none">➕ Apunta una captura</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <label className="block">
@@ -183,7 +183,7 @@ export default function DiaryClient() {
               value={form.dateISO}
               max={todayMadridISO()}
               onChange={(ev) => setForm((f) => ({ ...f, dateISO: ev.target.value }))}
-              className="mt-1 w-full border border-ink/20 rounded-xl bg-paper px-3 py-2 text-sm"
+              className="mt-1 w-full border border-ink/12 rounded-xl bg-paper px-3 py-2 text-sm"
             />
           </label>
           <label className="block">
@@ -191,7 +191,7 @@ export default function DiaryClient() {
             <select
               value={form.spotSlug}
               onChange={(ev) => setForm((f) => ({ ...f, spotSlug: ev.target.value }))}
-              className="mt-1 w-full border border-ink/20 rounded-xl bg-paper px-3 py-2 text-sm"
+              className="mt-1 w-full border border-ink/12 rounded-xl bg-paper px-3 py-2 text-sm"
             >
               <option value="">Elige zona…</option>
               {FISHING_SPOTS.map((s) => (
@@ -206,7 +206,7 @@ export default function DiaryClient() {
             <select
               value={form.speciesId}
               onChange={(ev) => setForm((f) => ({ ...f, speciesId: ev.target.value }))}
-              className="mt-1 w-full border border-ink/20 rounded-xl bg-paper px-3 py-2 text-sm"
+              className="mt-1 w-full border border-ink/12 rounded-xl bg-paper px-3 py-2 text-sm"
             >
               {SEA_SPECIES.map((sp) => (
                 <option key={sp.id} value={sp.id}>
@@ -224,7 +224,7 @@ export default function DiaryClient() {
               max={99}
               value={form.qty}
               onChange={(ev) => setForm((f) => ({ ...f, qty: Number(ev.target.value) }))}
-              className="mt-1 w-full border border-ink/20 rounded-xl bg-paper px-3 py-2 text-sm"
+              className="mt-1 w-full border border-ink/12 rounded-xl bg-paper px-3 py-2 text-sm"
             />
           </label>
         </div>
@@ -236,13 +236,13 @@ export default function DiaryClient() {
             maxLength={200}
             placeholder="p. ej. sarda a la boya con coreano, amanecer"
             onChange={(ev) => setForm((f) => ({ ...f, note: ev.target.value }))}
-            className="mt-1 w-full border border-ink/20 rounded-xl bg-paper px-3 py-2 text-sm"
+            className="mt-1 w-full border border-ink/12 rounded-xl bg-paper px-3 py-2 text-sm"
           />
         </label>
         <button
           onClick={add}
           disabled={!form.dateISO || !form.spotSlug}
-          className="inline-flex items-center gap-2 bg-accent text-paper px-5 py-2.5 text-xs font-bold uppercase tracking-wide border border-accent rounded-xl shadow-hard hover-shift hover:bg-ink hover:border-ink disabled:opacity-50 transition-colors"
+          className="inline-flex items-center gap-2 bg-accent text-paper px-5 py-2.5 text-sm font-semibold border border-accent rounded-full shadow-hard hover-shift hover:bg-ink hover:border-ink disabled:opacity-50 transition-colors"
         >
           Guardar captura
         </button>
@@ -278,13 +278,13 @@ export default function DiaryClient() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-display uppercase text-xl leading-none">🎣 Tus capturas</h2>
           {entries.length > 0 && (
-            <button onClick={exportJson} className="font-mono text-[11px] uppercase tracking-wide text-accent hover:underline">
+            <button onClick={exportJson} className="text-[11px] text-accent hover:underline">
               ⬇️ Exportar copia (JSON)
             </button>
           )}
         </div>
         {entries.length === 0 ? (
-          <p className="text-sm text-ink/55 border border-ink/12 rounded-2xl p-5 bg-paper">
+          <p className="text-sm text-ink/55 border border-ink/[0.07] rounded-2xl p-5 bg-paper">
             Aún no hay capturas. Apunta la primera y, a partir de tres, te enseñamos tus patrones: con qué luna, qué
             coeficiente y en qué zonas pescas mejor.
           </p>
@@ -295,7 +295,7 @@ export default function DiaryClient() {
               const sp = SEA_SPECIES.find((x) => x.id === e.speciesId)
               const c = contexts.get(e.id)
               return (
-                <li key={e.id} className="border border-ink/12 rounded-xl bg-paper px-4 py-3 flex flex-wrap items-center gap-x-4 gap-y-1">
+                <li key={e.id} className="border border-ink/[0.07] rounded-xl bg-paper px-4 py-3 flex flex-wrap items-center gap-x-4 gap-y-1">
                   <span className="min-w-0 flex-1">
                     <span className="block font-bold text-ink text-sm">
                       {e.qty > 1 ? `${e.qty}× ` : ''}

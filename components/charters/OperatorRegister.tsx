@@ -24,7 +24,7 @@ export default function OperatorRegister({ spots }: { spots: Opt[] }) {
   }
 
   const L = 'font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50'
-  const I = 'mt-1 w-full border border-ink/20 rounded-xl bg-paper px-3 py-2 text-sm'
+  const I = 'mt-1 w-full border border-ink/12 rounded-xl bg-paper px-3 py-2 text-sm'
 
   return (
     <form onSubmit={submit} className="space-y-4">
@@ -45,12 +45,12 @@ export default function OperatorRegister({ spots }: { spots: Opt[] }) {
       </div>
       <label className="block"><span className={L}>Sobre ti / tu servicio</span><textarea value={f.bio} onChange={(e) => set('bio', e.target.value)} maxLength={800} rows={3} className={I} /></label>
       <input type="text" tabIndex={-1} autoComplete="off" value={f.website} onChange={(e) => set('website', e.target.value)} className="hidden" aria-hidden />
-      <p className="text-[12px] text-ink/55 leading-relaxed border border-ink/12 rounded-xl bg-ink/[0.02] p-3">
+      <p className="text-[12px] text-ink/55 leading-relaxed border border-ink/[0.07] rounded-xl bg-ink/[0.02] p-3">
         Verificaremos tu <strong>titulación profesional y tu seguro</strong> antes de publicar tus chárters. Solo operadores verificados
         aparecen en el directorio y pueden cobrar. Guardarás un enlace privado para gestionar tus salidas.
       </p>
       {state === 'error' && <p className="text-sm text-red-700">{msg}</p>}
-      <button type="submit" disabled={state === 'saving'} className="inline-flex items-center gap-2 bg-accent text-paper px-6 py-3 text-sm font-bold uppercase tracking-wide border border-accent rounded-xl shadow-hard hover-shift hover:bg-ink hover:border-ink disabled:opacity-60 transition-colors">
+      <button type="submit" disabled={state === 'saving'} className="inline-flex items-center gap-2 bg-accent text-paper px-6 py-3 text-sm font-semibold border border-accent rounded-full shadow-hard hover-shift hover:bg-ink hover:border-ink disabled:opacity-60 transition-colors">
         {state === 'saving' ? 'Enviando…' : 'Registrarme como operador'}
       </button>
     </form>

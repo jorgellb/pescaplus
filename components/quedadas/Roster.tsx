@@ -48,7 +48,7 @@ export default function Roster({
   }
 
   const chip = (p: Person, waiting: boolean, i?: number) => (
-    <span key={p.id} className={`inline-flex items-center gap-1.5 border rounded-full px-3 py-1.5 text-sm ${waiting ? 'border-amber-700/30 text-ink/70 bg-amber-700/[0.04]' : 'border-ink/12 text-ink'}`}>
+    <span key={p.id} className={`inline-flex items-center gap-1.5 border rounded-full px-3 py-1.5 text-sm ${waiting ? 'border-amber-700/30 text-ink/70 bg-amber-700/[0.04]' : 'border-ink/[0.07] text-ink'}`}>
       {waiting && i != null && <span className="font-mono text-[10px] text-ink/40">{i + 1}º</span>}
       {p.name}{p.places > 1 ? ` +${p.places - 1}` : ''}
       {isHost && p.contact && <span className="font-mono text-[10px] text-accent">{p.contact}</span>}

@@ -22,15 +22,15 @@ export default function ProfileForm({ user, avatarChoices }: { user: U; avatarCh
   }
 
   const L = 'font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50'
-  const I = 'mt-1 w-full border border-ink/20 rounded-xl bg-paper px-3 py-2 text-sm'
+  const I = 'mt-1 w-full border border-ink/12 rounded-xl bg-paper px-3 py-2 text-sm'
   return (
-    <form onSubmit={save} className="border border-ink/15 rounded-2xl bg-paper p-5 space-y-4 max-w-xl">
+    <form onSubmit={save} className="border border-ink/10 rounded-2xl bg-paper p-5 space-y-4 max-w-xl">
       <div>
         <span className={L}>Avatar</span>
         <div className="flex flex-wrap gap-2 mt-2">
           {avatarChoices.map((a) => (
             <button type="button" key={a} onClick={() => setF((s) => ({ ...s, avatar: a }))}
-              className={`h-11 w-11 rounded-xl border text-xl flex items-center justify-center transition-colors ${f.avatar === a ? 'border-accent bg-accent/10' : 'border-ink/15 hover:border-ink/40'}`}>{a}</button>
+              className={`h-11 w-11 rounded-xl border text-xl flex items-center justify-center transition-colors ${f.avatar === a ? 'border-accent bg-accent/10' : 'border-ink/10 hover:border-ink/40'}`}>{a}</button>
           ))}
         </div>
       </div>
@@ -46,7 +46,7 @@ export default function ProfileForm({ user, avatarChoices }: { user: U; avatarCh
         <textarea value={f.bio} onChange={(e) => setF((s) => ({ ...s, bio: e.target.value }))} maxLength={600} rows={3} placeholder="Tu experiencia, modalidades favoritas…" className={I} /></label>
       {state === 'error' && <p className="text-sm text-red-700">{msg}</p>}
       {state === 'ok' && <p className="text-sm text-accent">✓ Guardado.</p>}
-      <button type="submit" disabled={state === 'saving'} className="bg-accent text-paper px-5 py-2.5 text-xs font-bold uppercase tracking-wide rounded-xl hover:bg-ink disabled:opacity-60 transition-colors">{state === 'saving' ? 'Guardando…' : 'Guardar perfil'}</button>
+      <button type="submit" disabled={state === 'saving'} className="bg-accent text-paper px-5 py-2.5 text-sm font-semibold rounded-full hover:bg-ink disabled:opacity-60 transition-colors">{state === 'saving' ? 'Guardando…' : 'Guardar perfil'}</button>
     </form>
   )
 }
