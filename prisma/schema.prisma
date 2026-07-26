@@ -303,6 +303,37 @@ model Waypoint {
  * sanción a un pescador. Mientras la tabla esté vacía para una zona, la
  * aplicación dice "no verificado", nunca "puedes pescar".
  */
+/**
+ * Puntos náuticos de OpenStreetMap: rampas de varada, puertos y pecios.
+ *
+ * Se preimportan en vez de consultar Overpass en vivo por dos razones: la API
+ * pública se satura a ratos —estuvo cayéndose a intervalos durante horas
+ * mientras se hacía esto— y una carta que depende de que un tercero responda al
+ * mover el mapa no es una carta, es una apuesta. Como Natura 2000: se trae, se
+ * guarda y se cita la fuente.
+ */
+model NauticalPoi {
+  id         String   @id @default(cuid())
+  /** node | way | relation, y su id en OSM: juntos identifican el original. */
+  osmType    String
+  osmId      String
+  /** rampa | puerto | pecio */
+  kind       String
+  name       String   @default("")
+  lat        Float
+  lon        Float
+  /** Lo que la ficha sabe contar: acceso, firme, calado, profundidad… */
+  details    Json?
+  /** Dónde y cuándo se obtuvo: se muestra en la interfaz. */
+  sourceName String   @default("OpenStreetMap")
+  sourceDate String   @default("")
+  createdAt  DateTime @default(now())
+
+  @@unique([osmType, osmId])
+  @@index([kind])
+  @@index([lat, lon])
+}
+
 model ProtectedArea {
   id             String   @id @default(cuid())
   name           String

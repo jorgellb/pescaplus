@@ -14,7 +14,7 @@ const csp = [
   // fetch, así que con connect-src 'self' quedaría en blanco sin decir por qué.
   // ows.* es el WMS de las isóbatas; rest.* (la sonda de un punto) no aparece
   // porque se consulta desde el servidor, no desde el navegador.
-  "connect-src 'self' https://tile.openstreetmap.org https://tiles.openseamap.org https://tiles.emodnet-bathymetry.eu https://ows.emodnet-bathymetry.eu",
+  "connect-src 'self' https://tile.openstreetmap.org https://tiles.openseamap.org https://tiles.emodnet-bathymetry.eu https://ows.emodnet-bathymetry.eu https://ows.emodnet-seabedhabitats.eu",
   // MapLibre crea su worker desde un blob.
   "worker-src 'self' blob:",
   "frame-ancestors 'self'",

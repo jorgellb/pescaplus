@@ -5,6 +5,9 @@ import { Map as MapLibreMap, NavigationControl, ScaleControl, GeolocateControl, 
 import 'maplibre-gl/dist/maplibre-gl.css'
 import type { ChartProvider } from '@/lib/chart-providers'
 import type { Sounding } from '@/lib/soundings'
+import { MIN_POI_ZOOM, POI_KINDS } from '@/lib/nautical-poi-types'
+import type { Seabed } from '@/lib/seabed'
+import { SEABED_LEGEND_URL, SEABED_NOTE } from '@/lib/seabed'
 
 interface PointConditions {
   available: boolean
@@ -148,7 +151,10 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
   const [seamarks, setSeamarks] = useState(true)
   const [bathy, setBathy] = useState(true)
   const [contours, setContours] = useState(true)
+  const [substrate, setSubstrate] = useState(false)
   const [showAreas, setShowAreas] = useState(true)
+  const [showPois, setShowPois] = useState(true)
+  const [poisFar, setPoisFar] = useState(false)
   const [areasFar, setAreasFar] = useState(false)
   // WebGL se comprueba al crear el estado, no en un efecto: es un hecho del
   // navegador, no algo que dependa del ciclo de vida.
@@ -170,6 +176,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
   const [clickedAt, setClickedAt] = useState<{ lat: number; lon: number } | null>(null)
   const [sounding, setSounding] = useState<Sounding | null>(null)
   const [weather, setWeather] = useState<PointConditions | null>(null)
+  const [seabed, setSeabed] = useState<Seabed | null>(null)
   const [name, setName] = useState('')
   const [type, setType] = useState('caladero')
   const [depth, setDepth] = useState('')
@@ -234,6 +241,21 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
         paint: { 'raster-opacity': 0.55 },
       })
     }
+    // El sustrato es un relleno opaco: va lo más abajo posible, justo sobre la
+    // batimetría, para no tapar isóbatas ni balizamiento.
+    if (provider.substrate) {
+      sources.substrate = {
+        type: 'raster', tiles: provider.substrate.tiles,
+        tileSize: provider.substrate.tileSize, attribution: provider.substrate.attribution,
+      }
+      layers.push({
+        id: 'substrate', type: 'raster', source: 'substrate',
+        minzoom: provider.substrate.minZoom, maxzoom: provider.substrate.maxZoom,
+        // Apagada de inicio: es una capa densa y tapa la carta si nadie la pide.
+        layout: { visibility: 'none' },
+        paint: { 'raster-opacity': 0.5 },
+      })
+    }
     // Las isóbatas van SOBRE el color batimétrico —si no, se pierden— pero
     // debajo del balizamiento, que es lo que más importa leer.
     if (provider.contours) {
@@ -259,9 +281,22 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
 
     // Fuente vacía: se rellena al mover, con lo que entre en pantalla.
     sources.areas = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } }
+    sources.pois = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } }
     layers.push(
       { id: 'areas-fill', type: 'fill', source: 'areas', paint: { 'fill-color': '#b91c1c', 'fill-opacity': 0.14 } },
       { id: 'areas-line', type: 'line', source: 'areas', paint: { 'line-color': '#b91c1c', 'line-width': 1.6, 'line-opacity': 0.75 } },
+      // Un círculo con borde claro se lee sobre la batimetría y sobre tierra;
+      // un icono de color plano se pierde en cuanto el fondo cambia de tono.
+      {
+        id: 'pois', type: 'circle', source: 'pois',
+        paint: {
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 9, 4.5, 14, 7],
+          'circle-color': ['match', ['get', 'kind'],
+            'rampa', '#0a7d72', 'puerto', '#1d4ed8', 'pecio', '#7c2d12', '#0a7d72'],
+          'circle-stroke-width': 1.6,
+          'circle-stroke-color': '#ffffff',
+        },
+      },
     )
 
     let m: MapLibreMap
@@ -290,6 +325,23 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
         .then((d) => { src.setData(d); setAreasFar(!!d.tooFar) })
         .catch(() => {})
     }
+    const loadPois = () => {
+      const src = m.getSource('pois') as { setData(d: unknown): void } | undefined
+      if (!src) return
+      // Con el mapa muy abierto serían miles de chinchetas ilegibles, y una
+      // consulta inútil por cada arrastre. Se avisa en vez de pedirlos.
+      if (m.getZoom() < MIN_POI_ZOOM) {
+        src.setData({ type: 'FeatureCollection', features: [] })
+        setPoisFar(true)
+        return
+      }
+      setPoisFar(false)
+      const b = m.getBounds()
+      fetch(`/api/puntos-nauticos?w=${b.getWest()}&s=${b.getSouth()}&e=${b.getEast()}&n=${b.getNorth()}`)
+        .then((r) => r.json())
+        .then((d) => { if (d.success) src.setData(d.geojson) })
+        .catch(() => {})
+    }
     m.on('error', (e) => {
       const msg = (e as unknown as { error?: Error }).error?.message ?? 'error desconocido'
       console.error('MapLibre:', msg)
@@ -297,13 +349,14 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
       if (/webgl|context|style/i.test(msg)) setFatal(`La carta no ha podido dibujarse: ${msg}`)
     })
     m.on('data', (e) => { if (e.dataType === 'source' && e.isSourceLoaded) setTilesOk(true) })
-    m.on('load', () => { setReady(true); m.resize(); loadAreas() })
+    m.on('load', () => { setReady(true); m.resize(); loadAreas(); loadPois() })
 
     // Si el contenedor cambia de tamaño (fuentes, rotación, barra del móvil)
     // el mapa no se entera solo.
     ro = new ResizeObserver(() => m.resize())
     ro.observe(holder.current)
     m.on('moveend', loadAreas)
+    m.on('moveend', loadPois)
 
     // Pulsar un espacio protegido cuenta su nombre y enlaza su ficha.
     m.on('click', 'areas-fill', (e) => {
@@ -315,7 +368,35 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
         .setHTML(`<strong>${p.name ?? 'Espacio protegido'}</strong><br><span style="font-size:12px">Consulta la normativa antes de pescar.</span>${link}`)
         .addTo(m)
     })
+    m.on('click', 'pois', (e) => {
+      const f = e.features?.[0]
+      if (!f) return
+      const p = f.properties as { kind: string; name: string; details: string; osmUrl: string; sourceDate: string }
+      let filas = ''
+      try {
+        const d = JSON.parse(p.details || '{}') as Record<string, string>
+        filas = Object.entries(d).slice(0, 6)
+          .map(([k, v]) => `<div style="font-size:12px"><span style="color:#5b6469">${k}:</span> ${v}</div>`)
+          .join('')
+      } catch { /* si el detalle viene roto, se enseña la ficha sin él */ }
+      const tipo = POI_KINDS.find((k) => k.id === p.kind)
+      // Muchos puntos de OSM no tienen nombre. En ese caso el tipo hace de
+      // título y no se repite debajo, que quedaba "Rampa de varada" dos veces.
+      const titulo = p.name || tipo?.label || 'Punto náutico'
+      const subtitulo = p.name && tipo ? `<div style="font-size:12px;color:#5b6469">${tipo.label}</div>` : ''
+      new Popup({ offset: 12 }).setLngLat(e.lngLat).setHTML(
+        `<strong>${titulo}</strong>`
+        + subtitulo
+        + filas
+        + `<div style="font-size:11px;margin-top:6px"><a href="${p.osmUrl}" target="_blank" rel="noopener noreferrer" style="color:#0a7d72">Ver en OpenStreetMap</a></div>`,
+      ).addTo(m)
+    })
+    m.on('mouseenter', 'pois', () => { m.getCanvas().style.cursor = 'pointer' })
+    m.on('mouseleave', 'pois', () => { m.getCanvas().style.cursor = '' })
+
     m.on('click', (e) => {
+      // Si el clic ha caído sobre un punto, manda su ficha, no la sonda.
+      if (m.queryRenderedFeatures(e.point, { layers: ['pois'] }).length > 0) return
       const lat = Math.round(e.lngLat.lat * 1e6) / 1e6
       const lon = Math.round(e.lngLat.lng * 1e6) / 1e6
 
@@ -324,6 +405,11 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
       setClickedAt({ lat, lon })
       setSounding(null)
       setWeather(null)
+      setSeabed(null)
+      fetch(`/api/fondo?lat=${lat}&lon=${lon}`)
+        .then((r) => r.json())
+        .then((d: Seabed & { success?: boolean }) => { if (d?.success) setSeabed(d) })
+        .catch(() => {})
       fetch(`/api/condiciones?lat=${lat}&lon=${lon}`)
         .then((r) => r.json())
         .then((d: PointConditions & { success?: boolean }) => { if (d?.success) setWeather(d) })
@@ -400,6 +486,18 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
     if (!m || !ready || !m.getLayer('contours')) return
     m.setLayoutProperty('contours', 'visibility', contours ? 'visible' : 'none')
   }, [contours, ready])
+
+  useEffect(() => {
+    const m = map.current
+    if (!m || !ready || !m.getLayer('substrate')) return
+    m.setLayoutProperty('substrate', 'visibility', substrate ? 'visible' : 'none')
+  }, [substrate, ready])
+
+  useEffect(() => {
+    const m = map.current
+    if (!m || !ready || !m.getLayer('pois')) return
+    m.setLayoutProperty('pois', 'visibility', showPois ? 'visible' : 'none')
+  }, [showPois, ready])
 
   useEffect(() => {
     const m = map.current
@@ -481,12 +579,43 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
         <button type="button" onClick={() => setShowAreas((v) => !v)} aria-pressed={showAreas} className={toggle(showAreas)}>
           🛑 Espacios protegidos
         </button>
+        {provider.substrate && (
+          <button type="button" onClick={() => setSubstrate((v) => !v)} aria-pressed={substrate} className={toggle(substrate)}>
+            🪨 Tipo de fondo
+          </button>
+        )}
+        <button type="button" onClick={() => setShowPois((v) => !v)} aria-pressed={showPois} className={toggle(showPois)}>
+          ⚓ Rampas y puertos
+        </button>
+        {showPois && poisFar && (
+          <span className="px-3 py-1.5 rounded-full bg-paper/90 text-[12px] text-ink/60 border border-ink/12">
+            Acércate para ver rampas, puertos y pecios
+          </span>
+        )}
         {showAreas && areasFar && (
           <span className="px-3 py-1.5 rounded-full bg-paper/90 text-[12px] text-ink/60 border border-ink/12">
             Acércate para ver los espacios protegidos
           </span>
         )}
       </div>
+
+      {substrate && (
+        <details className="pointer-events-auto w-64 max-w-full bg-paper rounded-2xl shadow-hard border border-ink/[0.07]">
+          <summary className="px-4 py-2.5 text-[13px] font-semibold text-ink cursor-pointer select-none">
+            Leyenda del fondo
+          </summary>
+          <div className="px-4 pb-3">
+            {/* La leyenda la sirve el propio EMODnet: así no se desfasa si
+                cambian los colores o las clases de su mapa. Va con <img> y no
+                con next/image porque es una URL de un WMS ajeno, y optimizarla
+                obligaría a declarar su dominio y a proxearla para nada. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={SEABED_LEGEND_URL} alt="Clases de sustrato del fondo marino según EUSeaMap"
+              className="max-w-full h-auto rounded-lg bg-white" />
+            <p className="text-[11px] text-ink/60 mt-2">{SEABED_NOTE}</p>
+          </div>
+        </details>
+      )}
 
       {clickedAt && !draft && (
         <div className="pointer-events-auto w-72 max-w-full bg-paper rounded-2xl shadow-hard border border-ink/[0.07] px-4 py-3">
@@ -496,6 +625,11 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
               aria-label="Cerrar la sonda" className="text-ink/40 hover:text-ink leading-none text-[15px]">×</button>
           </div>
           <div className="mt-1"><SoundingReading s={sounding} /></div>
+          {seabed?.substrate && (
+            <p className="text-[13px] text-ink mt-1.5">
+              <span className="text-ink/60">Fondo:</span> <span className="font-semibold">{seabed.label}</span>
+            </p>
+          )}
           <div className="mt-3 pt-3 border-t border-ink/[0.07]">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/60 mb-1.5">El mar aquí</p>
             <PointWeather c={weather} />
@@ -510,6 +644,11 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
           <p className="text-[12px] text-ink/60">{draft.lat.toFixed(5)}, {draft.lon.toFixed(5)}</p>
           <div className="rounded-xl bg-ink/[0.03] px-3 py-2 space-y-2">
             <SoundingReading s={sounding} />
+            {seabed?.substrate && (
+              <p className="text-[13px] text-ink">
+                <span className="text-ink/60">Fondo:</span> <span className="font-semibold">{seabed.label}</span>
+              </p>
+            )}
             <div className="pt-2 border-t border-ink/[0.07]"><PointWeather c={weather} /></div>
           </div>
           <input autoFocus value={name} onChange={(e) => setName(e.target.value)} maxLength={80}

@@ -41,6 +41,8 @@ export interface ChartProvider {
   bathymetry: ChartLayer | null
   /** Isóbatas: las curvas de nivel del fondo, rotuladas en metros. */
   contours: ChartLayer | null
+  /** Tipo de sustrato: roca, arena, fango… lo que decide dónde y cómo se pesca. */
+  substrate: ChartLayer | null
   /** False means it may not be used while the site earns money. */
   allowsCommercialUse: boolean
   /** Shown in the legal notice under the chart. */
@@ -103,8 +105,27 @@ const OPENSEAMAP: ChartProvider = {
     tileSize: 256,
     attribution: '© EMODnet Bathymetry',
   },
+  /**
+   * EUSeaMap (EMODnet Seabed Habitats): el sustrato del fondo, clasificado.
+   *
+   * OJO CON LA ESCALA: el servidor no dibuja nada por debajo de zoom ~9. Vista
+   * España entera la capa parece vacía, y es fácil concluir que no sirve —me
+   * pasó—. A partir de zoom 10 cubre la plataforma entera con sus clases.
+   */
+  substrate: {
+    id: 'eusm-substrate',
+    tiles: [
+      'https://ows.emodnet-seabedhabitats.eu/geoserver/emodnet_open/wms?service=WMS&version=1.3.0&request=GetMap' +
+      '&layers=eusm2025_subs_full&styles=&format=image%2Fpng&transparent=true' +
+      '&crs=EPSG%3A3857&width=256&height=256&bbox={bbox-epsg-3857}',
+    ],
+    minZoom: 9,
+    maxZoom: 18,
+    tileSize: 256,
+    attribution: '© EMODnet Seabed Habitats (EUSeaMap)',
+  },
   allowsCommercialUse: true,
-  sourceNote: 'Cartografía de OpenSeaMap y OpenStreetMap (ODbL) con batimetría de EMODnet.',
+  sourceNote: 'Cartografía de OpenSeaMap y OpenStreetMap (ODbL), batimetría de EMODnet y tipo de fondo de EUSeaMap.',
 }
 
 const PROVIDERS: Record<string, ChartProvider> = {
@@ -127,7 +148,7 @@ export function getChartProvider(): ChartProvider {
 
 /** Every attribution the visible layers demand, deduplicated. */
 export function attributionFor(p: ChartProvider): string {
-  return [p.base, p.seamarks, p.bathymetry, p.contours]
+  return [p.base, p.seamarks, p.bathymetry, p.contours, p.substrate]
     .filter((l): l is ChartLayer => !!l)
     .map((l) => l.attribution)
     .filter((a, i, arr) => arr.indexOf(a) === i)
