@@ -44,6 +44,22 @@ export const PESCAREC_URL = 'https://www.mapa.gob.es/es/pesca/temas/proteccion-r
 export const PESCAREC_NOTE =
   'En reservas marinas de interés pesquero es obligatorio usar la app oficial PescaREC para las declaraciones y comunicaciones.'
 
+/**
+ * Where our data is complete, as bounding boxes [oeste, sur, este, norte].
+ *
+ * Coverage has to be SPATIAL, not a row count. With partial data, asking "are
+ * there rows?" and answering 'outside' for a point in a region we never loaded
+ * is precisely the false negative this file exists to prevent.
+ */
+export const COVERAGE_BOXES: [number, number, number, number][] = [
+  // España: península, Baleares y Canarias, con margen sobre aguas propias.
+  [-19.5, 26.5, 5.0, 44.5],
+]
+
+export function isCovered(lat: number, lon: number): boolean {
+  return COVERAGE_BOXES.some(([w, s, e, n]) => lon >= w && lon <= e && lat >= s && lat <= n)
+}
+
 /** How many areas we have loaded — the honest measure of our coverage. */
 export async function countAreas(): Promise<number> {
   if (!isDatabaseConfigured()) return 0
@@ -69,6 +85,9 @@ export async function checkPoint(lat: number, lon: number): Promise<PointCheck> 
   const loaded = await countAreas()
   // Sin datos cargados no podemos afirmar nada, ni siquiera lo contrario.
   if (loaded === 0) return { coverage: 'unverified', areas: [], loaded: 0 }
+  // Y fuera de la zona que hemos cargado tampoco: tener filas de Cádiz no
+  // autoriza a decir "estás fuera" de alguien que pincha en Croacia.
+  if (!isCovered(lat, lon)) return { coverage: 'unverified', areas: [], loaded }
 
   try {
     const { prisma } = await import('@/lib/prisma')
