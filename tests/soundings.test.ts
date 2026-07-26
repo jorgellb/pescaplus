@@ -24,7 +24,7 @@ describe('sondas — el fondo que se enseña', () => {
     const s = interpretSample(ESTRECHO)
     expect(s.kind).toBe('medida')
     expect(s.depthM).toBe(404.8)
-    expect(s.label).toBe('404.8 m')
+    expect(s.label).toBe('404,8 m')  // decimal con coma: esto se lee en español
   })
 
   /**
@@ -72,7 +72,7 @@ describe('sondas — lo que no se puede afirmar', () => {
     const s = interpretSample({ avg: -0.12, interpolationType: false, reference: {} })
     expect(s.depthM).toBe(0.1)
     expect(s.label).toMatch(/orilla/i)
-    expect(s.label).not.toBe('0 m')
+    expect(s.label).not.toMatch(/^0[,.]?0? m$/)
   })
 
   it('sin dato utilizable no se inventa nada', () => {

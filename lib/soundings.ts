@@ -95,6 +95,11 @@ function round(m: number): number {
   return Math.round(m * 10) / 10
 }
 
+/** En español el decimal va con coma. "872.2 m" chirría en una carta náutica. */
+export function metros(m: number): string {
+  return m.toLocaleString('es-ES', { maximumFractionDigits: 1 })
+}
+
 export function interpretSample(raw: RawSample): Sounding {
   const avg = raw.avg
   if (typeof avg !== 'number' || !Number.isFinite(avg)) return UNKNOWN
@@ -134,7 +139,7 @@ export function interpretSample(raw: RawSample): Sounding {
     sourceUrl,
     label: enLaOrilla
       ? 'Justo en la orilla (menos de 0,5 m)'
-      : aproximada ? `≈ ${depthM} m (modelo global)` : `${depthM} m`,
+      : aproximada ? `≈ ${metros(depthM)} m (modelo global)` : `${metros(depthM)} m`,
   }
 }
 
@@ -152,14 +157,21 @@ export async function getSounding(lat: number, lon: number): Promise<Sounding> {
 
   const url = `${ENDPOINT}?geom=POINT(${lon.toFixed(6)}%20${lat.toFixed(6)})`
   /*
-   * El reintento NO es defensa por si acaso: sin él la primera consulta de cada
-   * punto fallaba siempre. El host resuelve a IPv4 y a IPv6, y el primer intento
-   * muere con `TypeError: fetch failed` (causa: AggregateError) allí donde no
-   * hay ruta IPv6 viva. El segundo entra sin problema. Se veía como "sonda no
-   * disponible" en el primer clic y bien en el segundo, que es de los fallos más
-   * desconcertantes de perseguir.
+   * Los reintentos NO son defensa por si acaso: sin ellos la primera consulta
+   * de cada punto fallaba SIEMPRE. El host resuelve a IPv4 y a IPv6, y el
+   * intento muere con `TypeError: fetch failed` (causa: AggregateError) allí
+   * donde no hay ruta IPv6 viva. Con dos intentos seguidos, sin pausa, caían
+   * los dos: hace falta darle margen a la pila de red entre uno y otro. Se veía
+   * como "sonda no disponible" en el primer clic y bien en el segundo, que es
+   * de los fallos más desconcertantes de perseguir.
    */
-  for (let attempt = 0; attempt < 2; attempt++) {
+  // Las esperas van holgadas a propósito: el fallo observado es un ETIMEDOUT
+  // de la primera conexión saliente del proceso, y tres intentos pegados caen
+  // los tres. Peor caso, el usuario espera un par de segundos más antes de leer
+  // "no disponible", que es preferible a enseñarle una sonda inventada.
+  const ESPERAS = [0, 400, 1200]
+  for (let attempt = 0; attempt < ESPERAS.length; attempt++) {
+    if (ESPERAS[attempt] > 0) await new Promise((r) => setTimeout(r, ESPERAS[attempt]))
     try {
       // EMODnet tarda un par de segundos largos; pasado ese margen es mejor
       // decir "no disponible" que dejar la ficha colgada.
@@ -170,7 +182,7 @@ export async function getSounding(lat: number, lon: number): Promise<Sounding> {
       if (!res.ok) continue
       return remember(key, interpretSample((await res.json()) as RawSample))
     } catch (error) {
-      if (attempt === 1) console.warn('Sonda EMODnet no disponible:', error)
+      if (attempt === ESPERAS.length - 1) console.warn('Sonda EMODnet no disponible:', error)
     }
   }
   return UNKNOWN

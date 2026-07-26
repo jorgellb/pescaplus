@@ -5,6 +5,81 @@ import { Map as MapLibreMap, NavigationControl, ScaleControl, GeolocateControl, 
 import 'maplibre-gl/dist/maplibre-gl.css'
 import type { ChartProvider } from '@/lib/chart-providers'
 import type { Sounding } from '@/lib/soundings'
+
+interface PointConditions {
+  available: boolean
+  hasMarine?: boolean
+  ahora?: {
+    windKmh: number | null; gustKmh: number | null; windDirLabel: string | null
+    waveM: number | null; wavePeriod: number | null; seaTempC: number | null
+    score: number; activity: number
+  }
+  ventana?: { start: number; end: number; avg: number } | null
+  gridKm?: number | null
+}
+
+const nf = (v: number | null | undefined, dec = 0) =>
+  v == null ? '—' : v.toLocaleString('es-ES', { maximumFractionDigits: dec })
+
+/** "hoy 19:00 – 05:00" / "mañana 06:00 – 11:00", en hora de aquí. */
+function ventanaTexto(v: { start: number; end: number }): string {
+  const hora = (t: number) => new Date(t).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Madrid' })
+  const dia = (t: number) => {
+    const hoy = new Date().toLocaleDateString('es-ES', { timeZone: 'Europe/Madrid' })
+    const manana = new Date(Date.now() + 86400000).toLocaleDateString('es-ES', { timeZone: 'Europe/Madrid' })
+    const d = new Date(t).toLocaleDateString('es-ES', { timeZone: 'Europe/Madrid' })
+    if (d === hoy) return 'hoy'
+    if (d === manana) return 'mañana'
+    return new Date(t).toLocaleDateString('es-ES', { weekday: 'long', timeZone: 'Europe/Madrid' })
+  }
+  return `${dia(v.start)} ${hora(v.start)} – ${hora(v.end)}`
+}
+
+/**
+ * El mar que hay en el punto. Se enseñan cuatro cifras y una ventana: es lo que
+ * de verdad decide si sales o te quedas en el muelle. El parte completo, hora a
+ * hora, ya vive en la ficha de cada zona.
+ */
+function PointWeather({ c }: { c: PointConditions | null }) {
+  if (!c) return <p className="text-[13px] text-ink/60">Consultando el parte…</p>
+  if (!c.available || !c.ahora) return <p className="text-[13px] text-ink/60">Sin parte para este punto</p>
+  const a = c.ahora
+  return (
+    <>
+      <dl className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-[13px]">
+        <div>
+          <dt className="text-ink/60 text-[11px]">Viento</dt>
+          <dd className="text-ink font-semibold">
+            {nf(a.windKmh)} km/h{a.windDirLabel ? ` ${a.windDirLabel}` : ''}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-ink/60 text-[11px]">Rachas</dt>
+          <dd className="text-ink font-semibold">{nf(a.gustKmh)} km/h</dd>
+        </div>
+        {c.hasMarine && (
+          <>
+            <div>
+              <dt className="text-ink/60 text-[11px]">Ola</dt>
+              <dd className="text-ink font-semibold">
+                {nf(a.waveM, 1)} m{a.wavePeriod != null ? ` · ${nf(a.wavePeriod, 0)} s` : ''}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-ink/60 text-[11px]">Agua</dt>
+              <dd className="text-ink font-semibold">{nf(a.seaTempC, 1)} °C</dd>
+            </div>
+          </>
+        )}
+      </dl>
+      {c.ventana && (
+        <p className="text-[12px] text-ink/70 mt-2">
+          <span className="font-semibold text-accent">Mejor ventana:</span> {ventanaTexto(c.ventana)}
+        </p>
+      )}
+    </>
+  )
+}
 import { WAYPOINT_TYPES, type Waypoint } from '@/lib/waypoint-types'
 
 /**
@@ -44,7 +119,7 @@ function SoundingReading({ s }: { s: Sounding | null }) {
     <>
       <p className="font-display text-[26px] leading-none text-ink">{s.label}</p>
       {s.minM != null && s.maxM != null && s.maxM - s.minM >= 1 && (
-        <p className="text-[12px] text-ink/60 mt-1">Entre {s.minM} y {s.maxM} m alrededor del punto</p>
+        <p className="text-[12px] text-ink/60 mt-1">Entre {nf(s.minM, 1)} y {nf(s.maxM, 1)} m alrededor del punto</p>
       )}
       {s.kind === 'aproximada' && (
         <p className="text-[12px] text-amber-900 mt-1">Sale del modelo global: tómalo solo como orientación.</p>
@@ -94,6 +169,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
   /** Último punto pinchado y su sonda. `null` mientras se consulta. */
   const [clickedAt, setClickedAt] = useState<{ lat: number; lon: number } | null>(null)
   const [sounding, setSounding] = useState<Sounding | null>(null)
+  const [weather, setWeather] = useState<PointConditions | null>(null)
   const [name, setName] = useState('')
   const [type, setType] = useState('caladero')
   const [depth, setDepth] = useState('')
@@ -247,6 +323,11 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
       // aunque no tengas cuenta, y es la mejor invitación a crearse una.
       setClickedAt({ lat, lon })
       setSounding(null)
+      setWeather(null)
+      fetch(`/api/condiciones?lat=${lat}&lon=${lon}`)
+        .then((r) => r.json())
+        .then((d: PointConditions & { success?: boolean }) => { if (d?.success) setWeather(d) })
+        .catch(() => setWeather({ available: false }))
       fetch(`/api/sonda?lat=${lat}&lon=${lon}`)
         .then((r) => r.json())
         .then((d: Sounding & { success?: boolean }) => {
@@ -408,14 +489,18 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
       </div>
 
       {clickedAt && !draft && (
-        <div className="pointer-events-auto w-64 max-w-full bg-paper rounded-2xl shadow-hard border border-ink/[0.07] px-4 py-3">
+        <div className="pointer-events-auto w-72 max-w-full bg-paper rounded-2xl shadow-hard border border-ink/[0.07] px-4 py-3">
           <div className="flex items-start justify-between gap-2">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/60">Sonda</p>
             <button type="button" onClick={() => { setClickedAt(null); setSounding(null) }}
               aria-label="Cerrar la sonda" className="text-ink/40 hover:text-ink leading-none text-[15px]">×</button>
           </div>
           <div className="mt-1"><SoundingReading s={sounding} /></div>
-          <p className="text-[11px] text-ink/60 mt-2">{clickedAt.lat.toFixed(4)}, {clickedAt.lon.toFixed(4)}</p>
+          <div className="mt-3 pt-3 border-t border-ink/[0.07]">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/60 mb-1.5">El mar aquí</p>
+            <PointWeather c={weather} />
+          </div>
+          <p className="text-[11px] text-ink/60 mt-2.5">{clickedAt.lat.toFixed(4)}, {clickedAt.lon.toFixed(4)}</p>
         </div>
       )}
 
@@ -423,8 +508,9 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
         <div className="pointer-events-auto w-72 max-w-full bg-paper rounded-2xl shadow-hard-lg border border-ink/[0.07] p-4 space-y-2.5">
           <p className="font-semibold text-ink text-[15px]">Nueva marca</p>
           <p className="text-[12px] text-ink/60">{draft.lat.toFixed(5)}, {draft.lon.toFixed(5)}</p>
-          <div className="rounded-xl bg-ink/[0.03] px-3 py-2">
+          <div className="rounded-xl bg-ink/[0.03] px-3 py-2 space-y-2">
             <SoundingReading s={sounding} />
+            <div className="pt-2 border-t border-ink/[0.07]"><PointWeather c={weather} /></div>
           </div>
           <input autoFocus value={name} onChange={(e) => setName(e.target.value)} maxLength={80}
             placeholder="Nombre (p. ej. Bajo de las lubinas)"

@@ -363,24 +363,49 @@ const cachedMarineForecast = unstable_cache(
   { revalidate: FORECAST_REVALIDATE_S, tags: ['marine-forecast'] },
 )
 
-export async function getMarineForecast(
-  spot: FishingSpot,
-  speciesId?: string | null,
-  modalityId?: string | null,
-): Promise<MarineForecast> {
-  const base = await cachedMarineForecast(
-    { slug: spot.slug, lat: spot.lat, lon: spot.lon, type: spot.type },
-    speciesId ?? null,
-    modalityId ?? null,
-  )
+/** Re-stamp `isNow` from the current time (the cached copy is up to 30 min old). */
+function restampNow(base: MarineForecast): MarineForecast {
   if (!base.available || base.hours.length === 0) return base
-  // Re-stamp `isNow` from the current time (the cached copy is up to 30 min old).
   const nowHour = Math.floor(Date.now() / 3600000)
   const hours = base.hours.map((h) => {
     const isNow = Math.floor(h.time / 3600000) === nowHour
     return h.isNow === isNow ? h : { ...h, isNow }
   })
   return { ...base, hours }
+}
+
+export async function getMarineForecast(
+  spot: FishingSpot,
+  speciesId?: string | null,
+  modalityId?: string | null,
+): Promise<MarineForecast> {
+  return restampNow(await cachedMarineForecast(
+    { slug: spot.slug, lat: spot.lat, lon: spot.lon, type: spot.type },
+    speciesId ?? null,
+    modalityId ?? null,
+  ))
+}
+
+/**
+ * El parte de un punto cualquiera de la carta, no de un spot del catálogo.
+ *
+ * La clave de caché redondea a 2 decimales (~1,1 km) A PROPÓSITO: la malla del
+ * modelo mide varios kilómetros, así que dos puntos separados 200 m devuelven
+ * exactamente lo mismo. Redondear no pierde nada y evita fabricar miles de
+ * entradas de caché idénticas cada vez que alguien arrastra el dedo por el mapa.
+ */
+export async function getForecastAt(
+  lat: number,
+  lon: number,
+  modalityId?: string | null,
+): Promise<MarineForecast> {
+  const rlat = Math.round(lat * 100) / 100
+  const rlon = Math.round(lon * 100) / 100
+  return restampNow(await cachedMarineForecast(
+    { slug: `punto:${rlat},${rlon}`, lat: rlat, lon: rlon, type: 'mar' },
+    null,
+    modalityId ?? null,
+  ))
 }
 
 /** Pressure 3 h before an hour of the list — for recomputing factor breakdowns at render. */
