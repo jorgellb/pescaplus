@@ -16,7 +16,7 @@ const SORT_OPTIONS: { key: SortKey; label: string }[] = [
 ]
 
 const inputCls =
-  'w-full px-4 py-3 bg-paper border border-ink/10 rounded-xl text-ink placeholder-ink/40 focus:outline-none focus:border-accent text-sm transition-colors'
+  'w-full px-4 py-3 bg-paper border border-ink/10 rounded-xl text-ink placeholder-ink/60 focus:outline-none focus:border-accent text-sm transition-colors'
 
 export default function CategoryBrowser({
   category,
@@ -112,7 +112,7 @@ export default function CategoryBrowser({
 
       {subFilters.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-6">
-          <span className="inline-flex items-center font-mono text-[11px] font-bold uppercase tracking-widest text-ink/40 mr-1">Subcategorías:</span>
+          <span className="inline-flex items-center font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60 mr-1">Subcategorías:</span>
           {subFilters.map((s) => (
             <Link
               key={s.id}
@@ -134,7 +134,7 @@ export default function CategoryBrowser({
       {loading ? (
         <div className="flex flex-col items-center justify-center py-24 gap-4">
           <div className="w-12 h-12 border-4 border-ink border-t-accent animate-spin" />
-          <p className="font-mono text-xs uppercase tracking-widest text-ink/50">Buscando…</p>
+          <p className="font-mono text-xs uppercase tracking-widest text-ink/60">Buscando…</p>
         </div>
       ) : sortedProducts.length === 0 ? (
         <div className="text-center py-16 border border-ink/10 rounded-xl shadow-hard bg-paper max-w-lg mx-auto px-8 space-y-4">

@@ -16,7 +16,7 @@ export default function FavoritesList() {
   }, [])
 
   if (items === null) {
-    return <div className="py-16 text-center text-ink/50 text-sm">Cargando tus favoritos…</div>
+    return <div className="py-16 text-center text-ink/60 text-sm">Cargando tus favoritos…</div>
   }
 
   if (items.length === 0) {

@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 function Row({ label, value, icon }: { label: string; value: string; icon: string }) {
   return (
     <div className="flex items-baseline justify-between gap-4 px-4 py-3 bg-paper">
-      <dt className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50 flex-shrink-0 flex items-center gap-1.5">
+      <dt className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60 flex-shrink-0 flex items-center gap-1.5">
         <span aria-hidden>{icon}</span> {label}
       </dt>
       <dd className="text-sm font-semibold text-ink text-right">{value}</dd>
@@ -61,7 +61,7 @@ export default async function SpeciesPage({ params }: Params) {
 
       <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
-          <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-5">
+          <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/60 mb-5">
             <Link href="/" className="hover:text-accent">Inicio</Link> <span className="mx-1">/</span>{' '}
             <Link href="/especies" className="hover:text-accent">Especies</Link> <span className="mx-1">/</span>{' '}
             <span className="text-ink">{sp.name}</span>
@@ -73,7 +73,7 @@ export default async function SpeciesPage({ params }: Params) {
                 <span className="w-1.5 h-1.5 rounded-full bg-accent" /> En temporada
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1 st rounded-full border border-ink/12 text-ink/50">
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1 st rounded-full border border-ink/12 text-ink/60">
                 Fuera de su mejor época
               </span>
             )}
@@ -96,14 +96,14 @@ export default async function SpeciesPage({ params }: Params) {
               return (
                 <div
                   key={mo}
-                  className={`text-center text-[10px] sm:text-xs font-bold uppercase py-2 rounded ${good ? 'bg-accent text-paper' : 'bg-ink/5 text-ink/40'} ${isCurrent ? 'ring-2 ring-ink/40' : ''}`}
+                  className={`text-center text-[10px] sm:text-xs font-bold uppercase py-2 rounded ${good ? 'bg-accent text-paper' : 'bg-ink/5 text-ink/60'} ${isCurrent ? 'ring-2 ring-ink/40' : ''}`}
                 >
                   {mo}
                 </div>
               )
             })}
           </div>
-          <p className="text-[12px] text-ink/50">El anillo marca el mes actual. Temporadas orientativas para España; varían por zona.</p>
+          <p className="text-[12px] text-ink/60">El anillo marca el mes actual. Temporadas orientativas para España; varían por zona.</p>
         </div>
 
         {/* Fact sheet */}
@@ -117,7 +117,7 @@ export default async function SpeciesPage({ params }: Params) {
               <Row icon="🕐" label="Mejores horas" value={sp.hours} />
               <Row icon="📐" label="Talla de referencia" value={sp.minSizeNote} />
             </dl>
-            <p className="text-[12px] text-ink/50">
+            <p className="text-[12px] text-ink/60">
               La talla mínima legal la fija la normativa y cambia por zona: consulta la{' '}
               <a href={NATIONAL_SIZES_URL} target="_blank" rel="noopener noreferrer" className="text-accent underline">referencia oficial (MAPA)</a>.
             </p>
@@ -127,11 +127,11 @@ export default async function SpeciesPage({ params }: Params) {
             <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3">Cómo pescarla</h2>
             <div className="border border-ink/[0.07] rounded-xl bg-paper p-5 space-y-4">
               <div>
-                <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50 mb-1">Técnicas</p>
+                <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60 mb-1">Técnicas</p>
                 <p className="text-[15px] text-ink/80 leading-relaxed">{sp.technique}.</p>
               </div>
               <div>
-                <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50 mb-1">Cebos y señuelos</p>
+                <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60 mb-1">Cebos y señuelos</p>
                 <p className="text-[15px] text-ink/80 leading-relaxed">{sp.baits}.</p>
               </div>
               <div className="flex flex-wrap gap-2 pt-1">
@@ -175,7 +175,7 @@ export default async function SpeciesPage({ params }: Params) {
 
         {/* Other species */}
         <div>
-          <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50 mb-3">Otras especies</p>
+          <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60 mb-3">Otras especies</p>
           <div className="flex flex-wrap gap-2">
             {SEA_SPECIES.filter((o) => o.id !== sp.id).map((o) => (
               <Link key={o.id} href={`/especies/${o.id}`} className="px-3 py-1.5 text-xs font-bold text-ink border border-ink/10 rounded-full hover:bg-ink hover:text-paper transition-colors">

@@ -62,7 +62,7 @@ export default function AdminLogin({ usingDefaultPassword }: { usingDefaultPassw
               onChange={(e) => setPassword(e.target.value)}
               autoFocus
               placeholder="••••••••"
-              className="w-full px-4 py-3 bg-paper border border-ink/10 rounded-xl text-ink placeholder-ink/40 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 text-sm transition-all"
+              className="w-full px-4 py-3 bg-paper border border-ink/10 rounded-xl text-ink placeholder-ink/60 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 text-sm transition-all"
             />
           </div>
 
@@ -89,7 +89,7 @@ export default function AdminLogin({ usingDefaultPassword }: { usingDefaultPassw
           )}
         </form>
 
-        <p className="text-center text-xs text-ink/50">
+        <p className="text-center text-xs text-ink/60">
           <Link href="/" className="hover:text-accent transition-colors">← Volver a la tienda</Link>
         </p>
       </div>

@@ -76,14 +76,14 @@ export default function CharterForm({ operatorId, manageToken, defaultSpot, spot
     } finally { setSaving(false) }
   }
 
-  const L = 'text-[12px] font-semibold uppercase tracking-wide text-ink/50'
+  const L = 'text-[12px] font-semibold uppercase tracking-wide text-ink/60'
   const I = 'mt-1 w-full border border-ink/[0.07] rounded-xl bg-paper px-3 py-2.5 text-sm focus:outline-none focus:border-accent'
 
   return (
     <form onSubmit={submit} className="border border-ink/[0.07] rounded-2xl bg-paper p-5 sm:p-6 space-y-6 shadow-hard">
       <div>
         <h2 className="font-display text-2xl text-ink">Publicar una salida</h2>
-        <p className="text-[14px] text-ink/55 mt-1">Cuanto más detalles, más reservas: los pescadores comparan barco, técnicas y qué incluye el precio.</p>
+        <p className="text-[14px] text-ink/60 mt-1">Cuanto más detalles, más reservas: los pescadores comparan barco, técnicas y qué incluye el precio.</p>
       </div>
 
       {/* 1 · Lo esencial */}
@@ -135,7 +135,7 @@ export default function CharterForm({ operatorId, manageToken, defaultSpot, spot
             <input type="checkbox" checked={repeatOn} onChange={(e) => setRepeatOn(e.target.checked)}
               className="w-4 h-4 accent-accent" />
             <span className="font-semibold text-ink text-[15px]">Repetir esta salida</span>
-            <span className="text-[13px] text-ink/50">— si sales todas las semanas, publícalo una sola vez</span>
+            <span className="text-[13px] text-ink/60">— si sales todas las semanas, publícalo una sola vez</span>
           </label>
 
           {repeatOn && (
@@ -161,7 +161,7 @@ export default function CharterForm({ operatorId, manageToken, defaultSpot, spot
                 ? <p className="text-[13px] text-amber-800">{preview.error}</p>
                 : <p className="text-[13px] text-accent font-semibold">
                     {describeSeries({ weekdays, untilISO: until }, preview.dates.length)}
-                    {preview.truncated && <span className="font-normal text-ink/55"> · se publicarán las {MAX_SERIES_DATES} primeras</span>}
+                    {preview.truncated && <span className="font-normal text-ink/60"> · se publicarán las {MAX_SERIES_DATES} primeras</span>}
                   </p>}
             </div>
           )}
@@ -175,9 +175,9 @@ export default function CharterForm({ operatorId, manageToken, defaultSpot, spot
           <span className="flex items-center gap-2 text-[13px] font-bold uppercase tracking-wide text-accent">
             <span className="w-5 h-5 rounded-full bg-accent text-paper text-[11px] flex items-center justify-center">2</span>
             Detalle de la salida
-            <span className="font-normal normal-case tracking-normal text-ink/45">— técnicas, especies, qué incluye…</span>
+            <span className="font-normal normal-case tracking-normal text-ink/60">— técnicas, especies, qué incluye…</span>
           </span>
-          <CharterIcon name="check" className={`w-4 h-4 text-ink/40 transition-transform ${openDetail ? 'rotate-180' : ''}`} />
+          <CharterIcon name="check" className={`w-4 h-4 text-ink/60 transition-transform ${openDetail ? 'rotate-180' : ''}`} />
         </button>
 
         {openDetail && (

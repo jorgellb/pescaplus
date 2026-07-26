@@ -36,7 +36,7 @@ export default function ChipSelect({ label, hint, icon, options, value, onChange
         {label}
         {value.length > 0 && <span className="text-[12px] font-normal text-accent">({value.length})</span>}
       </legend>
-      {hint && <p className="text-[13px] text-ink/55 -mt-1">{hint}</p>}
+      {hint && <p className="text-[13px] text-ink/60 -mt-1">{hint}</p>}
       <div className="flex flex-wrap gap-2">
         {shown.map((o) => {
           const on = value.includes(o.id)

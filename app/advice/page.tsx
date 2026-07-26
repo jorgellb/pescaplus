@@ -221,7 +221,7 @@ export default function AdvicePage() {
 
       <section className="max-w-4xl mx-auto px-4 py-8 sm:px-6">
         <div className="mb-6 space-y-3">
-          <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50">Elige modalidad:</p>
+          <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60">Elige modalidad:</p>
           <div className="flex flex-wrap gap-2">
             {ADVICE_TYPES.map((type) => (
               <button
@@ -241,7 +241,7 @@ export default function AdvicePage() {
         <div className="border border-ink/10 rounded-xl shadow-hard bg-paper overflow-hidden flex flex-col h-[520px]">
           {messages.length > 0 && (
             <div className="flex items-center justify-between px-4 py-2.5 border-b border-ink/[0.07] bg-paper">
-              <span className="font-mono text-[11px] uppercase tracking-widest text-ink/50">Conversación</span>
+              <span className="font-mono text-[11px] uppercase tracking-widest text-ink/60">Conversación</span>
               <button onClick={clearConversation} className="font-mono text-[11px] font-bold uppercase text-ink hover:text-accent">Limpiar</button>
             </div>
           )}
@@ -277,7 +277,7 @@ export default function AdvicePage() {
                       </div>
                       {message.role === 'assistant' && message.products && message.products.length > 0 && (
                         <div className="w-full space-y-1.5">
-                          <p className="font-mono text-[10px] uppercase tracking-widest text-ink/40">Productos recomendados</p>
+                          <p className="font-mono text-[10px] uppercase tracking-widest text-ink/60">Productos recomendados</p>
                           <div className="flex flex-wrap gap-2">
                             {message.products.map((p) => (
                               <Link
@@ -343,7 +343,7 @@ export default function AdvicePage() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Escribe tu consulta…"
-                className="flex-1 px-4 py-3 bg-paper border border-ink/10 rounded-xl text-ink placeholder-ink/40 focus:outline-none focus:border-accent text-sm transition-colors"
+                className="flex-1 px-4 py-3 bg-paper border border-ink/10 rounded-xl text-ink placeholder-ink/60 focus:outline-none focus:border-accent text-sm transition-colors"
                 disabled={loading}
               />
               <button
@@ -358,7 +358,7 @@ export default function AdvicePage() {
         </div>
 
         <div className="mt-8 space-y-3">
-          <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50">Consultas frecuentes:</p>
+          <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60">Consultas frecuentes:</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {suggestedQuestions.map((q, idx) => (
               <button

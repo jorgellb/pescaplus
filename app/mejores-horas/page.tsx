@@ -42,7 +42,7 @@ export default function MejoresHorasHub() {
             <span className="inline-flex items-center gap-2 border border-ink/10 rounded-xl px-3 py-2 bg-paper text-sm">
               <span className="text-lg" aria-hidden>{phaseEmoji(moon.phase)}</span>
               <span className="font-bold text-ink">{moon.name}</span>
-              <span className="font-mono text-[11px] uppercase tracking-widest text-ink/50">{Math.round(moon.illumination * 100)}%</span>
+              <span className="font-mono text-[11px] uppercase tracking-widest text-ink/60">{Math.round(moon.illumination * 100)}%</span>
             </span>
             <Link href="/donde-pescar" className="inline-flex items-center gap-2 bg-ink text-paper px-4 py-2.5 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift hover:bg-accent hover:border-accent">
               🗺️ ¿Dónde pescar? · Mapa del día

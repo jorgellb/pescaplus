@@ -60,7 +60,7 @@ export default async function CompararPage({ searchParams }: SP) {
     <Layout>
       <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
-          <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-5">
+          <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/60 mb-5">
             <Link href="/" className="hover:text-accent">Inicio</Link> <span className="mx-1">/</span>{' '}
             <Link href="/mejores-horas" className="hover:text-accent">Mejores horas</Link> <span className="mx-1">/</span>{' '}
             <span className="text-ink">Comparar</span>
@@ -135,13 +135,13 @@ export default async function CompararPage({ searchParams }: SP) {
                 <table className="w-full border-collapse min-w-[560px]">
                   <thead>
                     <tr className="border-b border-ink/[0.07]">
-                      <th className="text-left font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50 px-4 py-3">Día</th>
+                      <th className="text-left font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60 px-4 py-3">Día</th>
                       {zones.map((z) => (
                         <th key={z.spot.slug} className="text-left px-4 py-3">
                           <Link href={`/mejores-horas/${z.spot.slug}`} className="font-display uppercase text-lg text-ink hover:text-accent transition-colors leading-none">
                             {z.spot.name}
                           </Link>
-                          <p className="font-mono text-[9px] uppercase tracking-widest text-ink/40">{z.spot.region}</p>
+                          <p className="font-mono text-[9px] uppercase tracking-widest text-ink/60">{z.spot.region}</p>
                         </th>
                       ))}
                     </tr>
@@ -163,7 +163,7 @@ export default async function CompararPage({ searchParams }: SP) {
                                 <span className="text-paper text-xs font-bold rounded px-2 py-1 min-w-[34px] text-center" style={{ background: scoreHex(score) }}>{score}</span>
                                 <div className="leading-tight">
                                   <p className="text-[13px] font-bold text-ink">{d.win ? fmtWindowRange(d.win.start, d.win.end, d.dayStart) : '—'}</p>
-                                  <p className="font-mono text-[9px] uppercase tracking-widest text-ink/40">{scoreLabel(score)}{isBest ? ' · 🏆' : ''}</p>
+                                  <p className="font-mono text-[9px] uppercase tracking-widest text-ink/60">{scoreLabel(score)}{isBest ? ' · 🏆' : ''}</p>
                                 </div>
                               </div>
                             </td>

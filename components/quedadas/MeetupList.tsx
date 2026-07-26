@@ -120,7 +120,7 @@ export default function MeetupList({ meetups }: { meetups: MeetupCard[] }) {
                     <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">
                       {MOD.find((x) => x.id === m.modality)?.label ?? m.modality} · <span className="capitalize">{m.dayLabel}</span> · {m.timeStart}
                     </span>
-                    <span className={`font-mono text-[10px] font-bold uppercase tracking-widest ${m.status === 'confirmed' ? 'text-accent' : 'text-ink/40'}`}>
+                    <span className={`font-mono text-[10px] font-bold uppercase tracking-widest ${m.status === 'confirmed' ? 'text-accent' : 'text-ink/60'}`}>
                       {m.kind === 'llamada'
                         ? m.status === 'confirmed'
                           ? '¡Grupo formado!'

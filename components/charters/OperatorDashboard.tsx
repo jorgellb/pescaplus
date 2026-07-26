@@ -78,7 +78,7 @@ export default function OperatorDashboard({ operatorId, manageToken, verified, s
     } finally { setBusy(null) }
   }
 
-  const L = 'font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50'
+  const L = 'font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60'
   const I = 'mt-1 w-full border border-ink/12 rounded-xl bg-paper px-3 py-2 text-sm'
 
   return (
@@ -101,7 +101,7 @@ export default function OperatorDashboard({ operatorId, manageToken, verified, s
         ) : (
           <div className="border border-ink/10 rounded-2xl bg-paper p-5 space-y-2">
             <p className="font-display uppercase text-xl leading-none">💳 Activa los cobros online</p>
-            <p className="text-sm text-ink/70">Conecta tu cuenta con Stripe para aceptar reservas pagadas por adelantado. Es gratis, tarda un par de minutos y el dinero va directo a tu banco. {operatorId && <span className="text-ink/50">Sin esto, seguirás recibiendo solicitudes de reserva por contacto.</span>}</p>
+            <p className="text-sm text-ink/70">Conecta tu cuenta con Stripe para aceptar reservas pagadas por adelantado. Es gratis, tarda un par de minutos y el dinero va directo a tu banco. {operatorId && <span className="text-ink/60">Sin esto, seguirás recibiendo solicitudes de reserva por contacto.</span>}</p>
             <button onClick={connectStripe} disabled={connecting} className="bg-accent text-paper px-5 py-2.5 text-sm font-semibold rounded-full hover:bg-ink disabled:opacity-60 transition-colors">{connecting ? 'Conectando…' : 'Conectar cobros con Stripe'}</button>
             {msg && <p className="text-sm text-red-700">{msg}</p>}
           </div>
@@ -158,7 +158,7 @@ export default function OperatorDashboard({ operatorId, manageToken, verified, s
             {msg && <p className="text-sm text-red-700">{msg}</p>}
             <div className="flex gap-2">
               <button type="submit" disabled={savingProfile} className="bg-accent text-paper px-5 py-2.5 text-sm font-semibold rounded-full hover:bg-ink disabled:opacity-60 transition-colors">{savingProfile ? 'Guardando…' : 'Guardar ficha'}</button>
-              <button type="button" onClick={() => setEditProfile(false)} className="px-4 py-2 text-sm font-semibold text-ink/50 hover:text-ink">Cancelar</button>
+              <button type="button" onClick={() => setEditProfile(false)} className="px-4 py-2 text-sm font-semibold text-ink/60 hover:text-ink">Cancelar</button>
             </div>
           </form>
         )}
@@ -192,8 +192,8 @@ export default function OperatorDashboard({ operatorId, manageToken, verified, s
                     <span className="font-bold text-ink">{b.name}</span>
                     {(b.anglerReviews ?? 0) > 0 && <span className="text-amber-600 text-[12px]" title={`${b.anglerReviews} valoraciones de otros patrones`}>★ {(b.anglerRating ?? 0).toFixed(1)}</span>}
                     <span className="text-ink/60">{b.people} pers · {b.contact}</span>
-                    {b.message && <span className="text-ink/50 italic">“{b.message}”</span>}
-                    <span className="font-mono text-[10px] uppercase tracking-wide text-ink/45">{b.status}</span>
+                    {b.message && <span className="text-ink/60 italic">“{b.message}”</span>}
+                    <span className="font-mono text-[10px] uppercase tracking-wide text-ink/60">{b.status}</span>
                     {b.status === 'requested' && (
                       <span className="flex gap-1.5">
                         <button onClick={() => respond(c.id, 'accept', b.id)} disabled={busy === b.id + 'accept'} className="text-xs font-bold text-accent hover:underline disabled:opacity-50">Aceptar</button>

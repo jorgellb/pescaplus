@@ -179,7 +179,7 @@ export default function AdminProductsPage() {
       </div>
 
       {backend && (
-        <p className="text-xs text-ink/50">
+        <p className="text-xs text-ink/60">
           Almacenamiento activo:{' '}
           <span className={backend === 'database' ? 'text-emerald-400 font-semibold' : 'text-amber-400 font-semibold'}>
             {backend === 'database' ? 'Base de datos (persistente)' : 'En memoria (demo, se reinicia con el servidor)'}
@@ -193,7 +193,7 @@ export default function AdminProductsPage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Filtrar por título…"
-          className="w-full sm:max-w-xs px-4 py-2.5 bg-paper border border-ink/10 rounded-xl text-ink placeholder-ink/40 focus:outline-none focus:border-accent text-sm transition-all"
+          className="w-full sm:max-w-xs px-4 py-2.5 bg-paper border border-ink/10 rounded-xl text-ink placeholder-ink/60 focus:outline-none focus:border-accent text-sm transition-all"
         />
         <div className="inline-flex rounded-xl border border-ink/10 overflow-hidden text-xs font-bold">
           {([
@@ -257,14 +257,14 @@ export default function AdminProductsPage() {
         <div className="overflow-x-auto rounded-2xl border border-ink/10 bg-white">
           <table className="w-full text-sm min-w-[640px]">
             <thead>
-              <tr className="text-left text-[11px] uppercase tracking-widest text-ink/50 border-b border-ink/10">
+              <tr className="text-left text-[11px] uppercase tracking-widest text-ink/60 border-b border-ink/10">
                 <th className="pl-4 pr-1 py-3 w-8">
                   <input
                     type="checkbox"
                     checked={allFilteredSelected}
                     onChange={toggleAll}
                     aria-label="Seleccionar todos"
-                    className="w-4 h-4 accent-[#0d9488] cursor-pointer"
+                    className="w-4 h-4 accent-[#0a7d72] cursor-pointer"
                   />
                 </th>
                 <th className="px-4 py-3 font-bold">Producto</th>
@@ -283,7 +283,7 @@ export default function AdminProductsPage() {
                       checked={selected.has(p.id)}
                       onChange={() => toggleSel(p.id)}
                       aria-label={`Seleccionar ${p.title}`}
-                      className="w-4 h-4 accent-[#0d9488] cursor-pointer"
+                      className="w-4 h-4 accent-[#0a7d72] cursor-pointer"
                     />
                   </td>
                   <td className="px-4 py-3">
@@ -299,7 +299,7 @@ export default function AdminProductsPage() {
                           ) : (
                             <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-700 bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 rounded">Sin optimizar</span>
                           )}
-                          <span className="text-[11px] text-ink/50">{p.inStock ? 'En stock' : 'Sin stock'}</span>
+                          <span className="text-[11px] text-ink/60">{p.inStock ? 'En stock' : 'Sin stock'}</span>
                         </div>
                       </div>
                     </div>
@@ -314,7 +314,7 @@ export default function AdminProductsPage() {
                   </td>
                   <td className="px-4 py-3 text-ink/80">
                     <span className="text-amber-400">★</span> {p.rating.toFixed(1)}{' '}
-                    <span className="text-xs text-ink/50">({p.reviews})</span>
+                    <span className="text-xs text-ink/60">({p.reviews})</span>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-2">
@@ -352,7 +352,7 @@ function StatCard({ label, value, icon }: { label: string; value: string; icon: 
       <span className="text-2xl p-2.5 bg-paper rounded-xl border border-ink/10">{icon}</span>
       <div>
         <p className="text-xl font-extrabold text-ink leading-none">{value}</p>
-        <p className="text-[11px] uppercase tracking-widest text-ink/50 mt-1">{label}</p>
+        <p className="text-[11px] uppercase tracking-widest text-ink/60 mt-1">{label}</p>
       </div>
     </div>
   )

@@ -62,7 +62,7 @@ export default function EspeciesHub() {
           })}
         </div>
 
-        <p className="text-[12px] text-ink/50 mt-6">
+        <p className="text-[12px] text-ink/60 mt-6">
           Temporadas y tallas orientativas: la normativa la fija cada administración. Combínalo con las{' '}
           <Link href="/mejores-horas" className="text-accent underline">mejores horas por localidad</Link> y el{' '}
           <Link href="/calendario" className="text-accent underline">calendario del pescador</Link>.

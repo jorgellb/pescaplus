@@ -129,7 +129,7 @@ export default async function CuentaPage({ searchParams }: { searchParams: Promi
             <span className="text-4xl">{user.avatar || '🎣'}</span>
             <div>
               <h1 className="font-display uppercase text-2xl sm:text-3xl leading-none text-ink">{user.name || 'Tu cuenta'}</h1>
-              <p className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mt-1">{user.email}</p>
+              <p className="font-mono text-[11px] uppercase tracking-widest text-ink/60 mt-1">{user.email}</p>
             </div>
           </div>
           {bienvenida === '1' && <p className="text-accent text-sm mt-3">✓ Sesión iniciada. ¡Bienvenido a bordo!</p>}
@@ -155,7 +155,7 @@ export default async function CuentaPage({ searchParams }: { searchParams: Promi
 function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
     <div className={`border rounded-2xl p-3 ${accent ? 'border-accent/30 bg-accent/[0.06]' : 'border-ink/10 bg-paper'}`}>
-      <p className="font-mono text-[10px] uppercase tracking-widest text-ink/50">{label}</p>
+      <p className="font-mono text-[10px] uppercase tracking-widest text-ink/60">{label}</p>
       <p className={`font-display text-lg leading-tight mt-0.5 ${accent ? 'text-accent' : 'text-ink'}`}>{value}</p>
     </div>
   )

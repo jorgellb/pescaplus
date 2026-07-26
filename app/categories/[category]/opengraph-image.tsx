@@ -9,7 +9,7 @@ export const contentType = 'image/png'
 
 const PAPER = '#ffffff'
 const INK = '#0f1417'
-const ACCENT = '#0d9488'
+const ACCENT = '#0a7d72'
 
 export default async function Image({ params }: { params: Promise<{ category: string }> }) {
   const { category } = await params

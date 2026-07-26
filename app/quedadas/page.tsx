@@ -99,7 +99,7 @@ export default async function QuedadasHub() {
           )}
         </div>
 
-        <p className="text-[12px] text-ink/50 leading-relaxed border-t border-ink/[0.07] pt-6">
+        <p className="text-[12px] text-ink/60 leading-relaxed border-t border-ink/[0.07] pt-6">
           Las quedadas son para compartir gastos, sin ánimo de lucro. Cada participante necesita su licencia de pesca.
           ¿Buscas un chárter con patrón profesional? Eso llegará pronto a PescaPlus.
         </p>

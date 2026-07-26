@@ -53,7 +53,7 @@ export default function AdminAnalyticsPage() {
         <div className="py-20 text-center border border-ink/10 rounded-2xl bg-white space-y-3">
           <span className="text-5xl">📊</span>
           <p className="text-ink/80 font-semibold">Aún no hay clics registrados</p>
-          <p className="text-sm text-ink/50 max-w-md mx-auto">
+          <p className="text-sm text-ink/60 max-w-md mx-auto">
             Cuando los visitantes pulsen <span className="text-emerald-400 font-semibold">Comprar</span>, verás aquí qué
             productos y categorías convierten.
           </p>
@@ -82,7 +82,7 @@ export default function AdminAnalyticsPage() {
                       className="w-full rounded-t bg-accent group-hover:bg-accent transition-colors min-h-[2px]"
                       style={{ height: `${Math.max(pct, d.count > 0 ? 4 : 0)}%` }}
                     />
-                    <span className="text-[9px] text-ink/50 tabular-nums">{label.slice(0, 2)}</span>
+                    <span className="text-[9px] text-ink/60 tabular-nums">{label.slice(0, 2)}</span>
                   </div>
                 )
               })}
@@ -138,7 +138,7 @@ function Kpi({ label, value, icon, small }: { label: string; value: string; icon
       <span className="text-2xl p-2.5 bg-paper rounded-xl border border-ink/10">{icon}</span>
       <div className="min-w-0">
         <p className={`font-extrabold text-ink leading-none truncate ${small ? 'text-base' : 'text-xl'}`}>{value}</p>
-        <p className="text-[11px] uppercase tracking-widest text-ink/50 mt-1">{label}</p>
+        <p className="text-[11px] uppercase tracking-widest text-ink/60 mt-1">{label}</p>
       </div>
     </div>
   )

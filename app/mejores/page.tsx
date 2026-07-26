@@ -49,7 +49,7 @@ export default async function MejoresHub() {
                   Mejores {p.name}
                 </h2>
                 <p className="text-sm text-ink/60 mt-2 leading-snug flex-1">{p.tagline}</p>
-                <span className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mt-4">
+                <span className="font-mono text-[11px] uppercase tracking-widest text-ink/60 mt-4">
                   {p.priceFrom ? `Desde ${p.priceFrom.toFixed(2)} €` : 'Ver comparativa'} →
                 </span>
               </div>

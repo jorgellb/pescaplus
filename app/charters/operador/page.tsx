@@ -72,7 +72,7 @@ export default async function OperatorPage({ searchParams }: Params) {
     <Layout>
       <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
-          <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-5"><Link href="/charters" className="hover:text-accent">Chárters</Link> <span className="mx-1">/</span> <span className="text-ink">Operador</span></nav>
+          <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/60 mb-5"><Link href="/charters" className="hover:text-accent">Chárters</Link> <span className="mx-1">/</span> <span className="text-ink">Operador</span></nav>
           <h1 className="font-display uppercase text-3xl sm:text-4xl md:text-5xl leading-[1.02] text-ink">¿Eres patrón profesional?</h1>
           <p className="text-ink/60 text-sm max-w-2xl mt-3">Ofrece tus salidas de pesca a nuestra comunidad. Verificamos tu <strong className="text-ink">titulación y tu seguro</strong>, y publicas tus chárters para que reserven plaza.</p>
         </div>

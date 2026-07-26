@@ -8,7 +8,7 @@ export default function GlobalError({ reset }: { error: Error & { digest?: strin
       <body style={{ margin: 0, background: '#ffffff', color: '#0f1417', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, textAlign: 'center' }}>
           <div style={{ maxWidth: 420 }}>
-            <p style={{ letterSpacing: 3, textTransform: 'uppercase', color: '#0d9488', fontWeight: 700, fontSize: 12 }}>PescaPlus</p>
+            <p style={{ letterSpacing: 3, textTransform: 'uppercase', color: '#0a7d72', fontWeight: 700, fontSize: 12 }}>PescaPlus</p>
             <h1 style={{ fontSize: 40, fontWeight: 800, margin: '12px 0' }}>Algo ha fallado</h1>
             <p style={{ color: '#555', fontSize: 14, marginBottom: 24 }}>Ha ocurrido un error inesperado. Inténtalo de nuevo.</p>
             <button

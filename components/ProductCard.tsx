@@ -60,7 +60,7 @@ export default function ProductCard({
           </h3>
         </Link>
 
-        <div className="mt-2 flex items-center gap-1 font-mono text-[11px] text-ink/55">
+        <div className="mt-2 flex items-center gap-1 font-mono text-[11px] text-ink/60">
           <span className="text-accent">★</span>
           <span className="font-bold text-ink/80">{rating.toFixed(1)}</span>
           <span>· {reviews.toLocaleString('es-ES')} vend.</span>

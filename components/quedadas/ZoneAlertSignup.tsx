@@ -39,7 +39,7 @@ export default function ZoneAlertSignup({ spotSlug, spotName }: { spotSlug: stri
   return (
     <form onSubmit={submit} className="flex flex-wrap items-end gap-2">
       <label className="flex-1 min-w-[200px]">
-        <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">🔔 Avísame de quedadas en {spotName}</span>
+        <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">🔔 Avísame de quedadas en {spotName}</span>
         <input
           required
           type="email"

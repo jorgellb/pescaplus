@@ -65,11 +65,11 @@ async function StationPanel({
       {obs?.available && (
         <div className={`border rounded-xl p-3.5 space-y-2 ${obsFresh ? 'border-accent/30 bg-accent/[0.04]' : 'border-ink/10 bg-ink/[0.02]'}`}>
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className={`font-mono text-[10px] font-bold uppercase tracking-widest ${obsFresh ? 'text-accent' : 'text-ink/55'}`}>
+            <p className={`font-mono text-[10px] font-bold uppercase tracking-widest ${obsFresh ? 'text-accent' : 'text-ink/60'}`}>
               📡 {obsFresh ? 'Observado ahora' : 'Última medición'} · estación {obs.stationName} (a {station.km} km)
             </p>
             {obs.time && (
-              <span className="font-mono text-[10px] uppercase tracking-widest text-ink/40">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-ink/60">
                 {obs.time.slice(11, 16)} UTC{!obsFresh && obsAgeMin != null ? ` · hace ${obsAgeMin >= 120 ? `${Math.round(obsAgeMin / 60)} h` : `${obsAgeMin} min`}` : ''}
               </span>
             )}
@@ -96,7 +96,7 @@ async function StationPanel({
         </div>
       )}
       {station.km <= 15 && (
-        <p className="font-mono text-[10px] uppercase tracking-wide text-ink/45 leading-relaxed">
+        <p className="font-mono text-[10px] uppercase tracking-wide text-ink/60 leading-relaxed">
           🎯 Fiabilidad verificada:{' '}
           {accuracy
             ? `error medio del viento ±${accuracy.maeKmh} km/h · ${Math.round(accuracy.within5 * 100)}% de días dentro de ±5 (últimas ${accuracy.n} verificaciones contra la estación oficial)`
@@ -133,7 +133,7 @@ async function DayAgreementChip({ promise, dateISO }: { promise: ReturnType<type
       <span className="font-mono text-[10px] font-bold uppercase tracking-widest">
         Confianza {agr.level} · ±{agr.spreadKmh} km/h
       </span>
-      <span className="font-mono text-[10px] uppercase tracking-wide text-ink/45 hidden sm:inline">{AGREEMENT_LABEL[agr.level]}</span>
+      <span className="font-mono text-[10px] uppercase tracking-wide text-ink/60 hidden sm:inline">{AGREEMENT_LABEL[agr.level]}</span>
     </span>
   )
 }
@@ -150,11 +150,11 @@ function WindArrow({ deg }: { deg: number | null }) {
 function Metric({ label, value, icon, sub }: { label: string; value: React.ReactNode; icon: React.ReactNode; sub?: string }) {
   return (
     <div className="border border-ink/[0.07] rounded-xl bg-paper px-3 py-2.5">
-      <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/40 flex items-center gap-1">
+      <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60 flex items-center gap-1">
         <span aria-hidden>{icon}</span> {label}
       </p>
       <p className="text-sm font-bold text-ink mt-1 leading-tight">{value}</p>
-      {sub && <p className="font-mono text-[10px] uppercase tracking-wide text-ink/40 capitalize">{sub}</p>}
+      {sub && <p className="font-mono text-[10px] uppercase tracking-wide text-ink/60 capitalize">{sub}</p>}
     </div>
   )
 }
@@ -315,7 +315,7 @@ export default async function SpotDashboard({
 
       <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
-          <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-5">
+          <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/60 mb-5">
             <Link href="/" className="hover:text-accent">Inicio</Link> <span className="mx-1">/</span>{' '}
             <Link href="/mejores-horas" className="hover:text-accent">Mejores horas</Link> <span className="mx-1">/</span>{' '}
             <span className="text-ink">{s.name}</span>
@@ -330,7 +330,7 @@ export default async function SpotDashboard({
             {subtitle ? `${subtitle}. ` : ''}Previsión completa para el pescador: viento, {s.type === 'mar' ? 'mareas, oleaje, ' : ''}presión, solunar y las mejores horas. {fmtDateLong(today)}.
           </p>
           {nowHour && (
-            <p className="font-mono text-[11px] uppercase tracking-widest text-ink/40 mt-2">
+            <p className="font-mono text-[11px] uppercase tracking-widest text-ink/60 mt-2">
               Hora local (España peninsular): {nowHour.hourLabel} · previsión actualizada {forecast.meta.fetchedAt ? fmtTime(forecast.meta.fetchedAt) : '—'}
             </p>
           )}
@@ -416,7 +416,7 @@ export default async function SpotDashboard({
         {s.type === 'mar' && (
           <div className="border border-ink/10 rounded-2xl bg-paper p-4 space-y-4">
             <div className="space-y-2">
-              <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50">¿Desde dónde pescas?</p>
+              <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60">¿Desde dónde pescas?</p>
               <div className="flex flex-wrap gap-2">
                 {MODALITIES.map((m) => {
                   const active = m.id === modality.id
@@ -432,12 +432,12 @@ export default async function SpotDashboard({
                   )
                 })}
               </div>
-              <p className="text-[12px] text-ink/50">
+              <p className="text-[12px] text-ink/60">
                 Cada modalidad tiene sus propios umbrales: el mismo viento que activa la orilla puede ser peligroso en kayak.
               </p>
             </div>
             <div className="space-y-2 border-t border-ink/10 pt-3">
-              <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50">Especie objetivo</p>
+              <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60">Especie objetivo</p>
               <div className="flex flex-wrap gap-2">
                 {[GENERAL, ...SEA_SPECIES].map((sp) => {
                   const active = sp.id === species.id
@@ -453,7 +453,7 @@ export default async function SpotDashboard({
                   )
                 })}
               </div>
-              <p className="text-[12px] text-ink/50">{species.tagline}.</p>
+              <p className="text-[12px] text-ink/60">{species.tagline}.</p>
             </div>
           </div>
         )}
@@ -464,33 +464,33 @@ export default async function SpotDashboard({
             <div className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-6 flex flex-col justify-between">
               <div className="flex items-center justify-between gap-3 border-b border-ink/[0.07] pb-4">
                 <h2 className="font-display uppercase text-2xl text-ink leading-none">Ahora</h2>
-                <span className="font-mono text-[11px] uppercase tracking-widest text-ink/50">{nowHour.hourLabel}</span>
+                <span className="font-mono text-[11px] uppercase tracking-widest text-ink/60">{nowHour.hourLabel}</span>
               </div>
               <div className="text-center py-5">
                 <div className="text-6xl font-display leading-none" style={{ color: scoreHex(nowHour.score) }}>{nowHour.score}</div>
-                <p className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mt-2">{scoreNoun} · {scoreLabel(nowHour.score)}</p>
+                <p className="font-mono text-[11px] uppercase tracking-widest text-ink/60 mt-2">{scoreNoun} · {scoreLabel(nowHour.score)}</p>
               </div>
 
               {/* Verdict per modality — activity vs conditions, never one sign for all */}
               <div className="space-y-1.5 border-t border-ink/[0.07] pt-4">
                 <div className="flex items-center justify-between text-[13px]">
-                  <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/45">Actividad</span>
+                  <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Actividad</span>
                   <span className="font-bold" style={{ color: scoreHex(nowHour.activity) }}>{activityWord(nowHour.activity)} ({nowHour.activity})</span>
                 </div>
                 {modalitySnapshot.map(({ m, score: cs }) => (
                   <div key={m.id} className="flex items-center justify-between text-[13px]">
-                    <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/45">{m.emoji} {m.name}</span>
+                    <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">{m.emoji} {m.name}</span>
                     <span className="font-bold" style={{ color: scoreHex(cs) }}>{conditionsWord(cs)} ({Math.round(cs)})</span>
                   </div>
                 ))}
                 {worstFactorNow && worstFactorNow.pts <= -15 && (
-                  <p className="text-[11px] text-ink/55 pt-1">Motivo: {worstFactorNow.label.toLowerCase()}.</p>
+                  <p className="text-[11px] text-ink/60 pt-1">Motivo: {worstFactorNow.label.toLowerCase()}.</p>
                 )}
               </div>
 
               <div className="flex items-center justify-between border-t border-ink/[0.07] pt-4">
-                <span className="font-mono text-[11px] uppercase tracking-widest text-ink/50">Solunar hoy</span>
-                <div className="text-right"><FishRating value={d0.rating} /><p className="font-mono text-[10px] uppercase tracking-widest text-ink/40 mt-1">{ratingLabel(d0.rating)}</p></div>
+                <span className="font-mono text-[11px] uppercase tracking-widest text-ink/60">Solunar hoy</span>
+                <div className="text-right"><FishRating value={d0.rating} /><p className="font-mono text-[10px] uppercase tracking-widest text-ink/60 mt-1">{ratingLabel(d0.rating)}</p></div>
               </div>
             </div>
 
@@ -548,8 +548,8 @@ export default async function SpotDashboard({
                   </summary>
                   <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4 text-[13px]">
                     <div>
-                      <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/45 mb-1.5">Actividad (base 40)</p>
-                      {nowActivityFactors.length === 0 && <p className="text-ink/50">Sin factores destacados a esta hora.</p>}
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60 mb-1.5">Actividad (base 40)</p>
+                      {nowActivityFactors.length === 0 && <p className="text-ink/60">Sin factores destacados a esta hora.</p>}
                       {nowActivityFactors.map((f) => (
                         <p key={f.label} className="flex justify-between gap-2 py-0.5">
                           <span className="text-ink/70">{f.label} <span className="text-ink/35">({f.kind === 'propio' ? 'cálculo PescaPlus' : 'dato físico'})</span></span>
@@ -558,8 +558,8 @@ export default async function SpotDashboard({
                       ))}
                     </div>
                     <div>
-                      <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/45 mb-1.5">Condiciones · {modality.name} (base 90)</p>
-                      {nowConditionsFactors.length === 0 && <p className="text-ink/50">Sin penalizaciones: condiciones limpias.</p>}
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60 mb-1.5">Condiciones · {modality.name} (base 90)</p>
+                      {nowConditionsFactors.length === 0 && <p className="text-ink/60">Sin penalizaciones: condiciones limpias.</p>}
                       {nowConditionsFactors.map((f) => (
                         <p key={f.label} className="flex justify-between gap-2 py-0.5">
                           <span className="text-ink/70">{f.label} <span className="text-ink/35">(dato físico)</span></span>
@@ -573,7 +573,7 @@ export default async function SpotDashboard({
               )}
               {bestToday.length > 0 && (
                 <div className="pt-1">
-                  <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50 mb-2">Mejores horas hoy</p>
+                  <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60 mb-2">Mejores horas hoy</p>
                   <div className="flex flex-wrap gap-2">
                     {bestToday.map((h) => (
                       <span key={h.time} className="inline-flex items-center gap-2 border border-ink/10 rounded-full px-3 py-1.5">
@@ -594,7 +594,7 @@ export default async function SpotDashboard({
             </div>
           </div>
         ) : (
-          <div className="border border-ink/10 rounded-2xl bg-paper p-6 text-sm text-ink/50">La previsión meteorológica no está disponible ahora mismo. Vuelve a intentarlo en unos minutos.</div>
+          <div className="border border-ink/10 rounded-2xl bg-paper p-6 text-sm text-ink/60">La previsión meteorológica no está disponible ahora mismo. Vuelve a intentarlo en unos minutos.</div>
         )}
 
         {/* Qué buscar hoy — species intelligence from season + live conditions */}
@@ -609,7 +609,7 @@ export default async function SpotDashboard({
                 <div key={p.species.id} className={`border rounded-xl p-4 flex flex-col gap-2.5 ${i === 0 ? 'border-accent/40 bg-accent/[0.04]' : 'border-ink/[0.07] bg-paper'}`}>
                   <div className="flex items-center justify-between gap-2">
                     <p className="font-display uppercase text-xl text-ink leading-none">{i === 0 && '⭐ '}{p.species.name}</p>
-                    <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/40">#{i + 1}</span>
+                    <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">#{i + 1}</span>
                   </div>
                   <p className="text-[13px] text-ink/65 leading-relaxed flex-1">
                     {p.reasons.length ? `${p.reasons.join(', ')}.` : 'Opción secundaria en estas condiciones.'}
@@ -639,7 +639,7 @@ export default async function SpotDashboard({
         {byDay.length > 0 && (
           <div id="prevision" className="space-y-3 scroll-mt-28">
             <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3">Previsión hora a hora · 7 días</h2>
-            <p className="text-[12px] text-ink/50">Elige el día. «Activ.» es la actividad prevista de los peces{species.id !== 'general' ? ` (adaptada a ${species.name})` : ''} y «Cond.» las condiciones para {modality.name.toLowerCase()}; verde = mejor. Desliza la tabla para ver todas las horas.</p>
+            <p className="text-[12px] text-ink/60">Elige el día. «Activ.» es la actividad prevista de los peces{species.id !== 'general' ? ` (adaptada a ${species.name})` : ''} y «Cond.» las condiciones para {modality.name.toLowerCase()}; verde = mejor. Desliza la tabla para ver todas las horas.</p>
             <DayTabs labels={byDay.map((g, i) => `${i === bestDayIdx ? '⭐ ' : ''}${dayLabel(g.dateISO, i)}`)}>
               {byDay.map((g) => {
                 const sol = solByDate.get(g.dateISO)
@@ -673,19 +673,19 @@ export default async function SpotDashboard({
                             <span className="text-paper text-[11px] font-bold rounded px-1.5 py-0.5" style={{ background: scoreHex(win.avg) }}>{win.avg}</span>
                           </>
                         ) : (
-                          <span className="text-sm text-ink/50">dato no disponible</span>
+                          <span className="text-sm text-ink/60">dato no disponible</span>
                         )}
                       </span>
                       {sol && (
                         <span className="inline-flex items-center gap-2 rounded-xl border border-ink/10 px-3 py-2" title="Cálculo astronómico propio de PescaPlus">
                           <FishRating value={sol.rating} />
-                          <span className="font-mono text-[10px] uppercase tracking-widest text-ink/50">solunar (calculado)</span>
+                          <span className="font-mono text-[10px] uppercase tracking-widest text-ink/60">solunar (calculado)</span>
                         </span>
                       )}
                       {showTide && coef != null && (
                         <span className="inline-flex items-center gap-2 rounded-xl border border-ink/10 px-3 py-2" title="Estimado del ciclo lunar (viva/muerta), no es el coeficiente oficial de la estación">
                           <span className="font-display text-lg text-ink">{coef}</span>
-                          <span className="font-mono text-[10px] uppercase tracking-widest text-ink/50">coef estimado · {coefficientLabel(coef)}</span>
+                          <span className="font-mono text-[10px] uppercase tracking-widest text-ink/60">coef estimado · {coefficientLabel(coef)}</span>
                         </span>
                       )}
                       <Suspense fallback={null}>
@@ -694,7 +694,7 @@ export default async function SpotDashboard({
                       {navWins.map((w, i) => (
                         <span key={i} className="inline-flex items-center gap-2 rounded-xl border border-ink/10 px-3 py-2" title="Tramo con viento y olas aptos para embarcación menor">
                           <span aria-hidden>🚤</span>
-                          <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Navegación</span>
+                          <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Navegación</span>
                           <span className="font-display text-lg text-ink">{fmtWindowRange(w.start, w.end, gStart)}</span>
                         </span>
                       ))}
@@ -706,11 +706,11 @@ export default async function SpotDashboard({
                         <div className="border border-ink/10 rounded-2xl bg-paper p-4 flex flex-wrap items-center gap-x-6 gap-y-2">
                           <span className="inline-flex items-center gap-2">
                             <span aria-hidden>{modality.emoji}</span>
-                            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Salida</span>
+                            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Salida</span>
                             <span className="font-display text-xl text-ink">{outing.departure <= gStart ? '00:00' : fmtTime(outing.departure)}</span>
                           </span>
                           <span className="inline-flex items-center gap-2">
-                            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Regreso antes de</span>
+                            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Regreso antes de</span>
                             <span className="font-display text-xl text-ink">{outing.returnBy >= gStart + 24 * 3600000 ? '24:00' : fmtTime(outing.returnBy)}</span>
                           </span>
                           {outing.returnNote && <span className="text-[13px] text-ink/60">Motivo: {outing.returnNote}.</span>}
@@ -725,14 +725,14 @@ export default async function SpotDashboard({
                     <div className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-5 space-y-3">
                       <h3 className="font-display uppercase text-lg text-ink leading-none flex items-center gap-2"><span aria-hidden>📈</span> Actividad de pesca del día</h3>
                       <ActivityChart hours={g.hours} window={win} now={now} />
-                      <p className="text-[11px] text-ink/40">Curva de puntuación 0-100 · banda verde: mejor ventana · punto: pico del día.</p>
+                      <p className="text-[11px] text-ink/60">Curva de puntuación 0-100 · banda verde: mejor ventana · punto: pico del día.</p>
                     </div>
 
                     <div className={`grid grid-cols-1 ${showTide ? 'lg:grid-cols-2' : ''} gap-6`}>
                       <div className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-5 space-y-3">
                         <h3 className="font-display uppercase text-lg text-ink leading-none flex items-center gap-2"><span aria-hidden>💨</span> Viento (km/h)</h3>
                         <WindChart hours={g.hours} sunrise={sol?.sunrise ?? null} sunset={sol?.sunset ?? null} periods={sol?.periods ?? []} now={now} />
-                        <p className="text-[11px] text-ink/40">Barras: viento medio · línea: rachas · franjas verdes: periodos solunares · sombreado: noche.</p>
+                        <p className="text-[11px] text-ink/60">Barras: viento medio · línea: rachas · franjas verdes: periodos solunares · sombreado: noche.</p>
                         <SourceBadge
                           source="Open-Meteo"
                           kind="previsto"
@@ -745,7 +745,7 @@ export default async function SpotDashboard({
                         <div className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-5 space-y-3">
                           <h3 className="font-display uppercase text-lg text-ink leading-none flex items-center gap-2"><span aria-hidden>🌊</span> Marea</h3>
                           <TideChart extremes={dayExtremes} dayStart={gStart} now={now} />
-                          <p className="text-[11px] text-ink/40">{TIDE_DATUM_NOTE}</p>
+                          <p className="text-[11px] text-ink/60">{TIDE_DATUM_NOTE}</p>
                           <SourceBadge
                             source="WorldTides"
                             kind="predicción armónica"
@@ -830,7 +830,7 @@ export default async function SpotDashboard({
           <div className="lg:col-span-2 border border-ink/10 rounded-2xl bg-paper shadow-hard p-6 space-y-4">
             <h2 className="font-display uppercase text-2xl text-ink leading-none border-b border-ink/[0.07] pb-4">Sol, luna y solunar</h2>
             <div>
-              <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50 mb-2">Periodos de máxima actividad</p>
+              <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60 mb-2">Periodos de máxima actividad</p>
               <div className="space-y-2">
                 {majors.map((p, i) => (
                   <div key={`ma${i}`} className="flex items-center gap-3">
@@ -857,7 +857,7 @@ export default async function SpotDashboard({
           <div className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-6 flex flex-col items-center justify-center text-center gap-2">
             <span className="text-5xl">🌙</span>
             <p className="font-bold text-ink text-lg">{d0.moonPhaseName}</p>
-            <p className="font-mono text-[11px] uppercase tracking-widest text-ink/50">{Math.round(d0.moonIllumination * 100)}% iluminada</p>
+            <p className="font-mono text-[11px] uppercase tracking-widest text-ink/60">{Math.round(d0.moonIllumination * 100)}% iluminada</p>
             <Link href="/calendario" className="mt-2 text-xs font-semibold text-accent hover:underline">Ver calendario →</Link>
           </div>
         </div>
@@ -898,11 +898,11 @@ export default async function SpotDashboard({
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="border border-ink/[0.07] rounded-xl bg-paper p-4 space-y-1.5">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/45">{aemet.subzonaNombre || 'Aguas costeras'}</p>
+                <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">{aemet.subzonaNombre || 'Aguas costeras'}</p>
                 <p className="text-[14px] text-ink/80 leading-relaxed">{aemet.subzonaTexto}</p>
               </div>
               <div className="border border-ink/[0.07] rounded-xl bg-paper p-4 space-y-1.5">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/45">Situación general</p>
+                <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Situación general</p>
                 <p className="text-[14px] text-ink/80 leading-relaxed">{aemet.situacion || '—'}</p>
               </div>
             </div>
@@ -978,7 +978,7 @@ export default async function SpotDashboard({
 
         {/* Nearby zones — true nearest by distance */}
         <div className="border-t border-ink/[0.07] pt-8">
-          <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50 mb-3">Zonas cercanas</p>
+          <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60 mb-3">Zonas cercanas</p>
           <div className="flex flex-wrap gap-2">
             {nearby.map((o) => (
               <Link key={o.slug} href={`/mejores-horas/${o.slug}`} className="px-3 py-1.5 text-sm font-semibold text-ink border border-ink/10 rounded-full hover:bg-ink hover:text-paper transition-colors">

@@ -60,7 +60,7 @@ export default function AvisoLegalPage() {
         juzgados y tribunales que correspondan conforme a derecho.
       </p>
 
-      <p className="text-sm text-ink/50">
+      <p className="text-sm text-ink/60">
         Consulta también nuestra <Link href="/privacidad">Política de privacidad</Link> y la{' '}
         <Link href="/cookies">Política de cookies</Link>.
       </p>

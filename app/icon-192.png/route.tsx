@@ -8,7 +8,7 @@ function BrandMark({ size }: { size: number }) {
       style={{
         width: '100%',
         height: '100%',
-        background: '#0d9488',
+        background: '#0a7d72',
         color: '#fff',
         display: 'flex',
         alignItems: 'center',

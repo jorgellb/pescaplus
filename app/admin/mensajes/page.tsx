@@ -16,7 +16,7 @@ export default async function AdminMessagesPage() {
           <h1 className="font-display uppercase text-3xl md:text-4xl text-ink leading-none">Mensajes</h1>
           <p className="text-ink/60 text-sm mt-1">Consultas recibidas desde el formulario de contacto.</p>
         </div>
-        <span className="font-mono text-xs font-bold uppercase tracking-widest text-ink/50 whitespace-nowrap">{messages.length} total</span>
+        <span className="font-mono text-xs font-bold uppercase tracking-widest text-ink/60 whitespace-nowrap">{messages.length} total</span>
       </div>
 
       {messages.length === 0 ? (
@@ -32,7 +32,7 @@ export default async function AdminMessagesPage() {
                   <span className="font-bold text-ink">{m.name || 'Sin nombre'}</span>{' '}
                   <a href={`mailto:${m.email}`} className="text-accent underline text-sm break-all">{m.email}</a>
                 </div>
-                <span className="font-mono text-[11px] uppercase tracking-widest text-ink/40 whitespace-nowrap">{formatDate(m.createdAt)}</span>
+                <span className="font-mono text-[11px] uppercase tracking-widest text-ink/60 whitespace-nowrap">{formatDate(m.createdAt)}</span>
               </div>
               {m.subject && <p className="font-bold text-sm text-ink/80">{m.subject}</p>}
               <p className="text-sm text-ink/70 whitespace-pre-wrap break-words">{m.message}</p>

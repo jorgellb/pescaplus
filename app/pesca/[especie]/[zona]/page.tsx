@@ -107,7 +107,7 @@ export default async function SpeciesZonePage({ params }: Params) {
 
       <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
-          <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-5">
+          <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/60 mb-5">
             <Link href="/" className="hover:text-accent">Inicio</Link> <span className="mx-1">/</span>{' '}
             <Link href="/pesca" className="hover:text-accent">Qué pescar</Link> <span className="mx-1">/</span>{' '}
             <Link href={`/especies/${sp.id}`} className="hover:text-accent">{sp.name}</Link> <span className="mx-1">/</span>{' '}
@@ -133,7 +133,7 @@ export default async function SpeciesZonePage({ params }: Params) {
               { k: 'Mejores horas', v: sp.hours.split(';')[0] },
             ].map((f) => (
               <div key={f.k} className="border border-ink/[0.07] rounded-xl bg-paper px-3 py-2.5">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/40">{f.k}</p>
+                <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">{f.k}</p>
                 <p className="text-sm font-bold text-ink mt-1 leading-tight capitalize">{f.v}</p>
               </div>
             ))}
@@ -164,7 +164,7 @@ export default async function SpeciesZonePage({ params }: Params) {
             {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => {
               const on = sp.bestMonths.includes(m)
               return (
-                <span key={m} className={`font-mono text-[11px] font-bold uppercase tracking-wide rounded-lg px-2.5 py-1.5 border ${on ? 'bg-accent text-paper border-accent' : 'bg-paper text-ink/40 border-ink/[0.07]'}`}>
+                <span key={m} className={`font-mono text-[11px] font-bold uppercase tracking-wide rounded-lg px-2.5 py-1.5 border ${on ? 'bg-accent text-paper border-accent' : 'bg-paper text-ink/60 border-ink/[0.07]'}`}>
                   {MONTHS_SHORT[m - 1]}
                 </span>
               )
@@ -288,7 +288,7 @@ export default async function SpeciesZonePage({ params }: Params) {
           )}
         </div>
 
-        <p className="text-[13px] text-ink/55 leading-relaxed border-t border-ink/[0.07] pt-6">
+        <p className="text-[13px] text-ink/60 leading-relaxed border-t border-ink/[0.07] pt-6">
           ¿Buscas más? Ficha completa de la <Link href={`/especies/${sp.id}`} className="text-accent underline">{n}</Link>, previsión de{' '}
           <Link href={`/mejores-horas/${spot.slug}`} className="text-accent underline">pesca en {spot.name}</Link> y el mapa del día en{' '}
           <Link href="/donde-pescar" className="text-accent underline">¿dónde pescar?</Link>.

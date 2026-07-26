@@ -38,8 +38,8 @@ function toForm(g: Guide | null): FormState {
 }
 
 const field =
-  'w-full px-3 py-2.5 bg-paper border border-ink/25 rounded-lg text-ink placeholder-ink/40 focus:outline-none focus:border-accent text-sm transition-colors'
-const labelCls = 'text-[11px] font-bold uppercase tracking-widest text-ink/50'
+  'w-full px-3 py-2.5 bg-paper border border-ink/25 rounded-lg text-ink placeholder-ink/60 focus:outline-none focus:border-accent text-sm transition-colors'
+const labelCls = 'text-[11px] font-bold uppercase tracking-widest text-ink/60'
 
 export default function GuideEditor({ initial, onClose, onSaved }: GuideEditorProps) {
   const [form, setForm] = useState<FormState>(toForm(initial))
@@ -177,7 +177,7 @@ export default function GuideEditor({ initial, onClose, onSaved }: GuideEditorPr
       <div className="w-full max-w-3xl my-4 bg-white border border-ink/10 rounded-xl shadow-hard-lg" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-ink/[0.07] sticky top-0 bg-white z-10">
           <h2 className="font-display uppercase text-xl text-ink">{initial ? 'Editar guía' : 'Nueva guía'}</h2>
-          <button onClick={onClose} className="text-ink/50 hover:text-ink text-xl">✕</button>
+          <button onClick={onClose} className="text-ink/60 hover:text-ink text-xl">✕</button>
         </div>
 
         <div className="p-6 space-y-6">
@@ -211,7 +211,7 @@ export default function GuideEditor({ initial, onClose, onSaved }: GuideEditorPr
                   {rewriteLoading ? 'Reescribiendo…' : 'Reescribir ↻'}
                 </button>
               </div>
-              <p className="text-[10px] text-ink/50">Toma el título, extracto y cuerpo actuales y los reescribe según tu indicación.</p>
+              <p className="text-[10px] text-ink/60">Toma el título, extracto y cuerpo actuales y los reescribe según tu indicación.</p>
             </div>
 
             {aiNote && <p className="text-[11px] text-accent">{aiNote}</p>}
@@ -255,7 +255,7 @@ export default function GuideEditor({ initial, onClose, onSaved }: GuideEditorPr
               <button onClick={() => setShowPreview((v) => !v)} className="text-xs font-bold text-accent hover:underline">{showPreview ? 'Editar' : 'Vista previa'}</button>
             </div>
             {showPreview ? (
-              <div className="min-h-[12rem] p-4 border border-ink/10 bg-paper text-sm text-ink/80 [&_strong]:text-ink [&_a]:text-accent [&_a]:underline [&_ul]:list-disc [&_ul]:pl-5" dangerouslySetInnerHTML={{ __html: renderDescription(form.content) || '<span class="text-ink/40">Nada que previsualizar…</span>' }} />
+              <div className="min-h-[12rem] p-4 border border-ink/10 bg-paper text-sm text-ink/80 [&_strong]:text-ink [&_a]:text-accent [&_a]:underline [&_ul]:list-disc [&_ul]:pl-5" dangerouslySetInnerHTML={{ __html: renderDescription(form.content) || '<span class="text-ink/60">Nada que previsualizar…</span>' }} />
             ) : (
               <>
                 <div className="flex flex-wrap gap-1.5">
@@ -270,7 +270,7 @@ export default function GuideEditor({ initial, onClose, onSaved }: GuideEditorPr
           </div>
 
           <div className="grid grid-cols-1 gap-3 p-4 border border-ink/10 bg-paper">
-            <p className="text-xs font-bold uppercase tracking-widest text-ink/50">SEO</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-ink/60">SEO</p>
             <div className="space-y-1">
               <label className={labelCls}>Título SEO</label>
               <input value={form.seoTitle} onChange={(e) => set('seoTitle', e.target.value)} maxLength={120} placeholder="Vacío = título de la guía" className={field} />
@@ -282,7 +282,7 @@ export default function GuideEditor({ initial, onClose, onSaved }: GuideEditorPr
           </div>
 
           <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" checked={form.published} onChange={(e) => set('published', e.target.checked)} className="accent-[#0d9488]" />
+            <input type="checkbox" checked={form.published} onChange={(e) => set('published', e.target.checked)} className="accent-[#0a7d72]" />
             <span className="text-sm text-ink/80">Publicada (visible en /guias)</span>
           </label>
 

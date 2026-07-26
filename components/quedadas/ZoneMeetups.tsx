@@ -39,11 +39,11 @@ export default async function ZoneMeetups({ spotSlug, spotName }: { spotSlug: st
                       {MOD_EMOJI[m.modality]} <span className="capitalize">{fmtDayLabel(m.dateISO)}</span> · {m.timeStart}
                       {sp ? ` · ${sp.name}` : ''}
                     </span>
-                    <span className="block font-mono text-[10px] uppercase tracking-widest text-ink/45">
+                    <span className="block font-mono text-[10px] uppercase tracking-widest text-ink/60">
                       nivel {m.level} · {costInfo(m).label}
                     </span>
                   </span>
-                  <span className={`font-mono text-[10px] font-bold uppercase tracking-widest shrink-0 ${m.status === 'confirmed' ? 'text-accent' : 'text-ink/40'}`}>
+                  <span className={`font-mono text-[10px] font-bold uppercase tracking-widest shrink-0 ${m.status === 'confirmed' ? 'text-accent' : 'text-ink/60'}`}>
                     {full ? 'Completa' : m.status === 'confirmed' ? 'Confirmada' : `${m.placesTaken}/${m.maxPlaces}`}
                   </span>
                 </Link>

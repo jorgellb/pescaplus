@@ -19,7 +19,7 @@ interface Settings {
 }
 
 const field =
-  'w-full px-3 py-2.5 bg-paper border border-ink/10 rounded-lg text-ink placeholder-ink/40 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 text-sm transition-all'
+  'w-full px-3 py-2.5 bg-paper border border-ink/10 rounded-lg text-ink placeholder-ink/60 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 text-sm transition-all'
 const labelCls = 'text-[11px] font-bold uppercase tracking-widest text-ink/60'
 
 export default function AdminSettingsPage() {
@@ -199,7 +199,7 @@ export default function AdminSettingsPage() {
             type="checkbox"
             checked={settings.aiAssistantEnabled}
             onChange={(e) => set('aiAssistantEnabled', e.target.checked)}
-            className="accent-[#0d9488]"
+            className="accent-[#0a7d72]"
           />
           <span className="text-sm text-ink/80">Habilitar asistente IA en la tienda</span>
         </label>
@@ -273,7 +273,7 @@ function FeedRow({
     <div className="flex flex-col sm:flex-row sm:items-center gap-2 justify-between p-3 border border-ink/10 rounded-xl bg-paper">
       <div className="min-w-0">
         <p className="text-sm font-bold text-ink">{label}</p>
-        <p className="font-mono text-[11px] text-ink/50 truncate">{url || path}</p>
+        <p className="font-mono text-[11px] text-ink/60 truncate">{url || path}</p>
       </div>
       <div className="flex gap-2 flex-shrink-0">
         <a
@@ -302,7 +302,7 @@ function IntegrationRow({ title, ok, detail }: { title: string; ok: boolean; det
       <span className={`mt-0.5 w-2.5 h-2.5 rounded-full flex-shrink-0 ${ok ? 'bg-emerald-500' : 'bg-ink/30'}`} />
       <div className="min-w-0">
         <p className="text-sm font-semibold text-ink">{title}</p>
-        <p className="text-xs text-ink/50">{detail}</p>
+        <p className="text-xs text-ink/60">{detail}</p>
       </div>
     </div>
   )

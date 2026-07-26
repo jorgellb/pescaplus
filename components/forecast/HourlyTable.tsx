@@ -11,7 +11,7 @@ function WindArrow({ deg }: { deg: number | null }) {
   )
 }
 
-const LABEL = 'sticky left-0 z-10 bg-paper text-left font-mono text-[10px] font-bold uppercase tracking-wide text-ink/50 px-2 py-1 whitespace-nowrap border-r border-ink/[0.07]'
+const LABEL = 'sticky left-0 z-10 bg-paper text-left font-mono text-[10px] font-bold uppercase tracking-wide text-ink/60 px-2 py-1 whitespace-nowrap border-r border-ink/[0.07]'
 const CELL = 'text-center px-1 py-1 text-[11px] tabular-nums border-l border-ink/[0.06]'
 
 export default function HourlyTable({
@@ -53,7 +53,7 @@ export default function HourlyTable({
             <tr>
               <th className={LABEL}>Hora</th>
               {hours.map((h, i) => (
-                <th key={i} className={`${CELL} font-mono text-[10px] text-ink/50 font-bold ${colBg(h)}`}>{h.hourLabel.slice(0, 2)}</th>
+                <th key={i} className={`${CELL} font-mono text-[10px] text-ink/60 font-bold ${colBg(h)}`}>{h.hourLabel.slice(0, 2)}</th>
               ))}
             </tr>
           </thead>
@@ -148,21 +148,21 @@ export default function HourlyTable({
             <tr>
               <td className={LABEL}>UV</td>
               {hours.map((h, i) => (
-                <td key={i} className={`${CELL} ${colBg(h)} ${h.uv != null && h.uv >= 8 ? 'text-ink font-bold' : 'text-ink/40'}`}>{h.uv != null ? Math.round(h.uv) : '–'}</td>
+                <td key={i} className={`${CELL} ${colBg(h)} ${h.uv != null && h.uv >= 8 ? 'text-ink font-bold' : 'text-ink/60'}`}>{h.uv != null ? Math.round(h.uv) : '–'}</td>
               ))}
             </tr>
             {/* Precip */}
             <tr>
               <td className={LABEL}>Lluvia %</td>
               {hours.map((h, i) => (
-                <td key={i} className={`${CELL} ${colBg(h)} ${h.precipProb != null && h.precipProb >= 50 ? 'text-ink font-bold' : 'text-ink/40'}`}>{h.precipProb ?? '–'}</td>
+                <td key={i} className={`${CELL} ${colBg(h)} ${h.precipProb != null && h.precipProb >= 50 ? 'text-ink font-bold' : 'text-ink/60'}`}>{h.precipProb ?? '–'}</td>
               ))}
             </tr>
             {/* Pressure */}
             <tr>
               <td className={LABEL}>Presión</td>
               {hours.map((h, i) => (
-                <td key={i} className={`${CELL} text-ink/50 text-[10px] ${colBg(h)}`}>{h.pressure != null ? Math.round(h.pressure) : '–'}</td>
+                <td key={i} className={`${CELL} text-ink/60 text-[10px] ${colBg(h)}`}>{h.pressure != null ? Math.round(h.pressure) : '–'}</td>
               ))}
             </tr>
           </tbody>

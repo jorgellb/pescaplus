@@ -23,7 +23,7 @@ const MONTH_NAMES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Jul
 const WEEKDAYS = ['L', 'M', 'X', 'J', 'V', 'S', 'D']
 
 const RATING_HEX: Record<number, string> = {
-  5: '#0d9488',
+  5: '#0a7d72',
   4: '#3f9d94',
   3: '#b9b29f',
   2: '#a49c8a',
@@ -86,7 +86,7 @@ export default async function PlanificadorPage({ params }: { params: Promise<{ s
     <Layout>
       <section className="bg-paper border-b border-ink/[0.07] print:border-0">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 print:py-4">
-          <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-5 print:hidden">
+          <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/60 mb-5 print:hidden">
             <Link href="/mejores-horas" className="hover:text-accent">Mejores horas</Link> <span className="mx-1">/</span>{' '}
             <Link href={`/mejores-horas/${s.slug}`} className="hover:text-accent">{s.name}</Link> <span className="mx-1">/</span>{' '}
             <span className="text-ink">Planificador</span>
@@ -101,7 +101,7 @@ export default async function PlanificadorPage({ params }: { params: Promise<{ s
             las olas del día concreto los tendrás en la{' '}
             <Link href={`/mejores-horas/${s.slug}`} className="text-accent underline">previsión de 7 días</Link>.
           </p>
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 mt-5 font-mono text-[10px] uppercase tracking-widest text-ink/50">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 mt-5 font-mono text-[10px] uppercase tracking-widest text-ink/60">
             {[5, 4, 3].map((r) => (
               <span key={r} className="inline-flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: RATING_HEX[r] }} />
@@ -129,11 +129,11 @@ export default async function PlanificadorPage({ params }: { params: Promise<{ s
               <div key={key} className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-4 sm:p-5 space-y-3 break-inside-avoid">
                 <div className="flex items-baseline justify-between border-b border-ink/10 pb-2">
                   <h2 className="font-display uppercase text-xl text-ink leading-none">
-                    {MONTH_NAMES[monthIdx]} <span className="text-ink/40">{year}</span>
+                    {MONTH_NAMES[monthIdx]} <span className="text-ink/60">{year}</span>
                   </h2>
                   {clim && clim.w > 0 && (
                     <span
-                      className="font-mono text-[9.5px] uppercase tracking-wide text-ink/45 text-right"
+                      className="font-mono text-[9.5px] uppercase tracking-wide text-ink/60 text-right"
                       title={`Histórico ${CLIMATE_YEARS}: media del viento máximo diario y porcentaje de días con máxima ≤ 20 km/h`}
                     >
                       hist. 💨 {Math.round(clim.w)} km/h · {clim.ok}% días buenos
@@ -150,7 +150,7 @@ export default async function PlanificadorPage({ params }: { params: Promise<{ s
                   ))}
                   {list.map((d) => (
                     <span key={d.dateISO} className="flex flex-col items-center gap-0.5 py-0.5" title={`${fmtDayLabel(d.dateISO)} · actividad ${d.rating}/5 · coef ${d.coef} ${phaseEmoji(d.phase)}`}>
-                      <span className={`text-[11px] leading-none ${bestSet.has(d.dateISO) ? 'font-bold text-ink' : 'text-ink/55'}`}>{d.day}</span>
+                      <span className={`text-[11px] leading-none ${bestSet.has(d.dateISO) ? 'font-bold text-ink' : 'text-ink/60'}`}>{d.day}</span>
                       <span
                         className="w-2 h-2 rounded-full inline-block"
                         style={{
@@ -163,13 +163,13 @@ export default async function PlanificadorPage({ params }: { params: Promise<{ s
                 </div>
 
                 <div className="border-t border-ink/10 pt-2 space-y-1.5">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Los 5 mejores</p>
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Los 5 mejores</p>
                   <p className="text-[13px] text-ink/80 leading-relaxed">
                     {best.map((d, i) => (
                       <span key={d.dateISO}>
                         {i > 0 && <span className="text-ink/30"> · </span>}
                         <span className="font-bold">{fmtDayLabel(d.dateISO)}</span>
-                        <span className="text-ink/50"> ({d.rating}/5{d.coef >= 85 ? `, coef ${d.coef}` : ''})</span>
+                        <span className="text-ink/60"> ({d.rating}/5{d.coef >= 85 ? `, coef ${d.coef}` : ''})</span>
                       </span>
                     ))}
                   </p>
@@ -196,7 +196,7 @@ export default async function PlanificadorPage({ params }: { params: Promise<{ s
             kind="calculado"
             extra={climate ? `climatología ERA5 ${CLIMATE_YEARS} vía Open-Meteo` : undefined}
           />
-          <p className="text-[12px] text-ink/50 leading-relaxed max-w-3xl">
+          <p className="text-[12px] text-ink/60 leading-relaxed max-w-3xl">
             La actividad (1–5) combina fase lunar y coincidencia de periodos solunares con amanecer y atardecer; el
             coeficiente de marea es el estimado del ciclo lunar. Son excelentes para elegir fechas, pero el mar del día lo
             deciden el viento y las olas: confirma siempre en la previsión de 7 días antes de salir.

@@ -116,7 +116,7 @@ export default function PescaHub() {
 
       <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12">
-          <nav className="text-[13px] text-ink/50 mb-4">
+          <nav className="text-[13px] text-ink/60 mb-4">
             <Link href="/" className="hover:text-accent">Inicio</Link>
             <span className="mx-2">/</span><span className="text-ink">Qué pescar</span>
           </nav>
@@ -152,7 +152,7 @@ export default function PescaHub() {
                 <h3 className="font-display text-xl text-ink">
                   <Link href={`/especies/${sp.id}`} className="hover:text-accent transition-colors">{sp.name}</Link>
                 </h3>
-                <p className="text-[13px] text-ink/50">
+                <p className="text-[13px] text-ink/60">
                   Mejor época: <span className="text-ink/70">{monthsPhrase(sp.bestMonths)}</span> · {zones.length} zonas
                 </p>
               </div>
@@ -188,7 +188,7 @@ export default function PescaHub() {
               const spots = FISHING_SPOTS.filter((s) => s.type === 'mar' && s.region === region)
               return (
                 <div key={region}>
-                  <h3 className="text-[12px] font-bold uppercase tracking-wider text-ink/40 mb-2.5">{region}</h3>
+                  <h3 className="text-[12px] font-bold uppercase tracking-wider text-ink/60 mb-2.5">{region}</h3>
                   <ul className="space-y-1.5">
                     {spots.map((s) => (
                       <li key={s.slug}>

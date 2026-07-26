@@ -13,7 +13,7 @@ interface Cat {
 }
 
 const field =
-  'w-full px-3 py-2 bg-white border border-ink/25 rounded-lg text-ink placeholder-ink/40 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 text-sm transition-all'
+  'w-full px-3 py-2 bg-white border border-ink/25 rounded-lg text-ink placeholder-ink/60 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 text-sm transition-all'
 
 export default function TaxonomyAdminPage() {
   const [cats, setCats] = useState<Cat[]>([])
@@ -91,7 +91,7 @@ export default function TaxonomyAdminPage() {
     }
   }
 
-  if (loading) return <p className="text-sm text-ink/50">Cargando taxonomía…</p>
+  if (loading) return <p className="text-sm text-ink/60">Cargando taxonomía…</p>
 
   return (
     <div className="space-y-6 max-w-4xl">
@@ -119,7 +119,7 @@ export default function TaxonomyAdminPage() {
         {cats.map((c) => (
           <div key={c.id} className="rounded-xl border border-ink/10 bg-white p-4 space-y-3">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-ink/40">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-ink/60">
                 Categoría · <span className="font-mono">{c.id}</span>
               </label>
               <input value={c.name} onChange={(e) => setCatName(c.id, e.target.value)} className={`${field} font-bold`} />
@@ -127,10 +127,10 @@ export default function TaxonomyAdminPage() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-ink/40">Subcategorías</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-ink/60">Subcategorías</span>
                 <button onClick={() => addSub(c.id)} className="text-xs font-bold text-accent hover:underline">+ Añadir</button>
               </div>
-              {c.subcategories.length === 0 && <p className="text-xs text-ink/40">Sin subcategorías.</p>}
+              {c.subcategories.length === 0 && <p className="text-xs text-ink/60">Sin subcategorías.</p>}
               {c.subcategories.map((s, i) => (
                 <div key={i} className="flex items-center gap-1.5">
                   <input
@@ -139,8 +139,8 @@ export default function TaxonomyAdminPage() {
                     placeholder="Nombre de la subcategoría"
                     className={`${field} py-1.5 text-xs`}
                   />
-                  <button onClick={() => moveSub(c.id, i, -1)} disabled={i === 0} className="w-6 h-7 flex-shrink-0 rounded bg-white border border-ink/10 text-ink/50 hover:text-ink disabled:opacity-30 text-xs">↑</button>
-                  <button onClick={() => moveSub(c.id, i, 1)} disabled={i === c.subcategories.length - 1} className="w-6 h-7 flex-shrink-0 rounded bg-white border border-ink/10 text-ink/50 hover:text-ink disabled:opacity-30 text-xs">↓</button>
+                  <button onClick={() => moveSub(c.id, i, -1)} disabled={i === 0} className="w-6 h-7 flex-shrink-0 rounded bg-white border border-ink/10 text-ink/60 hover:text-ink disabled:opacity-30 text-xs">↑</button>
+                  <button onClick={() => moveSub(c.id, i, 1)} disabled={i === c.subcategories.length - 1} className="w-6 h-7 flex-shrink-0 rounded bg-white border border-ink/10 text-ink/60 hover:text-ink disabled:opacity-30 text-xs">↓</button>
                   <button onClick={() => removeSub(c.id, i)} className="w-6 h-7 flex-shrink-0 rounded bg-white border border-red-200 text-red-500 hover:bg-red-50 text-xs">✕</button>
                 </div>
               ))}
@@ -149,7 +149,7 @@ export default function TaxonomyAdminPage() {
         ))}
       </div>
 
-      <p className="text-[11px] text-ink/40">
+      <p className="text-[11px] text-ink/60">
         Nota: al borrar una subcategoría, los productos que la tuvieran asignada quedan sin subcategoría (no se borran). Renombrar
         mantiene la asignación de los productos.
       </p>

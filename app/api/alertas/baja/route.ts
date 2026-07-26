@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
 <p style="font-size:40px;margin:0">🎣</p>
 <h1 style="font-size:24px">${ok ? 'Alerta cancelada' : 'Enlace no válido'}</h1>
 <p style="color:#555">${ok ? 'No volverás a recibir avisos de esta zona. Puedes reactivarlos cuando quieras desde su página.' : 'La suscripción ya no existe o el enlace ha caducado.'}</p>
-<a href="/mejores-horas" style="color:#0d9488">Volver a Mejores horas</a>
+<a href="/mejores-horas" style="color:#0a7d72">Volver a Mejores horas</a>
 </div></body></html>`
   return new NextResponse(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } })
 }

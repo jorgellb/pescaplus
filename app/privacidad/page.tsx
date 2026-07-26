@@ -67,7 +67,7 @@ export default function PrivacidadPage() {
         Agencia Española de Protección de Datos (<a href="https://www.aepd.es" target="_blank" rel="noopener noreferrer">aepd.es</a>).
       </p>
 
-      <p className="text-sm text-ink/50">
+      <p className="text-sm text-ink/60">
         Consulta también nuestra <Link href="/cookies">Política de cookies</Link> y el{' '}
         <Link href="/aviso-legal">Aviso legal</Link>.
       </p>

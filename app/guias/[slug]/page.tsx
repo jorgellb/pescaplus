@@ -68,7 +68,7 @@ export default async function GuidePage({ params }: Params) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
 
       <article className="max-w-3xl mx-auto px-4 py-12 sm:px-6">
-        <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-6">
+        <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/60 mb-6">
           <Link href="/" className="hover:text-accent">Inicio</Link> <span className="mx-1">/</span>{' '}
           <Link href="/guias" className="hover:text-accent">Guías</Link>
         </nav>
@@ -79,7 +79,7 @@ export default async function GuidePage({ params }: Params) {
               {fishingLabel(guide.typeFishing)}
             </span>
           )}
-          <time className="font-mono text-[11px] uppercase tracking-widest text-ink/40">
+          <time className="font-mono text-[11px] uppercase tracking-widest text-ink/60">
             {new Date(guide.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}
           </time>
         </div>

@@ -46,7 +46,7 @@ export default function CookiesPage() {
         sea necesario, solicitaremos tu consentimiento previo.
       </p>
 
-      <p className="text-sm text-ink/50">
+      <p className="text-sm text-ink/60">
         Consulta también nuestra <Link href="/privacidad">Política de privacidad</Link> y el{' '}
         <Link href="/aviso-legal">Aviso legal</Link>.
       </p>

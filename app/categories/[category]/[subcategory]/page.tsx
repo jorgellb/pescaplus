@@ -75,7 +75,7 @@ export default async function SubcategoryPage({ params }: Params) {
 
       <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-5">
+          <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/60 mb-5">
             <Link href="/" className="hover:text-accent">Inicio</Link> <span className="mx-1">/</span>{' '}
             <Link href={`/categories/${category}`} className="hover:text-accent">{catName}</Link>{' '}
             <span className="mx-1">/</span> <span className="text-ink">{sub.name}</span>
@@ -99,7 +99,7 @@ export default async function SubcategoryPage({ params }: Params) {
         {/* Sibling subcategories (real pages) */}
         {subs.length > 1 && (
           <div className="flex flex-wrap gap-2">
-            <span className="inline-flex items-center font-mono text-[11px] font-bold uppercase tracking-widest text-ink/40 mr-1">Subcategorías:</span>
+            <span className="inline-flex items-center font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60 mr-1">Subcategorías:</span>
             <Link href={`/categories/${category}`} className="px-3.5 py-1.5 text-[11px] font-semibold border border-ink/10 rounded-full text-ink hover:bg-ink hover:text-paper transition-colors">Todas</Link>
             {subs.map((s) => (
               <Link

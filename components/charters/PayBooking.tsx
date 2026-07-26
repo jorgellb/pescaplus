@@ -28,7 +28,7 @@ export default function PayBooking({ id, full, price }: { id: string; full: bool
     } catch { setState('error'); setMsg('Fallo de red.') }
   }
 
-  const labelCls = 'font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50'
+  const labelCls = 'font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60'
   const inputCls = 'mt-1 w-full border border-ink/12 rounded-xl bg-paper px-3 py-2 text-sm'
 
   if (full) {
@@ -61,7 +61,7 @@ export default function PayBooking({ id, full, price }: { id: string; full: bool
       <button type="submit" disabled={state === 'loading'} className="inline-flex items-center gap-2 bg-accent text-paper px-5 py-2.5 text-sm font-semibold border border-accent rounded-full shadow-hard hover-shift hover:bg-ink hover:border-ink disabled:opacity-60 transition-colors">
         {state === 'loading' ? 'Redirigiendo a pago…' : `Reservar y pagar ${total} €`}
       </button>
-      <p className="font-mono text-[10px] uppercase tracking-wide text-ink/40">{price} €/persona · pago procesado por Stripe</p>
+      <p className="font-mono text-[10px] uppercase tracking-wide text-ink/60">{price} €/persona · pago procesado por Stripe</p>
     </form>
   )
 }

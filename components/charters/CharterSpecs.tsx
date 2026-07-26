@@ -18,7 +18,7 @@ function Spec({ icon, label, value }: { icon: string; label: string; value: stri
     <div className="flex items-center gap-3 rounded-xl border border-ink/[0.07] bg-paper px-3.5 py-3">
       <CharterIcon name={icon} className="w-5 h-5 shrink-0 text-accent" />
       <div className="min-w-0">
-        <p className="text-[11px] uppercase tracking-wide text-ink/45 leading-none">{label}</p>
+        <p className="text-[11px] uppercase tracking-wide text-ink/60 leading-none">{label}</p>
         <p className="font-semibold text-ink text-[15px] leading-tight mt-1 truncate">{value}</p>
       </div>
     </div>

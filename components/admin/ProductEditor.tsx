@@ -63,8 +63,8 @@ function toForm(p: Product | null): FormState {
 }
 
 const field =
-  'w-full px-3 py-2.5 bg-white border border-ink/25 rounded-lg text-ink placeholder-ink/40 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 text-sm transition-all'
-const labelCls = 'text-[11px] font-bold uppercase tracking-widest text-ink/50'
+  'w-full px-3 py-2.5 bg-white border border-ink/25 rounded-lg text-ink placeholder-ink/60 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 text-sm transition-all'
+const labelCls = 'text-[11px] font-bold uppercase tracking-widest text-ink/60'
 
 export default function ProductEditor({ initial, onClose, onSaved }: ProductEditorProps) {
   const [form, setForm] = useState<FormState>(toForm(initial))
@@ -406,7 +406,7 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
                   {rewriteLoading ? 'Reescribiendo…' : 'Reescribir ↻'}
                 </button>
               </div>
-              <p className="text-[10px] text-ink/50">Toma el título, la descripción y la meta actuales y los reescribe según tu indicación.</p>
+              <p className="text-[10px] text-ink/60">Toma el título, la descripción y la meta actuales y los reescribe según tu indicación.</p>
             </div>
 
             <div className="border-t border-accent/20 pt-3">
@@ -417,7 +417,7 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
               >
                 {polishLoading ? 'Puliendo SEO…' : '✨ Pulir SEO (limpia el título, describe y optimiza)'}
               </button>
-              <p className="text-[10px] text-ink/50 mt-1.5">Un clic: quita nombres de vendedor del título y genera título, descripción y metadatos optimizados para SEO.</p>
+              <p className="text-[10px] text-ink/60 mt-1.5">Un clic: quita nombres de vendedor del título y genera título, descripción y metadatos optimizados para SEO.</p>
             </div>
 
             {aiNote && <p className="text-[11px] text-accent">{aiNote}</p>}
@@ -467,20 +467,20 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
                   )
                 })}
               </div>
-              <p className="text-[10px] text-ink/50">El producto aparecerá en todas las categorías marcadas. La principal define su URL y migas de pan.</p>
+              <p className="text-[10px] text-ink/60">El producto aparecerá en todas las categorías marcadas. La principal define su URL y migas de pan.</p>
             </div>
             <div className="space-y-1">
               <label className={labelCls}>Stock</label>
               <label className="flex items-center gap-2 h-[42px] px-3 bg-white border border-ink/25 rounded-lg cursor-pointer">
-                <input type="checkbox" checked={form.inStock} onChange={(e) => set('inStock', e.target.checked)} className="accent-[#0d9488]" />
-                <span className="text-sm text-ink/50">Disponible</span>
+                <input type="checkbox" checked={form.inStock} onChange={(e) => set('inStock', e.target.checked)} className="accent-[#0a7d72]" />
+                <span className="text-sm text-ink/60">Disponible</span>
               </label>
             </div>
             <div className="space-y-1">
               <label className={labelCls}>SEO</label>
               <label className="flex items-center gap-2 h-[42px] px-3 bg-white border border-ink/25 rounded-lg cursor-pointer">
-                <input type="checkbox" checked={form.aiOptimized} onChange={(e) => set('aiOptimized', e.target.checked)} className="accent-[#0d9488]" />
-                <span className="text-sm text-ink/50">Optimizado</span>
+                <input type="checkbox" checked={form.aiOptimized} onChange={(e) => set('aiOptimized', e.target.checked)} className="accent-[#0a7d72]" />
+                <span className="text-sm text-ink/60">Optimizado</span>
               </label>
             </div>
           </div>
@@ -495,7 +495,7 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
                 if (subs.length === 0) return null
                 return (
                   <div key={catId} className="flex flex-wrap items-center gap-1.5">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-ink/40 w-full sm:w-28 sm:flex-shrink-0">{cat?.name}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-ink/60 w-full sm:w-28 sm:flex-shrink-0">{cat?.name}</span>
                     {subs.map((s) => {
                       const on = form.subcategories.includes(s.id)
                       return (
@@ -515,10 +515,10 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
                 )
               })}
               {form.categories.every((c) => (tax.find((t) => t.id === c)?.subcategories.length ?? 0) === 0) && (
-                <p className="text-[11px] text-ink/40">Las categorías seleccionadas no tienen subcategorías.</p>
+                <p className="text-[11px] text-ink/60">Las categorías seleccionadas no tienen subcategorías.</p>
               )}
             </div>
-            <p className="text-[10px] text-ink/50">Puedes marcar varias. El producto aparecerá en la página de cada subcategoría marcada.</p>
+            <p className="text-[10px] text-ink/60">Puedes marcar varias. El producto aparecerá en la página de cada subcategoría marcada.</p>
           </div>
 
           {/* Numeric */}
@@ -551,8 +551,8 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
                     <input value={row.alt} onChange={(e) => setImage(i, { alt: e.target.value })} placeholder="Texto ALT (describe la imagen para SEO/accesibilidad)" className={`${field} py-1.5 text-xs`} />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <button onClick={() => moveImage(i, -1)} disabled={i === 0} className="w-6 h-6 rounded bg-white border border-ink/10 text-ink/50 hover:text-ink disabled:opacity-30 text-xs">↑</button>
-                    <button onClick={() => moveImage(i, 1)} disabled={i === form.images.length - 1} className="w-6 h-6 rounded bg-white border border-ink/10 text-ink/50 hover:text-ink disabled:opacity-30 text-xs">↓</button>
+                    <button onClick={() => moveImage(i, -1)} disabled={i === 0} className="w-6 h-6 rounded bg-white border border-ink/10 text-ink/60 hover:text-ink disabled:opacity-30 text-xs">↑</button>
+                    <button onClick={() => moveImage(i, 1)} disabled={i === form.images.length - 1} className="w-6 h-6 rounded bg-white border border-ink/10 text-ink/60 hover:text-ink disabled:opacity-30 text-xs">↓</button>
                     <button onClick={() => removeImage(i)} className="w-6 h-6 rounded bg-white border border-red-200 text-red-500 hover:bg-red-50 text-xs">✕</button>
                   </div>
                 </div>
@@ -574,7 +574,7 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
             </div>
             {showPreview ? (
               <div
-                className="min-h-[8rem] p-3 rounded-lg border border-ink/10 bg-paper text-sm text-ink/50 [&_a]:text-accent [&_a]:underline [&_strong]:text-ink [&_ul]:list-disc [&_ul]:pl-5"
+                className="min-h-[8rem] p-3 rounded-lg border border-ink/10 bg-paper text-sm text-ink/60 [&_a]:text-accent [&_a]:underline [&_strong]:text-ink [&_ul]:list-disc [&_ul]:pl-5"
                 dangerouslySetInnerHTML={{ __html: renderDescription(form.description) || '<span class="text-ink/60">Nada que previsualizar…</span>' }}
               />
             ) : (
@@ -602,7 +602,7 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
 
           {/* SEO */}
           <div className="space-y-3 p-4 rounded-xl border border-ink/10 bg-paper">
-            <p className="text-xs font-bold uppercase tracking-widest text-ink/50">SEO</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-ink/60">SEO</p>
             <div className="space-y-1">
               <label className={labelCls}>Título SEO (meta title, ~60 car.)</label>
               <input value={form.seoTitle} onChange={(e) => set('seoTitle', e.target.value)} maxLength={70} placeholder="Si lo dejas vacío se usa el título del producto" className={field} />
@@ -625,7 +625,7 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
         </div>
 
         <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-ink/10 sticky bottom-0 bg-white rounded-b-2xl">
-          <button onClick={onClose} className="text-sm font-semibold text-ink/50 hover:text-ink px-4 py-2.5 rounded-lg transition-colors">Cancelar</button>
+          <button onClick={onClose} className="text-sm font-semibold text-ink/60 hover:text-ink px-4 py-2.5 rounded-lg transition-colors">Cancelar</button>
           <button
             onClick={save}
             disabled={saving}

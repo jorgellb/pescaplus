@@ -111,7 +111,7 @@ export default async function PlanPage({ params, searchParams }: Params) {
     <Layout>
       <section className="bg-paper border-b border-ink/[0.07] print:border-0">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 print:py-4">
-          <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-5 print:hidden">
+          <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/60 mb-5 print:hidden">
             <Link href="/" className="hover:text-accent">Inicio</Link> <span className="mx-1">/</span>{' '}
             <Link href="/mejores-horas" className="hover:text-accent">Mejores horas</Link> <span className="mx-1">/</span>{' '}
             <Link href={`/mejores-horas/${s.slug}`} className="hover:text-accent">{s.name}</Link> <span className="mx-1">/</span>{' '}
@@ -145,7 +145,7 @@ export default async function PlanPage({ params, searchParams }: Params) {
 
       <section className="max-w-4xl mx-auto px-4 py-8 sm:px-6 space-y-8 print:py-2">
         {hours.length === 0 ? (
-          <div className="border border-ink/10 rounded-2xl bg-paper p-6 text-sm text-ink/50">
+          <div className="border border-ink/10 rounded-2xl bg-paper p-6 text-sm text-ink/60">
             La previsión de este día no está disponible ahora mismo. Vuelve a intentarlo en unos minutos.
           </div>
         ) : (
@@ -163,7 +163,7 @@ export default async function PlanPage({ params, searchParams }: Params) {
                 {outing && (
                   <span className="inline-flex items-center gap-2 rounded-xl border border-ink/10 px-3.5 py-2">
                     <span aria-hidden>{modality.emoji}</span>
-                    <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Salida {fmtTime(outing.departure)} · regreso {outing.returnBy >= dayStart + 24 * 3600000 ? '24:00' : fmtTime(outing.returnBy)}</span>
+                    <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Salida {fmtTime(outing.departure)} · regreso {outing.returnBy >= dayStart + 24 * 3600000 ? '24:00' : fmtTime(outing.returnBy)}</span>
                   </span>
                 )}
               </div>

@@ -185,7 +185,7 @@ export default async function Home() {
               href={`/categories/${type.id}`}
               className="group flex items-center gap-4 p-5 rounded-2xl bg-paper border border-ink/[0.07] hover:border-accent/40 shadow-hard hover-shift"
             >
-              <CategoryIcon id={type.id} className="w-9 h-9 shrink-0 text-ink/55 group-hover:text-accent transition-colors" strokeWidth={1.5} />
+              <CategoryIcon id={type.id} className="w-9 h-9 shrink-0 text-ink/60 group-hover:text-accent transition-colors" strokeWidth={1.5} />
               <h3 className="font-semibold text-[15px] leading-snug text-ink group-hover:text-accent transition-colors hyphens-none">
                 {categoryName(taxonomy, type.id)}
               </h3>
@@ -284,7 +284,7 @@ export default async function Home() {
                 </div>
                 <div className="p-4">
                   <h3 className="font-display uppercase text-lg md:text-xl leading-tight text-ink group-hover:text-accent transition-colors">Mejores {r.name}</h3>
-                  <p className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mt-1.5">{r.priceFrom ? `Desde ${r.priceFrom.toFixed(2)} €` : `${r.count} modelos`} →</p>
+                  <p className="font-mono text-[11px] uppercase tracking-widest text-ink/60 mt-1.5">{r.priceFrom ? `Desde ${r.priceFrom.toFixed(2)} €` : `${r.count} modelos`} →</p>
                 </div>
               </Link>
             ))}

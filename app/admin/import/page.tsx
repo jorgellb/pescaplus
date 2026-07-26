@@ -158,7 +158,7 @@ export default function AdminImportPage() {
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
           placeholder="Palabra clave opcional (ej: carrete estanco)…"
-          className="flex-1 px-3 py-2.5 bg-paper border border-ink/10 rounded-lg text-ink placeholder-ink/40 text-sm focus:outline-none focus:border-accent"
+          className="flex-1 px-3 py-2.5 bg-paper border border-ink/10 rounded-lg text-ink placeholder-ink/60 text-sm focus:outline-none focus:border-accent"
         />
         <button
           type="submit"
@@ -182,7 +182,7 @@ export default function AdminImportPage() {
         </div>
       ) : (
         <div className="space-y-6">
-          <p className="font-mono text-[11px] uppercase tracking-widest text-ink/50">
+          <p className="font-mono text-[11px] uppercase tracking-widest text-ink/60">
             {results.length} productos{active.keyword ? ` · "${active.keyword}"` : ''} — importa los que quieras
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -208,7 +208,7 @@ export default function AdminImportPage() {
                   <p className="text-xs text-ink/80 line-clamp-2 leading-snug flex-1" title={p.title}>
                     {p.title}
                   </p>
-                  <div className="flex items-center justify-between text-[11px] text-ink/50">
+                  <div className="flex items-center justify-between text-[11px] text-ink/60">
                     <span>{fishingLabel(category)}</span>
                     <span>{p.reviews.toLocaleString('es-ES')} vendidos · {p.images.length} 📷</span>
                   </div>

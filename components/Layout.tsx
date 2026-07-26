@@ -40,7 +40,7 @@ export default function Layout({ children }: LayoutProps) {
             <div className="lg:col-span-9 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8">
               {NAV_SECTIONS.map((s) => (
                 <div key={s.id}>
-                  <h4 className="text-[12px] font-bold uppercase tracking-wider text-ink/40 mb-3">{s.label}</h4>
+                  <h4 className="text-[12px] font-bold uppercase tracking-wider text-ink/60 mb-3">{s.label}</h4>
                   <ul className="space-y-2 text-sm">
                     {s.links.slice(0, 5).map((l) => (
                       <li key={l.href + l.label}>
@@ -53,12 +53,12 @@ export default function Layout({ children }: LayoutProps) {
             </div>
           </div>
 
-          <p className="text-xs text-ink/45 leading-relaxed mt-10 max-w-2xl">
+          <p className="text-xs text-ink/60 leading-relaxed mt-10 max-w-2xl">
             Algunos enlaces de la tienda son de afiliados: podemos recibir una pequeña comisión
             por las compras, sin ningún coste adicional para ti.
           </p>
 
-          <div className="mt-8 pt-6 border-t border-ink/[0.07] flex flex-col md:flex-row justify-between items-center gap-3 text-[13px] text-ink/50">
+          <div className="mt-8 pt-6 border-t border-ink/[0.07] flex flex-col md:flex-row justify-between items-center gap-3 text-[13px] text-ink/60">
             <p>&copy; {currentYear} PescaPlus</p>
             <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
               <Link href="/aviso-legal" className="hover:text-accent transition-colors">Aviso legal</Link>

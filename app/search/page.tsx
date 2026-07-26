@@ -31,7 +31,7 @@ export default async function SearchPage({
     <Layout>
       <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <p className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-3">Búsqueda inteligente</p>
+          <p className="font-mono text-[11px] uppercase tracking-widest text-ink/60 mb-3">Búsqueda inteligente</p>
           <h1 className="font-display uppercase text-4xl md:text-5xl leading-none text-ink">
             {query ? `“${query}”` : 'Buscar productos'}
           </h1>
@@ -42,7 +42,7 @@ export default async function SearchPage({
               defaultValue={query}
               autoFocus
               placeholder="Ej. algo barato para pescar de noche en el mar…"
-              className="flex-1 px-4 py-3 bg-paper border border-ink/10 rounded-xl text-ink placeholder-ink/40 focus:outline-none focus:border-accent text-sm"
+              className="flex-1 px-4 py-3 bg-paper border border-ink/10 rounded-xl text-ink placeholder-ink/60 focus:outline-none focus:border-accent text-sm"
             />
             <button className="bg-ink text-paper px-6 py-3 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover:bg-accent hover:border-accent transition-colors">
               Buscar

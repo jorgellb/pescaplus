@@ -168,7 +168,7 @@ export default function DiaryClient() {
     URL.revokeObjectURL(url)
   }
 
-  if (!ready) return <div className="border border-ink/10 rounded-2xl bg-paper p-6 text-sm text-ink/50">Cargando tu diario…</div>
+  if (!ready) return <div className="border border-ink/10 rounded-2xl bg-paper p-6 text-sm text-ink/60">Cargando tu diario…</div>
 
   return (
     <div className="space-y-6">
@@ -177,7 +177,7 @@ export default function DiaryClient() {
         <h2 className="font-display uppercase text-xl leading-none">➕ Apunta una captura</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <label className="block">
-            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Día</span>
+            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Día</span>
             <input
               type="date"
               value={form.dateISO}
@@ -187,7 +187,7 @@ export default function DiaryClient() {
             />
           </label>
           <label className="block">
-            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Zona</span>
+            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Zona</span>
             <select
               value={form.spotSlug}
               onChange={(ev) => setForm((f) => ({ ...f, spotSlug: ev.target.value }))}
@@ -202,7 +202,7 @@ export default function DiaryClient() {
             </select>
           </label>
           <label className="block">
-            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Especie</span>
+            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Especie</span>
             <select
               value={form.speciesId}
               onChange={(ev) => setForm((f) => ({ ...f, speciesId: ev.target.value }))}
@@ -217,7 +217,7 @@ export default function DiaryClient() {
             </select>
           </label>
           <label className="block">
-            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Piezas</span>
+            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Piezas</span>
             <input
               type="number"
               min={1}
@@ -229,7 +229,7 @@ export default function DiaryClient() {
           </label>
         </div>
         <label className="block">
-          <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Nota (cebo, técnica, tamaño…)</span>
+          <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Nota (cebo, técnica, tamaño…)</span>
           <input
             type="text"
             value={form.note}
@@ -267,7 +267,7 @@ export default function DiaryClient() {
               🐟 Tu especie estrella: <strong>{analysis.topSpecies}</strong> · tu zona: <strong>{analysis.topSpot}</strong> ({analysis.topSpotCount} salidas).
             </li>
           </ul>
-          <p className="font-mono text-[10px] uppercase tracking-wide text-ink/40">
+          <p className="font-mono text-[10px] uppercase tracking-wide text-ink/60">
             Contexto astronómico calculado en tu navegador · tus datos no salen de aquí
           </p>
         </div>
@@ -284,7 +284,7 @@ export default function DiaryClient() {
           )}
         </div>
         {entries.length === 0 ? (
-          <p className="text-sm text-ink/55 border border-ink/[0.07] rounded-2xl p-5 bg-paper">
+          <p className="text-sm text-ink/60 border border-ink/[0.07] rounded-2xl p-5 bg-paper">
             Aún no hay capturas. Apunta la primera y, a partir de tres, te enseñamos tus patrones: con qué luna, qué
             coeficiente y en qué zonas pescas mejor.
           </p>
@@ -301,7 +301,7 @@ export default function DiaryClient() {
                       {e.qty > 1 ? `${e.qty}× ` : ''}
                       {sp?.name ?? 'Captura'} · {spot?.name ?? e.spotSlug}
                     </span>
-                    <span className="block font-mono text-[10px] uppercase tracking-widest text-ink/45">
+                    <span className="block font-mono text-[10px] uppercase tracking-widest text-ink/60">
                       {fmtDateLong(e.dateISO)}
                       {c ? ` · ${phaseEmoji(c.phase)} ${PHASE_LABEL[c.phaseBucket]} · actividad ${c.rating}/5 · coef ${c.coef}` : ''}
                     </span>
@@ -310,7 +310,7 @@ export default function DiaryClient() {
                   <button
                     onClick={() => remove(e.id)}
                     aria-label="Borrar captura"
-                    className="font-mono text-[11px] uppercase tracking-wide text-ink/40 hover:text-red-700"
+                    className="font-mono text-[11px] uppercase tracking-wide text-ink/60 hover:text-red-700"
                   >
                     Borrar
                   </button>
@@ -321,7 +321,7 @@ export default function DiaryClient() {
         )}
       </div>
 
-      <p className="text-[12px] text-ink/50 leading-relaxed">
+      <p className="text-[12px] text-ink/60 leading-relaxed">
         Consejo: apunta también las salidas sin pesca — el contraste es lo que revela patrones de verdad. Y elige el
         próximo día bueno en el <Link href="/mejores-horas" className="text-accent underline">calendario de tu zona</Link>.
       </p>

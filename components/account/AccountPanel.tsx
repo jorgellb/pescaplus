@@ -64,7 +64,7 @@ export default function AccountPanel({ user, avatarChoices, bookings, rsvps, thr
               <p className="text-sm text-ink/60">Todavía no has reservado ninguna salida. <Link href="/charters" className="text-accent font-bold hover:underline">Ver chárters →</Link></p>
             )}
             {bookings.map((b) => {
-              const st = BOOKING_STATUS[b.status] ?? { label: b.status, cls: 'text-ink/50' }
+              const st = BOOKING_STATUS[b.status] ?? { label: b.status, cls: 'text-ink/60' }
               return (
                 <div key={b.id} className={`border rounded-2xl p-4 ${b.isPast ? 'border-ink/10 bg-ink/[0.02]' : 'border-ink/10 bg-paper'}`}>
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -79,7 +79,7 @@ export default function AccountPanel({ user, avatarChoices, bookings, rsvps, thr
                     <button onClick={() => cancelBooking(b.id)} disabled={busy === 'b' + b.id} className="mt-1.5 text-[10px] text-red-700 hover:underline disabled:opacity-50">Cancelar reserva</button>
                   )}
                   {!b.isPast && b.status === 'paid' && (
-                    <p className="mt-1.5 font-mono text-[10px] uppercase tracking-wide text-ink/40">Para cancelar una reserva pagada, contacta con el patrón.</p>
+                    <p className="mt-1.5 font-mono text-[10px] uppercase tracking-wide text-ink/60">Para cancelar una reserva pagada, contacta con el patrón.</p>
                   )}
                 </div>
               )
@@ -125,7 +125,7 @@ export default function AccountPanel({ user, avatarChoices, bookings, rsvps, thr
                 <span className="font-bold text-ink">{t.otherName}</span>
                 {t.unread > 0 && <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 bg-red-600 text-paper text-[10px] font-bold rounded-full">{t.unread}</span>}
               </div>
-              <p className="text-[12px] text-ink/50">{t.charterLabel}</p>
+              <p className="text-[12px] text-ink/60">{t.charterLabel}</p>
               {t.lastBody && <p className="text-[13px] text-ink/70 mt-1 truncate">{t.lastBody}</p>}
             </Link>
           ))}
@@ -137,12 +137,12 @@ export default function AccountPanel({ user, avatarChoices, bookings, rsvps, thr
       {tab === 'perfil' && (
         <div className="space-y-4">
           <div className="border border-ink/10 rounded-2xl bg-paper p-5 max-w-xl">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Tu reputación como pescador</p>
+            <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Tu reputación como pescador</p>
             {user.reviewCount > 0 ? (
               <>
                 <p className="font-display text-2xl leading-tight mt-1 text-ink">
                   <span className="text-amber-500">★</span> {user.avgRating.toFixed(1)}
-                  <span className="text-ink/45 text-base"> · {user.reviewCount} {user.reviewCount === 1 ? 'valoración' : 'valoraciones'}</span>
+                  <span className="text-ink/60 text-base"> · {user.reviewCount} {user.reviewCount === 1 ? 'valoración' : 'valoraciones'}</span>
                 </p>
                 <div className="space-y-2 mt-3">
                   {received.map((r) => (

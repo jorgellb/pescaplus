@@ -53,9 +53,9 @@ export default function SpotSearch() {
         }}
         placeholder="Busca tu localidad: Tarifa, Sanxenxo, La Manga…"
         aria-label="Buscar localidad de pesca"
-        className="w-full pl-10 pr-4 py-3.5 bg-paper border border-ink/10 rounded-xl text-ink placeholder-ink/40 focus:outline-none focus:border-accent text-[15px] shadow-hard transition-colors"
+        className="w-full pl-10 pr-4 py-3.5 bg-paper border border-ink/10 rounded-xl text-ink placeholder-ink/60 focus:outline-none focus:border-accent text-[15px] shadow-hard transition-colors"
       />
-      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink/50 pointer-events-none" aria-hidden>🔍</span>
+      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink/60 pointer-events-none" aria-hidden>🔍</span>
 
       {open && results.length > 0 && (
         <ul className="absolute z-30 left-0 right-0 mt-2 bg-paper border border-ink/10 rounded-xl shadow-hard-md overflow-hidden">

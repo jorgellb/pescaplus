@@ -23,7 +23,7 @@ export default function OperatorRegister({ spots }: { spots: Opt[] }) {
     } catch { setState('error'); setMsg('Fallo de red.') }
   }
 
-  const L = 'font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50'
+  const L = 'font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60'
   const I = 'mt-1 w-full border border-ink/12 rounded-xl bg-paper px-3 py-2 text-sm'
 
   return (
@@ -45,7 +45,7 @@ export default function OperatorRegister({ spots }: { spots: Opt[] }) {
       </div>
       <label className="block"><span className={L}>Sobre ti / tu servicio</span><textarea value={f.bio} onChange={(e) => set('bio', e.target.value)} maxLength={800} rows={3} className={I} /></label>
       <input type="text" tabIndex={-1} autoComplete="off" value={f.website} onChange={(e) => set('website', e.target.value)} className="hidden" aria-hidden />
-      <p className="text-[12px] text-ink/55 leading-relaxed border border-ink/[0.07] rounded-xl bg-ink/[0.02] p-3">
+      <p className="text-[12px] text-ink/60 leading-relaxed border border-ink/[0.07] rounded-xl bg-ink/[0.02] p-3">
         Verificaremos tu <strong>titulación profesional y tu seguro</strong> antes de publicar tus chárters. Solo operadores verificados
         aparecen en el directorio y pueden cobrar. Guardarás un enlace privado para gestionar tus salidas.
       </p>

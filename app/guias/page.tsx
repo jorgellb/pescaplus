@@ -56,7 +56,7 @@ export default async function GuidesIndex() {
                   )}
                 </div>
                 <div className="p-5 flex flex-col flex-1">
-                  <time className="font-mono text-[11px] uppercase tracking-widest text-ink/40">
+                  <time className="font-mono text-[11px] uppercase tracking-widest text-ink/60">
                     {new Date(g.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
                   </time>
                   <h3 className="font-display uppercase text-xl leading-tight text-ink group-hover:text-accent transition-colors mt-2">

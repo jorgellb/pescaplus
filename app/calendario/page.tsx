@@ -64,7 +64,7 @@ export default function CalendarioPage() {
           </h2>
           <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
             {WEEKDAYS.map((w) => (
-              <div key={w} className="text-center font-mono text-[11px] font-bold uppercase tracking-widest text-ink/40 py-1">{w}</div>
+              <div key={w} className="text-center font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60 py-1">{w}</div>
             ))}
             {cells.map((c, i) =>
               c === null ? (
@@ -111,7 +111,7 @@ export default function CalendarioPage() {
                       sp.name
                     )}
                   </h3>
-                  <span className="font-mono text-[10px] uppercase tracking-widest text-ink/40">{sp.water === 'mar' ? 'Mar' : 'Agua dulce'}</span>
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-ink/60">{sp.water === 'mar' ? 'Mar' : 'Agua dulce'}</span>
                 </div>
                 <div className="grid grid-cols-12 gap-1 mb-2">
                   {MONTHS_ABBR.map((mo, idx) => {
@@ -122,7 +122,7 @@ export default function CalendarioPage() {
                         key={mo}
                         title={mo}
                         className={`text-center text-[9px] sm:text-[10px] font-bold uppercase py-1 rounded ${
-                          good ? 'bg-accent text-paper' : 'bg-ink/5 text-ink/40'
+                          good ? 'bg-accent text-paper' : 'bg-ink/5 text-ink/60'
                         } ${isCurrent ? 'ring-2 ring-ink/40' : ''}`}
                       >
                         {mo[0]}
@@ -134,7 +134,7 @@ export default function CalendarioPage() {
               </div>
             ))}
           </div>
-          <p className="text-[12px] text-ink/50">La franja resaltada marca el mes actual. Orientativo para planificar.</p>
+          <p className="text-[12px] text-ink/60">La franja resaltada marca el mes actual. Orientativo para planificar.</p>
         </div>
 
         {/* Vedas note */}

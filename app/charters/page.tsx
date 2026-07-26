@@ -64,7 +64,7 @@ export default async function ChartersHub({ searchParams }: Params) {
             {filtered ? 'Resultados' : 'Próximos chárters'}
           </h2>
           {filtered && describeFilter(filter) && (
-            <p className="text-[14px] text-ink/55 mt-1">{describeFilter(filter)}</p>
+            <p className="text-[14px] text-ink/60 mt-1">{describeFilter(filter)}</p>
           )}
         </div>
 
@@ -100,15 +100,15 @@ export default async function ChartersHub({ searchParams }: Params) {
                     <div className="p-4">
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-[12px] font-semibold text-accent">{MOD[c.modality]} <span className="first-letter:uppercase inline-block">{fmtDayLabel(c.dateISO)}</span> · {c.timeStart}</span>
-                        <span className="text-[12px] font-medium text-ink/40">{c.placesTaken}/{c.maxPlaces}</span>
+                        <span className="text-[12px] font-medium text-ink/60">{c.placesTaken}/{c.maxPlaces}</span>
                       </div>
                       <p className="font-display text-xl text-ink mt-1.5">{c.highlights || spot?.name || c.spotSlug}</p>
                       <p className="text-[13px] text-ink/65 mt-1">
                         {c.operator?.businessName || c.operator?.name} · patrón verificado ✓{sp ? ` · a por ${sp.name.toLowerCase()}` : ''}
                       </p>
                       <p className="text-[15px] font-bold text-ink mt-1.5">
-                        {c.pricePerPerson} €<span className="font-normal text-ink/55">/persona</span>
-                        {c.durationH ? <span className="font-normal text-ink/55"> · {c.durationH} h</span> : null}
+                        {c.pricePerPerson} €<span className="font-normal text-ink/60">/persona</span>
+                        {c.durationH ? <span className="font-normal text-ink/60"> · {c.durationH} h</span> : null}
                       </p>
                     </div>
                   </Link>

@@ -120,10 +120,10 @@ export default function PhotoUploader({ operatorId, manageToken, photos: initial
         <p className="flex items-center gap-2 font-semibold text-ink text-[15px]">
           <CharterIcon name="camera" className="w-[18px] h-[18px] text-accent" />
           Fotos del barco
-          <span className="text-[12px] font-normal text-ink/45">({photos.length}/{max})</span>
+          <span className="text-[12px] font-normal text-ink/60">({photos.length}/{max})</span>
         </p>
       </div>
-      <p className="text-[13px] text-ink/55 -mt-1">
+      <p className="text-[13px] text-ink/60 -mt-1">
         Es lo primero que mira un pescador. La primera foto es la portada del anuncio.
       </p>
 

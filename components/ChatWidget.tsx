@@ -334,7 +334,7 @@ export default function ChatWidget() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Escribe tu consulta…"
-              className="flex-1 min-w-0 px-3 py-2.5 bg-paper border border-ink/10 rounded-xl text-ink placeholder-ink/40 focus:outline-none focus:border-accent text-[13px] transition-colors"
+              className="flex-1 min-w-0 px-3 py-2.5 bg-paper border border-ink/10 rounded-xl text-ink placeholder-ink/60 focus:outline-none focus:border-accent text-[13px] transition-colors"
               disabled={loading}
             />
             <button

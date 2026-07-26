@@ -121,9 +121,9 @@ export default function Navbar() {
                 name="q"
                 placeholder="Buscar aparejos…"
                 aria-label="Buscar productos"
-                className="w-40 lg:w-56 pl-9 pr-3 py-2 bg-ink/[0.04] border border-transparent rounded-full text-ink placeholder-ink/45 text-sm focus:outline-none focus:bg-paper focus:border-accent/50 transition-colors"
+                className="w-40 lg:w-56 pl-9 pr-3 py-2 bg-ink/[0.04] border border-transparent rounded-full text-ink placeholder-ink/60 text-sm focus:outline-none focus:bg-paper focus:border-accent/50 transition-colors"
               />
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/40 text-sm pointer-events-none">🔍</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/60 text-sm pointer-events-none">🔍</span>
             </form>
 
             <Link href="/favoritos" aria-label={`Favoritos${favCount > 0 ? ` (${favCount})` : ''}`}
@@ -170,7 +170,7 @@ export default function Navbar() {
               <div className="flex items-baseline justify-between gap-4 mb-5">
                 <div>
                   <p className="font-display text-xl text-ink">{s.label}</p>
-                  <p className="text-sm text-ink/55 mt-0.5">{s.tagline}</p>
+                  <p className="text-sm text-ink/60 mt-0.5">{s.tagline}</p>
                 </div>
                 <Link href={s.href} className="text-sm font-semibold text-accent hover:underline shrink-0">Ver todo →</Link>
               </div>
@@ -204,7 +204,7 @@ export default function Navbar() {
                       <span className="text-xl leading-none mt-0.5">{l.emoji}</span>
                       <span className="min-w-0">
                         <span className="block text-[15px] font-semibold text-ink group-hover:text-accent transition-colors">{l.label}</span>
-                        {l.hint && <span className="block text-[13px] text-ink/55 leading-snug mt-0.5">{l.hint}</span>}
+                        {l.hint && <span className="block text-[13px] text-ink/60 leading-snug mt-0.5">{l.hint}</span>}
                       </span>
                     </Link>
                   ))}
@@ -221,7 +221,7 @@ export default function Navbar() {
           <div className="px-4 py-4 space-y-3">
             <form action="/search" method="get" className="flex gap-2">
               <input type="text" name="q" placeholder="Buscar aparejos…" aria-label="Buscar productos"
-                className="flex-1 px-4 py-2.5 bg-ink/[0.04] rounded-full text-ink placeholder-ink/45 text-sm focus:outline-none focus:bg-paper focus:ring-1 focus:ring-accent/50" />
+                className="flex-1 px-4 py-2.5 bg-ink/[0.04] rounded-full text-ink placeholder-ink/60 text-sm focus:outline-none focus:bg-paper focus:ring-1 focus:ring-accent/50" />
               <button className="bg-accent text-paper px-4 rounded-full text-sm font-semibold">Buscar</button>
             </form>
 
@@ -232,7 +232,7 @@ export default function Navbar() {
                   <button onClick={() => setMobileSection(open ? null : s.id)} aria-expanded={open}
                     className="w-full flex items-center justify-between py-2.5 text-[15px] font-semibold text-ink">
                     {s.label}
-                    <svg className={`w-4 h-4 text-ink/40 transition-transform ${open ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    <svg className={`w-4 h-4 text-ink/60 transition-transform ${open ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" /></svg>
                   </button>
                   {open && (
                     <div className={s.variant === 'categories' ? 'grid grid-cols-2 gap-0.5 pb-2' : 'space-y-0.5 pb-2'}>

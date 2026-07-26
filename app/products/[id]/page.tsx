@@ -149,7 +149,7 @@ export default async function ProductPage({ params }: Params) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
       <RecentTracker {...snapshot} />
       <div className="max-w-7xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
-        <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-8">
+        <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/60 mb-8">
           <Link href="/" className="hover:text-accent">Inicio</Link> <span className="mx-1">/</span>{' '}
           <Link href={`/categories/${product.typeFishing}`} className="hover:text-accent">{modalityLabel}</Link>{' '}
           <span className="mx-1">/</span> <span className="text-ink truncate">{product.title.slice(0, 40)}</span>
@@ -174,7 +174,7 @@ export default async function ProductPage({ params }: Params) {
                     <span className="w-1.5 h-1.5 rounded-full bg-accent" /> Disponible
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 st rounded-full border border-ink/12 text-ink/50">
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 st rounded-full border border-ink/12 text-ink/60">
                     <span className="w-1.5 h-1.5 rounded-full bg-ink/40" /> No disponible
                   </span>
                 )}
@@ -185,7 +185,7 @@ export default async function ProductPage({ params }: Params) {
               <div className="flex items-center gap-2 font-mono text-sm">
                 <span className="text-accent">{'★'.repeat(Math.round(product.rating))}{'☆'.repeat(5 - Math.round(product.rating))}</span>
                 <span className="font-bold text-ink">{product.rating.toFixed(1)}</span>
-                <span className="text-ink/50">· {product.reviews.toLocaleString('es-ES')} vendidos</span>
+                <span className="text-ink/60">· {product.reviews.toLocaleString('es-ES')} vendidos</span>
               </div>
 
               <div className="space-y-1.5">
@@ -193,13 +193,13 @@ export default async function ProductPage({ params }: Params) {
                   <span className="font-display text-5xl leading-none text-ink">{product.price.toFixed(2)}</span>
                   <span className="font-display text-2xl text-ink/60">{product.currency === 'EUR' ? '€' : product.currency}</span>
                 </div>
-                <p className="text-[12px] text-ink/45">
+                <p className="text-[12px] text-ink/60">
                   Precio orientativo · puede variar en la tienda del vendedor
                 </p>
               </div>
 
               <div className="space-y-2 pt-2">
-                <h2 className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50">Descripción</h2>
+                <h2 className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60">Descripción</h2>
                 <div
                   className="text-[15px] text-ink/80 leading-relaxed [&_strong]:text-ink [&_a]:text-accent [&_a]:underline [&_ul]:list-disc [&_ul]:pl-5"
                   dangerouslySetInnerHTML={{ __html: renderDescription(product.description) }}
@@ -208,7 +208,7 @@ export default async function ProductPage({ params }: Params) {
 
               {/* Internal linking: product → its categories */}
               <div className="flex flex-wrap items-center gap-2 pt-1">
-                <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/40">Categorías:</span>
+                <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60">Categorías:</span>
                 {productCategories.map((cat) => (
                   <Link
                     key={cat}
@@ -232,7 +232,7 @@ export default async function ProductPage({ params }: Params) {
                   Comprar ahora →
                 </a>
               ) : (
-                <div className="w-full flex flex-col items-center justify-center gap-1 bg-ink/5 text-ink/50 px-8 py-5 border border-ink/10 rounded-xl cursor-not-allowed">
+                <div className="w-full flex flex-col items-center justify-center gap-1 bg-ink/5 text-ink/60 px-8 py-5 border border-ink/10 rounded-xl cursor-not-allowed">
                   <span className="font-display uppercase text-2xl leading-none">No disponible</span>
                   <span className="text-[13px]">Vuelve a consultarlo pronto</span>
                 </div>
@@ -252,7 +252,7 @@ export default async function ProductPage({ params }: Params) {
               >
                 Ver todo en {modalityLabel} →
               </Link>
-              <p className="text-[12px] text-ink/45 text-center">Compra 100% segura · Envío con seguimiento</p>
+              <p className="text-[12px] text-ink/60 text-center">Compra 100% segura · Envío con seguimiento</p>
             </div>
           </div>
         </div>
@@ -274,7 +274,7 @@ export default async function ProductPage({ params }: Params) {
             <dl className="divide-y divide-ink/10 border border-ink/[0.07] rounded-xl overflow-hidden">
               {specs.map((s) => (
                 <div key={s.label} className="flex items-baseline justify-between gap-4 px-4 py-3 bg-paper">
-                  <dt className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50 flex-shrink-0">{s.label}</dt>
+                  <dt className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60 flex-shrink-0">{s.label}</dt>
                   <dd className="text-sm font-semibold text-ink text-right break-words">{s.value}</dd>
                 </div>
               ))}

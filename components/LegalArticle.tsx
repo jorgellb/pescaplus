@@ -14,11 +14,11 @@ export default function LegalArticle({
     <Layout>
       <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
-          <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-5">
+          <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/60 mb-5">
             <Link href="/" className="hover:text-accent">Inicio</Link> <span className="mx-1">/</span> <span className="text-ink">{title}</span>
           </nav>
           <h1 className="font-display uppercase text-4xl sm:text-5xl leading-[1.02] text-ink">{title}</h1>
-          <p className="font-mono text-[11px] uppercase tracking-widest text-ink/40 mt-3">Última actualización: {updated}</p>
+          <p className="font-mono text-[11px] uppercase tracking-widest text-ink/60 mt-3">Última actualización: {updated}</p>
         </div>
       </section>
 

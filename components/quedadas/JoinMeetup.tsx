@@ -47,7 +47,7 @@ export default function JoinMeetup({ id, full, kind = 'quedada' }: { id: string;
     )
   }
 
-  const labelCls = 'font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50'
+  const labelCls = 'font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60'
   const inputCls = 'mt-1 w-full border border-ink/12 rounded-xl bg-paper px-3 py-2 text-sm'
   const cta = full ? 'Unirme a la lista de espera' : kind === 'llamada' ? 'Me interesa' : 'Apuntarme'
 

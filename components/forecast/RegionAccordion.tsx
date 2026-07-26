@@ -45,7 +45,7 @@ export default function RegionAccordion() {
                 aria-hidden
               />
               <span className="font-display uppercase text-lg sm:text-xl text-ink leading-none truncate">{region}</span>
-              <span className="flex-shrink-0 font-mono text-[10px] font-bold uppercase tracking-widest text-ink/45 border border-ink/10 rounded-full px-2 py-0.5">
+              <span className="flex-shrink-0 font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60 border border-ink/10 rounded-full px-2 py-0.5">
                 {spots.length} {spots.length === 1 ? 'zona' : 'zonas'}
               </span>
             </span>

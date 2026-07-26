@@ -57,7 +57,7 @@ export default function AlertSignup({ spotSlug, spotName, isSea }: { spotSlug: s
           maxLength={160}
           placeholder="tucorreo@ejemplo.com"
           aria-label="Tu email para las alertas"
-          className="flex-1 px-4 py-2.5 bg-paper border border-ink/10 rounded-xl text-ink placeholder-ink/40 focus:outline-none focus:border-accent text-sm"
+          className="flex-1 px-4 py-2.5 bg-paper border border-ink/10 rounded-xl text-ink placeholder-ink/60 focus:outline-none focus:border-accent text-sm"
         />
         {isSea && (
           <select name="especie" aria-label="Especie (opcional)" className="px-3 py-2.5 bg-paper border border-ink/10 rounded-xl text-sm text-ink/80 focus:outline-none focus:border-accent">

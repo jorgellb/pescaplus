@@ -97,7 +97,7 @@ export default function NearMeDay({ spots, showNav }: { spots: SpotDayScore[]; s
 
       {rankedMar.length > 0 && (
         <div className="space-y-2">
-          {rankedInterior.length > 0 && <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">🌊 Costa</p>}
+          {rankedInterior.length > 0 && <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">🌊 Costa</p>}
           <ol className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {rankedMar.map((s, i) => (
               <NearRow key={s.slug} s={s} i={i} showNav={showNav} />
@@ -108,7 +108,7 @@ export default function NearMeDay({ spots, showNav }: { spots: SpotDayScore[]; s
 
       {rankedInterior.length > 0 && (
         <div className="space-y-2">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">🎣 Embalses y ríos</p>
+          <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">🎣 Embalses y ríos</p>
           <ol className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {rankedInterior.map((s, i) => (
               <NearRow key={s.slug} s={s} i={i} showNav={showNav} />
@@ -134,7 +134,7 @@ function NearRow({ s, i, showNav }: { s: SpotDayScore & { km: number }; i: numbe
         href={`/mejores-horas/${s.slug}`}
         className="flex items-center gap-3 border border-ink/[0.07] rounded-xl px-3 py-2.5 bg-paper hover:border-accent transition-colors"
       >
-        <span className="font-mono text-[11px] font-bold text-ink/40 w-5 text-right shrink-0">{i + 1}</span>
+        <span className="font-mono text-[11px] font-bold text-ink/60 w-5 text-right shrink-0">{i + 1}</span>
         <span
           className="font-mono text-sm font-bold text-paper rounded-lg px-2 py-1 shrink-0"
           style={{ backgroundColor: s.waveUnknown ? '#9c9484' : scoreHex(s.score) }}
@@ -143,7 +143,7 @@ function NearRow({ s, i, showNav }: { s: SpotDayScore & { km: number }; i: numbe
         </span>
         <span className="min-w-0">
           <span className="block font-bold text-ink text-sm truncate">{s.name}</span>
-          <span className="block font-mono text-[10px] uppercase tracking-widest text-ink/45 truncate">
+          <span className="block font-mono text-[10px] uppercase tracking-widest text-ink/60 truncate">
             a {Math.round(s.km)} km · {scoreLabel(s.score)} {note}
           </span>
         </span>

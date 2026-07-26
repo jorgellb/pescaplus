@@ -70,7 +70,7 @@ export default async function MeetupPage({ params, searchParams }: Params) {
     <Layout>
       <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
-          <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-5">
+          <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/60 mb-5">
             <Link href="/quedadas" className="hover:text-accent">Quedadas</Link> <span className="mx-1">/</span>{' '}
             <span className="text-ink">{spot?.name ?? meetup.spotSlug}</span>
           </nav>
@@ -91,18 +91,18 @@ export default async function MeetupPage({ params, searchParams }: Params) {
 
           <div className="flex flex-wrap gap-2 mt-4">
             <span className="inline-flex items-center gap-2 rounded-xl border border-ink/10 px-3 py-2 text-sm">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-ink/50">{meetup.kind === 'llamada' ? 'Interesados' : 'Plazas'}</span>
+              <span className="font-mono text-[10px] uppercase tracking-widest text-ink/60">{meetup.kind === 'llamada' ? 'Interesados' : 'Plazas'}</span>
               <span className="font-display text-lg text-ink">{meetup.kind === 'llamada' ? meetup.placesTaken : `${meetup.placesTaken}/${meetup.maxPlaces}`}</span>
-              <span className={`font-mono text-[10px] uppercase tracking-widest ${meetup.status === 'confirmed' ? 'text-accent' : 'text-ink/40'}`}>
+              <span className={`font-mono text-[10px] uppercase tracking-widest ${meetup.status === 'confirmed' ? 'text-accent' : 'text-ink/60'}`}>
                 {meetup.status === 'confirmed' ? (meetup.kind === 'llamada' ? '✓ grupo formado' : '✓ confirmada') : `mín. ${meetup.minToConfirm}`}
               </span>
             </span>
             <span className="inline-flex items-center gap-2 rounded-xl border border-ink/10 px-3 py-2 text-sm">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-ink/50">Nivel</span>
+              <span className="font-mono text-[10px] uppercase tracking-widest text-ink/60">Nivel</span>
               <span className="font-bold text-ink capitalize">{meetup.level}</span>
             </span>
             <span className="inline-flex items-center gap-2 rounded-xl border border-ink/10 px-3 py-2 text-sm">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-ink/50">Coste</span>
+              <span className="font-mono text-[10px] uppercase tracking-widest text-ink/60">Coste</span>
               <span className="font-bold text-ink">{cost.label}</span>
             </span>
           </div>
@@ -143,7 +143,7 @@ export default async function MeetupPage({ params, searchParams }: Params) {
                 <> Si se llena ({meetup.maxPlaces + 1} a bordo), baja a <strong>≈{cost.perPersonFull} €</strong>. Cuantos más seáis, más barato.</>
               )}
             </p>
-            <p className="font-mono text-[10px] uppercase tracking-wide text-ink/40">Solo reparto de gastos reales, sin ánimo de lucro.</p>
+            <p className="font-mono text-[10px] uppercase tracking-wide text-ink/60">Solo reparto de gastos reales, sin ánimo de lucro.</p>
           </div>
         )}
 
@@ -174,7 +174,7 @@ export default async function MeetupPage({ params, searchParams }: Params) {
           </div>
         )}
         {daysAway != null && (
-          <p className="text-[13px] text-ink/55 border border-ink/[0.07] rounded-xl bg-ink/[0.02] p-3">
+          <p className="text-[13px] text-ink/60 border border-ink/[0.07] rounded-xl bg-ink/[0.02] p-3">
             🗓️ Faltan {daysAway} días — la previsión detallada aparecerá cuando entre en el rango de 7 días. Mientras, mira el{' '}
             <Link href={`/mejores-horas/${meetup.spotSlug}/planificador`} className="text-accent underline">planificador de la zona</Link>.
           </p>
@@ -193,7 +193,7 @@ export default async function MeetupPage({ params, searchParams }: Params) {
           manageToken={isHost ? t : undefined}
         />
 
-        <p className="text-[12px] text-ink/50 leading-relaxed border-t border-ink/[0.07] pt-6">
+        <p className="text-[12px] text-ink/60 leading-relaxed border-t border-ink/[0.07] pt-6">
           Quedada para compartir gastos, sin ánimo de lucro. Lleva tu licencia de pesca, chaleco y avisa a alguien en tierra.
           El anfitrión y cada participante son responsables de su propia seguridad.
         </p>

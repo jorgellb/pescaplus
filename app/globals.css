@@ -11,7 +11,7 @@
   --paper: #ffffff;
   --surface: #f4f6f6;
   --ink: #0f1417;
-  --accent: #0d9488;
+  --accent: #0a7d72;
   --accent-soft: color-mix(in srgb, var(--accent) 9%, white);
   /* Font families are self-hosted via next/font (see app/layout.tsx). */
   --font-sans: var(--font-grotesk), system-ui, sans-serif;

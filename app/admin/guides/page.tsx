@@ -68,7 +68,7 @@ export default function AdminGuidesPage() {
         <div className="overflow-x-auto border border-ink/10 rounded-2xl bg-white">
           <table className="w-full text-sm min-w-[560px]">
             <thead>
-              <tr className="text-left text-[11px] uppercase tracking-widest text-ink/50 border-b border-ink/10">
+              <tr className="text-left text-[11px] uppercase tracking-widest text-ink/60 border-b border-ink/10">
                 <th className="px-4 py-3 font-bold">Título</th>
                 <th className="px-4 py-3 font-bold">Categoría</th>
                 <th className="px-4 py-3 font-bold">Estado</th>
@@ -80,7 +80,7 @@ export default function AdminGuidesPage() {
                 <tr key={g.id} className="border-b border-ink/10 last:border-0 hover:bg-ink/[0.02]">
                   <td className="px-4 py-3">
                     <p className="font-semibold text-ink truncate max-w-[320px]">{g.title}</p>
-                    <p className="text-[11px] text-ink/40">{new Date(g.createdAt).toLocaleDateString('es-ES')}</p>
+                    <p className="text-[11px] text-ink/60">{new Date(g.createdAt).toLocaleDateString('es-ES')}</p>
                   </td>
                   <td className="px-4 py-3 text-ink/70">{g.typeFishing ? fishingLabel(g.typeFishing) : 'General'}</td>
                   <td className="px-4 py-3">

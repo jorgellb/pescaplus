@@ -37,14 +37,14 @@ export default function LoginForm() {
   const inputCls = 'mt-1 w-full border border-ink/12 rounded-xl bg-paper px-3 py-2.5 text-sm'
   return (
     <form onSubmit={submit} className="border border-ink/10 rounded-2xl bg-paper p-5 space-y-3 max-w-md">
-      <label className="block"><span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Tu email</span>
+      <label className="block"><span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Tu email</span>
         <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={160} placeholder="tu@email.com" className={inputCls} autoFocus /></label>
       <input type="text" tabIndex={-1} autoComplete="off" value={website} onChange={(e) => setWebsite(e.target.value)} className="hidden" aria-hidden />
       {state === 'error' && <p className="text-sm text-red-700">{msg}</p>}
       <button type="submit" disabled={state === 'loading'} className="w-full bg-accent text-paper px-5 py-2.5 text-sm font-semibold rounded-full hover:bg-ink disabled:opacity-60 transition-colors">
         {state === 'loading' ? 'Enviando…' : 'Enviarme enlace de acceso'}
       </button>
-      <p className="text-[12px] text-ink/50">Sin contraseñas. Te enviamos un enlace seguro para entrar. Si es tu primera vez, se crea tu cuenta automáticamente.</p>
+      <p className="text-[12px] text-ink/60">Sin contraseñas. Te enviamos un enlace seguro para entrar. Si es tu primera vez, se crea tu cuenta automáticamente.</p>
     </form>
   )
 }

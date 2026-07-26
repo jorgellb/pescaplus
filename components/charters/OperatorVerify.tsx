@@ -22,10 +22,10 @@ export default function OperatorVerify({ operators }: { operators: Op[] }) {
         <div key={o.id} className={`border rounded-2xl p-4 ${o.verified ? 'border-accent/30 bg-accent/[0.04]' : 'border-amber-700/30 bg-amber-700/[0.05]'}`}>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="font-bold text-ink">{o.businessName || o.name} <span className="font-mono text-[10px] uppercase tracking-widest text-ink/45">{o.verified ? '✓ verificado' : 'pendiente'}</span></p>
+              <p className="font-bold text-ink">{o.businessName || o.name} <span className="font-mono text-[10px] uppercase tracking-widest text-ink/60">{o.verified ? '✓ verificado' : 'pendiente'}</span></p>
               <p className="text-[13px] text-ink/65">{o.name} · {o.email}{o.phone ? ` · ${o.phone}` : ''} · {o.spotSlug} · {o.boatName} {o.boatType} ({o.capacity} plazas)</p>
-              <p className="text-[12px] text-ink/55 mt-1">Licencia: <strong>{o.licenseRef}</strong> · Seguro: <strong>{o.insuranceRef}</strong></p>
-              {o.bio && <p className="text-[12px] text-ink/50 mt-1">{o.bio}</p>}
+              <p className="text-[12px] text-ink/60 mt-1">Licencia: <strong>{o.licenseRef}</strong> · Seguro: <strong>{o.insuranceRef}</strong></p>
+              {o.bio && <p className="text-[12px] text-ink/60 mt-1">{o.bio}</p>}
             </div>
             <div className="flex gap-2">
               {!o.verified

@@ -33,7 +33,7 @@ export default function RequestBooking({ id, full, price }: { id: string; full: 
     )
   }
 
-  const labelCls = 'font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50'
+  const labelCls = 'font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60'
   const inputCls = 'mt-1 w-full border border-ink/12 rounded-xl bg-paper px-3 py-2 text-sm'
 
   return (

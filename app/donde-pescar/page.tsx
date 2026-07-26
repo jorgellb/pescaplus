@@ -129,7 +129,7 @@ export default async function DondePescarPage({ searchParams }: Params) {
                         href={`/mejores-horas/${s.slug}`}
                         className="flex items-center gap-3 border border-ink/[0.07] rounded-xl px-3.5 py-3 bg-paper hover:border-accent transition-colors"
                       >
-                        <span className="font-mono text-xs font-bold text-ink/40 w-6 text-right shrink-0">{i + 1}</span>
+                        <span className="font-mono text-xs font-bold text-ink/60 w-6 text-right shrink-0">{i + 1}</span>
                         <span
                           className="font-mono text-base font-bold text-paper rounded-lg px-2.5 py-1 shrink-0"
                           style={{ backgroundColor: scoreHex(s.score) }}
@@ -138,12 +138,12 @@ export default async function DondePescarPage({ searchParams }: Params) {
                         </span>
                         <span className="min-w-0 flex-1">
                           <span className="block font-bold text-ink truncate">{s.name}</span>
-                          <span className="block font-mono text-[10px] uppercase tracking-widest text-ink/45 truncate">
+                          <span className="block font-mono text-[10px] uppercase tracking-widest text-ink/60 truncate">
                             {s.region} · {scoreLabel(s.score)}
                             {s.waveUnknown ? ' · ⚠️ sin dato de oleaje' : showNav && s.navegabilidad === 'no' ? ' · ⚠️ no navegable' : showNav && s.navegabilidad === 'unknown' ? ' · navegación sin confirmar' : ''}
                           </span>
                         </span>
-                        <span className="hidden sm:block text-right shrink-0 font-mono text-[11px] text-ink/55 leading-relaxed">
+                        <span className="hidden sm:block text-right shrink-0 font-mono text-[11px] text-ink/60 leading-relaxed">
                           {s.windMax != null && (
                             <span className="block">💨 {Math.round(s.windMax)} km/h · {windWord(s.windMax)}</span>
                           )}
@@ -176,7 +176,7 @@ export default async function DondePescarPage({ searchParams }: Params) {
                             </span>
                             <span className="min-w-0">
                               <span className="block font-bold text-ink text-sm truncate">{s.name}</span>
-                              <span className="block font-mono text-[10px] uppercase tracking-widest text-ink/45">{s.region}</span>
+                              <span className="block font-mono text-[10px] uppercase tracking-widest text-ink/60">{s.region}</span>
                             </span>
                           </Link>
                         </li>
@@ -187,7 +187,7 @@ export default async function DondePescarPage({ searchParams }: Params) {
 
                 <div className="border border-red-700/25 rounded-2xl bg-red-700/[0.04] p-4 space-y-2">
                   <h2 className="font-display uppercase text-lg leading-none">🚫 Mejor evita</h2>
-                  <p className="font-mono text-[10px] uppercase tracking-widest text-ink/45">Las peores del día en la costa</p>
+                  <p className="font-mono text-[10px] uppercase tracking-widest text-ink/60">Las peores del día en la costa</p>
                   <ul className="space-y-1.5">
                     {worst.map((s) => (
                       <li key={s.slug} className="flex items-center gap-2 text-sm">
@@ -197,7 +197,7 @@ export default async function DondePescarPage({ searchParams }: Params) {
                         <Link href={`/mejores-horas/${s.slug}`} className="font-bold text-ink hover:text-accent truncate">
                           {s.name}
                         </Link>
-                        <span className="font-mono text-[10px] uppercase text-ink/45 ml-auto shrink-0">
+                        <span className="font-mono text-[10px] uppercase text-ink/60 ml-auto shrink-0">
                           {s.windMax != null ? `💨 ${Math.round(s.windMax)}` : ''}
                           {s.waveMax != null ? ` 🌊 ${s.waveMax.toFixed(1)}m` : ''}
                         </span>

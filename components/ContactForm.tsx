@@ -48,7 +48,7 @@ export default function ContactForm() {
   }
 
   const inputCls =
-    'w-full px-4 py-3 bg-paper border border-ink/10 rounded-xl text-ink placeholder-ink/40 focus:outline-none focus:border-accent text-sm transition-colors'
+    'w-full px-4 py-3 bg-paper border border-ink/10 rounded-xl text-ink placeholder-ink/60 focus:outline-none focus:border-accent text-sm transition-colors'
 
   return (
     <form onSubmit={handleSubmit} className="border border-ink/10 rounded-xl shadow-hard bg-paper p-5 sm:p-7 space-y-4">
@@ -57,22 +57,22 @@ export default function ContactForm() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
-          <label htmlFor="name" className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50">Nombre</label>
+          <label htmlFor="name" className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60">Nombre</label>
           <input id="name" name="name" required minLength={2} maxLength={120} placeholder="Tu nombre" className={inputCls} />
         </div>
         <div className="space-y-1.5">
-          <label htmlFor="email" className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50">Email</label>
+          <label htmlFor="email" className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60">Email</label>
           <input id="email" name="email" type="email" required maxLength={160} placeholder="tucorreo@ejemplo.com" className={inputCls} />
         </div>
       </div>
 
       <div className="space-y-1.5">
-        <label htmlFor="subject" className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50">Asunto</label>
+        <label htmlFor="subject" className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60">Asunto</label>
         <input id="subject" name="subject" maxLength={160} placeholder="¿En qué podemos ayudarte?" className={inputCls} />
       </div>
 
       <div className="space-y-1.5">
-        <label htmlFor="message" className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50">Mensaje</label>
+        <label htmlFor="message" className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60">Mensaje</label>
         <textarea id="message" name="message" required minLength={5} maxLength={4000} rows={6} placeholder="Cuéntanos tu consulta…" className={`${inputCls} resize-y`} />
       </div>
 
@@ -86,7 +86,7 @@ export default function ContactForm() {
         >
           {status === 'sending' ? 'Enviando…' : 'Enviar mensaje'}
         </button>
-        <p className="font-mono text-[10px] uppercase tracking-widest text-ink/40">Respuesta en 24-48 h laborables</p>
+        <p className="font-mono text-[10px] uppercase tracking-widest text-ink/60">Respuesta en 24-48 h laborables</p>
       </div>
     </form>
   )

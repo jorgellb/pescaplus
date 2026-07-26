@@ -39,14 +39,14 @@ export default function MessageThread({ threadId, initial, myRole }: { threadId:
   return (
     <div className="space-y-4">
       <div className="space-y-2.5 max-h-[55vh] overflow-y-auto border border-ink/[0.07] rounded-2xl bg-paper p-4">
-        {messages.length === 0 && <p className="text-sm text-ink/50 text-center py-6">Aún no hay mensajes. Escribe el primero 👇</p>}
+        {messages.length === 0 && <p className="text-sm text-ink/60 text-center py-6">Aún no hay mensajes. Escribe el primero 👇</p>}
         {messages.map((m) => {
           const mine = m.sender === myRole
           return (
             <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[80%] rounded-2xl px-3.5 py-2 ${mine ? 'bg-accent text-paper' : 'bg-ink/[0.06] text-ink'}`}>
                 <p className="text-[14px] whitespace-pre-line break-words">{m.body}</p>
-                <p className={`text-[10px] mt-0.5 ${mine ? 'text-paper/70' : 'text-ink/40'}`}>{fmtTime(m.createdAt)}</p>
+                <p className={`text-[10px] mt-0.5 ${mine ? 'text-paper/70' : 'text-ink/60'}`}>{fmtTime(m.createdAt)}</p>
               </div>
             </div>
           )

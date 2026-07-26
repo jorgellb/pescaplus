@@ -29,7 +29,7 @@ function SummaryChip({ icon, label, value }: { icon: string; label: string; valu
     <div className="flex items-center gap-3 rounded-xl border border-ink/[0.07] bg-paper px-3.5 py-3">
       <CharterIcon name={icon} className="w-5 h-5 shrink-0 text-accent" />
       <div className="min-w-0">
-        <p className="text-[11px] uppercase tracking-wide text-ink/45 leading-none">{label}</p>
+        <p className="text-[11px] uppercase tracking-wide text-ink/60 leading-none">{label}</p>
         <p className="font-semibold text-ink text-[14.5px] leading-tight mt-1 truncate">{value}</p>
       </div>
     </div>
@@ -76,7 +76,7 @@ export default async function CharterPage({ params, searchParams }: { params: Pr
     <Layout>
       <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
-          <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/50 mb-5">
+          <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/60 mb-5">
             <Link href="/charters" className="hover:text-accent">Chárters</Link> <span className="mx-1">/</span> <span className="text-ink">{spot?.name ?? charter.spotSlug}</span>
           </nav>
           {cancelled && <div className="border border-red-700/40 rounded-xl bg-red-700/[0.07] p-3 mb-5 text-sm font-bold text-red-900">Este chárter se ha cancelado.</div>}
@@ -107,11 +107,11 @@ export default async function CharterPage({ params, searchParams }: { params: Pr
         <div className="border border-accent/30 rounded-2xl bg-accent/[0.04] p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">⚓ Patrón profesional verificado ✓</p>
           <p className="text-[15px] font-bold text-ink mt-1">{charter.operator.businessName || charter.operator.name}
-            {charter.operator.reviewCount > 0 && <span className="ml-2 text-[13px] font-normal text-amber-600">★ {charter.operator.avgRating.toFixed(1)} <span className="text-ink/45">({charter.operator.reviewCount})</span></span>}
+            {charter.operator.reviewCount > 0 && <span className="ml-2 text-[13px] font-normal text-amber-600">★ {charter.operator.avgRating.toFixed(1)} <span className="text-ink/60">({charter.operator.reviewCount})</span></span>}
           </p>
           <p className="text-[13px] text-ink/70">{charter.operator.boatName} {charter.operator.boatType}{charter.operator.capacity ? ` · ${charter.operator.capacity} plazas` : ''}</p>
           {charter.operator.bio && <p className="text-[13px] text-ink/70 mt-1">{charter.operator.bio}</p>}
-          <p className="font-mono text-[10px] uppercase tracking-wide text-ink/40 mt-1">Licencia y seguro comprobados por PescaPlus.</p>
+          <p className="font-mono text-[10px] uppercase tracking-wide text-ink/60 mt-1">Licencia y seguro comprobados por PescaPlus.</p>
           {!cancelled && <div className="mt-3"><AskOperator charterId={charter.id} loggedIn={!!viewer} isOwner={isOwner} /></div>}
         </div>
 
@@ -184,7 +184,7 @@ export default async function CharterPage({ params, searchParams }: { params: Pr
           </div>
         )}
 
-        <p className="text-[12px] text-ink/50 leading-relaxed border-t border-ink/[0.07] pt-6">
+        <p className="text-[12px] text-ink/60 leading-relaxed border-t border-ink/[0.07] pt-6">
           Salida con patrón profesional verificado. Cada participante debe llevar su documentación.{charter.operator.stripeReady
             ? ' El pago se procesa de forma segura con Stripe; PescaPlus retiene una comisión de servicio y el resto llega al patrón.'
             : ' Coordinas el pago directamente con el patrón tras confirmar la plaza.'}

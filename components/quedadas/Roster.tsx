@@ -49,7 +49,7 @@ export default function Roster({
 
   const chip = (p: Person, waiting: boolean, i?: number) => (
     <span key={p.id} className={`inline-flex items-center gap-1.5 border rounded-full px-3 py-1.5 text-sm ${waiting ? 'border-amber-700/30 text-ink/70 bg-amber-700/[0.04]' : 'border-ink/[0.07] text-ink'}`}>
-      {waiting && i != null && <span className="font-mono text-[10px] text-ink/40">{i + 1}º</span>}
+      {waiting && i != null && <span className="font-mono text-[10px] text-ink/60">{i + 1}º</span>}
       {p.name}{p.places > 1 ? ` +${p.places - 1}` : ''}
       {isHost && p.contact && <span className="font-mono text-[10px] text-accent">{p.contact}</span>}
       {isHost && (
@@ -64,7 +64,7 @@ export default function Roster({
     <div className="space-y-3">
       {attendees.length > 0 && (
         <div className="space-y-2">
-          <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50">Quién va ({placesTaken})</p>
+          <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60">Quién va ({placesTaken})</p>
           <div className="flex flex-wrap gap-2">{attendees.map((p) => chip(p, false))}</div>
         </div>
       )}

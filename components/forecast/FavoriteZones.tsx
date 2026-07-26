@@ -21,7 +21,7 @@ export default function FavoriteZones() {
 
   return (
     <div className="mt-5 space-y-2">
-      <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/50">★ Tus zonas</p>
+      <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60">★ Tus zonas</p>
       <div className="flex flex-wrap gap-2">
         {spots.map((s) => (
           <Link key={s!.slug} href={`/mejores-horas/${s!.slug}`} className="px-3.5 py-1.5 text-sm font-bold bg-ink text-paper rounded-full hover:bg-accent transition-colors">

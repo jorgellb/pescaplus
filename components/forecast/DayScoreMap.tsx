@@ -67,7 +67,7 @@ export default function DayScoreMap({ spots, showNav }: { spots: SpotDayScore[];
         </svg>
       </div>
       <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-1.5 px-4 sm:px-6 py-3 border-t border-ink/10 bg-ink/[0.02]">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[10px] uppercase tracking-widest text-ink/50">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[10px] uppercase tracking-widest text-ink/60">
           {LEGEND.map((l) => (
             <span key={l.label} className="inline-flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full inline-block border border-paper" style={{ backgroundColor: l.color }} /> {l.label}

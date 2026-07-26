@@ -32,7 +32,7 @@ export default function CharterFilters({ initial, spots, resultCount }: {
     ...f.techniques, ...f.species, ...f.areas,
   ].filter(Boolean).length
 
-  const L = 'text-[12px] font-semibold uppercase tracking-wide text-ink/50'
+  const L = 'text-[12px] font-semibold uppercase tracking-wide text-ink/60'
   const I = 'mt-1 w-full border border-ink/[0.07] rounded-xl bg-paper px-3 py-2.5 text-sm focus:outline-none focus:border-accent'
 
   return (
@@ -64,11 +64,11 @@ export default function CharterFilters({ initial, spots, resultCount }: {
           {open ? 'Menos filtros' : 'Más filtros'}
         </button>
         {active > 0 && (
-          <button type="button" onClick={clear} className="text-sm font-medium text-ink/50 hover:text-red-700">
+          <button type="button" onClick={clear} className="text-sm font-medium text-ink/60 hover:text-red-700">
             Limpiar ({active})
           </button>
         )}
-        <span className="ml-auto text-sm text-ink/55">
+        <span className="ml-auto text-sm text-ink/60">
           {resultCount} {resultCount === 1 ? 'salida' : 'salidas'}
         </span>
       </div>
