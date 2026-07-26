@@ -3,6 +3,7 @@ import Layout from '@/components/Layout'
 import NauticalChart from '@/components/carta/NauticalChart'
 import { getChartProvider, attributionFor, NOT_FOR_NAVIGATION } from '@/lib/chart-providers'
 import { getSpot } from '@/lib/fishing-spots'
+import { getSessionUser } from '@/lib/auth'
 
 export const metadata: Metadata = {
   title: 'Carta náutica de pesca: balizamiento y profundidad',
@@ -17,6 +18,7 @@ export default async function CartaPage({ searchParams }: Params) {
   const { zona } = await searchParams
   const spot = zona ? getSpot(zona) : null
   const provider = getChartProvider()
+  const user = await getSessionUser()
   // Sin zona, se abre sobre el litoral peninsular a escala de conjunto.
   const initial = spot
     ? { lon: spot.lon, lat: spot.lat, zoom: 11 }
@@ -39,7 +41,7 @@ export default async function CartaPage({ searchParams }: Params) {
         </div>
       </section>
 
-      <NauticalChart provider={provider} attribution={attributionFor(provider)} initial={initial} />
+      <NauticalChart provider={provider} attribution={attributionFor(provider)} initial={initial} loggedIn={!!user} />
 
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <p className="text-[13px] text-ink/60 max-w-3xl">

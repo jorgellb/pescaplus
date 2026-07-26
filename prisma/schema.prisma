@@ -154,6 +154,7 @@ model User {
   rsvps    Rsvp[]
   operator Operator?
   reviews  Review[]         @relation("ReviewAuthor")
+  waypoints Waypoint[]
 
   @@index([email])
 }
@@ -254,6 +255,41 @@ model CatchReport {
 
   @@index([spotSlug, dateISO])
   @@index([speciesId, dateISO])
+}
+
+/**
+ * Marca personal en la carta: un caladero, un bajo, un naufragio.
+ *
+ * Son datos de localización de una persona —revelan dónde y cuándo navega— y
+ * además un caladero se guarda con expectativa de secreto. Por eso:
+ * `visibility` nace en 'private' SIEMPRE, y la propiedad se comprueba en cada
+ * consulta del store, nunca en la vista.
+ *
+ * La geometría se guarda como lat/lon en vez de un tipo PostGIS: a escala de
+ * "las marcas de un usuario" el filtro que importa es el dueño, no el espacio,
+ * y así la tabla vive en el esquema de Prisma sin riesgo de que un db push la
+ * borre. PostGIS se usa donde sí hace falta: el punto-en-polígono contra las
+ * áreas protegidas, construyendo el punto en la propia consulta.
+ */
+model Waypoint {
+  id         String   @id @default(cuid())
+  userId     String
+  name       String
+  /** caladero | bajo | naufragio | boya | rampa | peligro | otro */
+  type       String   @default("caladero")
+  lat        Float
+  lon        Float
+  /** Sonda en metros, si el pescador la anota. */
+  depthM     Float?
+  notes      String   @default("")
+  /** private | public. Nunca por defecto otra cosa que 'private'. */
+  visibility String   @default("private")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([visibility])
 }
 
 model Meetup {
