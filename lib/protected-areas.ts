@@ -107,6 +107,39 @@ export async function checkPoint(lat: number, lon: number): Promise<PointCheck> 
   }
 }
 
+/** Por debajo de este zoom no se pintan: serían miles de polígonos ilegibles. */
+export const MIN_RENDER_ZOOM = 8
+
+export interface AreaGeoJSON {
+  type: 'FeatureCollection'
+  features: { type: 'Feature'; properties: Record<string, unknown>; geometry: unknown }[]
+}
+
+/** Areas intersecting a viewport, as GeoJSON, for drawing on the chart. */
+export async function areasInBBox(w: number, s: number, e: number, n: number): Promise<AreaGeoJSON> {
+  if (!isDatabaseConfigured()) return { type: 'FeatureCollection', features: [] }
+  try {
+    const { prisma } = await import('@/lib/prisma')
+    const rows = await prisma.$queryRaw<{ id: string; name: string; type: string; rulesUrl: string; geojson: string }[]>`
+      SELECT id, name, type, "rulesUrl", ST_AsGeoJSON(geom) AS geojson
+      FROM "ProtectedArea"
+      WHERE geom && ST_MakeEnvelope(${w}::float8, ${s}::float8, ${e}::float8, ${n}::float8, 4326)
+      LIMIT 400
+    `
+    return {
+      type: 'FeatureCollection',
+      features: rows.map((r) => ({
+        type: 'Feature' as const,
+        properties: { id: r.id, name: r.name, type: r.type, rulesUrl: r.rulesUrl },
+        geometry: JSON.parse(r.geojson),
+      })),
+    }
+  } catch (error) {
+    console.warn('Areas bbox read failed:', error)
+    return { type: 'FeatureCollection', features: [] }
+  }
+}
+
 export interface AreaImport {
   name: string
   type?: string

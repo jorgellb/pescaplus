@@ -24,6 +24,8 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
   const map = useRef<MapLibreMap | null>(null)
   const [seamarks, setSeamarks] = useState(true)
   const [bathy, setBathy] = useState(true)
+  const [showAreas, setShowAreas] = useState(true)
+  const [areasFar, setAreasFar] = useState(false)
   const [ready, setReady] = useState(false)
   const [marks, setMarks] = useState<Waypoint[]>([])
   const [draft, setDraft] = useState<{ lat: number; lon: number } | null>(null)
@@ -76,6 +78,13 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
       })
     }
 
+    // Fuente vacía: se rellena al mover, con lo que entre en pantalla.
+    sources.areas = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } }
+    layers.push(
+      { id: 'areas-fill', type: 'fill', source: 'areas', paint: { 'fill-color': '#b91c1c', 'fill-opacity': 0.14 } },
+      { id: 'areas-line', type: 'line', source: 'areas', paint: { 'line-color': '#b91c1c', 'line-width': 1.6, 'line-opacity': 0.75 } },
+    )
+
     const m = new MapLibreMap({
       container: holder.current,
       style: { version: 8, sources, layers },
@@ -89,7 +98,29 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
       positionOptions: { enableHighAccuracy: true },
       trackUserLocation: true,
     }), 'top-right')
-    m.on('load', () => setReady(true))
+    const loadAreas = () => {
+      const src = m.getSource('areas') as { setData(d: unknown): void } | undefined
+      if (!src) return
+      const b = m.getBounds()
+      const bbox = [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()].join(',')
+      fetch(`/api/areas-protegidas/geojson?bbox=${bbox}&zoom=${m.getZoom().toFixed(1)}`)
+        .then((r) => r.json())
+        .then((d) => { src.setData(d); setAreasFar(!!d.tooFar) })
+        .catch(() => {})
+    }
+    m.on('load', () => { setReady(true); loadAreas() })
+    m.on('moveend', loadAreas)
+
+    // Pulsar un espacio protegido cuenta su nombre y enlaza su ficha.
+    m.on('click', 'areas-fill', (e) => {
+      const f = e.features?.[0]
+      if (!f) return
+      const p = f.properties as { name?: string; rulesUrl?: string }
+      const link = p.rulesUrl ? `<br><a href="${p.rulesUrl}" target="_blank" rel="noopener noreferrer" style="color:#0a7d72">Ver normativa</a>` : ''
+      new Popup({ offset: 8 }).setLngLat(e.lngLat)
+        .setHTML(`<strong>${p.name ?? 'Espacio protegido'}</strong><br><span style="font-size:12px">Consulta la normativa antes de pescar.</span>${link}`)
+        .addTo(m)
+    })
     m.on('click', (e) => {
       if (!loggedIn) return
       const lat = Math.round(e.lngLat.lat * 1e6) / 1e6
@@ -136,6 +167,14 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
     m.setLayoutProperty('bathymetry', 'visibility', bathy ? 'visible' : 'none')
   }, [bathy, ready])
 
+  useEffect(() => {
+    const m = map.current
+    if (!m || !ready) return
+    for (const id of ['areas-fill', 'areas-line']) {
+      if (m.getLayer(id)) m.setLayoutProperty(id, 'visibility', showAreas ? 'visible' : 'none')
+    }
+  }, [showAreas, ready])
+
   const saveDraft = async () => {
     if (!draft || !name.trim()) { setErr('Ponle un nombre a la marca.'); return }
     setSaving(true); setErr('')
@@ -178,6 +217,14 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
           <button type="button" onClick={() => setBathy((v) => !v)} aria-pressed={bathy} className={toggle(bathy)}>
             🌊 Profundidad
           </button>
+        )}
+        <button type="button" onClick={() => setShowAreas((v) => !v)} aria-pressed={showAreas} className={toggle(showAreas)}>
+          🛑 Espacios protegidos
+        </button>
+        {showAreas && areasFar && (
+          <span className="px-3 py-1.5 rounded-full bg-paper/90 text-[12px] text-ink/60 border border-ink/12">
+            Acércate para ver los espacios protegidos
+          </span>
         )}
       </div>
 
