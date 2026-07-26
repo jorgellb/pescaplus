@@ -235,6 +235,27 @@ model Message {
   @@index([threadId])
 }
 
+/**
+ * Captura compartida de forma anónima desde el diario.
+ *
+ * Solo campos estructurados: zona (no coordenadas), especie, día y cantidad.
+ * La nota del diario NUNCA sale del navegador — es texto libre y puede delatar
+ * un punto concreto, que es justo lo que un pescador no quiere compartir.
+ * `userId` se guarda solo para moderación y control de abuso; jamás se expone.
+ */
+model CatchReport {
+  id        String   @id @default(cuid())
+  spotSlug  String
+  speciesId String
+  dateISO   String
+  qty       Int      @default(1)
+  userId    String?
+  createdAt DateTime @default(now())
+
+  @@index([spotSlug, dateISO])
+  @@index([speciesId, dateISO])
+}
+
 model Meetup {
   id           String   @id @default(cuid())
   // Secret token: whoever holds it can edit/cancel the meetup (no accounts).

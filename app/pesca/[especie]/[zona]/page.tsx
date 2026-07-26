@@ -6,6 +6,7 @@ import { getSpot } from '@/lib/fishing-spots'
 import { SEA_SPECIES, MONTHS_SHORT } from '@/lib/fishing-species'
 import { speciesForZone, zonesForSpecies, isSpeciesZone } from '@/lib/species-zones'
 import { buildZoneFacts } from '@/lib/zone-facts'
+import { getSpeciesActivity } from '@/lib/catch-reports'
 import { getZoneClimate, CLIMATE_YEARS } from '@/lib/zone-climate'
 import { getRegulation, NATIONAL_SIZES_URL } from '@/lib/fishing-regulations'
 import { getTaxonomy, categoryName } from '@/lib/taxonomy-store'
@@ -46,6 +47,7 @@ export default async function SpeciesZonePage({ params }: Params) {
   if (!sp || !spot || !isSpeciesZone(especie, zona)) notFound()
 
   const facts = buildZoneFacts(spot)
+  const activity = await getSpeciesActivity(spot.slug, sp.id)
   const climate = getZoneClimate(spot.slug)
   const regulation = getRegulation(spot.region)
   const taxonomy = await getTaxonomy()
@@ -157,6 +159,19 @@ export default async function SpeciesZonePage({ params }: Params) {
       </section>
 
       <section className="max-w-4xl mx-auto px-4 sm:px-6 py-10 space-y-10">
+        {/* Señal de la comunidad: lo único que no sale de un modelo. */}
+        {activity.enough && (
+          <div className="border border-accent/25 rounded-2xl bg-accent/[0.04] p-5">
+            <h2 className="font-display text-xl text-ink">🐟 Se está pescando ahora mismo</h2>
+            <p className="text-[15px] text-ink/80 mt-1.5">
+              Pescadores han compartido <strong>{activity.reports} capturas</strong> de {n} en {spot.name}
+              {activity.fish > activity.reports && <> ({activity.fish} ejemplares)</>} en las últimas tres semanas.
+            </p>
+            <p className="text-[12px] text-ink/60 mt-2">
+              Datos anónimos y agregados por zona, compartidos desde el diario de capturas.
+            </p>
+          </div>
+        )}
         {/* CUÁNDO */}
         <div className="space-y-3">
           <h2 className="font-display uppercase text-2xl md:text-3xl text-ink border-b border-ink/[0.07] pb-3">¿Cuándo pescar {n} en {spot.name}?</h2>

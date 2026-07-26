@@ -15,6 +15,8 @@ import { todayMadridISO, fmtDateLong } from '@/lib/solunar-format'
  * computed locally, and with 3+ catches we surface the angler's own patterns.
  */
 const KEY = 'pescaplus-diario'
+/** Ids ya compartidos: compartir es opt-in y no debe repetirse. */
+const SHARED_KEY = 'pescaplus-diario-compartidas'
 
 interface CatchEntry {
   id: string
@@ -78,12 +80,39 @@ const PHASE_LABEL: Record<EntryContext['phaseBucket'], string> = {
 
 export default function DiaryClient() {
   const [entries, setEntries] = useState<CatchEntry[]>([])
+  const [shared, setShared] = useState<string[]>([])
+  const [sharing, setSharing] = useState<string | null>(null)
+
+  /**
+   * Compartir una captura: viajan solo zona, especie, día y cantidad. La nota
+   * se queda SIEMPRE en el navegador — es texto libre y ahí es donde se escapa
+   * un punto concreto, que es justo lo que nadie quiere publicar.
+   */
+  const share = async (e: CatchEntry) => {
+    setSharing(e.id)
+    try {
+      const res = await fetch('/api/capturas', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ spotSlug: e.spotSlug, speciesId: e.speciesId, dateISO: e.dateISO, qty: e.qty }),
+      })
+      const data = await res.json()
+      if (res.ok && data.success) {
+        const next = [...shared, e.id]
+        setShared(next)
+        try { localStorage.setItem(SHARED_KEY, JSON.stringify(next)) } catch { /* almacenamiento lleno */ }
+      }
+    } catch { /* sin red: se puede reintentar */ } finally { setSharing(null) }
+  }
   const [ready, setReady] = useState(false)
   const [form, setForm] = useState({ dateISO: '', spotSlug: '', speciesId: 'lubina', qty: 1, note: '' })
 
   useEffect(() => {
     const init = () => {
       setEntries(load())
+      try {
+        const raw = localStorage.getItem(SHARED_KEY)
+        if (raw) setShared(JSON.parse(raw) as string[])
+      } catch { /* almacenamiento bloqueado: se podrá recompartir */ }
       const params = new URLSearchParams(window.location.search)
       const zona = params.get('zona')
       setForm((f) => ({
@@ -307,10 +336,22 @@ export default function DiaryClient() {
                     </span>
                     {e.note && <span className="block text-[13px] text-ink/70 mt-0.5">{e.note}</span>}
                   </span>
+                  {shared.includes(e.id) ? (
+                    <span className="text-[12px] font-semibold text-accent" title="Compartida de forma anónima">✓ Compartida</span>
+                  ) : (
+                    <button
+                      onClick={() => share(e)}
+                      disabled={sharing === e.id}
+                      title="Comparte zona, especie, día y cantidad. Tu nota nunca sale de aquí."
+                      className="text-[12px] font-semibold text-accent hover:underline disabled:opacity-50"
+                    >
+                      {sharing === e.id ? 'Compartiendo…' : 'Compartir anónimamente'}
+                    </button>
+                  )}
                   <button
                     onClick={() => remove(e.id)}
                     aria-label="Borrar captura"
-                    className="font-mono text-[11px] uppercase tracking-wide text-ink/60 hover:text-red-700"
+                    className="text-[12px] text-ink/60 hover:text-red-700"
                   >
                     Borrar
                   </button>

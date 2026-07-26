@@ -1,4 +1,6 @@
 import { Suspense } from 'react'
+import SpotCatchActivity from './SpotCatchActivity'
+import { getSpotActivity } from '@/lib/catch-reports'
 import Link from 'next/link'
 import Layout from '@/components/Layout'
 import FishRating from '@/components/FishRating'
@@ -634,6 +636,9 @@ export default async function SpotDashboard({
             <p className="font-mono text-[10px] uppercase tracking-wide text-ink/35">Basado en temporada, Tª del agua medida, estado del mar y solunar de hoy · orientativo.</p>
           </div>
         )}
+
+        {/* Lo que ninguna previsión sabe: qué está entrando de verdad aquí. */}
+        <SpotCatchActivity activity={await getSpotActivity(s.slug)} spotName={s.name} />
 
         {/* 7-day hourly forecast with day selector */}
         {byDay.length > 0 && (
