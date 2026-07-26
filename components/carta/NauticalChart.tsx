@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Map as MapLibreMap, NavigationControl, ScaleControl, GeolocateControl, Marker, Popup, type StyleSpecification } from 'maplibre-gl'
+import { Map as MapLibreMap, NavigationControl, ScaleControl, GeolocateControl, Marker, Popup, setWorkerUrl, type StyleSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import type { ChartProvider } from '@/lib/chart-providers'
 import { WAYPOINT_TYPES, type Waypoint } from '@/lib/waypoint-types'
@@ -13,6 +13,17 @@ import { WAYPOINT_TYPES, type Waypoint } from '@/lib/waypoint-types'
  * source or writes a tile URL, which is what keeps the provider swap a config
  * change (see lib/chart-providers).
  */
+/**
+ * MapLibre carga su worker con `new URL('./maplibre-gl-worker.mjs',
+ * import.meta.url)`. Turbopack no emite ese fichero: la petición caía en el
+ * catch-all de Next, devolvía HTML, y el navegador la rechazaba por MIME type.
+ * El mapa montaba el canvas y los controles, pero no dibujaba nada — y sin
+ * error visible salvo en la consola. Lo servimos desde /public (lo copia
+ * scripts/copy-maplibre-worker.mjs antes de compilar), que además cumple la
+ * CSP sin abrirla a terceros.
+ */
+setWorkerUrl('/maplibre/maplibre-gl-worker.mjs')
+
 export default function NauticalChart({ provider, attribution, initial, loggedIn }: {
   provider: ChartProvider
   attribution: string
@@ -108,7 +119,11 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
         .then((d) => { src.setData(d); setAreasFar(!!d.tooFar) })
         .catch(() => {})
     }
-    m.on('load', () => { setReady(true); loadAreas() })
+    m.on('load', () => { setReady(true); m.resize(); loadAreas() })
+    // Si el contenedor cambia de tamaño (fuentes, rotación, barra del móvil)
+    // el mapa no se entera solo.
+    const ro = new ResizeObserver(() => m.resize())
+    ro.observe(holder.current)
     m.on('moveend', loadAreas)
 
     // Pulsar un espacio protegido cuenta su nombre y enlaza su ficha.
@@ -134,7 +149,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
     })
     map.current = m
 
-    return () => { m.remove(); map.current = null }
+    return () => { ro.disconnect(); m.remove(); map.current = null }
   }, [provider, initial.lon, initial.lat, initial.zoom, loggedIn])
 
   // Pintar las marcas. Se redibujan enteras: son decenas, no miles.
