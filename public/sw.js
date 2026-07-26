@@ -1,8 +1,8 @@
 /* PescaPlus service worker — network-first, con modo pescador sin cobertura:
    las páginas de previsión que visitas quedan guardadas y se sirven tal cual
    (última consulta) si te quedas sin red en la playa o en el barco. */
-const VERSION = 'pescaplus-v2'
-const PAGES = 'pescaplus-pages-v2'
+const VERSION = 'pescaplus-v3'
+const PAGES = 'pescaplus-pages-v3'
 const OFFLINE_URL = '/offline.html'
 const MAX_PAGES = 40
 

@@ -37,6 +37,19 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
   const [bathy, setBathy] = useState(true)
   const [showAreas, setShowAreas] = useState(true)
   const [areasFar, setAreasFar] = useState(false)
+  // WebGL se comprueba al crear el estado, no en un efecto: es un hecho del
+  // navegador, no algo que dependa del ciclo de vida.
+  const [fatal, setFatal] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null
+    try {
+      const probe = document.createElement('canvas')
+      const gl = probe.getContext('webgl2') || probe.getContext('webgl')
+      return gl ? null : 'Tu navegador no tiene WebGL activo, y la carta lo necesita. Actívalo o prueba con otro navegador.'
+    } catch {
+      return 'No se ha podido inicializar el gráfico de la carta en este navegador.'
+    }
+  })
+  const [tilesOk, setTilesOk] = useState(false)
   const [ready, setReady] = useState(false)
   const [marks, setMarks] = useState<Waypoint[]>([])
   const [draft, setDraft] = useState<{ lat: number; lon: number } | null>(null)
@@ -58,7 +71,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
   }, [loggedIn])
 
   useEffect(() => {
-    if (!holder.current || map.current) return
+    if (!holder.current || map.current || fatal) return
 
     const sources: StyleSpecification['sources'] = {
       base: { type: 'raster', tiles: provider.base.tiles, tileSize: provider.base.tileSize, attribution: provider.base.attribution },
@@ -119,6 +132,13 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
         .then((d) => { src.setData(d); setAreasFar(!!d.tooFar) })
         .catch(() => {})
     }
+    m.on('error', (e) => {
+      const msg = (e as unknown as { error?: Error }).error?.message ?? 'error desconocido'
+      console.error('MapLibre:', msg)
+      // Un fallo de una tesela suelta no debe tapar el mapa entero.
+      if (/webgl|context|style/i.test(msg)) setFatal(`La carta no ha podido dibujarse: ${msg}`)
+    })
+    m.on('data', (e) => { if (e.dataType === 'source' && e.isSourceLoaded) setTilesOk(true) })
     m.on('load', () => { setReady(true); m.resize(); loadAreas() })
     // Si el contenedor cambia de tamaño (fuentes, rotación, barra del móvil)
     // el mapa no se entera solo.
@@ -150,7 +170,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
     map.current = m
 
     return () => { ro.disconnect(); m.remove(); map.current = null }
-  }, [provider, initial.lon, initial.lat, initial.zoom, loggedIn])
+  }, [provider, initial.lon, initial.lat, initial.zoom, loggedIn, fatal])
 
   // Pintar las marcas. Se redibujan enteras: son decenas, no miles.
   useEffect(() => {
@@ -329,6 +349,18 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
           <a href="/entrar" className="font-semibold text-accent hover:underline">Inicia sesión</a> para guardar tus
           caladeros en la carta. Son privados: solo los ves tú.
         </p>
+      )}
+
+      {fatal && (
+        <div className="absolute inset-x-3 top-3 z-30 rounded-2xl border border-red-600/35 bg-paper p-4 shadow-hard-lg">
+          <p className="font-semibold text-red-900 text-[15px]">No se ha podido cargar la carta</p>
+          <p className="text-[13.5px] text-ink/75 mt-1">{fatal}</p>
+        </div>
+      )}
+      {!fatal && !tilesOk && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+          <p className="text-[14px] text-ink/60 bg-paper/85 rounded-full px-4 py-2">Cargando la carta…</p>
+        </div>
       )}
 
       {/* Atribución: es parte de la licencia, así que no se puede ocultar. */}

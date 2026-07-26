@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Layout from '@/components/Layout'
-import NauticalChart from '@/components/carta/NauticalChart'
+import ChartLoader from '@/components/carta/ChartLoader'
 import { getChartProvider, attributionFor, NOT_FOR_NAVIGATION } from '@/lib/chart-providers'
 import { getSpot } from '@/lib/fishing-spots'
 import { getSessionUser } from '@/lib/auth'
@@ -41,7 +41,7 @@ export default async function CartaPage({ searchParams }: Params) {
         </div>
       </section>
 
-      <NauticalChart provider={provider} attribution={attributionFor(provider)} initial={initial} loggedIn={!!user} />
+      <ChartLoader provider={provider} attribution={attributionFor(provider)} initial={initial} loggedIn={!!user} />
 
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <p className="text-[13px] text-ink/60 max-w-3xl">
