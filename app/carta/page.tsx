@@ -4,6 +4,8 @@ import ChartLoader from '@/components/carta/ChartLoader'
 import { getChartProvider, attributionFor, NOT_FOR_NAVIGATION } from '@/lib/chart-providers'
 import { getSpot } from '@/lib/fishing-spots'
 import { getSessionUser } from '@/lib/auth'
+import { countPois } from '@/lib/nautical-pois'
+import { POI_KINDS } from '@/lib/nautical-poi-types'
 
 export const metadata: Metadata = {
   title: 'Carta náutica de pesca: balizamiento y profundidad',
@@ -19,6 +21,7 @@ export default async function CartaPage({ searchParams }: Params) {
   const spot = zona ? getSpot(zona) : null
   const provider = getChartProvider()
   const user = await getSessionUser()
+  const pois = await countPois()
   // Sin zona, se abre sobre el litoral peninsular a escala de conjunto.
   const initial = spot
     ? { lon: spot.lon, lat: spot.lat, zoom: 11 }
@@ -48,6 +51,17 @@ export default async function CartaPage({ searchParams }: Params) {
           {provider.sourceNote} Las profundidades son orientativas y proceden de modelos batimétricos,
           no de sondas oficiales corregidas.
         </p>
+        {/* Decir cuántos puntos hay es la única medida honesta de la cobertura:
+            que falte una rampa no significa que no exista, sino que no consta. */}
+        {Object.keys(pois).length > 0 && (
+          <p className="text-[13px] text-ink/60 max-w-3xl mt-2">
+            De OpenStreetMap:{' '}
+            {POI_KINDS.filter((k) => pois[k.id] > 0)
+              .map((k) => `${pois[k.id]} ${k.plural.toLowerCase()}`)
+              .join(', ')}
+            . Es lo que hay cartografiado, no todo lo que existe: si conoces una que falta, puedes añadirla en OpenStreetMap.
+          </p>
+        )}
       </section>
     </Layout>
   )
