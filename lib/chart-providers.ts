@@ -18,7 +18,10 @@
  */
 export interface ChartLayer {
   id: string
-  /** Raster tile URL template ({z}/{x}/{y}). */
+  /**
+   * Raster tile URL template. Normalmente `{z}/{x}/{y}`; un servicio WMS usa
+   * `{bbox-epsg-3857}`, que MapLibre sustituye igual de bien.
+   */
   tiles: string[]
   minZoom: number
   maxZoom: number
@@ -36,6 +39,8 @@ export interface ChartProvider {
   seamarks: ChartLayer | null
   /** Depth / bathymetry, when the provider offers it. */
   bathymetry: ChartLayer | null
+  /** Isóbatas: las curvas de nivel del fondo, rotuladas en metros. */
+  contours: ChartLayer | null
   /** False means it may not be used while the site earns money. */
   allowsCommercialUse: boolean
   /** Shown in the legal notice under the chart. */
@@ -80,6 +85,24 @@ const OPENSEAMAP: ChartProvider = {
     tileSize: 256,
     attribution: '© EMODnet Bathymetry',
   },
+  /**
+   * Isóbatas de EMODnet por WMS. Van aparte de la batimetría en color porque
+   * responden a preguntas distintas: el color dice "aquí baja", la curva dice
+   * "aquí hay 50 m". Se dibujan en blanco con halo oscuro, así que solo se leen
+   * sobre la carta, nunca sobre fondo claro.
+   */
+  contours: {
+    id: 'emodnet-contours',
+    tiles: [
+      'https://ows.emodnet-bathymetry.eu/wms?service=WMS&version=1.3.0&request=GetMap' +
+      '&layers=emodnet%3Acontours&styles=&format=image%2Fpng&transparent=true' +
+      '&crs=EPSG%3A3857&width=256&height=256&bbox={bbox-epsg-3857}',
+    ],
+    minZoom: 6,
+    maxZoom: 18,
+    tileSize: 256,
+    attribution: '© EMODnet Bathymetry',
+  },
   allowsCommercialUse: true,
   sourceNote: 'Cartografía de OpenSeaMap y OpenStreetMap (ODbL) con batimetría de EMODnet.',
 }
@@ -104,7 +127,7 @@ export function getChartProvider(): ChartProvider {
 
 /** Every attribution the visible layers demand, deduplicated. */
 export function attributionFor(p: ChartProvider): string {
-  return [p.base, p.seamarks, p.bathymetry]
+  return [p.base, p.seamarks, p.bathymetry, p.contours]
     .filter((l): l is ChartLayer => !!l)
     .map((l) => l.attribution)
     .filter((a, i, arr) => arr.indexOf(a) === i)

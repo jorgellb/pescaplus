@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Map as MapLibreMap, NavigationControl, ScaleControl, GeolocateControl, Marker, Popup, setWorkerUrl, type StyleSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import type { ChartProvider } from '@/lib/chart-providers'
+import type { Sounding } from '@/lib/soundings'
 import { WAYPOINT_TYPES, type Waypoint } from '@/lib/waypoint-types'
 
 /**
@@ -24,6 +25,41 @@ import { WAYPOINT_TYPES, type Waypoint } from '@/lib/waypoint-types'
  */
 setWorkerUrl('/maplibre/maplibre-gl-worker.mjs')
 
+/**
+ * La lectura del fondo. Cada caso se cuenta como es: una medida de un
+ * levantamiento no vale lo mismo que una interpolación del modelo global, y
+ * decir "0 m" en tierra sería sencillamente falso.
+ */
+function SoundingReading({ s }: { s: Sounding | null }) {
+  if (!s) return <p className="text-[13px] text-ink/60">Midiendo el fondo…</p>
+  if (s.kind === 'desconocida' || s.kind === 'tierra') {
+    return (
+      <p className="text-[13px] text-ink/70">
+        {s.label}
+        {s.elevationM != null && ` · ${s.elevationM} m de altitud`}
+      </p>
+    )
+  }
+  return (
+    <>
+      <p className="font-display text-[26px] leading-none text-ink">{s.label}</p>
+      {s.minM != null && s.maxM != null && s.maxM - s.minM >= 1 && (
+        <p className="text-[12px] text-ink/60 mt-1">Entre {s.minM} y {s.maxM} m alrededor del punto</p>
+      )}
+      {s.kind === 'aproximada' && (
+        <p className="text-[12px] text-amber-900 mt-1">Sale del modelo global: tómalo solo como orientación.</p>
+      )}
+      {s.source && (
+        <p className="text-[11px] text-ink/60 mt-1">
+          Fuente: {s.sourceUrl
+            ? <a href={s.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline hover:text-ink">{s.source}</a>
+            : s.source}
+        </p>
+      )}
+    </>
+  )
+}
+
 export default function NauticalChart({ provider, attribution, initial, loggedIn }: {
   provider: ChartProvider
   attribution: string
@@ -36,6 +72,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
   const map = useRef<MapLibreMap | null>(null)
   const [seamarks, setSeamarks] = useState(true)
   const [bathy, setBathy] = useState(true)
+  const [contours, setContours] = useState(true)
   const [showAreas, setShowAreas] = useState(true)
   const [areasFar, setAreasFar] = useState(false)
   // WebGL se comprueba al crear el estado, no en un efecto: es un hecho del
@@ -54,6 +91,9 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
   const [ready, setReady] = useState(false)
   const [marks, setMarks] = useState<Waypoint[]>([])
   const [draft, setDraft] = useState<{ lat: number; lon: number } | null>(null)
+  /** Último punto pinchado y su sonda. `null` mientras se consulta. */
+  const [clickedAt, setClickedAt] = useState<{ lat: number; lon: number } | null>(null)
+  const [sounding, setSounding] = useState<Sounding | null>(null)
   const [name, setName] = useState('')
   const [type, setType] = useState('caladero')
   const [depth, setDepth] = useState('')
@@ -116,6 +156,18 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
         id: 'bathymetry', type: 'raster', source: 'bathymetry',
         minzoom: provider.bathymetry.minZoom, maxzoom: provider.bathymetry.maxZoom,
         paint: { 'raster-opacity': 0.55 },
+      })
+    }
+    // Las isóbatas van SOBRE el color batimétrico —si no, se pierden— pero
+    // debajo del balizamiento, que es lo que más importa leer.
+    if (provider.contours) {
+      sources.contours = {
+        type: 'raster', tiles: provider.contours.tiles,
+        tileSize: provider.contours.tileSize, attribution: provider.contours.attribution,
+      }
+      layers.push({
+        id: 'contours', type: 'raster', source: 'contours',
+        minzoom: provider.contours.minZoom, maxzoom: provider.contours.maxZoom,
       })
     }
     if (provider.seamarks) {
@@ -188,9 +240,28 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
         .addTo(m)
     })
     m.on('click', (e) => {
-      if (!loggedIn) return
       const lat = Math.round(e.lngLat.lat * 1e6) / 1e6
       const lon = Math.round(e.lngLat.lng * 1e6) / 1e6
+
+      // La sonda se consulta pinches quien pinches: saber el fondo es útil
+      // aunque no tengas cuenta, y es la mejor invitación a crearse una.
+      setClickedAt({ lat, lon })
+      setSounding(null)
+      fetch(`/api/sonda?lat=${lat}&lon=${lon}`)
+        .then((r) => r.json())
+        .then((d: Sounding & { success?: boolean }) => {
+          if (!d?.success) return
+          setSounding(d)
+          // Se rellena la sonda solo si el patrón no ha escrito la suya: el
+          // dato de a bordo siempre manda sobre el del modelo.
+          if (d.depthM != null && d.depthM >= 0.5) setDepth((cur) => (cur === '' ? String(d.depthM) : cur))
+        })
+        .catch(() => setSounding({
+          kind: 'desconocida', depthM: null, minM: null, maxM: null, elevationM: null,
+          source: null, sourceUrl: null, label: 'Sonda no disponible ahora mismo',
+        }))
+
+      if (!loggedIn) return
       setDraft({ lat, lon })
       setName(''); setDepth(''); setErr(''); setZone(null)
       fetch(`/api/areas-protegidas?lat=${lat}&lon=${lon}`)
@@ -242,6 +313,12 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
     if (!m || !ready || !m.getLayer('bathymetry')) return
     m.setLayoutProperty('bathymetry', 'visibility', bathy ? 'visible' : 'none')
   }, [bathy, ready])
+
+  useEffect(() => {
+    const m = map.current
+    if (!m || !ready || !m.getLayer('contours')) return
+    m.setLayoutProperty('contours', 'visibility', contours ? 'visible' : 'none')
+  }, [contours, ready])
 
   useEffect(() => {
     const m = map.current
@@ -315,6 +392,11 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
             🌊 Profundidad
           </button>
         )}
+        {provider.contours && (
+          <button type="button" onClick={() => setContours((v) => !v)} aria-pressed={contours} className={toggle(contours)}>
+            📏 Isóbatas
+          </button>
+        )}
         <button type="button" onClick={() => setShowAreas((v) => !v)} aria-pressed={showAreas} className={toggle(showAreas)}>
           🛑 Espacios protegidos
         </button>
@@ -325,10 +407,25 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
         )}
       </div>
 
+      {clickedAt && !draft && (
+        <div className="pointer-events-auto w-64 max-w-full bg-paper rounded-2xl shadow-hard border border-ink/[0.07] px-4 py-3">
+          <div className="flex items-start justify-between gap-2">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/60">Sonda</p>
+            <button type="button" onClick={() => { setClickedAt(null); setSounding(null) }}
+              aria-label="Cerrar la sonda" className="text-ink/40 hover:text-ink leading-none text-[15px]">×</button>
+          </div>
+          <div className="mt-1"><SoundingReading s={sounding} /></div>
+          <p className="text-[11px] text-ink/60 mt-2">{clickedAt.lat.toFixed(4)}, {clickedAt.lon.toFixed(4)}</p>
+        </div>
+      )}
+
       {loggedIn && draft && (
         <div className="pointer-events-auto w-72 max-w-full bg-paper rounded-2xl shadow-hard-lg border border-ink/[0.07] p-4 space-y-2.5">
           <p className="font-semibold text-ink text-[15px]">Nueva marca</p>
           <p className="text-[12px] text-ink/60">{draft.lat.toFixed(5)}, {draft.lon.toFixed(5)}</p>
+          <div className="rounded-xl bg-ink/[0.03] px-3 py-2">
+            <SoundingReading s={sounding} />
+          </div>
           <input autoFocus value={name} onChange={(e) => setName(e.target.value)} maxLength={80}
             placeholder="Nombre (p. ej. Bajo de las lubinas)"
             className="w-full border border-ink/12 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-accent" />
