@@ -32,6 +32,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
   loggedIn: boolean
 }) {
   const holder = useRef<HTMLDivElement>(null)
+  const shell = useRef<HTMLDivElement>(null)
   const map = useRef<MapLibreMap | null>(null)
   const [seamarks, setSeamarks] = useState(true)
   const [bathy, setBathy] = useState(true)
@@ -69,6 +70,32 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
       .then((d) => { if (d.success) setMarks(d.waypoints) })
       .catch(() => {})
   }, [loggedIn])
+
+  /*
+   * La carta ocupa exactamente lo que queda de ventana bajo la cabecera.
+   *
+   * Con una altura fija de `100vh - 4rem` el mapa medía casi una pantalla
+   * entera, pero empezaba ya por debajo del título y del aviso legal: su borde
+   * inferior caía siempre fuera. Ahí viven la atribución y la escala, y la
+   * atribución de OpenStreetMap/OpenSeaMap no es decorativa — la ODbL la exige.
+   * Se mide contra el documento, no contra el scroll, para que el resultado no
+   * dependa de por dónde ande el usuario.
+   */
+  useEffect(() => {
+    const el = shell.current
+    if (!el) return
+    const fit = () => {
+      const top = el.getBoundingClientRect().top + window.scrollY
+      el.style.height = `${Math.round(Math.max(window.innerHeight - top, 420))}px`
+    }
+    fit()
+    window.addEventListener('resize', fit)
+    window.addEventListener('orientationchange', fit)
+    return () => {
+      window.removeEventListener('resize', fit)
+      window.removeEventListener('orientationchange', fit)
+    }
+  }, [])
 
   useEffect(() => {
     if (!holder.current || map.current || fatal) return
@@ -109,7 +136,10 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
       { id: 'areas-line', type: 'line', source: 'areas', paint: { 'line-color': '#b91c1c', 'line-width': 1.6, 'line-opacity': 0.75 } },
     )
 
-    const m = new MapLibreMap({
+    let m: MapLibreMap
+    let ro: ResizeObserver | null = null
+    try {
+    m = new MapLibreMap({
       container: holder.current,
       style: { version: 8, sources, layers },
       center: [initial.lon, initial.lat],
@@ -140,9 +170,10 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
     })
     m.on('data', (e) => { if (e.dataType === 'source' && e.isSourceLoaded) setTilesOk(true) })
     m.on('load', () => { setReady(true); m.resize(); loadAreas() })
+
     // Si el contenedor cambia de tamaño (fuentes, rotación, barra del móvil)
     // el mapa no se entera solo.
-    const ro = new ResizeObserver(() => m.resize())
+    ro = new ResizeObserver(() => m.resize())
     ro.observe(holder.current)
     m.on('moveend', loadAreas)
 
@@ -168,8 +199,18 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
         .catch(() => {})
     })
     map.current = m
+    } catch (err) {
+      // Sin esto, un fallo al construir el mapa dejaba el recuadro vacío y sin
+      // explicación: el usuario veía un hueco gris y nada más.
+      console.error('MapLibre init falló:', err)
+      // Fuera del cuerpo del efecto a propósito: React sigue renderizando este
+      // componente y `setFatal` aquí encadenaría un render sobre otro.
+      const msg = err instanceof Error ? err.message : 'No se ha podido cargar la carta.'
+      queueMicrotask(() => setFatal(msg))
+      return
+    }
 
-    return () => { ro.disconnect(); m.remove(); map.current = null }
+    return () => { ro?.disconnect(); m.remove(); map.current = null }
   }, [provider, initial.lon, initial.lat, initial.zoom, loggedIn, fatal])
 
   // Pintar las marcas. Se redibujan enteras: son decenas, no miles.
@@ -238,11 +279,32 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
       on ? 'bg-accent text-paper' : 'bg-paper text-ink/70 border border-ink/12 hover:border-accent'
     }`
 
+  /*
+   * El tamaño de la carta va en estilos inline, y no es por pereza.
+   *
+   * MapLibre añade la clase `maplibregl-map` al contenedor, y su hoja declara
+   * `position:relative` con la misma especificidad que el `.absolute` de
+   * Tailwind. Como su CSS viaja en el chunk dinámico y se inyecta DESPUÉS del
+   * de la app, ganaba MapLibre: el div se quedaba en relative, `inset:0` dejaba
+   * de darle altura, y el mapa entero —controles incluidos— desaparecía tras su
+   * propio overflow:hidden. En pantalla: un recuadro vacío, en todos los
+   * navegadores.
+   *
+   * La altura del marco tampoco puede ser una clase: `h-[calc(100vh-4rem)]` no
+   * llega a generarse, porque Tailwind v4 exige subrayados en los espacios de
+   * un valor arbitrario. Inline, las dos cosas son inmunes al orden de carga.
+   */
   return (
-    <div className="relative w-full h-[calc(100vh-4rem)] min-h-[420px]">
-      <div ref={holder} className="absolute inset-0" />
+    <div ref={shell} className="relative w-full" style={{ height: 'calc(100vh - 4rem)', minHeight: '420px' }}>
+      <div ref={holder} style={{ position: 'absolute', inset: 0 }} />
 
-      <div className="absolute top-3 left-3 flex flex-wrap gap-2 z-10">
+      {/* Todo lo que flota sobre la carta vive en UNA columna. Antes cada panel
+          se colocaba con un `top-16` fijo, que da por hecho una sola fila de
+          chips: en móvil los chips envuelven a dos filas y el aviso de sesión
+          tapaba "Espacios protegidos". Apilados en columna, se colocan solos.
+          El contenedor no intercepta el ratón; sus hijos sí. */}
+      <div className="absolute top-3 left-3 right-14 z-20 flex flex-col items-start gap-2 pointer-events-none">
+      <div className="flex flex-wrap gap-2 pointer-events-auto">
         {provider.seamarks && (
           <button type="button" onClick={() => setSeamarks((v) => !v)} aria-pressed={seamarks} className={toggle(seamarks)}>
             ⚓ Balizamiento
@@ -264,7 +326,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
       </div>
 
       {loggedIn && draft && (
-        <div className="absolute top-16 left-3 z-20 w-72 bg-paper rounded-2xl shadow-hard-lg border border-ink/[0.07] p-4 space-y-2.5">
+        <div className="pointer-events-auto w-72 max-w-full bg-paper rounded-2xl shadow-hard-lg border border-ink/[0.07] p-4 space-y-2.5">
           <p className="font-semibold text-ink text-[15px]">Nueva marca</p>
           <p className="text-[12px] text-ink/60">{draft.lat.toFixed(5)}, {draft.lon.toFixed(5)}</p>
           <input autoFocus value={name} onChange={(e) => setName(e.target.value)} maxLength={80}
@@ -320,7 +382,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
       )}
 
       {loggedIn && marks.length > 0 && !draft && (
-        <details className="absolute top-16 left-3 z-20 w-64 bg-paper rounded-2xl shadow-hard border border-ink/[0.07]">
+        <details className="pointer-events-auto w-64 max-w-full bg-paper rounded-2xl shadow-hard border border-ink/[0.07]">
           <summary className="px-4 py-2.5 text-[14px] font-semibold text-ink cursor-pointer">
             📍 Mis marcas ({marks.length})
           </summary>
@@ -345,11 +407,12 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
       )}
 
       {!loggedIn && (
-        <p className="absolute top-16 left-3 z-20 bg-paper rounded-xl shadow-hard border border-ink/[0.07] px-3.5 py-2.5 text-[13px] text-ink/70 max-w-xs">
+        <p className="pointer-events-auto bg-paper rounded-xl shadow-hard border border-ink/[0.07] px-3.5 py-2.5 text-[13px] text-ink/70 max-w-xs">
           <a href="/entrar" className="font-semibold text-accent hover:underline">Inicia sesión</a> para guardar tus
           caladeros en la carta. Son privados: solo los ves tú.
         </p>
       )}
+      </div>
 
       {fatal && (
         <div className="absolute inset-x-3 top-3 z-30 rounded-2xl border border-red-600/35 bg-paper p-4 shadow-hard-lg">
@@ -363,8 +426,10 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
         </div>
       )}
 
-      {/* Atribución: es parte de la licencia, así que no se puede ocultar. */}
-      <p className="absolute bottom-0 inset-x-0 z-10 bg-paper/90 backdrop-blur px-3 py-1.5 text-[11px] text-ink/70 text-center">
+      {/* Atribución: es parte de la licencia, así que no se puede ocultar. En
+          móvil se le deja hueco a la derecha porque el botón flotante del
+          asesor se comía el final del texto. */}
+      <p className="absolute bottom-0 inset-x-0 z-10 bg-paper/90 backdrop-blur px-3 py-1.5 pr-20 sm:pr-3 text-[11px] text-ink/70 text-center">
         {attribution}
       </p>
     </div>

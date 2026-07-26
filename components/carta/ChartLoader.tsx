@@ -14,7 +14,7 @@ import type { ChartProvider } from '@/lib/chart-providers'
 const NauticalChart = dynamic(() => import('./NauticalChart'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-[calc(100vh-4rem)] min-h-[420px] flex items-center justify-center bg-ink/[0.03]">
+    <div className="w-full flex items-center justify-center bg-ink/[0.03]" style={{ height: 'calc(100vh - 4rem)', minHeight: '420px' }}>
       <p className="text-[15px] text-ink/60">Cargando la carta…</p>
     </div>
   ),
