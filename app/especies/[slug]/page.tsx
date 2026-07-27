@@ -8,6 +8,7 @@ import { getTaxonomy, categoryName } from '@/lib/taxonomy-store'
 import { NATIONAL_SIZES_URL } from '@/lib/fishing-regulations'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
 import { safeJsonLd } from '@/lib/json-ld'
+import Icon, { type IconName } from '@/components/icons/Icon'
 
 export const revalidate = 86400
 
@@ -29,11 +30,11 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   }
 }
 
-function Row({ label, value, icon }: { label: string; value: string; icon: string }) {
+function Row({ label, value, icon }: { label: string; value: string; icon: IconName }) {
   return (
     <div className="flex items-baseline justify-between gap-4 px-4 py-3 bg-paper">
       <dt className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60 flex-shrink-0 flex items-center gap-1.5">
-        <span aria-hidden>{icon}</span> {label}
+        <Icon name={icon} className="w-3.5 h-3.5" strokeWidth={1.8} /> {label}
       </dt>
       <dd className="text-sm font-semibold text-ink text-right">{value}</dd>
     </div>
@@ -112,11 +113,11 @@ export default async function SpeciesPage({ params }: Params) {
           <div className="space-y-3">
             <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3">Ficha técnica</h2>
             <dl className="divide-y divide-ink/10 border border-ink/[0.07] rounded-xl overflow-hidden">
-              <Row icon="🌡️" label="Tª del agua" value={`${sp.seaTempC[0]}–${sp.seaTempC[1]}°C`} />
-              <Row icon="🪸" label="Hábitat" value={sp.habitat} />
-              <Row icon="📏" label="Profundidad" value={sp.depth} />
-              <Row icon="🕐" label="Mejores horas" value={sp.hours} />
-              <Row icon="📐" label="Talla de referencia" value={sp.minSizeNote} />
+              <Row icon="thermometer" label="Tª del agua" value={`${sp.seaTempC[0]}–${sp.seaTempC[1]}°C`} />
+              <Row icon="rock" label="Hábitat" value={sp.habitat} />
+              <Row icon="ruler" label="Profundidad" value={sp.depth} />
+              <Row icon="clock" label="Mejores horas" value={sp.hours} />
+              <Row icon="ruler" label="Talla de referencia" value={sp.minSizeNote} />
             </dl>
             <p className="text-[12px] text-ink/60">
               La talla mínima legal la fija la normativa y cambia por zona: consulta la{' '}
@@ -164,13 +165,13 @@ export default async function SpeciesPage({ params }: Params) {
         {/* Cross links */}
         <div className="border-t border-ink/[0.07] pt-8 flex flex-wrap gap-3">
           <Link href={`/mejores-horas`} className="inline-flex items-center gap-2 bg-ink text-paper px-5 py-3 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift hover:bg-accent hover:border-accent">
-            🕐 Mejores horas por localidad
+            <Icon name="clock" className="w-4 h-4" strokeWidth={1.8} />Mejores horas por localidad
           </Link>
           <Link href="/calendario" className="inline-flex items-center gap-2 bg-paper text-ink px-5 py-3 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift">
-            🌙 Calendario del pescador
+            <Icon name="moon" className="w-4 h-4" strokeWidth={1.6} />Calendario del pescador
           </Link>
           <Link href="/advice" className="inline-flex items-center gap-2 bg-paper text-ink px-5 py-3 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift">
-            🎣 Preguntar al asesor
+            <Icon name="rod" className="w-4 h-4" strokeWidth={1.8} />Preguntar al asesor
           </Link>
         </div>
 

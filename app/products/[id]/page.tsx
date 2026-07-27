@@ -14,6 +14,8 @@ import { renderDescription } from '@/lib/markdown'
 import { CATALOG } from '@/lib/catalog'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
 import { safeJsonLd } from '@/lib/json-ld'
+import Icon, { type IconName } from '@/components/icons/Icon'
+import Stars from '@/components/Stars'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -50,7 +52,7 @@ export default async function ProductPage({ params }: Params) {
     return (
       <Layout>
         <div className="max-w-7xl mx-auto px-4 py-24 text-center space-y-6">
-          <span className="text-6xl inline-block">🪝</span>
+          <Icon name="hook" className="w-14 h-14 mx-auto text-ink/40" strokeWidth={1.4} />
           <h1 className="font-display uppercase text-4xl text-ink">Aparejo no encontrado</h1>
           <p className="text-ink/60 text-sm max-w-sm mx-auto">El producto no existe o ha sido retirado del catálogo.</p>
           <Link href="/" className="inline-block bg-ink text-paper px-6 py-3 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift">
@@ -111,11 +113,11 @@ export default async function ProductPage({ params }: Params) {
     })),
   }
 
-  const trustBadges: { icon: string; label: string }[] = [
-    { icon: '🔒', label: 'Compra 100% segura' },
-    { icon: '📦', label: 'Envío con seguimiento' },
-    { icon: '🎣', label: 'Seleccionado por expertos' },
-    { icon: '💬', label: 'Asesor de pesca gratis' },
+  const trustBadges: { icon: IconName; label: string }[] = [
+    { icon: 'lock', label: 'Compra 100% segura' },
+    { icon: 'package', label: 'Envío con seguimiento' },
+    { icon: 'rod', label: 'Seleccionado por expertos' },
+    { icon: 'message', label: 'Asesor de pesca gratis' },
   ]
 
   const breadcrumbLd = breadcrumbJsonLd([
@@ -184,7 +186,7 @@ export default async function ProductPage({ params }: Params) {
               <h1 className="font-display uppercase text-4xl md:text-5xl leading-[0.95] text-ink">{product.title}</h1>
 
               <div className="flex items-center gap-2 font-mono text-sm">
-                <span className="text-accent">{'★'.repeat(Math.round(product.rating))}{'☆'.repeat(5 - Math.round(product.rating))}</span>
+                <Stars rating={product.rating} className="w-4 h-4" />
                 <span className="font-bold text-ink">{product.rating.toFixed(1)}</span>
                 <span className="text-ink/60">· {product.reviews.toLocaleString('es-ES')} vendidos</span>
               </div>
@@ -243,7 +245,7 @@ export default async function ProductPage({ params }: Params) {
                   ask={`¿Es buena opción el/la "${product.title}"? ¿Para qué tipo de pesca lo recomiendas y cómo lo uso?`}
                   className="w-full flex items-center justify-center gap-2 bg-paper text-ink px-6 py-3.5 font-semibold text-sm border border-ink/10 rounded-full hover:bg-ink hover:text-paper transition-colors"
                 >
-                  🎣 Preguntar
+                  <Icon name="rod" className="w-4 h-4" strokeWidth={1.8} />Preguntar
                 </AsesorButton>
                 <FavoriteButton product={snapshot} variant="full" className="w-full px-6 py-3.5 text-sm" />
               </div>
@@ -262,7 +264,7 @@ export default async function ProductPage({ params }: Params) {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-14">
           {trustBadges.map((b) => (
             <div key={b.label} className="flex items-center gap-3 border border-ink/[0.07] rounded-xl bg-paper px-4 py-3">
-              <span className="text-2xl leading-none">{b.icon}</span>
+              <Icon name={b.icon} className="w-6 h-6 text-accent" strokeWidth={1.6} />
               <span className="text-[13px] font-semibold text-ink/75 leading-tight">{b.label}</span>
             </div>
           ))}

@@ -4,6 +4,7 @@ import ProductCard from '@/components/ProductCard'
 import AsesorButton from '@/components/AsesorButton'
 import { listProducts } from '@/lib/products-store'
 import { retrieveProducts } from '@/lib/retrieval'
+import Icon from '@/components/icons/Icon'
 
 export const metadata: Metadata = {
   title: 'Buscar',
@@ -62,7 +63,7 @@ export default async function SearchPage({
               ask={`Estoy buscando "${query}". ¿Qué me recomiendas y por qué?`}
               className="inline-flex items-center gap-2 self-start bg-accent text-paper px-4 py-2.5 text-xs font-semibold border border-ink/10 rounded-full shadow-hard hover-shift"
             >
-              🎣 Pregúntale a nuestro asesor
+<Icon name="rod" className="w-4 h-4" strokeWidth={1.8} />Pregúntale a nuestro asesor
             </AsesorButton>
           </div>
         )}
@@ -71,16 +72,16 @@ export default async function SearchPage({
           <p className="text-ink/60 text-sm">Escribe qué buscas —con tus palabras— y encontramos lo más relevante del catálogo.</p>
         ) : results.length === 0 ? (
           <div className="text-center py-16 border border-ink/10 rounded-xl shadow-hard bg-paper max-w-lg mx-auto px-8 space-y-4">
-            <span className="inline-block text-5xl">🔍</span>
+            <Icon name="search" className="w-12 h-12 mx-auto text-ink/40" strokeWidth={1.5} />
             <h3 className="font-display uppercase text-2xl text-ink">Sin resultados directos</h3>
             <p className="text-sm text-ink/60">
               No hemos encontrado una coincidencia exacta. Deja que nuestro asesor te oriente según lo que necesitas.
             </p>
             <AsesorButton
               ask={`Estoy buscando "${query}". ¿Qué me recomiendas y por qué?`}
-              className="inline-block bg-ink text-paper px-5 py-2.5 text-sm font-semibold border border-ink/10 rounded-full hover:bg-accent transition-colors"
+              className="inline-flex items-center gap-2 bg-ink text-paper px-5 py-2.5 text-sm font-semibold border border-ink/10 rounded-full hover:bg-accent transition-colors"
             >
-              🎣 Preguntar al asesor
+<Icon name="rod" className="w-4 h-4" strokeWidth={1.8} />Preguntar al asesor
             </AsesorButton>
           </div>
         ) : (

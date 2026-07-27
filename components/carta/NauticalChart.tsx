@@ -1191,8 +1191,8 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
           falta hace: la primera vez lo que quieres es traerte las de la sonda. */}
       {loggedIn && marks.length === 0 && !draft && rec.state.status === 'parado' && (
         <details className="pointer-events-auto w-72 max-w-full bg-paper rounded-2xl shadow-hard border border-ink/[0.07]">
-          <summary className="px-4 py-2.5 text-[14px] font-semibold text-ink cursor-pointer">
-            📥 Traer mis marcas de la sonda
+          <summary className="px-4 py-2.5 text-[14px] font-semibold text-ink cursor-pointer inline-flex items-center gap-1.5">
+            <Icon name="download" className="w-4 h-4" strokeWidth={1.8} />Traer mis marcas de la sonda
           </summary>
           <div className="px-4 pb-3 pt-1">
             <MarksTransfer onImported={recargarMarcas} />

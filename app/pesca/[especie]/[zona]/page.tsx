@@ -12,6 +12,7 @@ import { getRegulation, NATIONAL_SIZES_URL } from '@/lib/fishing-regulations'
 import { getTaxonomy, categoryName } from '@/lib/taxonomy-store'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
 import { safeJsonLd } from '@/lib/json-ld'
+import Icon from '@/components/icons/Icon'
 
 export const revalidate = 86400
 
@@ -116,7 +117,7 @@ export default async function SpeciesZonePage({ params }: Params) {
             <Link href={`/especies/${sp.id}`} className="hover:text-accent">{sp.name}</Link> <span className="mx-1">/</span>{' '}
             <span className="text-ink">{spot.name}</span>
           </nav>
-          <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3">🎣 Guía de pesca · {sp.name}</p>
+          <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3 inline-flex items-center gap-1.5"><Icon name="rod" className="w-3.5 h-3.5" strokeWidth={1.8} />Guía de pesca · {sp.name}</p>
           <h1 className="font-display uppercase text-3xl sm:text-4xl md:text-5xl leading-[1.02] text-ink">
             Pesca de {n} en {spot.name}
           </h1>
@@ -147,13 +148,13 @@ export default async function SpeciesZonePage({ params }: Params) {
               href={`/mejores-horas/${spot.slug}?especie=${sp.id}`}
               className="inline-flex items-center gap-2 bg-accent text-paper px-5 py-2.5 text-sm font-semibold border border-accent rounded-full shadow-hard hover-shift hover:bg-ink hover:border-ink"
             >
-              📈 Ver mejores horas para {n} en {spot.name}
+              <Icon name="chartUp" className="w-4 h-4" strokeWidth={1.8} />Ver mejores horas para {n} en {spot.name}
             </Link>
             <Link
               href={`/mejores-horas/${spot.slug}/planificador`}
               className="inline-flex items-center gap-2 bg-paper text-ink px-5 py-2.5 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift hover:bg-ink hover:text-paper"
             >
-              📅 Planificador anual
+              <Icon name="calendar" className="w-4 h-4" strokeWidth={1.8} />Planificador anual
             </Link>
           </div>
         </div>
@@ -163,7 +164,7 @@ export default async function SpeciesZonePage({ params }: Params) {
         {/* Señal de la comunidad: lo único que no sale de un modelo. */}
         {activity.enough && (
           <div className="border border-accent/25 rounded-2xl bg-accent/[0.04] p-5">
-            <h2 className="font-display text-xl text-ink">🐟 Se está pescando ahora mismo</h2>
+            <h2 className="font-display text-xl text-ink inline-flex items-center gap-2"><Icon name="fish" className="w-4 h-4" strokeWidth={1.8} />Se está pescando ahora mismo</h2>
             <p className="text-[15px] text-ink/80 mt-1.5">
               Pescadores han compartido <strong>{activity.reports} capturas</strong> de {n} en {spot.name}
               {activity.fish > activity.reports && <> ({activity.fish} ejemplares)</>} en las últimas tres semanas.
@@ -226,7 +227,7 @@ export default async function SpeciesZonePage({ params }: Params) {
             href={`/mejores-horas/${spot.slug}?especie=${sp.id}`}
             className="inline-flex items-center gap-2 bg-ink text-paper px-5 py-2.5 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift hover:bg-accent hover:border-accent"
           >
-            📈 Previsión hora a hora para {n} en {spot.name}
+<Icon name="chartUp" className="w-4 h-4" strokeWidth={1.8} />Previsión hora a hora para {n} en {spot.name}
           </Link>
         </div>
 

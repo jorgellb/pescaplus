@@ -10,6 +10,7 @@ import { getTrendingRanked } from '@/lib/trending'
 import { getTaxonomy, categoryName, subcategoriesOf } from '@/lib/taxonomy-store'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
 import { safeJsonLd } from '@/lib/json-ld'
+import Icon from '@/components/icons/Icon'
 
 type Params = { params: Promise<{ category: string; subcategory: string }> }
 
@@ -122,7 +123,7 @@ export default async function SubcategoryPage({ params }: Params) {
 
         {products.length === 0 ? (
           <div className="text-center py-16 border border-ink/10 rounded-xl shadow-hard bg-paper max-w-lg mx-auto px-8 space-y-4">
-            <span className="inline-block text-5xl">⚓</span>
+            <Icon name="anchor" className="w-12 h-12 mx-auto text-ink/40" strokeWidth={1.5} />
             <h2 className="font-display uppercase text-2xl text-ink">Sin productos por ahora</h2>
             <p className="text-sm text-ink/60">Vuelve pronto o explora el resto de la categoría.</p>
             <Link href={`/categories/${category}`} className="inline-block bg-ink text-paper px-5 py-2.5 text-sm font-semibold border border-ink/10 rounded-full hover:bg-accent transition-colors">

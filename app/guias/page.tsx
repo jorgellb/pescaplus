@@ -5,6 +5,7 @@ import ProductImage from '@/components/ProductImage'
 import { listGuides } from '@/lib/guides-store'
 import { fishingLabel } from '@/lib/fishing'
 import { proxiedImage } from '@/lib/img-proxy'
+import Icon from '@/components/icons/Icon'
 
 export const revalidate = 3600
 
@@ -35,7 +36,7 @@ export default async function GuidesIndex() {
       <section className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         {guides.length === 0 ? (
           <div className="text-center py-20 border border-ink/10 rounded-xl shadow-hard bg-paper max-w-lg mx-auto px-8 space-y-4">
-            <span className="inline-block text-5xl">📝</span>
+            <Icon name="notepad" className="w-12 h-12 mx-auto text-ink/40" strokeWidth={1.5} />
             <h2 className="font-display uppercase text-2xl text-ink">Aún no hay guías</h2>
             <p className="text-sm text-ink/60">Vuelve pronto: estamos preparando contenido.</p>
           </div>

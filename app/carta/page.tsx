@@ -72,8 +72,8 @@ export default async function CartaPage({ searchParams }: Params) {
             </div>
           )}
           {/* El aviso va en la propia página, no escondido en un pie legal. */}
-          <p className="mt-3 text-[13px] text-amber-900 bg-amber-500/10 border border-amber-600/30 rounded-xl px-3.5 py-2.5">
-            ⚠️ {NOT_FOR_NAVIGATION}
+          <p className="mt-3 text-[13px] text-amber-900 bg-amber-500/10 border border-amber-600/30 rounded-xl px-3.5 py-2.5 inline-flex items-start gap-1.5">
+            <Icon name="warning" className="w-3.5 h-3.5 shrink-0 mt-0.5" strokeWidth={2} />{NOT_FOR_NAVIGATION}
           </p>
         </div>
       </section>

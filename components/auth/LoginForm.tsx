@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Icon from '@/components/icons/Icon'
 
 /** Passwordless login: submit email → receive a magic link. In dev (no email
  * configured) the API returns the link directly so you can log in locally. */
@@ -26,7 +27,7 @@ export default function LoginForm() {
   if (state === 'sent') {
     return (
       <div className="border border-accent/30 rounded-2xl bg-accent/[0.06] p-5 space-y-2">
-        <p className="font-display uppercase text-xl leading-none">📬 Revisa tu correo</p>
+        <p className="font-display uppercase text-xl leading-none inline-flex items-center gap-2"><Icon name="mail" className="w-5 h-5" strokeWidth={1.7} />Revisa tu correo</p>
         <p className="text-sm text-ink/75">Te hemos enviado un enlace de acceso a <strong>{email}</strong>. Caduca en 15 minutos y solo funciona una vez.</p>
         {dryRun && <p className="text-[13px] text-amber-800 bg-amber-500/10 border border-amber-600/30 rounded-lg p-2">El envío de emails aún no está configurado (RESEND). En producción el enlace no llegará hasta activarlo.</p>}
         {devLink && <p className="text-[13px] text-ink/70">Enlace de desarrollo: <a href={devLink} className="text-accent font-bold underline break-all">entrar ahora →</a></p>}
