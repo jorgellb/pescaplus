@@ -15,6 +15,7 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([])
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState<AdminUser | null>(null)
+  const [creating, setCreating] = useState(false)
   const [q, setQ] = useState('')
 
   const load = useCallback(async () => {
@@ -40,7 +41,7 @@ export default function AdminUsersPage() {
     else alert('No se pudo eliminar.')
   }
 
-  const closeEditor = () => setEditing(null)
+  const closeEditor = () => { setEditing(null); setCreating(false) }
   const onSaved = () => { closeEditor(); load() }
 
   const needle = q.trim().toLowerCase()
@@ -53,12 +54,20 @@ export default function AdminUsersPage() {
           <h1 className="font-display uppercase text-3xl md:text-4xl text-ink leading-none">Usuarios</h1>
           <p className="text-ink/60 text-sm mt-1">Cuentas de pescadores y patrones registrados.</p>
         </div>
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Buscar por nombre o email…"
-          className="px-3 py-2 bg-paper border border-ink/25 rounded-lg text-ink placeholder-ink/60 focus:outline-none focus:border-accent text-sm w-full sm:w-64"
-        />
+        <div className="flex items-center gap-3">
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Buscar por nombre o email…"
+            className="px-3 py-2 bg-paper border border-ink/25 rounded-lg text-ink placeholder-ink/60 focus:outline-none focus:border-accent text-sm w-full sm:w-64"
+          />
+          <button
+            onClick={() => setCreating(true)}
+            className="inline-flex items-center gap-2 bg-ink text-paper hover:bg-accent font-extrabold text-sm px-4 py-2 border border-ink/10 rounded-xl transition-colors whitespace-nowrap"
+          >
+            <span className="text-base leading-none">＋</span> Nuevo usuario
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -109,7 +118,7 @@ export default function AdminUsersPage() {
         </p>
       )}
 
-      {editing && <UserEditor user={editing} onClose={closeEditor} onSaved={onSaved} />}
+      {(editing || creating) && <UserEditor user={editing} onClose={closeEditor} onSaved={onSaved} />}
     </div>
   )
 }

@@ -133,6 +133,47 @@ export async function updateUserProfile(id: string, input: ProfileInput): Promis
 // Admin (gestión de cuentas — moderación/soporte)
 // ---------------------------------------------------------------------------
 
+export interface AdminUserCreateInput {
+  email: string
+  name?: string
+  phone?: string
+  bio?: string
+  avatar?: string
+}
+
+/**
+ * Panel admin: alta manual de una cuenta (soporte — un pescador pide ayuda por
+ * teléfono/email y no puede o no quiere entrar por el enlace mágico). Se marca
+ * `emailVerified` porque el alta la hace un administrador, no un email sin dueño.
+ */
+export async function adminCreateUser(input: AdminUserCreateInput): Promise<User> {
+  const email = normEmail(input.email)
+  if (!isValidEmail(email)) throw new Error('Email no válido.')
+  const name = (input.name ?? '').trim().slice(0, 80)
+  const phone = (input.phone ?? '').trim().slice(0, 40)
+  const bio = (input.bio ?? '').trim().slice(0, 600)
+  const avatar = input.avatar && AVATARS.includes(input.avatar) ? input.avatar : AVATARS[Math.floor(Math.random() * AVATARS.length)]
+
+  if (isDatabaseConfigured()) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+      const existing = await prisma.user.findUnique({ where: { email } })
+      if (existing) throw new Error('Ya existe una cuenta con ese email.')
+      const row = await prisma.user.create({ data: { email, name, phone, bio, avatar, emailVerified: true } })
+      return rowToUser(row)
+    } catch (error) {
+      if ((error as Error).message === 'Ya existe una cuenta con ese email.') throw error
+      console.error('Admin user create failed:', error)
+      throw new Error(WRITE_FAIL)
+    }
+  }
+  if (mem().some((u) => u.email === email)) throw new Error('Ya existe una cuenta con ese email.')
+  const now = Date.now()
+  const user: StoredUser = { id: `usr-${now}-${Math.random().toString(36).slice(2, 8)}`, email, name, phone, phoneVerified: false, bio, avatar, emailVerified: true, avgRating: 0, reviewCount: 0, createdAt: now, updatedAt: now }
+  mem().unshift(user)
+  return { ...user }
+}
+
 /** Panel admin: todos los usuarios registrados. */
 export async function adminListUsers(limit = 500): Promise<User[]> {
   if (isDatabaseConfigured()) {
