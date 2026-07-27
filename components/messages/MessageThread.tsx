@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import Icon from '@/components/icons/Icon'
 
 interface Msg { id: string; sender: 'user' | 'operator'; body: string; createdAt: number }
 
@@ -39,7 +40,7 @@ export default function MessageThread({ threadId, initial, myRole }: { threadId:
   return (
     <div className="space-y-4">
       <div className="space-y-2.5 max-h-[55vh] overflow-y-auto border border-ink/[0.07] rounded-2xl bg-paper p-4">
-        {messages.length === 0 && <p className="text-sm text-ink/60 text-center py-6">Aún no hay mensajes. Escribe el primero 👇</p>}
+        {messages.length === 0 && <p className="text-sm text-ink/60 text-center py-6 inline-flex items-center justify-center gap-1.5">Aún no hay mensajes. Escribe el primero <Icon name="arrowRight" className="w-3.5 h-3.5 rotate-90" strokeWidth={2} /></p>}
         {messages.map((m) => {
           const mine = m.sender === myRole
           return (

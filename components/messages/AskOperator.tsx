@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import Icon from '@/components/icons/Icon'
 
 /** "Message the patrón" entry point on a charter page. Opens (or reuses) the
  * thread for this charter and takes the pescador to the conversation. */
@@ -16,7 +17,7 @@ export default function AskOperator({ charterId, loggedIn, isOwner }: { charterI
   if (!loggedIn) {
     return (
       <Link href="/entrar" className="inline-flex items-center gap-1.5 border border-ink/12 text-ink px-4 py-2 text-sm font-semibold rounded-full hover:bg-ink hover:text-paper transition-colors">
-        💬 Inicia sesión para escribir al patrón
+        <Icon name="message" className="w-4 h-4" strokeWidth={1.8} />Inicia sesión para escribir al patrón
       </Link>
     )
   }
@@ -34,7 +35,7 @@ export default function AskOperator({ charterId, loggedIn, isOwner }: { charterI
   return (
     <div>
       <button onClick={open} disabled={busy} className="inline-flex items-center gap-1.5 border border-accent/40 text-accent px-4 py-2 text-sm font-semibold rounded-full hover:bg-accent hover:text-paper disabled:opacity-60 transition-colors">
-        💬 {busy ? 'Abriendo…' : 'Preguntar al patrón'}
+        <Icon name="message" className="w-4 h-4" strokeWidth={1.8} />{busy ? 'Abriendo…' : 'Preguntar al patrón'}
       </button>
       {err && <p className="text-sm text-red-700 mt-1">{err}</p>}
     </div>
