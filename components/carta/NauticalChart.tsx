@@ -11,6 +11,8 @@ import { useTrackRecorder } from './useTrackRecorder'
 import { formatDistance, formatDuration } from '@/lib/track-types'
 import { trackToGPX } from '@/lib/gpx'
 import MarksTransfer from './MarksTransfer'
+import CoordinateEntry from './CoordinateEntry'
+import { formatNautical } from '@/lib/marks-io'
 import { SEABED_LEGEND_URL, SEABED_NOTE } from '@/lib/seabed'
 
 interface PointConditions {
@@ -118,7 +120,7 @@ function SoundingReading({ s, onRetry }: { s: Sounding | null; onRetry?: () => v
     return (
       <p className="text-[13px] text-ink/70">
         {s.label}
-        {s.elevationM != null && ` · ${s.elevationM} m de altitud`}
+        {s.elevationM != null && ` · ${nf(s.elevationM, 1)} m de altitud`}
         {/* Que no se haya podido medir no significa que no haya fondo, así que
             se puede reintentar sin volver a buscar el punto en la carta. */}
         {s.kind === 'desconocida' && onRetry && (
@@ -198,6 +200,8 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
   const [zone, setZone] = useState<{ coverage: string; areas: { name: string; recreationalFishing: boolean | null; requiresPermit: boolean | null; rulesUrl: string; sourceName: string; sourceDate: string }[]; pescarec: { note: string; url: string } | null } | null>(null)
   const [err, setErr] = useState('')
   const markers = useRef<{ remove(): void }[]>([])
+  /** La chincheta del punto que se está mirando, distinta de las marcas guardadas. */
+  const puntoMarker = useRef<Marker | null>(null)
   const rec = useTrackRecorder()
   /**
    * Si el mapa sigue al barco. Se apaga en cuanto el usuario arrastra: grabando
@@ -206,6 +210,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
    * seguirlo está el botón de posición de MapLibre.
    */
   const siguiendo = useRef(true)
+  const [anchoSuficiente] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 640)
   const [savingTrack, setSavingTrack] = useState(false)
   const [trackName, setTrackName] = useState('')
   const [trackDone, setTrackDone] = useState<string | null>(null)
@@ -303,6 +308,46 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
         }
       }
     } catch { /* se queda como estaba */ }
+  }
+
+  /**
+   * Todo lo que se sabe de un punto: sonda, fondo, mar y —con sesión— el panel
+   * para guardarlo como marca.
+   *
+   * La usan el clic en la carta y el formulario de coordenadas. Estaba metida
+   * dentro del manejador del mapa, y dejarla ahí habría obligado a duplicarla
+   * para la entrada manual, con el riesgo de que una de las dos vías acabara
+   * enseñando menos que la otra.
+   */
+  const marcarPunto = (lat: number, lon: number) => {
+    setClickedAt({ lat, lon })
+    setWeather(null)
+    setSeabed(null)
+    fetch(`/api/fondo?lat=${lat}&lon=${lon}`)
+      .then((r) => r.json())
+      .then((d: Seabed & { success?: boolean }) => { if (d?.success) setSeabed(d) })
+      .catch(() => {})
+    fetch(`/api/condiciones?lat=${lat}&lon=${lon}`)
+      .then((r) => r.json())
+      .then((d: PointConditions & { success?: boolean }) => { if (d?.success) setWeather(d) })
+      .catch(() => setWeather({ available: false }))
+    pedirSonda(lat, lon)
+
+    if (!loggedIn) return
+    setDraft({ lat, lon })
+    setName(''); setDepth(''); setErr(''); setZone(null)
+    fetch(`/api/areas-protegidas?lat=${lat}&lon=${lon}`)
+      .then((r) => r.json())
+      .then((d) => { if (d.success) setZone(d) })
+      .catch(() => {})
+  }
+
+  /** Lleva la carta a unas coordenadas escritas a mano y las marca. */
+  const irACoordenadas = (lat: number, lon: number) => {
+    // Se deja de seguir al barco: acabas de decir adónde quieres mirar.
+    siguiendo.current = false
+    map.current?.flyTo({ center: [lon, lat], zoom: Math.max(map.current.getZoom(), 13), duration: 900 })
+    marcarPunto(lat, lon)
   }
 
   const pedirSonda = (lat: number, lon: number) => {
@@ -566,28 +611,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
       const lat = Math.round(e.lngLat.lat * 1e6) / 1e6
       const lon = Math.round(e.lngLat.lng * 1e6) / 1e6
 
-      // La sonda se consulta pinches quien pinches: saber el fondo es útil
-      // aunque no tengas cuenta, y es la mejor invitación a crearse una.
-      setClickedAt({ lat, lon })
-      setWeather(null)
-      setSeabed(null)
-      fetch(`/api/fondo?lat=${lat}&lon=${lon}`)
-        .then((r) => r.json())
-        .then((d: Seabed & { success?: boolean }) => { if (d?.success) setSeabed(d) })
-        .catch(() => {})
-      fetch(`/api/condiciones?lat=${lat}&lon=${lon}`)
-        .then((r) => r.json())
-        .then((d: PointConditions & { success?: boolean }) => { if (d?.success) setWeather(d) })
-        .catch(() => setWeather({ available: false }))
-      pedirSonda(lat, lon)
-
-      if (!loggedIn) return
-      setDraft({ lat, lon })
-      setName(''); setDepth(''); setErr(''); setZone(null)
-      fetch(`/api/areas-protegidas?lat=${lat}&lon=${lon}`)
-        .then((r) => r.json())
-        .then((d) => { if (d.success) setZone(d) })
-        .catch(() => {})
+      marcarPunto(lat, lon)
     })
     map.current = m
     } catch (err) {
@@ -650,6 +674,27 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
       ? { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: pts.map((p) => [p.lon, p.lat]) } }
       : { type: 'FeatureCollection', features: [] })
   }, [rec.state.points, ready])
+
+  /*
+   * La chincheta del punto elegido.
+   *
+   * Sin ella, escribir unas coordenadas movía la carta y abría la ficha, pero no
+   * señalaba nada: había que adivinar cuál de los accidentes del centro era el
+   * punto. Se dibuja con el color de acento y un anillo claro para que se lea
+   * sobre cualquier fondo, y se distinga de las marcas ya guardadas.
+   */
+  useEffect(() => {
+    const m = map.current
+    if (!m || !ready) return
+    puntoMarker.current?.remove()
+    puntoMarker.current = null
+    if (!clickedAt) return
+    const el = document.createElement('div')
+    el.style.cssText = 'width:18px;height:18px;border-radius:50%;background:#0a7d72;'
+      + 'border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.45)'
+    el.setAttribute('aria-label', 'Punto seleccionado')
+    puntoMarker.current = new Marker({ element: el }).setLngLat([clickedAt.lon, clickedAt.lat]).addTo(m)
+  }, [clickedAt, ready])
 
   // Grabando, la carta sigue al barco — hasta que el usuario decida mirar otra
   // cosa. Ver `siguiendo`.
@@ -790,6 +835,17 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
         )}
       </div>
 
+      {/* Ir a unas coordenadas. Abierto de inicio en pantallas grandes y
+          plegado en el móvil, donde cada panel se come media carta. */}
+      <details className="pointer-events-auto w-72 max-w-full bg-paper rounded-2xl shadow-hard border border-ink/[0.07]" open={anchoSuficiente}>
+        <summary className="px-4 py-2.5 text-[14px] font-semibold text-ink cursor-pointer select-none">
+          🧭 Ir a unas coordenadas
+        </summary>
+        <div className="px-4 pb-3 pt-1">
+          <CoordinateEntry onGo={irACoordenadas} />
+        </div>
+      </details>
+
       {/* Grabación de la derrota. Va la primera de la columna porque mientras
           se graba es lo único que se mira, y con guantes o con el barco
           moviéndose los botones tienen que ser grandes. */}
@@ -911,14 +967,18 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
             <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/60 mb-1.5">El mar aquí</p>
             <PointWeather c={weather} />
           </div>
-          <p className="text-[11px] text-ink/60 mt-2.5">{clickedAt.lat.toFixed(4)}, {clickedAt.lon.toFixed(4)}</p>
+          <p className="text-[11px] text-ink/60 mt-2.5">
+            {formatNautical(clickedAt.lat, clickedAt.lon).lat} · {formatNautical(clickedAt.lat, clickedAt.lon).lon}
+          </p>
         </div>
       )}
 
       {loggedIn && draft && (
         <div className="pointer-events-auto w-72 max-w-full bg-paper rounded-2xl shadow-hard-lg border border-ink/[0.07] p-4 space-y-2.5">
           <p className="font-semibold text-ink text-[15px]">Nueva marca</p>
-          <p className="text-[12px] text-ink/60">{draft.lat.toFixed(5)}, {draft.lon.toFixed(5)}</p>
+          <p className="text-[12px] text-ink/60">
+            {formatNautical(draft.lat, draft.lon).lat} · {formatNautical(draft.lat, draft.lon).lon}
+          </p>
           <div className="rounded-xl bg-ink/[0.03] px-3 py-2 space-y-2">
             <SoundingReading s={sounding} onRetry={() => draft && pedirSonda(draft.lat, draft.lon)} />
             {seabed?.substrate && (

@@ -164,6 +164,28 @@ export function parseCoord(raw: string): number {
   return (g < 0 ? -1 : signo) * magnitud
 }
 
+/**
+ * De grados decimales a la notación de a bordo: 36° 00.768' N.
+ *
+ * Grados y minutos decimales es lo que enseñan los plotters y lo que viene
+ * impreso en las cartas náuticas. La longitud se escribe con tres dígitos por
+ * convenio marino (005° y no 5°), que evita confundirla con la latitud cuando
+ * alguien dicta unas coordenadas por radio.
+ */
+export function formatNautical(lat: number, lon: number): { lat: string; lon: string } {
+  const parte = (valor: number, positivo: string, negativo: string, digitos: number) => {
+    const hemisferio = valor >= 0 ? positivo : negativo
+    const abs = Math.abs(valor)
+    let grados = Math.floor(abs)
+    let minutos = (abs - grados) * 60
+    // 59,9999' redondea a 60,000': hay que subir el grado en vez de escribirlo.
+    if (Number(minutos.toFixed(3)) >= 60) { grados += 1; minutos = 0 }
+    const min = minutos.toFixed(3).replace('.', ',').padStart(6, '0')
+    return `${String(grados).padStart(digitos, '0')}° ${min}' ${hemisferio}`
+  }
+  return { lat: parte(lat, 'N', 'S', 2), lon: parte(lon, 'E', 'O', 3) }
+}
+
 const CABECERAS: Record<string, string[]> = {
   name: ['name', 'nombre', 'waypoint', 'wpt', 'descripcion corta', 'titulo', 'title', 'marca'],
   lat: ['lat', 'latitude', 'latitud', 'y'],

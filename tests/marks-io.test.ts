@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import {
-  parseMarks, parseGPX, parseCSV, parseKML, parseCoord, detectFormat, toCSV, toKML,
+  parseMarks, parseGPX, parseCSV, parseKML, parseCoord, detectFormat, toCSV, toKML, formatNautical,
 } from '@/lib/marks-io'
 import { toGPX } from '@/lib/gpx'
 import type { Waypoint } from '@/lib/waypoint-types'
@@ -210,5 +210,33 @@ describe('ida y vuelta por cada formato', () => {
     expect(csv.startsWith('﻿')).toBe(true)   // sin BOM las tildes salen mal
     expect(csv).toContain('36,012800')            // coma decimal
     expect(csv.split('\n')[0]).toContain(';')     // punto y coma
+  })
+})
+
+describe('escribir coordenadas como se leen a bordo', () => {
+  it('grados y minutos decimales, con la longitud a tres dígitos', () => {
+    // Tres dígitos en longitud es convenio marino: evita confundirla con la
+    // latitud cuando alguien las dicta por radio.
+    const c = formatNautical(36.0128, -5.6056)
+    expect(c.lat).toBe("36° 00,768' N")
+    expect(c.lon).toBe("005° 36,336' O")
+  })
+
+  it('los hemisferios sur y este', () => {
+    const c = formatNautical(-33.5, 151.25)
+    expect(c.lat).toBe("33° 30,000' S")
+    expect(c.lon).toBe("151° 15,000' E")
+  })
+
+  it("59,9999' sube el grado en vez de escribir 60'", () => {
+    expect(formatNautical(35.99999999, 0).lat).toBe("36° 00,000' N")
+  })
+
+  it('lo que se escribe se vuelve a leer igual', () => {
+    for (const [lat, lon] of [[36.0128, -5.6056], [43.3021, -8.4045], [-33.5, 151.25]]) {
+      const c = formatNautical(lat, lon)
+      expect(parseCoord(c.lat)).toBeCloseTo(lat, 4)
+      expect(parseCoord(c.lon)).toBeCloseTo(lon, 4)
+    }
   })
 })
