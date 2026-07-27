@@ -284,6 +284,10 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
   const [sounding, setSounding] = useState<Sounding | null>(null)
   const [weather, setWeather] = useState<PointConditions | null>(null)
   const [seabed, setSeabed] = useState<Seabed | null>(null)
+  const [normativa, setNormativa] = useState<{
+    comunidad: { region: string; segun: string; organismo: string | null; enlace: string | null }
+    licencia: string; tallasUrl: string; revisado: string; aviso: string
+  } | null>(null)
   const [name, setName] = useState('')
   const [type, setType] = useState('caladero')
   const [depth, setDepth] = useState('')
@@ -431,6 +435,11 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
     setClickedAt({ lat, lon })
     setWeather(null)
     setSeabed(null)
+    setNormativa(null)
+    fetch(`/api/normativa?lat=${lat}&lon=${lon}`)
+      .then((r) => r.json())
+      .then((d) => { if (d?.success) setNormativa(d) })
+      .catch(() => {})
     fetch(`/api/fondo?lat=${lat}&lon=${lon}`)
       .then((r) => r.json())
       .then((d: Seabed & { success?: boolean }) => { if (d?.success) setSeabed(d) })
@@ -1187,6 +1196,34 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
           <p className="text-[11px] text-ink/60 mt-2.5">
             {formatNautical(clickedAt.lat, clickedAt.lon).lat} · {formatNautical(clickedAt.lat, clickedAt.lon).lon}
           </p>
+          {normativa && (
+            <details className="mt-2 pt-2 border-t border-ink/[0.07]">
+              <summary className="text-[12px] font-semibold text-ink/70 cursor-pointer">
+                Normativa aquí · {normativa.comunidad.region}
+              </summary>
+              <div className="mt-1.5 space-y-1">
+                <p className="text-[12px] text-ink/70">{normativa.licencia}</p>
+                {normativa.comunidad.enlace && (
+                  <p className="text-[12px]">
+                    <a href={normativa.comunidad.enlace} target="_blank" rel="noopener noreferrer"
+                      className="font-semibold text-accent hover:underline">
+                      {normativa.comunidad.organismo}
+                    </a>
+                  </p>
+                )}
+                <p className="text-[12px]">
+                  <a href={normativa.tallasUrl} target="_blank" rel="noopener noreferrer"
+                    className="font-semibold text-accent hover:underline">Tallas mínimas oficiales</a>
+                </p>
+                {/* El aviso no es letra pequeña: es lo que evita que alguien dé
+                    por buena una talla que aquí no se publica. */}
+                <p className="text-[11.5px] text-amber-900">{normativa.aviso}</p>
+                <p className="text-[11px] text-ink/50">
+                  Comunidad deducida por {normativa.comunidad.segun} · revisado {normativa.revisado}
+                </p>
+              </div>
+            </details>
+          )}
           {(seabed?.substrate || sounding?.relief.kind !== 'desconocido') && (
             <details className="mt-1.5">
               <summary className="text-[11px] text-ink/50 cursor-pointer">Hasta dónde llega este dato</summary>
