@@ -253,6 +253,13 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
    * quien no la usa.
    */
   const [showCoords, setShowCoords] = useState(false)
+  /*
+   * Sin cobertura la carta sigue funcionando con lo guardado, pero hay que
+   * decirlo: el fondo y la sonda valen igual —no cambian— mientras que el parte
+   * del mar puede ser de la última vez que hubo red. Callarlo sería dejar que
+   * alguien salga fiándose de un viento de ayer.
+   */
+  const [sinRed, setSinRed] = useState(() => typeof navigator !== 'undefined' && navigator.onLine === false)
   const [savingTrack, setSavingTrack] = useState(false)
   const [trackName, setTrackName] = useState('')
   const [trackDone, setTrackDone] = useState<string | null>(null)
@@ -430,6 +437,19 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
   }, [loggedIn])
 
   useEffect(() => { cargarRutas() }, [cargarRutas])
+
+  // `navigator.onLine` se consulta al crear el estado, pero también hay que
+  // escuchar: la cobertura se va y vuelve sola durante toda una salida.
+  useEffect(() => {
+    const conectado = () => setSinRed(false)
+    const desconectado = () => setSinRed(true)
+    window.addEventListener('online', conectado)
+    window.addEventListener('offline', desconectado)
+    return () => {
+      window.removeEventListener('online', conectado)
+      window.removeEventListener('offline', desconectado)
+    }
+  }, [])
 
   // Las marcas se piden solo si hay sesión: son privadas por definición.
   const recargarMarcas = useCallback(() => {
@@ -855,6 +875,16 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
           </span>
         )}
       </div>
+
+      {sinRed && (
+        <div className="pointer-events-auto w-72 max-w-full bg-amber-500/[0.12] border border-amber-600/40 rounded-2xl px-4 py-2.5">
+          <p className="text-[13px] font-semibold text-amber-900">Sin conexión</p>
+          <p className="text-[12px] text-amber-900/90 mt-0.5">
+            La carta y las sondas que ya habías mirado siguen aquí. El parte del mar puede ser
+            de la última vez que tuviste cobertura.
+          </p>
+        </div>
+      )}
 
       {showCoords && (
         <div className="pointer-events-auto w-72 max-w-full bg-paper rounded-2xl shadow-hard border border-ink/[0.07] px-4 py-3">
