@@ -207,16 +207,8 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
   const [bathy, setBathy] = useState(true)
   const [contours, setContours] = useState(true)
   const [substrate, setSubstrate] = useState(false)
-  /*
-   * Los espacios protegidos ya no tienen botón: ocupaba sitio en una fila que se
-   * había quedado larga. La CAPA se queda encendida a propósito y sin forma de
-   * apagarla. Es información legal —pescar dentro de una reserva es una multa— y
-   * no es lo mismo quitar un interruptor que quitar el aviso.
-   */
-  const showAreas = true
   const [showPois, setShowPois] = useState(true)
   const [poisFar, setPoisFar] = useState(false)
-  const [areasFar, setAreasFar] = useState(false)
   // WebGL se comprueba al crear el estado, no en un efecto: es un hecho del
   // navegador, no algo que dependa del ciclo de vida.
   const [fatal, setFatal] = useState<string | null>(() => {
@@ -535,13 +527,10 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
       })
     }
 
-    // Fuente vacía: se rellena al mover, con lo que entre en pantalla.
-    sources.areas = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } }
+    // Fuentes vacías: se rellenan al mover, con lo que entre en pantalla.
     sources.pois = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } }
     sources.ruta = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } }
     layers.push(
-      { id: 'areas-fill', type: 'fill', source: 'areas', paint: { 'fill-color': '#b91c1c', 'fill-opacity': 0.14 } },
-      { id: 'areas-line', type: 'line', source: 'areas', paint: { 'line-color': '#b91c1c', 'line-width': 1.6, 'line-opacity': 0.75 } },
       // Un círculo con borde claro se lee sobre la batimetría y sobre tierra;
       // un icono de color plano se pierde en cuanto el fondo cambia de tono.
       {
@@ -584,16 +573,6 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
     // A pantalla completa se le pasa el marco, no el div del mapa: si no, los
     // paneles y los botones se quedan fuera y solo se ve la carta pelada.
     if (shell.current) m.addControl(new FullscreenControl({ container: shell.current }), 'top-right')
-    const loadAreas = () => {
-      const src = m.getSource('areas') as { setData(d: unknown): void } | undefined
-      if (!src) return
-      const b = m.getBounds()
-      const bbox = [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()].join(',')
-      fetch(`/api/areas-protegidas/geojson?bbox=${bbox}&zoom=${m.getZoom().toFixed(1)}`)
-        .then((r) => r.json())
-        .then((d) => { src.setData(d); setAreasFar(!!d.tooFar) })
-        .catch(() => {})
-    }
     const loadPois = () => {
       const src = m.getSource('pois') as { setData(d: unknown): void } | undefined
       if (!src) return
@@ -618,29 +597,18 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
       if (/webgl|context|style/i.test(msg)) setFatal(`La carta no ha podido dibujarse: ${msg}`)
     })
     m.on('data', (e) => { if (e.dataType === 'source' && e.isSourceLoaded) setTilesOk(true) })
-    m.on('load', () => { setReady(true); m.resize(); loadAreas(); loadPois() })
+    m.on('load', () => { setReady(true); m.resize(); loadPois() })
 
     // Si el contenedor cambia de tamaño (fuentes, rotación, barra del móvil)
     // el mapa no se entera solo.
     ro = new ResizeObserver(() => m.resize())
     ro.observe(holder.current)
-    m.on('moveend', loadAreas)
     m.on('moveend', loadPois)
     // `dragstart` y no `movestart`: este último lo dispara también el recentrado
     // automático, que se apagaría a sí mismo en cuanto empezara.
     m.on('dragstart', () => { siguiendo.current = false })
     m.on('zoomstart', (e) => { if ((e as unknown as { originalEvent?: unknown }).originalEvent) siguiendo.current = false })
 
-    // Pulsar un espacio protegido cuenta su nombre y enlaza su ficha.
-    m.on('click', 'areas-fill', (e) => {
-      const f = e.features?.[0]
-      if (!f) return
-      const p = f.properties as { name?: string; rulesUrl?: string }
-      const link = p.rulesUrl ? `<br><a href="${p.rulesUrl}" target="_blank" rel="noopener noreferrer" style="color:#0a7d72">Ver normativa</a>` : ''
-      new Popup({ offset: 8 }).setLngLat(e.lngLat)
-        .setHTML(`<strong>${p.name ?? 'Espacio protegido'}</strong><br><span style="font-size:12px">Consulta la normativa antes de pescar.</span>${link}`)
-        .addTo(m)
-    })
     m.on('click', 'pois', (e) => {
       const f = e.features?.[0]
       if (!f) return
@@ -779,14 +747,6 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
     m.setLayoutProperty('pois', 'visibility', showPois ? 'visible' : 'none')
   }, [showPois, ready])
 
-  useEffect(() => {
-    const m = map.current
-    if (!m || !ready) return
-    for (const id of ['areas-fill', 'areas-line']) {
-      if (m.getLayer(id)) m.setLayoutProperty(id, 'visibility', showAreas ? 'visible' : 'none')
-    }
-  }, [showAreas, ready])
-
   const saveDraft = async () => {
     if (!draft || !name.trim()) { setErr('Ponle un nombre a la marca.'); return }
     setSaving(true); setErr('')
@@ -816,10 +776,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
    * frases con "y" daba "espacios protegidos y rampas, puertos y pecios", que
    * se lee de pena.
    */
-  const capasLejos = [
-    ...(showAreas && areasFar ? ['espacios protegidos'] : []),
-    ...(showPois && poisFar ? ['rampas', 'puertos', 'pecios'] : []),
-  ]
+  const capasLejos = showPois && poisFar ? ['rampas', 'puertos', 'pecios'] : []
   const avisoLejos = capasLejos.length > 1
     ? `${capasLejos.slice(0, -1).join(', ')} y ${capasLejos[capasLejos.length - 1]}`
     : capasLejos[0] ?? ''
