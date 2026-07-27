@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Icon from '@/components/icons/Icon'
 
 export default function JoinMeetup({ id, full, kind = 'quedada' }: { id: string; full: boolean; kind?: 'quedada' | 'llamada' }) {
   const router = useRouter()
@@ -38,10 +39,10 @@ export default function JoinMeetup({ id, full, kind = 'quedada' }: { id: string;
   if (state === 'done') {
     return (
       <div className={`border rounded-xl p-4 ${waitlisted ? 'border-amber-700/30 bg-amber-700/[0.06]' : 'border-accent/30 bg-accent/[0.06]'}`}>
-        <p className="text-sm font-bold text-ink">
+        <p className="text-sm font-bold text-ink inline-flex items-start gap-1.5">
           {waitlisted
-            ? '⏳ Estás en la lista de espera. Si se libera una plaza, subes automáticamente y el anfitrión te avisa.'
-            : '✅ ¡Apuntado! Coordina el resto con el anfitrión por su contacto.'}
+            ? <><Icon name="clock" className="w-4 h-4 shrink-0 mt-0.5" strokeWidth={2} />Estás en la lista de espera. Si se libera una plaza, subes automáticamente y el anfitrión te avisa.</>
+            : <><Icon name="checkCircle" className="w-4 h-4 shrink-0 mt-0.5 text-accent" strokeWidth={2} />¡Apuntado! Coordina el resto con el anfitrión por su contacto.</>}
         </p>
       </div>
     )

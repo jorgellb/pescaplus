@@ -14,6 +14,7 @@ import { getSpecies } from '@/lib/fishing-species'
 import { getMarineForecast, groupByDay, bestWindow, getModality } from '@/lib/marine-forecast'
 import { safetyAlerts, navigationWindows, dayVerdict } from '@/lib/sea-state'
 import { fmtDateLong, fmtWindowRange, todayMadridISO, addDaysISO } from '@/lib/solunar-format'
+import Icon, { type IconName } from '@/components/icons/Icon'
 
 export const metadata: Metadata = {
   title: 'Quedada de pesca',
@@ -22,7 +23,11 @@ export const metadata: Metadata = {
 
 type Params = { params: Promise<{ id: string }>; searchParams: Promise<{ t?: string; nueva?: string }> }
 
-const MOD_LABEL: Record<string, string> = { tierra: '🏖️ Orilla / costa', kayak: '🛶 Kayak', barco: '🚤 Barco (compartir gastos)' }
+const MOD_LABEL: Record<string, { icon: IconName; text: string }> = {
+  tierra: { icon: 'umbrella', text: 'Orilla / costa' },
+  kayak: { icon: 'kayak', text: 'Kayak' },
+  barco: { icon: 'boat', text: 'Barco (compartir gastos)' },
+}
 
 export default async function MeetupPage({ params, searchParams }: Params) {
   const { id } = await params
@@ -81,8 +86,9 @@ export default async function MeetupPage({ params, searchParams }: Params) {
             </div>
           )}
 
-          <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3">
-            {meetup.kind === 'llamada' ? '🙋 Busca compañía · ' : ''}{MOD_LABEL[meetup.modality]}{sp ? ` · a por ${sp.name.toLowerCase()}` : ''}
+          <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3 inline-flex items-center gap-1.5">
+            {meetup.kind === 'llamada' && <><Icon name="users" className="w-3.5 h-3.5" strokeWidth={2} />Busca compañía ·</>}
+            <Icon name={MOD_LABEL[meetup.modality].icon} className="w-3.5 h-3.5" strokeWidth={2} />{MOD_LABEL[meetup.modality].text}{sp ? ` · a por ${sp.name.toLowerCase()}` : ''}
           </p>
           <h1 className="font-display uppercase text-3xl sm:text-4xl md:text-5xl leading-[1.02] text-ink">
             {spot?.name ?? meetup.spotSlug}
@@ -93,8 +99,10 @@ export default async function MeetupPage({ params, searchParams }: Params) {
             <span className="inline-flex items-center gap-2 rounded-xl border border-ink/10 px-3 py-2 text-sm">
               <span className="font-mono text-[10px] uppercase tracking-widest text-ink/60">{meetup.kind === 'llamada' ? 'Interesados' : 'Plazas'}</span>
               <span className="font-display text-lg text-ink">{meetup.kind === 'llamada' ? meetup.placesTaken : `${meetup.placesTaken}/${meetup.maxPlaces}`}</span>
-              <span className={`font-mono text-[10px] uppercase tracking-widest ${meetup.status === 'confirmed' ? 'text-accent' : 'text-ink/60'}`}>
-                {meetup.status === 'confirmed' ? (meetup.kind === 'llamada' ? '✓ grupo formado' : '✓ confirmada') : `mín. ${meetup.minToConfirm}`}
+              <span className={`font-mono text-[10px] uppercase tracking-widest inline-flex items-center gap-1 ${meetup.status === 'confirmed' ? 'text-accent' : 'text-ink/60'}`}>
+                {meetup.status === 'confirmed'
+                  ? <><Icon name="checkCircle" className="w-3 h-3" strokeWidth={2.2} />{meetup.kind === 'llamada' ? 'grupo formado' : 'confirmada'}</>
+                  : `mín. ${meetup.minToConfirm}`}
               </span>
             </span>
             <span className="inline-flex items-center gap-2 rounded-xl border border-ink/10 px-3 py-2 text-sm">
@@ -114,8 +122,8 @@ export default async function MeetupPage({ params, searchParams }: Params) {
 
         {/* Detalle */}
         <div className="space-y-2 text-[15px] text-ink/85">
-          {meetup.meetingPoint && <p><strong>📍 Punto de encuentro:</strong> {meetup.meetingPoint}</p>}
-          <p><strong>👤 Anfitrión:</strong> {meetup.hostName}</p>
+          {meetup.meetingPoint && <p><strong className="inline-flex items-center gap-1"><Icon name="pin" className="w-3.5 h-3.5" strokeWidth={2} />Punto de encuentro:</strong> {meetup.meetingPoint}</p>}
+          <p><strong className="inline-flex items-center gap-1"><Icon name="person" className="w-3.5 h-3.5" strokeWidth={2} />Anfitrión:</strong> {meetup.hostName}</p>
           {meetup.notes && <p className="text-ink/75 whitespace-pre-line border-l-4 border-accent/40 pl-3">{meetup.notes}</p>}
         </div>
 
@@ -135,7 +143,7 @@ export default async function MeetupPage({ params, searchParams }: Params) {
         {/* Reparto de gastos dinámico (barco compartido, sin lucro) */}
         {cost.mode === 'reparto' && cost.perPersonNow != null && (
           <div className="border border-accent/30 rounded-2xl bg-accent/[0.05] p-4 space-y-1">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">🚤 Gastos compartidos</p>
+            <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent inline-flex items-center gap-1.5"><Icon name="boat" className="w-3.5 h-3.5" strokeWidth={2} />Gastos compartidos</p>
             <p className="text-[15px] text-ink/85">
               Gastos totales <strong>{meetup.totalCost} €</strong> a repartir entre todos los que vais.
               Ahora sois <strong>{meetup.placesTaken + 1}</strong> a bordo → <strong>≈{cost.perPersonNow} €/persona</strong>.
@@ -150,8 +158,8 @@ export default async function MeetupPage({ params, searchParams }: Params) {
         {/* Previsión + seguridad del día */}
         {danger && (
           <div className="border border-red-700/40 rounded-2xl bg-red-700/[0.07] p-4">
-            <p className="font-bold text-red-900 text-sm">
-              ⚠️ Condiciones no aptas para {meetup.modality} este día
+            <p className="font-bold text-red-900 text-sm inline-flex items-start gap-1.5">
+              <Icon name="warning" className="w-4 h-4 shrink-0 mt-0.5" strokeWidth={2} />Condiciones no aptas para {meetup.modality} este día
             </p>
             <p className="text-[13px] text-red-900/80 mt-1">
               {outlook?.navSafe === false
@@ -162,11 +170,11 @@ export default async function MeetupPage({ params, searchParams }: Params) {
         )}
         {outlook && !danger && (
           <div className="border border-ink/10 rounded-2xl bg-paper p-4 space-y-2">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">🌊 Previsión del día en {spot?.name}</p>
+            <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent inline-flex items-center gap-1.5"><Icon name="wave" className="w-3.5 h-3.5" strokeWidth={2} />Previsión del día en {spot?.name}</p>
             {outlook.verdict && <p className="text-[14px] text-ink/85">{outlook.verdict}</p>}
-            {outlook.window && <p className="text-[13px] text-ink/70">Mejor ventana: <strong>{outlook.window}</strong>{outlook.navSafe ? ' · franja de navegación apta ✓' : ''}</p>}
+            {outlook.window && <p className="text-[13px] text-ink/70">Mejor ventana: <strong>{outlook.window}</strong>{outlook.navSafe ? <> · franja de navegación apta <Icon name="checkCircle" className="w-3 h-3 inline -mt-0.5 text-accent" strokeWidth={2.2} /></> : ''}</p>}
             {outlook.alerts.filter((a) => a.level === 'aviso').map((a, i) => (
-              <p key={i} className="text-[13px] text-amber-800">⚠️ {a.text}</p>
+              <p key={i} className="text-[13px] text-amber-800 inline-flex items-start gap-1.5"><Icon name="warning" className="w-3.5 h-3.5 shrink-0 mt-0.5" strokeWidth={2} />{a.text}</p>
             ))}
             <Link href={`/mejores-horas/${meetup.spotSlug}?modo=${meetup.modality}${meetup.targetSpecies ? `&especie=${meetup.targetSpecies}` : ''}`} className="inline-block text-[12px] font-bold uppercase tracking-wide text-accent hover:underline">
               Ver previsión completa hora a hora →
@@ -174,8 +182,8 @@ export default async function MeetupPage({ params, searchParams }: Params) {
           </div>
         )}
         {daysAway != null && (
-          <p className="text-[13px] text-ink/60 border border-ink/[0.07] rounded-xl bg-ink/[0.02] p-3">
-            🗓️ Faltan {daysAway} días — la previsión detallada aparecerá cuando entre en el rango de 7 días. Mientras, mira el{' '}
+          <p className="text-[13px] text-ink/60 border border-ink/[0.07] rounded-xl bg-ink/[0.02] p-3 inline-flex items-start gap-1.5">
+            <Icon name="calendar" className="w-3.5 h-3.5 shrink-0 mt-0.5" strokeWidth={2} />Faltan {daysAway} días — la previsión detallada aparecerá cuando entre en el rango de 7 días. Mientras, mira el{' '}
             <Link href={`/mejores-horas/${meetup.spotSlug}/planificador`} className="text-accent underline">planificador de la zona</Link>.
           </p>
         )}

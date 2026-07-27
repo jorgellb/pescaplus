@@ -81,6 +81,10 @@ const P: Record<string, JSX.Element> = {
   starOutline: <path d="M12 3.5 14.8 9.3 21.2 10.2 16.6 14.7 17.7 21 12 17.9 6.3 21 7.4 14.7 2.8 10.2 9.2 9.3 12 3.5Z" />,  // trazo sin rellenar: rating vacío
   arrowRight: <path d="M4 12h15M13 6l6 6-6 6" />,
   refresh: <><path d="M4 12a8 8 0 0 1 14-5.3L20 9" /><path d="M20 4v5h-5" /><path d="M20 12a8 8 0 0 1-14 5.3L4 15" /><path d="M4 20v-5h5" /></>,
+
+  // — tercer lote: quedadas —
+  key: <><circle cx="8" cy="15" r="4.3" /><path d="M11 12 20 3" /><path d="M16.5 6.5 17.5 7.5" /><path d="M18 5 19 6" /></>,
+  person: <><circle cx="12" cy="8" r="3.3" /><path d="M5.5 20a6.5 6.5 0 0 1 13 0" /></>,
 }
 
 export type IconName = keyof typeof P

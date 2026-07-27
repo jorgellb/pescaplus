@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Icon from '@/components/icons/Icon'
 
 /** "Avísame de quedadas en {zona}" — email signup for new-meetup alerts. */
 export default function ZoneAlertSignup({ spotSlug, spotName }: { spotSlug: string; spotName: string }) {
@@ -33,13 +34,13 @@ export default function ZoneAlertSignup({ spotSlug, spotName }: { spotSlug: stri
   }
 
   if (state === 'done') {
-    return <p className="text-sm text-ink/70 border border-accent/30 rounded-xl bg-accent/[0.06] p-3">🔔 Hecho. Te avisaremos por email cuando alguien organice una salida en {spotName}.</p>
+    return <p className="text-sm text-ink/70 border border-accent/30 rounded-xl bg-accent/[0.06] p-3 inline-flex items-start gap-1.5"><Icon name="bell" className="w-4 h-4 shrink-0 mt-0.5 text-accent" strokeWidth={1.8} />Hecho. Te avisaremos por email cuando alguien organice una salida en {spotName}.</p>
   }
 
   return (
     <form onSubmit={submit} className="flex flex-wrap items-end gap-2">
       <label className="flex-1 min-w-[200px]">
-        <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">🔔 Avísame de quedadas en {spotName}</span>
+        <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60 inline-flex items-center gap-1"><Icon name="bell" className="w-3 h-3" strokeWidth={2} />Avísame de quedadas en {spotName}</span>
         <input
           required
           type="email"

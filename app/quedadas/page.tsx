@@ -6,6 +6,7 @@ import { listUpcomingMeetups, costInfo } from '@/lib/meetups-store'
 import { getSpot } from '@/lib/fishing-spots'
 import { getSpecies } from '@/lib/fishing-species'
 import { todayMadridISO, fmtDayLabel } from '@/lib/solunar-format'
+import Icon from '@/components/icons/Icon'
 
 export const dynamic = 'force-dynamic'
 
@@ -58,10 +59,10 @@ export default async function QuedadasHub() {
           </p>
           <div className="flex flex-wrap gap-3 mt-6">
             <Link href="/quedadas/nueva" className="inline-flex items-center gap-2 bg-accent text-paper px-6 py-3 text-sm font-semibold border border-accent rounded-full shadow-hard hover-shift hover:bg-ink hover:border-ink">
-              ➕ Organizar una quedada
+              <Icon name="plus" className="w-4 h-4" strokeWidth={2} />Organizar una quedada
             </Link>
             <Link href="/quedadas/nueva?tipo=llamada" className="inline-flex items-center gap-2 bg-paper text-ink px-6 py-3 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift hover:bg-ink hover:text-paper">
-              🙋 ¿Quién se apunta?
+              <Icon name="users" className="w-4 h-4" strokeWidth={1.8} />¿Quién se apunta?
             </Link>
           </div>
         </div>
@@ -84,7 +85,7 @@ export default async function QuedadasHub() {
 
         <div>
           <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3 mb-2 flex items-center gap-2">
-            <span aria-hidden>🙋</span> ¿Quién se apunta?
+            <Icon name="users" className="w-6 h-6" strokeWidth={1.7} /> ¿Quién se apunta?
           </h2>
           <p className="text-sm text-ink/60 mb-5">Pescadores buscando compañía en su zona, sin hora fija. Apúntate y, cuando seáis suficientes, os coordináis.</p>
           {llamadaCards.length === 0 ? (

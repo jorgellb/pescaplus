@@ -3,8 +3,9 @@ import { listMeetupsBySpot, costInfo } from '@/lib/meetups-store'
 import ZoneAlertSignup from '@/components/quedadas/ZoneAlertSignup'
 import { getSpecies } from '@/lib/fishing-species'
 import { todayMadridISO, fmtDayLabel } from '@/lib/solunar-format'
+import Icon, { type IconName } from '@/components/icons/Icon'
 
-const MOD_EMOJI: Record<string, string> = { tierra: '🏖️', kayak: '🛶', barco: '🚤' }
+const MOD_ICON: Record<string, IconName> = { tierra: 'umbrella', kayak: 'kayak', barco: 'boat' }
 
 /** Compact "quedadas in this zone" block for the spot dashboard. Streamed in a
  * Suspense boundary so it never blocks the forecast. */
@@ -15,10 +16,10 @@ export default async function ZoneMeetups({ spotSlug, spotName }: { spotSlug: st
     <div className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-6 space-y-4 scroll-mt-28">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="font-display uppercase text-2xl text-ink leading-none flex items-center gap-2">
-          <span aria-hidden>🎣</span> Quedadas en {spotName}
+          <Icon name="rod" className="w-5 h-5" strokeWidth={1.7} /> Quedadas en {spotName}
         </h2>
         <Link href={`/quedadas/nueva?zona=${spotSlug}`} className="inline-flex items-center gap-2 bg-ink text-paper px-4 py-2 text-sm font-semibold rounded-full hover:bg-accent transition-colors">
-          ➕ Organizar
+          <Icon name="plus" className="w-4 h-4" strokeWidth={2} />Organizar
         </Link>
       </div>
 
@@ -35,8 +36,8 @@ export default async function ZoneMeetups({ spotSlug, spotName }: { spotSlug: st
               <li key={m.id}>
                 <Link href={`/quedadas/${m.id}`} className="flex items-center justify-between gap-3 border border-ink/[0.07] rounded-xl px-3.5 py-2.5 bg-paper hover:border-accent transition-colors">
                   <span className="min-w-0">
-                    <span className="block font-bold text-ink text-sm">
-                      {MOD_EMOJI[m.modality]} <span className="capitalize">{fmtDayLabel(m.dateISO)}</span> · {m.timeStart}
+                    <span className="flex items-center gap-1 font-bold text-ink text-sm">
+                      <Icon name={MOD_ICON[m.modality]} className="w-3.5 h-3.5 shrink-0" strokeWidth={2} /> <span className="capitalize">{fmtDayLabel(m.dateISO)}</span> · {m.timeStart}
                       {sp ? ` · ${sp.name}` : ''}
                     </span>
                     <span className="block font-mono text-[10px] uppercase tracking-widest text-ink/60">

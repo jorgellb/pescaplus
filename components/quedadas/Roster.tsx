@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Icon from '@/components/icons/Icon'
 
 interface Person {
   id: string
@@ -53,7 +54,9 @@ export default function Roster({
       {p.name}{p.places > 1 ? ` +${p.places - 1}` : ''}
       {isHost && p.contact && <span className="font-mono text-[10px] text-accent">{p.contact}</span>}
       {isHost && (
-        <button onClick={() => remove(p.id)} disabled={busy === p.id} aria-label="Quitar" className="text-ink/30 hover:text-red-700 disabled:opacity-50 ml-0.5">✕</button>
+        <button onClick={() => remove(p.id)} disabled={busy === p.id} aria-label="Quitar" className="text-ink/30 hover:text-red-700 disabled:opacity-50 ml-0.5">
+          <Icon name="close" className="w-3 h-3" strokeWidth={2.2} />
+        </button>
       )}
     </span>
   )
@@ -70,7 +73,7 @@ export default function Roster({
       )}
       {waitlist.length > 0 && (
         <div className="space-y-2">
-          <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-amber-700/80">⏳ Lista de espera ({waitlist.length})</p>
+          <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-amber-700/80 inline-flex items-center gap-1"><Icon name="clock" className="w-3 h-3" strokeWidth={2} />Lista de espera ({waitlist.length})</p>
           <div className="flex flex-wrap gap-2">{waitlist.map((p, i) => chip(p, true, i))}</div>
         </div>
       )}

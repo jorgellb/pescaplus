@@ -4,6 +4,7 @@ import { useState } from 'react'
 import ChipSelect from '@/components/charters/ChipSelect'
 import { TECHNIQUES, TARGET_SPECIES, MEETUP_BRING } from '@/lib/charter-options'
 import { useRouter } from 'next/navigation'
+import Icon from '@/components/icons/Icon'
 
 interface Opt {
   slug: string
@@ -104,8 +105,8 @@ export default function NewMeetupForm({ spots, species, defaultSpot, defaultKind
       {/* Tipo: quedada concreta vs llamada abierta (demanda inversa) */}
       <div className="grid grid-cols-2 gap-2">
         {([
-          { id: 'quedada', t: '📅 Quedada concreta', d: 'Día y hora fijos' },
-          { id: 'llamada', t: '🙋 Busco compañía', d: '¿Quién se apunta?' },
+          { id: 'quedada', icon: 'calendar', t: 'Quedada concreta', d: 'Día y hora fijos' },
+          { id: 'llamada', icon: 'users', t: 'Busco compañía', d: '¿Quién se apunta?' },
         ] as const).map((o) => (
           <button
             key={o.id}
@@ -113,7 +114,7 @@ export default function NewMeetupForm({ spots, species, defaultSpot, defaultKind
             onClick={() => setKind(o.id)}
             className={`text-left rounded-xl border px-3.5 py-2.5 transition-colors ${kind === o.id ? 'bg-accent/[0.08] border-accent' : 'bg-paper border-ink/10 hover:border-accent/50'}`}
           >
-            <span className="block text-sm font-bold text-ink">{o.t}</span>
+            <span className="flex items-center gap-1.5 text-sm font-bold text-ink"><Icon name={o.icon} className="w-3.5 h-3.5" strokeWidth={1.8} />{o.t}</span>
             <span className="block font-mono text-[10px] uppercase tracking-widest text-ink/60">{o.d}</span>
           </button>
         ))}
@@ -248,10 +249,11 @@ export default function NewMeetupForm({ spots, species, defaultSpot, defaultKind
       {/* Honeypot */}
       <input type="text" tabIndex={-1} autoComplete="off" value={form.website} onChange={(e) => set('website', e.target.value)} className="hidden" aria-hidden />
 
-      <p className="text-[12px] text-ink/60 leading-relaxed border border-ink/[0.07] rounded-xl bg-ink/[0.02] p-3">
-        ⚠️ Las quedadas son para <strong>compartir gastos, sin ánimo de lucro</strong>. Si cobras por llevar gente a pescar
+      <p className="text-[12px] text-ink/60 leading-relaxed border border-ink/[0.07] rounded-xl bg-ink/[0.02] p-3 flex items-start gap-1.5">
+        <Icon name="warning" className="w-3.5 h-3.5 shrink-0 mt-0.5" strokeWidth={2} />
+        <span>Las quedadas son para <strong>compartir gastos, sin ánimo de lucro</strong>. Si cobras por llevar gente a pescar
         necesitas licencia y seguro de actividad náutica comercial. Cada participante debe llevar su licencia de pesca. Sal
-        con seguridad: chaleco, avisa a alguien en tierra y no salgas solo en kayak o barco.
+        con seguridad: chaleco, avisa a alguien en tierra y no salgas solo en kayak o barco.</span>
       </p>
 
       {state === 'error' && <p className="text-sm text-red-700">{msg}</p>}

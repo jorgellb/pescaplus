@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Icon from '@/components/icons/Icon'
 
 /** Share a meetup — WhatsApp (how anglers actually coordinate) + copy link. */
 export default function MeetupShare({ waText }: { waText: string }) {
@@ -24,13 +25,15 @@ export default function MeetupShare({ waText }: { waText: string }) {
         rel="noopener noreferrer"
         className="inline-flex items-center gap-2 bg-accent text-paper px-4 py-2.5 text-sm font-semibold border border-accent rounded-full shadow-hard hover-shift hover:bg-ink hover:border-ink transition-colors"
       >
-        💬 Compartir por WhatsApp
+        <Icon name="message" className="w-4 h-4" strokeWidth={1.8} />Compartir por WhatsApp
       </a>
       <button
         onClick={copy}
         className="inline-flex items-center gap-2 bg-paper text-ink px-4 py-2.5 text-sm font-semibold border border-ink/10 rounded-full hover:bg-ink hover:text-paper transition-colors"
       >
-        {copied ? '✓ Copiado' : '🔗 Copiar enlace'}
+        {copied
+          ? <><Icon name="checkCircle" className="w-4 h-4 text-accent" strokeWidth={1.8} />Copiado</>
+          : <><Icon name="link" className="w-4 h-4" strokeWidth={1.8} />Copiar enlace</>}
       </button>
     </div>
   )

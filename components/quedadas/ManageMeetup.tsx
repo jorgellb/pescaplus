@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Icon from '@/components/icons/Icon'
 
 /** Host-only panel, shown when the private management token is in the URL.
  * Lets the host copy the manage link and cancel the meetup. */
@@ -47,7 +48,7 @@ export default function ManageMeetup({ id, manageToken, justCreated }: { id: str
 
   return (
     <div className="border border-ink/12 rounded-2xl bg-ink/[0.03] p-4 space-y-3">
-      <p className="font-display uppercase text-lg leading-none">🔑 Eres el anfitrión</p>
+      <p className="font-display uppercase text-lg leading-none inline-flex items-center gap-2"><Icon name="key" className="w-4 h-4" strokeWidth={1.8} />Eres el anfitrión</p>
       {justCreated && (
         <p className="text-sm text-ink/80">
           ¡Quedada publicada! <strong>Guarda este enlace privado</strong> para gestionarla o cancelarla — es la única forma de volver a entrar como anfitrión.
@@ -55,7 +56,9 @@ export default function ManageMeetup({ id, manageToken, justCreated }: { id: str
       )}
       <div className="flex flex-wrap items-center gap-2">
         <button onClick={copy} className="inline-flex items-center gap-2 bg-ink text-paper px-4 py-2 text-sm font-semibold rounded-full hover:bg-accent transition-colors">
-          {copied ? '✓ Copiado' : '📋 Copiar enlace de gestión'}
+          {copied
+            ? <><Icon name="checkCircle" className="w-4 h-4" strokeWidth={1.8} />Copiado</>
+            : <><Icon name="clipboard" className="w-4 h-4" strokeWidth={1.8} />Copiar enlace de gestión</>}
         </button>
         <button onClick={cancel} disabled={state === 'working'} className="inline-flex items-center gap-2 bg-paper text-red-700 border border-red-700/40 px-4 py-2 text-sm font-semibold rounded-full hover:bg-red-700 hover:text-paper disabled:opacity-60 transition-colors">
           {state === 'working' ? 'Cancelando…' : 'Cancelar quedada'}

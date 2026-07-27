@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import Icon, { type IconName } from '@/components/icons/Icon'
 
 export interface MeetupCard {
   id: string
@@ -22,13 +23,19 @@ export interface MeetupCard {
   maxPlaces: number
 }
 
-const MOD = [
-  { id: 'todas', label: 'Todas' },
-  { id: 'tierra', label: '🏖️ Orilla' },
-  { id: 'kayak', label: '🛶 Kayak' },
-  { id: 'barco', label: '🚤 Barco' },
+const MOD: { id: string; icon?: IconName; text: string }[] = [
+  { id: 'todas', text: 'Todas' },
+  { id: 'tierra', icon: 'umbrella', text: 'Orilla' },
+  { id: 'kayak', icon: 'kayak', text: 'Kayak' },
+  { id: 'barco', icon: 'boat', text: 'Barco' },
 ]
 const LOC_KEY = 'pescaplus-last-loc'
+
+function ModLabel({ id }: { id: string }) {
+  const m = MOD.find((x) => x.id === id)
+  if (!m) return <>{id}</>
+  return <>{m.icon && <Icon name={m.icon} className="w-3 h-3 inline -mt-0.5" strokeWidth={2} />} {m.text}</>
+}
 
 function haversineKm(a: { lat: number; lon: number }, b: { lat: number; lon: number }): number {
   const r = Math.PI / 180
@@ -95,15 +102,16 @@ export default function MeetupList({ meetups }: { meetups: MeetupCard[] }) {
               modality === m.id ? 'bg-accent text-paper border-accent' : 'bg-paper text-ink/70 border-ink/10 hover:border-accent hover:text-accent'
             }`}
           >
-            {m.label}
+            {m.icon && <Icon name={m.icon} className="w-3.5 h-3.5 inline -mt-0.5 mr-1" strokeWidth={2} />}{m.text}
           </button>
         ))}
         <button
           onClick={locate}
           disabled={locating}
-          className="px-3.5 py-2 rounded-xl border text-sm font-semibold bg-paper text-ink/70 border-ink/10 hover:border-accent hover:text-accent disabled:opacity-60 transition-colors"
+          className="px-3.5 py-2 rounded-xl border text-sm font-semibold bg-paper text-ink/70 border-ink/10 hover:border-accent hover:text-accent disabled:opacity-60 transition-colors inline-flex items-center gap-1"
         >
-          📍 {locating ? 'Localizando…' : pos ? 'Cerca de mí ✓' : 'Cerca de mí'}
+          <Icon name="pin" className="w-3.5 h-3.5" strokeWidth={2} />
+          {locating ? 'Localizando…' : pos ? <>Cerca de mí <Icon name="checkCircle" className="w-3 h-3 inline -mt-0.5 text-accent" strokeWidth={2.2} /></> : 'Cerca de mí'}
         </button>
       </div>
 
@@ -118,7 +126,7 @@ export default function MeetupList({ meetups }: { meetups: MeetupCard[] }) {
                 <Link href={`/quedadas/${m.id}`} className="block border border-ink/[0.07] rounded-2xl bg-paper p-4 hover:border-accent transition-colors h-full">
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">
-                      {MOD.find((x) => x.id === m.modality)?.label ?? m.modality} · <span className="capitalize">{m.dayLabel}</span> · {m.timeStart}
+                      <ModLabel id={m.modality} /> · <span className="capitalize">{m.dayLabel}</span> · {m.timeStart}
                     </span>
                     <span className={`font-mono text-[10px] font-bold uppercase tracking-widest ${m.status === 'confirmed' ? 'text-accent' : 'text-ink/60'}`}>
                       {m.kind === 'llamada'
