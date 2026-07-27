@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getForecastAt, bestWindow, windDirLabel, FORECAST_REVALIDATE_S } from '@/lib/marine-forecast'
 import { rateLimit, clientIp } from '@/lib/rate-limit'
+import { getTides, tideCoefficient, coefficientLabel, tideRisingAt, nextExtremes, TIDE_DATUM_NOTE } from '@/lib/tides'
+import { lunarInfo } from '@/lib/solunar'
 
 /**
  * ¿Qué mar hay en este punto, y cuándo conviene salir?
@@ -23,7 +25,19 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: false, error: 'Coordenadas no válidas.' }, { status: 400 })
   }
 
-  const fc = await getForecastAt(lat, lon)
+  /*
+   * La marea va en paralelo con el parte: son dos servicios distintos y en serie
+   * el panel tardaría el doble en aparecer.
+   *
+   * El COEFICIENTE se calcula aquí mismo desde la fase lunar, así que sale
+   * siempre, haya o no clave de WorldTides. Es lo primero que mira quien pesca
+   * —vivas o muertas decide la corriente, y con ella la actividad— y sería
+   * absurdo esconderlo por no tener contratadas las alturas.
+   */
+  const [fc, tides] = await Promise.all([getForecastAt(lat, lon), getTides(lat, lon)])
+  const hoy = new Date().toISOString().slice(0, 10)
+  const luna = lunarInfo(hoy)
+  const coef = tideCoefficient(luna.phase)
   if (!fc.available || fc.hours.length === 0) {
     return NextResponse.json({ success: true, available: false })
   }
@@ -54,6 +68,23 @@ export async function GET(request: NextRequest) {
         activity: now.activity,
       },
       ventana,
+      marea: {
+        // Siempre presente: no depende de ningún servicio externo.
+        coeficiente: coef,
+        coeficienteTexto: coefficientLabel(coef),
+        lunaFase: luna.name,
+        // Lo demás solo si hay alturas de verdad. Nunca se inventan.
+        disponible: tides.available,
+        // En el Mediterráneo el rango es de centímetros: decirlo evita que
+        // alguien planifique una salida alrededor de una marea que no existe.
+        rangoPequeno: tides.smallRange,
+        estacion: tides.station,
+        subiendo: tides.available ? tideRisingAt(tides.all, Date.now()) : null,
+        proximas: tides.available
+          ? nextExtremes(tides.all, Date.now(), 2).map((e) => ({ t: e.time, altura: e.height, tipo: e.type }))
+          : [],
+        nota: tides.available ? TIDE_DATUM_NOTE : null,
+      },
       gridKm: fc.meta.marineGridKm ?? fc.meta.gridKm,
     },
     { headers: { 'Cache-Control': `public, max-age=300, s-maxage=${FORECAST_REVALIDATE_S}` } },

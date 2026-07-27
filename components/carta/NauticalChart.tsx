@@ -25,6 +25,17 @@ interface PointConditions {
     score: number; activity: number
   }
   ventana?: { start: number; end: number; avg: number } | null
+  marea?: {
+    coeficiente: number
+    coeficienteTexto: string
+    lunaFase: string
+    disponible: boolean
+    rangoPequeno: boolean
+    estacion: string | null
+    subiendo: boolean | null
+    proximas: { t: number; altura: number; tipo: 'alta' | 'baja' }[]
+    nota: string | null
+  }
   gridKm?: number | null
 }
 
@@ -43,6 +54,45 @@ function ventanaTexto(v: { start: number; end: number }): string {
     return new Date(t).toLocaleDateString('es-ES', { weekday: 'long', timeZone: 'Europe/Madrid' })
   }
   return `${dia(v.start)} ${hora(v.start)} – ${hora(v.end)}`
+}
+
+/**
+ * La marea.
+ *
+ * El COEFICIENTE va primero y siempre: sale de la fase lunar, se calcula en
+ * local y es lo que decide si hay corriente. Vivas o muertas cambia la jornada
+ * más que medio nudo de viento.
+ *
+ * Las alturas y la próxima pleamar solo salen si hay servicio contratado. Si no
+ * lo hay, no se enseña un hueco ni se rellena con nada: se calla esa parte.
+ */
+function Marea({ m }: { m: NonNullable<PointConditions['marea']> }) {
+  const hora = (t: number) => new Date(t).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Madrid' })
+  return (
+    <div className="mt-2 pt-2 border-t border-ink/[0.07]">
+      <p className="text-[13px] text-ink">
+        <span className="text-ink/60">Marea:</span>{' '}
+        <span className="font-semibold">{m.coeficienteTexto}</span>
+        <span className="text-ink/60"> · coef. {m.coeficiente} · {m.lunaFase}</span>
+      </p>
+      {m.disponible && (
+        <>
+          {m.subiendo != null && (
+            <p className="text-[12px] text-ink/70">
+              Ahora {m.subiendo ? 'subiendo ↑' : 'bajando ↓'}
+              {m.proximas[0] && ` · ${m.proximas[0].tipo === 'alta' ? 'pleamar' : 'bajamar'} a las ${hora(m.proximas[0].t)}`}
+            </p>
+          )}
+          {/* En el Mediterráneo el rango es de centímetros: planificar una
+              salida alrededor de esa marea no tiene sentido, y hay que decirlo. */}
+          {m.rangoPequeno && (
+            <p className="text-[11.5px] text-ink/60">Rango pequeño: aquí la marea apenas mueve el agua.</p>
+          )}
+          {m.estacion && <p className="text-[11px] text-ink/50">Estación: {m.estacion}</p>}
+        </>
+      )}
+    </div>
+  )
 }
 
 /**
@@ -87,6 +137,7 @@ function PointWeather({ c }: { c: PointConditions | null }) {
           <span className="font-semibold text-accent">Mejor ventana:</span> {ventanaTexto(c.ventana)}
         </p>
       )}
+      {c.marea && <Marea m={c.marea} />}
     </>
   )
 }
