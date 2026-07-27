@@ -9,6 +9,11 @@ const schema = z.object({
   speciesId: z.string().min(2).max(40),
   dateISO: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   qty: z.number().int().min(1).max(200).optional(),
+  // El punto exacto y la hora son opcionales: se apunta igual desde el diario
+  // sin carta delante, solo que el sello sale con el centro de la zona.
+  lat: z.number().min(-90).max(90).nullable().optional(),
+  lon: z.number().min(-180).max(180).nullable().optional(),
+  timeISO: z.string().regex(/^\d{2}:\d{2}$/).nullable().optional(),
 })
 
 /** Share one catch, anonymously. The diary keeps the note; it never travels. */

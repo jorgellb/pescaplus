@@ -246,6 +246,20 @@ model Message {
  * un punto concreto, que es justo lo que un pescador no quiere compartir.
  * `userId` se guarda solo para moderación y control de abuso; jamás se expone.
  */
+/**
+ * Una captura apuntada, con las condiciones que la rodearon.
+ *
+ * El sello de condiciones es lo que convierte un diario en una herramienta. Sin
+ * él queda "una lubina en Tarifa el 20 de julio", que no sirve para aprender
+ * nada; con él, tras una temporada, se puede responder a la pregunta que de
+ * verdad importa: con qué marea, sobre qué fondo y a qué profundidad pica cada
+ * especie PARA ESTE PESCADOR.
+ *
+ * Se guarda como JSON y no en columnas porque es una FOTO de lo que se sabía en
+ * ese momento: si mañana se añade una fuente nueva, las capturas viejas siguen
+ * valiendo con lo que tuvieran. Lo que no se supo entonces va a null y se dice;
+ * nunca se rellena después con una estimación.
+ */
 model CatchReport {
   id        String   @id @default(cuid())
   spotSlug  String
@@ -253,10 +267,18 @@ model CatchReport {
   dateISO   String
   qty       Int      @default(1)
   userId    String?
+  /** Punto exacto, cuando se apunta desde la carta. */
+  lat       Float?
+  lon       Float?
+  /** Hora local "HH:MM": sin ella no se puede casar con marea ni solunar. */
+  timeISO   String?
+  /** Foto de las condiciones. Ver lib/catch-context.ts. */
+  context   Json?
   createdAt DateTime @default(now())
 
   @@index([spotSlug, dateISO])
   @@index([speciesId, dateISO])
+  @@index([userId, dateISO])
 }
 
 /**

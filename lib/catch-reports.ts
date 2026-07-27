@@ -24,6 +24,11 @@ export interface CatchInput {
   speciesId: string
   dateISO: string
   qty?: number
+  /** Punto exacto, cuando se apunta desde la carta. */
+  lat?: number | null
+  lon?: number | null
+  /** Hora local "HH:MM". Sin ella la marea de la captura es orientativa. */
+  timeISO?: string | null
 }
 
 export interface SpeciesActivity {
@@ -70,7 +75,42 @@ export async function shareCatch(input: CatchInput, userId?: string | null): Pro
   const err = validateCatch(input)
   if (err) throw new Error(err)
   const qty = Math.min(200, Math.max(1, Math.round(Number(input.qty) || 1)))
-  const row = { spotSlug: input.spotSlug, speciesId: input.speciesId, dateISO: input.dateISO, qty, userId: userId ?? null }
+
+  /*
+   * El punto: el que se pase, y si no el de la zona.
+   *
+   * Sellar con el centro de la zona no es lo mismo que sellar con el sitio
+   * exacto —el fondo puede cambiar de roca a arena en cien metros— pero permite
+   * que las capturas apuntadas desde el diario, sin carta delante, tengan
+   * contexto igualmente. Se distingue con `puntoExacto`.
+   */
+  const spot = getSpot(input.spotSlug)!
+  const exacto = Number.isFinite(input.lat) && Number.isFinite(input.lon)
+    && Math.abs(input.lat!) <= 90 && Math.abs(input.lon!) <= 180
+  const lat = exacto ? input.lat! : spot.lat
+  const lon = exacto ? input.lon! : spot.lon
+  const timeISO = input.timeISO && /^\d{2}:\d{2}$/.test(input.timeISO) ? input.timeISO : null
+
+  /*
+   * La foto de condiciones NO puede impedir apuntar una captura. Si las fuentes
+   * están caídas se guarda sin ella: perder el registro por no poder consultar
+   * el viento sería absurdo.
+   */
+  let context: object | null = null
+  try {
+    const { buildCatchContext } = await import('@/lib/catch-context')
+    context = { ...(await buildCatchContext(lat, lon, input.dateISO, timeISO)), puntoExacto: exacto }
+  } catch (error) {
+    console.warn('No se ha podido sellar la captura con sus condiciones:', error)
+  }
+
+  const row = {
+    spotSlug: input.spotSlug, speciesId: input.speciesId, dateISO: input.dateISO, qty,
+    userId: userId ?? null,
+    ...(exacto ? { lat, lon } : {}),
+    ...(timeISO ? { timeISO } : {}),
+    ...(context ? { context } : {}),
+  }
 
   if (isDatabaseConfigured()) {
     const { prisma } = await import('@/lib/prisma')
@@ -142,4 +182,38 @@ export async function getSpeciesActivity(spotSlug: string, speciesId: string, da
   // hay actividad suficiente, decir "y de estas 2 son lubinas" no identifica.
   if (!all.enough || !found) return { enough: false, reports: 0, fish: 0, lastDateISO: null }
   return { enough: true, reports: found.reports, fish: found.fish, lastDateISO: all.lastDateISO }
+}
+
+/**
+ * Las capturas SELLADAS de un usuario, para calcular sus patrones.
+ *
+ * Solo suyas y solo las que tienen contexto: sin él no se puede sacar ningún
+ * patrón, y arrastrarlas solo sirve para inflar el recuento y dar una falsa
+ * sensación de que hay datos.
+ */
+export async function listUserCatchesWithContext(userId: string, days = 730) {
+  if (!userId || !isDatabaseConfigured()) return []
+  const desde = addDaysISO(todayMadridISO(), -days)
+  try {
+    const { prisma } = await import('@/lib/prisma')
+    const rows = await prisma.catchReport.findMany({
+      // El "sin contexto" se filtra abajo y no aquí: en Prisma, comparar una
+      // columna JSON con null exige `Prisma.DbNull`, y no compensa importarlo
+      // para algo que la propia lectura ya descarta.
+      where: { userId, dateISO: { gte: desde } },
+      orderBy: { dateISO: 'desc' },
+      take: 3000,
+    })
+    return rows
+      .filter((r) => r.context && typeof r.context === 'object')
+      .map((r) => ({
+        speciesId: r.speciesId,
+        dateISO: r.dateISO,
+        qty: r.qty,
+        context: r.context as unknown as import('@/lib/catch-context').CatchContext & { puntoExacto?: boolean },
+      }))
+  } catch (error) {
+    console.warn('Catches with context read failed:', error)
+    return []
+  }
 }
