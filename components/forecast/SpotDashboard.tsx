@@ -38,7 +38,10 @@ import { getAemetBulletin, AEMET_REVALIDATE_S, type AemetBulletin } from '@/lib/
 import { aemetZoneFor } from '@/lib/aemet-zones'
 import { getAemetObservation, observationAgeMin, isObservationFresh, type AemetObservation } from '@/lib/aemet-obs'
 import { AEMET_STATIONS } from '@/lib/aemet-stations'
-import { getSpotAccuracy, type SpotAccuracy } from '@/lib/verification-store'
+import { getSpotAccuracy, getSpotAccuracyHistory, type SpotAccuracy, type AccuracyPoint } from '@/lib/verification-store'
+import AccuracyTrend from '@/components/forecast/AccuracyTrend'
+import LiveWeatherMap from '@/components/forecast/LiveWeatherMap'
+import WhosGoingToday from '@/components/forecast/WhosGoingToday'
 import { getModelAgreement, AGREEMENT_LABEL } from '@/lib/model-agreement'
 import { isSpeciesZone } from '@/lib/species-zones'
 import { scoreLabel, scoreHex, windWord, weatherIcon } from '@/lib/forecast-format'
@@ -52,6 +55,7 @@ const MONTH_NAMES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'jul
 interface StationData {
   obs: AemetObservation | null
   accuracy: SpotAccuracy | null
+  history: AccuracyPoint[]
 }
 
 /** Streamed: the live AEMET station read + public verification, resolved from a
@@ -67,7 +71,7 @@ async function StationPanel({
   now: number
   nowWindKmh: number | null
 }) {
-  const { obs, accuracy } = await promise
+  const { obs, accuracy, history } = await promise
   const obsAgeMin = observationAgeMin(obs?.time ?? null, now)
   const obsFresh = isObservationFresh(obsAgeMin)
   return (
@@ -106,13 +110,21 @@ async function StationPanel({
         </div>
       )}
       {station.km <= 15 && (
-        <p className="font-mono text-[10px] uppercase tracking-wide text-ink/60 leading-relaxed inline-flex items-start gap-1.5">
-          <Icon name="target" className="w-3.5 h-3.5 shrink-0 mt-0.5" strokeWidth={2} />
-          <span>Fiabilidad verificada:{' '}
-          {accuracy
-            ? `error medio del viento ±${accuracy.maeKmh} km/h · ${Math.round(accuracy.within5 * 100)}% de días dentro de ±5 (últimas ${accuracy.n} verificaciones contra la estación oficial)`
-            : 'comparamos a diario nuestra previsión con la estación oficial de AEMET; primeras cifras públicas en cuanto acumulemos 3 días.'}</span>
-        </p>
+        <div className="space-y-1.5">
+          <p className="font-mono text-[10px] uppercase tracking-wide text-ink/60 leading-relaxed inline-flex items-start gap-1.5">
+            <Icon name="target" className="w-3.5 h-3.5 shrink-0 mt-0.5" strokeWidth={2} />
+            <span>Fiabilidad verificada:{' '}
+            {accuracy
+              ? `error medio del viento ±${accuracy.maeKmh} km/h · ${Math.round(accuracy.within5 * 100)}% de días dentro de ±5 (últimas ${accuracy.n} verificaciones contra la estación oficial)`
+              : 'comparamos a diario nuestra previsión con la estación oficial de AEMET; primeras cifras públicas en cuanto acumulemos 3 días.'}</span>
+          </p>
+          {history.length >= 3 && (
+            <div className="pl-5">
+              <AccuracyTrend history={history} />
+              <p className="font-mono text-[9px] uppercase tracking-wide text-ink/35 mt-0.5">Error por día (verde ≤5 km/h · ámbar ≤10 · rojo más) · encima de la línea = predijimos de más</p>
+            </div>
+          )}
+        </div>
       )}
     </>
   )
@@ -240,8 +252,9 @@ export default async function SpotDashboard({
     ? Promise.all([
         getAemetObservation(station.idema),
         getSpotAccuracy(s.slug).catch(() => null as SpotAccuracy | null),
-      ]).then(([obs, accuracy]) => ({ obs, accuracy }))
-    : Promise.resolve({ obs: null, accuracy: null })
+        getSpotAccuracyHistory(s.slug).catch(() => [] as AccuracyPoint[]),
+      ]).then(([obs, accuracy, history]) => ({ obs, accuracy, history }))
+    : Promise.resolve({ obs: null, accuracy: null, history: [] })
 
   const hours = forecast.hours
   const nowHour = hours.find((h) => h.isNow) ?? hours[0] ?? null
@@ -698,19 +711,12 @@ export default async function SpotDashboard({
           <div className="border border-ink/10 rounded-2xl bg-paper p-6 text-sm text-ink/60">La previsión meteorológica no está disponible ahora mismo. Vuelve a intentarlo en unos minutos.</div>
         )}
 
-        {/* Live wind/wave map — animated, third-party (Windy), purely visual/orientative layer on top of our own scored forecast. */}
+        {/* Live wind/rain/wave map — animated, third-party (Windy), purely visual/orientative layer on top of our own scored forecast. */}
         <div id="mapa-vivo" className="space-y-3 scroll-mt-28">
           <h2 className="font-display uppercase text-2xl text-ink leading-none border-b border-ink/[0.07] pb-3 flex items-center gap-2">
-            <Icon name="wind" className="w-5 h-5" strokeWidth={1.7} /> Viento y oleaje en vivo
+            <Icon name="wind" className="w-5 h-5" strokeWidth={1.7} /> Mapa en vivo
           </h2>
-          <div className="border border-ink/10 rounded-2xl overflow-hidden shadow-hard bg-paper">
-            <iframe
-              src={`https://embed.windy.com/embed2.html?lat=${s.lat}&lon=${s.lon}&detailLat=${s.lat}&detailLon=${s.lon}&zoom=9&level=surface&overlay=wind&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1`}
-              title={`Mapa de viento y oleaje en vivo sobre ${s.name}`}
-              loading="lazy"
-              className="w-full h-[420px] border-0 block"
-            />
-          </div>
+          <LiveWeatherMap lat={s.lat} lon={s.lon} spotName={s.name} isSea={s.type === 'mar'} />
           <p className="font-mono text-[10px] uppercase tracking-wide text-ink/35">Mapa en vivo de un proveedor externo (Windy.com), independiente de nuestra puntuación · orientativo, no sustituye la previsión de arriba.</p>
         </div>
 
@@ -1096,6 +1102,9 @@ export default async function SpotDashboard({
             <Link href="/advice" className="text-accent underline">asesor</Link>.
           </p>
         </div>
+
+        {/* "Voy hoy" — lightweight social signal, separate from a full quedada */}
+        <WhosGoingToday spotSlug={s.slug} loggedIn={!!user} />
 
         {/* Quedadas de pesca en esta zona — streamed so it never blocks the forecast */}
         <Suspense fallback={null}>

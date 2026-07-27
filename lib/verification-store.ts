@@ -117,3 +117,38 @@ export async function getSpotAccuracy(spotSlug: string, days = 14): Promise<Spot
   const within5 = errs.filter((e) => Math.abs(e) <= 5).length / errs.length
   return { n: errs.length, maeKmh: Math.round(mae * 10) / 10, within5 }
 }
+
+export interface AccuracyPoint {
+  dateISO: string
+  errorKmh: number
+}
+
+/**
+ * Day-by-day error for the trend chart — same window as `getSpotAccuracy`,
+ * but keeping each day instead of collapsing it into one aggregate. Oldest
+ * first, so it plots left-to-right in chronological order.
+ */
+export async function getSpotAccuracyHistory(spotSlug: string, days = 14): Promise<AccuracyPoint[]> {
+  let rows: { dateISO: string; errorKmh: number | null }[] = []
+  if (isDatabaseConfigured()) {
+    try {
+      const { prisma } = await import('@/lib/prisma')
+      rows = await prisma.forecastCheck.findMany({
+        where: { spotSlug, resolvedAt: { not: null } },
+        orderBy: { dateISO: 'desc' },
+        take: days,
+        select: { dateISO: true, errorKmh: true },
+      })
+    } catch {
+      rows = []
+    }
+  } else {
+    rows = memory()
+      .filter((r) => r.spotSlug === spotSlug && r.resolvedAt !== null)
+      .sort((a, b) => b.dateISO.localeCompare(a.dateISO))
+      .slice(0, days)
+  }
+  return rows
+    .filter((r): r is { dateISO: string; errorKmh: number } => r.errorKmh != null)
+    .reverse()
+}

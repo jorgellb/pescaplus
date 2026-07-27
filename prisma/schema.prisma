@@ -158,6 +158,7 @@ model User {
 
   tracks    Track[]
   spotNotes SpotNote[]
+  checkins  SpotCheckin[]
 
   @@index([email])
 }
@@ -177,6 +178,21 @@ model SpotNote {
 
   @@unique([userId, spotSlug])
   @@index([userId])
+}
+
+// "Voy hoy" — señal ligera de quién sale a esa zona ese día, sin montar una
+// quedada completa. Un check-in por usuario, zona y día.
+model SpotCheckin {
+  id        String   @id @default(cuid())
+  userId    String
+  spotSlug  String
+  dateISO   String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, spotSlug, dateISO])
+  @@index([spotSlug, dateISO])
 }
 
 // Sesión de acceso (cookie httpOnly guarda el id). En BD para poder revocar.
