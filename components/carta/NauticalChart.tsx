@@ -108,13 +108,23 @@ setWorkerUrl('/maplibre/maplibre-gl-worker.mjs')
  * levantamiento no vale lo mismo que una interpolación del modelo global, y
  * decir "0 m" en tierra sería sencillamente falso.
  */
-function SoundingReading({ s }: { s: Sounding | null }) {
+function SoundingReading({ s, onRetry }: { s: Sounding | null; onRetry?: () => void }) {
   if (!s) return <p className="text-[13px] text-ink/60">Midiendo el fondo…</p>
   if (s.kind === 'desconocida' || s.kind === 'tierra') {
     return (
       <p className="text-[13px] text-ink/70">
         {s.label}
         {s.elevationM != null && ` · ${s.elevationM} m de altitud`}
+        {/* Que no se haya podido medir no significa que no haya fondo, así que
+            se puede reintentar sin volver a buscar el punto en la carta. */}
+        {s.kind === 'desconocida' && onRetry && (
+          <>
+            {' '}
+            <button type="button" onClick={onRetry} className="font-semibold text-accent hover:underline">
+              Reintentar
+            </button>
+          </>
+        )}
       </p>
     )
   }
@@ -184,6 +194,30 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
   const [zone, setZone] = useState<{ coverage: string; areas: { name: string; recreationalFishing: boolean | null; requiresPermit: boolean | null; rulesUrl: string; sourceName: string; sourceDate: string }[]; pescarec: { note: string; url: string } | null } | null>(null)
   const [err, setErr] = useState('')
   const markers = useRef<{ remove(): void }[]>([])
+
+  /**
+   * Pide la sonda de un punto. EMODnet falla de vez en cuando —la primera
+   * conexión saliente de un proceso frío puede morir— y esto tiene que poder
+   * repetirse sin obligar a nadie a buscar otra vez el mismo punto en la carta.
+   * Solo toca setters, cuya identidad React garantiza estable, así que al efecto
+   * del mapa (que se ejecuta una vez) le sirve la copia que capturó.
+   */
+  const pedirSonda = (lat: number, lon: number) => {
+    setSounding(null)
+    fetch(`/api/sonda?lat=${lat}&lon=${lon}`)
+      .then((r) => r.json())
+      .then((d: Sounding & { success?: boolean }) => {
+        if (!d?.success) return
+        setSounding(d)
+        // Se rellena la sonda solo si el patrón no ha escrito la suya: el dato
+        // de a bordo siempre manda sobre el del modelo.
+        if (d.depthM != null && d.depthM >= 0.5) setDepth((cur) => (cur === '' ? String(d.depthM) : cur))
+      })
+      .catch(() => setSounding({
+        kind: 'desconocida', depthM: null, minM: null, maxM: null, elevationM: null,
+        source: null, sourceUrl: null, label: 'Sonda no disponible ahora mismo',
+      }))
+  }
 
   // Las marcas se piden solo si hay sesión: son privadas por definición.
   useEffect(() => {
@@ -403,7 +437,6 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
       // La sonda se consulta pinches quien pinches: saber el fondo es útil
       // aunque no tengas cuenta, y es la mejor invitación a crearse una.
       setClickedAt({ lat, lon })
-      setSounding(null)
       setWeather(null)
       setSeabed(null)
       fetch(`/api/fondo?lat=${lat}&lon=${lon}`)
@@ -414,19 +447,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
         .then((r) => r.json())
         .then((d: PointConditions & { success?: boolean }) => { if (d?.success) setWeather(d) })
         .catch(() => setWeather({ available: false }))
-      fetch(`/api/sonda?lat=${lat}&lon=${lon}`)
-        .then((r) => r.json())
-        .then((d: Sounding & { success?: boolean }) => {
-          if (!d?.success) return
-          setSounding(d)
-          // Se rellena la sonda solo si el patrón no ha escrito la suya: el
-          // dato de a bordo siempre manda sobre el del modelo.
-          if (d.depthM != null && d.depthM >= 0.5) setDepth((cur) => (cur === '' ? String(d.depthM) : cur))
-        })
-        .catch(() => setSounding({
-          kind: 'desconocida', depthM: null, minM: null, maxM: null, elevationM: null,
-          source: null, sourceUrl: null, label: 'Sonda no disponible ahora mismo',
-        }))
+      pedirSonda(lat, lon)
 
       if (!loggedIn) return
       setDraft({ lat, lon })
@@ -624,7 +645,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
             <button type="button" onClick={() => { setClickedAt(null); setSounding(null) }}
               aria-label="Cerrar la sonda" className="text-ink/40 hover:text-ink leading-none text-[15px]">×</button>
           </div>
-          <div className="mt-1"><SoundingReading s={sounding} /></div>
+          <div className="mt-1"><SoundingReading s={sounding} onRetry={() => clickedAt && pedirSonda(clickedAt.lat, clickedAt.lon)} /></div>
           {seabed?.substrate && (
             <p className="text-[13px] text-ink mt-1.5">
               <span className="text-ink/60">Fondo:</span> <span className="font-semibold">{seabed.label}</span>
@@ -643,7 +664,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
           <p className="font-semibold text-ink text-[15px]">Nueva marca</p>
           <p className="text-[12px] text-ink/60">{draft.lat.toFixed(5)}, {draft.lon.toFixed(5)}</p>
           <div className="rounded-xl bg-ink/[0.03] px-3 py-2 space-y-2">
-            <SoundingReading s={sounding} />
+            <SoundingReading s={sounding} onRetry={() => draft && pedirSonda(draft.lat, draft.lon)} />
             {seabed?.substrate && (
               <p className="text-[13px] text-ink">
                 <span className="text-ink/60">Fondo:</span> <span className="font-semibold">{seabed.label}</span>
