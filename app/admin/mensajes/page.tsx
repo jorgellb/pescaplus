@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { ContactMessage } from '@/lib/contact-store'
 import Icon from '@/components/icons/Icon'
+import { useConfirm, useToast } from '@/components/admin/AdminFeedback'
 
 function formatDate(ms: number): string {
   return new Date(ms).toLocaleString('es-ES', { dateStyle: 'medium', timeStyle: 'short' })
@@ -12,6 +13,8 @@ export default function AdminMessagesPage() {
   const [messages, setMessages] = useState<ContactMessage[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'todos' | 'pendientes' | 'resueltos'>('pendientes')
+  const confirm = useConfirm()
+  const toast = useToast()
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -32,13 +35,14 @@ export default function AdminMessagesPage() {
   const toggleHandled = async (m: ContactMessage) => {
     const res = await fetch(`/api/admin/mensajes/${m.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ handled: !m.handled }) })
     if (res.ok) setMessages((prev) => prev.map((x) => (x.id === m.id ? { ...x, handled: !x.handled } : x)))
+    else toast('No se pudo actualizar el mensaje.', 'error')
   }
 
   const remove = async (m: ContactMessage) => {
-    if (!confirm(`¿Eliminar el mensaje de "${m.name || m.email}"?`)) return
+    if (!(await confirm({ message: `¿Eliminar el mensaje de "${m.name || m.email}"?`, tone: 'danger' }))) return
     const res = await fetch(`/api/admin/mensajes/${m.id}`, { method: 'DELETE' })
-    if (res.ok) setMessages((prev) => prev.filter((x) => x.id !== m.id))
-    else alert('No se pudo eliminar.')
+    if (res.ok) { setMessages((prev) => prev.filter((x) => x.id !== m.id)); toast('Mensaje eliminado.') }
+    else toast('No se pudo eliminar.', 'error')
   }
 
   const visible = messages.filter((m) => (filter === 'todos' ? true : filter === 'pendientes' ? !m.handled : m.handled))

@@ -6,6 +6,7 @@ import { fishingLabel } from '@/lib/fishing'
 import ProductImage from '@/components/ProductImage'
 import ProductEditor from '@/components/admin/ProductEditor'
 import Icon, { type IconName } from '@/components/icons/Icon'
+import { useConfirm, useToast } from '@/components/admin/AdminFeedback'
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
@@ -17,6 +18,8 @@ export default function AdminProductsPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [bulk, setBulk] = useState<{ done: number; total: number; ok: number; fail: number } | null>(null)
   const [optFilter, setOptFilter] = useState<'all' | 'yes' | 'no'>('all')
+  const confirm = useConfirm()
+  const toast = useToast()
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -42,12 +45,14 @@ export default function AdminProductsPage() {
   }, [load])
 
   const remove = async (product: Product) => {
-    if (!confirm(`¿Eliminar "${product.title}"? Esta acción no se puede deshacer.`)) return
+    const ok = await confirm({ title: 'Eliminar producto', message: `¿Eliminar "${product.title}"? Esta acción no se puede deshacer.`, tone: 'danger' })
+    if (!ok) return
     const res = await fetch(`/api/products/${product.id}`, { method: 'DELETE' })
     if (res.ok) {
       setProducts((prev) => prev.filter((p) => p.id !== product.id))
+      toast('Producto eliminado.')
     } else {
-      alert('No se pudo eliminar el producto.')
+      toast('No se pudo eliminar el producto.', 'error')
     }
   }
 
@@ -83,7 +88,8 @@ export default function AdminProductsPage() {
   const bulkPolish = async () => {
     const targets = products.filter((p) => selected.has(p.id))
     if (targets.length === 0) return
-    if (!confirm(`¿Optimizar SEO de ${targets.length} producto(s)? Se reescribirán título, descripción, metadatos y alt de imágenes con IA. Puede tardar un poco.`)) return
+    const proceed = await confirm(`¿Optimizar SEO de ${targets.length} producto(s)? Se reescribirán título, descripción, metadatos y alt de imágenes con IA. Puede tardar un poco.`)
+    if (!proceed) return
 
     setBulk({ done: 0, total: targets.length, ok: 0, fail: 0 })
     let ok = 0
@@ -132,6 +138,7 @@ export default function AdminProductsPage() {
     }
     await load()
     setSelected(new Set())
+    toast(`SEO optimizado: ${ok} ok${fail ? `, ${fail} fallo(s)` : ''}.`, fail > 0 && ok === 0 ? 'error' : 'success')
     // Leave the summary visible briefly, then clear.
     setTimeout(() => setBulk(null), 6000)
   }

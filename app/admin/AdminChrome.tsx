@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import Icon, { type IconName } from '@/components/icons/Icon'
+import AdminFeedbackProvider from '@/components/admin/AdminFeedback'
 
 const NAV: { href: string; label: string; icon: IconName }[] = [
   { href: '/admin', label: 'Productos', icon: 'package' },
@@ -16,6 +17,7 @@ const NAV: { href: string; label: string; icon: IconName }[] = [
   { href: '/admin/quedadas', label: 'Quedadas', icon: 'users' },
   { href: '/admin/resenas', label: 'Reseñas', icon: 'star' },
   { href: '/admin/usuarios', label: 'Usuarios', icon: 'person' },
+  { href: '/admin/auditoria', label: 'Auditoría', icon: 'clipboard' },
   { href: '/admin/settings', label: 'Configuración', icon: 'gear' },
 ]
 
@@ -112,7 +114,9 @@ export default function AdminChrome({
         </div>
       )}
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">{children}</main>
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <AdminFeedbackProvider>{children}</AdminFeedbackProvider>
+      </main>
     </div>
   )
 }

@@ -5,12 +5,15 @@ import type { Guide } from '@/types'
 import { fishingLabel } from '@/lib/fishing'
 import GuideEditor from '@/components/admin/GuideEditor'
 import Icon from '@/components/icons/Icon'
+import { useConfirm, useToast } from '@/components/admin/AdminFeedback'
 
 export default function AdminGuidesPage() {
   const [guides, setGuides] = useState<Guide[]>([])
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState<Guide | null>(null)
   const [creating, setCreating] = useState(false)
+  const confirm = useConfirm()
+  const toast = useToast()
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -29,10 +32,11 @@ export default function AdminGuidesPage() {
   }, [load])
 
   const remove = async (g: Guide) => {
-    if (!confirm(`¿Eliminar la guía "${g.title}"?`)) return
+    const ok = await confirm({ title: 'Eliminar guía', message: `¿Eliminar la guía "${g.title}"?`, tone: 'danger' })
+    if (!ok) return
     const res = await fetch(`/api/admin/guides/${g.id}`, { method: 'DELETE' })
-    if (res.ok) setGuides((prev) => prev.filter((x) => x.id !== g.id))
-    else alert('No se pudo eliminar.')
+    if (res.ok) { setGuides((prev) => prev.filter((x) => x.id !== g.id)); toast('Guía eliminada.') }
+    else toast('No se pudo eliminar.', 'error')
   }
 
   const closeEditor = () => {

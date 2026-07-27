@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import OperatorEditor, { type AdminOperator } from '@/components/admin/OperatorEditor'
 import Icon from '@/components/icons/Icon'
+import { useConfirm, useToast } from '@/components/admin/AdminFeedback'
 
 export default function AdminOperatorsPage() {
   const [operators, setOperators] = useState<AdminOperator[]>([])
@@ -10,6 +11,8 @@ export default function AdminOperatorsPage() {
   const [editing, setEditing] = useState<AdminOperator | null>(null)
   const [creating, setCreating] = useState(false)
   const [busy, setBusy] = useState<string | null>(null)
+  const confirm = useConfirm()
+  const toast = useToast()
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -31,17 +34,19 @@ export default function AdminOperatorsPage() {
     setBusy(o.id)
     try {
       const res = await fetch('/api/admin/operadores', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: o.id, verified: !o.verified }) })
-      if (res.ok) load()
+      if (res.ok) { load(); toast(o.verified ? 'Verificación revocada.' : 'Operador verificado.') }
+      else toast('No se pudo actualizar.', 'error')
     } finally {
       setBusy(null)
     }
   }
 
   const remove = async (o: AdminOperator) => {
-    if (!confirm(`¿Eliminar a "${o.businessName || o.name}"? También se borrarán sus chárters publicados.`)) return
+    const ok = await confirm({ title: 'Eliminar operador', message: `¿Eliminar a "${o.businessName || o.name}"? También se borrarán sus chárters publicados.`, tone: 'danger' })
+    if (!ok) return
     const res = await fetch(`/api/admin/operadores/${o.id}`, { method: 'DELETE' })
-    if (res.ok) setOperators((prev) => prev.filter((x) => x.id !== o.id))
-    else alert('No se pudo eliminar.')
+    if (res.ok) { setOperators((prev) => prev.filter((x) => x.id !== o.id)); toast('Operador eliminado.') }
+    else toast('No se pudo eliminar.', 'error')
   }
 
   const closeEditor = () => { setEditing(null); setCreating(false) }

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import type { User } from '@/lib/users-store'
 import UserEditor from '@/components/admin/UserEditor'
 import Icon from '@/components/icons/Icon'
+import { useConfirm, useToast } from '@/components/admin/AdminFeedback'
 
 export type AdminUser = User
 
@@ -17,6 +18,8 @@ export default function AdminUsersPage() {
   const [editing, setEditing] = useState<AdminUser | null>(null)
   const [creating, setCreating] = useState(false)
   const [q, setQ] = useState('')
+  const confirm = useConfirm()
+  const toast = useToast()
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -35,10 +38,15 @@ export default function AdminUsersPage() {
   }, [load])
 
   const remove = async (u: AdminUser) => {
-    if (!confirm(`¿Eliminar la cuenta de "${u.name || u.email}"? Se borrarán sus sesiones, reseñas escritas, notas y rutas; sus reservas y quedadas quedarán sin cuenta asociada.`)) return
+    const ok = await confirm({
+      title: 'Eliminar cuenta',
+      message: `¿Eliminar la cuenta de "${u.name || u.email}"? Se borrarán sus sesiones, reseñas escritas, notas y rutas; sus reservas y quedadas quedarán sin cuenta asociada.`,
+      tone: 'danger',
+    })
+    if (!ok) return
     const res = await fetch(`/api/admin/usuarios/${u.id}`, { method: 'DELETE' })
-    if (res.ok) setUsers((prev) => prev.filter((x) => x.id !== u.id))
-    else alert('No se pudo eliminar.')
+    if (res.ok) { setUsers((prev) => prev.filter((x) => x.id !== u.id)); toast('Usuario eliminado.') }
+    else toast('No se pudo eliminar.', 'error')
   }
 
   const closeEditor = () => { setEditing(null); setCreating(false) }

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { Review } from '@/lib/reviews-store'
 import Icon from '@/components/icons/Icon'
+import { useConfirm, useToast } from '@/components/admin/AdminFeedback'
 
 type AdminReview = Review & { operatorName: string; subjectName: string }
 
@@ -14,6 +15,8 @@ export default function AdminReviewsPage() {
   const [reviews, setReviews] = useState<AdminReview[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'todas' | 'toOperator' | 'toAngler'>('todas')
+  const confirm = useConfirm()
+  const toast = useToast()
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -32,10 +35,11 @@ export default function AdminReviewsPage() {
   }, [load])
 
   const remove = async (r: AdminReview) => {
-    if (!confirm(`¿Eliminar la reseña de "${r.authorName}"? Esta acción no se puede deshacer.`)) return
+    const ok = await confirm({ title: 'Eliminar reseña', message: `¿Eliminar la reseña de "${r.authorName}"? Esta acción no se puede deshacer.`, tone: 'danger' })
+    if (!ok) return
     const res = await fetch(`/api/admin/resenas/${r.id}`, { method: 'DELETE' })
-    if (res.ok) setReviews((prev) => prev.filter((x) => x.id !== r.id))
-    else alert('No se pudo eliminar.')
+    if (res.ok) { setReviews((prev) => prev.filter((x) => x.id !== r.id)); toast('Reseña eliminada.') }
+    else toast('No se pudo eliminar.', 'error')
   }
 
   const visible = filter === 'todas' ? reviews : reviews.filter((r) => r.direction === filter)

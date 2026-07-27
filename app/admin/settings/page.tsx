@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { FISHING_TYPES } from '@/lib/fishing'
 import Icon from '@/components/icons/Icon'
+import { useConfirm } from '@/components/admin/AdminFeedback'
 
 interface Integrations {
   database: { configured: boolean; backend: 'database' | 'memory' }
@@ -29,6 +30,7 @@ export default function AdminSettingsPage() {
   const [saving, setSaving] = useState(false)
   const [note, setNote] = useState('')
   const [origin, setOrigin] = useState('')
+  const confirm = useConfirm()
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -89,7 +91,8 @@ export default function AdminSettingsPage() {
   }
 
   const resetCatalog = async () => {
-    if (!confirm('¿Restablecer el catálogo a los productos originales? Se perderán los cambios.')) return
+    const ok = await confirm({ title: 'Restablecer catálogo', message: '¿Restablecer el catálogo a los productos originales? Se perderán los cambios.', tone: 'danger' })
+    if (!ok) return
     const res = await fetch('/api/admin/catalog', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

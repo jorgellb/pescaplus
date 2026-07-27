@@ -5,6 +5,7 @@ import type { Meetup } from '@/lib/meetups-store'
 import { getSpot } from '@/lib/fishing-spots'
 import MeetupEditor from '@/components/admin/MeetupEditor'
 import Icon from '@/components/icons/Icon'
+import { useConfirm, useToast } from '@/components/admin/AdminFeedback'
 
 export type AdminMeetup = Meetup
 
@@ -20,6 +21,8 @@ export default function AdminMeetupsPage() {
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState<AdminMeetup | null>(null)
   const [filter, setFilter] = useState<'todos' | AdminMeetup['status']>('todos')
+  const confirm = useConfirm()
+  const toast = useToast()
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -38,16 +41,19 @@ export default function AdminMeetupsPage() {
   }, [load])
 
   const cancel = async (m: AdminMeetup) => {
+    const ok = await confirm({ message: `¿Cancelar la quedada de ${m.hostName} (${m.dateISO})? Los apuntados verán que se ha cancelado.` })
+    if (!ok) return
     const res = await fetch(`/api/admin/quedadas/${m.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'cancelled' }) })
-    if (res.ok) load()
-    else alert('No se pudo cancelar.')
+    if (res.ok) { load(); toast('Quedada cancelada.') }
+    else toast('No se pudo cancelar.', 'error')
   }
 
   const remove = async (m: AdminMeetup) => {
-    if (!confirm(`¿Eliminar la quedada de ${m.hostName} (${m.dateISO})? Se borrarán también sus inscripciones.`)) return
+    const ok = await confirm({ title: 'Eliminar quedada', message: `¿Eliminar la quedada de ${m.hostName} (${m.dateISO})? Se borrarán también sus inscripciones.`, tone: 'danger' })
+    if (!ok) return
     const res = await fetch(`/api/admin/quedadas/${m.id}`, { method: 'DELETE' })
-    if (res.ok) setMeetups((prev) => prev.filter((x) => x.id !== m.id))
-    else alert('No se pudo eliminar.')
+    if (res.ok) { setMeetups((prev) => prev.filter((x) => x.id !== m.id)); toast('Quedada eliminada.') }
+    else toast('No se pudo eliminar.', 'error')
   }
 
   const closeEditor = () => setEditing(null)

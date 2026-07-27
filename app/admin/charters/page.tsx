@@ -5,6 +5,7 @@ import type { Charter } from '@/lib/charters-store'
 import { getSpot } from '@/lib/fishing-spots'
 import CharterEditor, { type OperatorOption } from '@/components/admin/CharterEditor'
 import Icon from '@/components/icons/Icon'
+import { useConfirm, useToast } from '@/components/admin/AdminFeedback'
 
 export type AdminCharter = Charter
 
@@ -22,6 +23,8 @@ export default function AdminChartersPage() {
   const [editing, setEditing] = useState<AdminCharter | null>(null)
   const [creating, setCreating] = useState(false)
   const [filter, setFilter] = useState<'todos' | AdminCharter['status']>('todos')
+  const confirm = useConfirm()
+  const toast = useToast()
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -42,14 +45,19 @@ export default function AdminChartersPage() {
   }, [load])
 
   const remove = async (c: AdminCharter) => {
-    if (!confirm(`¿Eliminar este chárter de ${c.operator?.businessName || c.operator?.name || 'operador'} (${c.dateISO})? Se borrarán también sus reservas.`)) return
+    const ok = await confirm({
+      title: 'Eliminar chárter',
+      message: `¿Eliminar este chárter de ${c.operator?.businessName || c.operator?.name || 'operador'} (${c.dateISO})? Se borrarán también sus reservas.`,
+      tone: 'danger',
+    })
+    if (!ok) return
     const res = await fetch(`/api/admin/charters/${c.id}`, { method: 'DELETE' })
-    if (res.ok) setCharters((prev) => prev.filter((x) => x.id !== c.id))
-    else alert('No se pudo eliminar.')
+    if (res.ok) { setCharters((prev) => prev.filter((x) => x.id !== c.id)); toast('Chárter eliminado.') }
+    else toast('No se pudo eliminar.', 'error')
   }
 
   const closeEditor = () => { setEditing(null); setCreating(false) }
-  const onSaved = () => { closeEditor(); load() }
+  const onSaved = () => { const wasCreating = creating; closeEditor(); load(); toast(wasCreating ? 'Chárter creado.' : 'Cambios guardados.') }
 
   const visible = filter === 'todos' ? charters : charters.filter((c) => c.status === filter)
 
