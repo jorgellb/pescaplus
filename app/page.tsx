@@ -13,6 +13,7 @@ import { getRoundupPreviews } from '@/lib/roundups'
 import { getTaxonomy, categoryName } from '@/lib/taxonomy-store'
 import { proxiedImage } from '@/lib/img-proxy'
 import { safeJsonLd } from '@/lib/json-ld'
+import Icon, { type IconName } from '@/components/icons/Icon'
 
 export const metadata: Metadata = {
   title: { absolute: 'PescaPlus | Tienda de pesca online en España al mejor precio' },
@@ -89,7 +90,7 @@ export default async function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-7">
             <p className="inline-flex items-center gap-2 text-[13px] font-semibold text-accent bg-accent/[0.09] px-3 py-1.5 rounded-full mb-6">
-              🎣 Todo para el pescador en España
+              <Icon name="rod" className="w-3.5 h-3.5" strokeWidth={2} />Todo para el pescador en España
             </p>
             <h1 className="font-display text-ink text-[2rem] sm:text-[2.75rem] md:text-5xl leading-[1.08] max-w-[19ch]">
               Tu tienda de pesca online{' '}
@@ -143,14 +144,16 @@ export default async function Home() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { href: '/mejores', emoji: '🛒', title: 'Comprar aparejos', text: 'Cañas, carretes, señuelos y más de 11 categorías, filtrados por valoraciones reales.', cta: 'Ir a la tienda' },
-            { href: '/mejores-horas', emoji: '🕐', title: 'Saber cuándo pescar', text: 'Mejores horas por zona según mareas, viento y actividad solunar. Actualizado a diario.', cta: 'Ver previsión' },
-            { href: '/donde-pescar', emoji: '🗺️', title: 'Saber dónde pescar', text: 'El mapa del día con las zonas donde mejor pica, y fichas de cada especie.', cta: 'Abrir el mapa' },
-            { href: '/charters', emoji: '🚤', title: 'Salir a pescar', text: 'Chárters con patrón verificado y quedadas para compartir barco con otros pescadores.', cta: 'Ver salidas' },
+            { href: '/mejores', icon: 'cart' as IconName, title: 'Comprar aparejos', text: 'Cañas, carretes, señuelos y más de 11 categorías, filtrados por valoraciones reales.', cta: 'Ir a la tienda' },
+            { href: '/mejores-horas', icon: 'clock' as IconName, title: 'Saber cuándo pescar', text: 'Mejores horas por zona según mareas, viento y actividad solunar. Actualizado a diario.', cta: 'Ver previsión' },
+            { href: '/donde-pescar', icon: 'map' as IconName, title: 'Saber dónde pescar', text: 'El mapa del día con las zonas donde mejor pica, y fichas de cada especie.', cta: 'Abrir el mapa' },
+            { href: '/charters', icon: 'boat' as IconName, title: 'Salir a pescar', text: 'Chárters con patrón verificado y quedadas para compartir barco con otros pescadores.', cta: 'Ver salidas' },
           ].map((s) => (
             <Link key={s.href} href={s.href}
               className="group flex flex-col bg-paper rounded-2xl p-6 border border-ink/[0.07] shadow-hard hover-shift">
-              <span className="text-3xl">{s.emoji}</span>
+              <span className="w-12 h-12 rounded-xl bg-accent/[0.09] text-accent flex items-center justify-center">
+                <Icon name={s.icon} className="w-6 h-6" strokeWidth={1.7} />
+              </span>
               <h3 className="font-display text-xl text-ink mt-4 group-hover:text-accent transition-colors">{s.title}</h3>
               <p className="text-[14px] text-ink/60 leading-relaxed mt-2 flex-1">{s.text}</p>
               <span className="text-[14px] font-semibold text-accent mt-4">{s.cta} →</span>

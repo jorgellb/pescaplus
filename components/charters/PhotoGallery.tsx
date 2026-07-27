@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Icon from '@/components/icons/Icon'
 
 /**
  * Charter photo gallery: a big cover plus thumbnails, with a lightbox. Photos
@@ -49,7 +50,9 @@ export default function PhotoGallery({ photos, alt }: { photos: string[]; alt: s
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={photos[active]} alt={alt} className="max-h-full max-w-full object-contain" />
           <button type="button" onClick={() => setZoom(false)} aria-label="Cerrar"
-            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 text-ink text-lg">✕</button>
+            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 text-ink flex items-center justify-center">
+            <Icon name="close" className="w-5 h-5" strokeWidth={2} />
+          </button>
           {photos.length > 1 && (
             <>
               <button type="button" aria-label="Anterior"

@@ -11,6 +11,7 @@ import { stripeConfigured } from '@/lib/stripe'
 import { listChartersByOperator } from '@/lib/charters-store'
 import { FISHING_SPOTS } from '@/lib/fishing-spots'
 import { SEA_SPECIES } from '@/lib/fishing-species'
+import Icon from '@/components/icons/Icon'
 
 export const metadata: Metadata = {
   title: '¿Eres patrón? Ofrece tus salidas de pesca',
@@ -44,10 +45,12 @@ export default async function OperatorPage({ searchParams }: Params) {
       <Layout>
         <section className="bg-paper border-b border-ink/[0.07]">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
-            <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3">⚓ Panel de operador{operator.verified ? ' · verificado ✓' : ' · pendiente'}</p>
+            <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3"><Icon name="anchor" className="w-3.5 h-3.5 inline -mt-0.5" strokeWidth={2} /> Panel de operador{operator.verified
+              ? <> · verificado <Icon name="checkCircle" className="w-3.5 h-3.5 inline -mt-0.5 text-accent" strokeWidth={2} /></>
+              : ' · pendiente'}</p>
             <h1 className="font-display uppercase text-3xl sm:text-4xl leading-[1.02] text-ink">{operator.businessName || operator.name}</h1>
             {nuevo === '1' && <p className="text-ink/70 text-sm max-w-2xl mt-3">¡Registrado! <strong>Guarda este enlace privado</strong> — es tu acceso al panel. Verificaremos tu licencia y seguro y podrás publicar salidas.</p>}
-            {stripe === 'done' && stripeReady && <p className="text-accent text-sm max-w-2xl mt-3">✓ Stripe conectado. Ya puedes recibir reservas pagadas por adelantado.</p>}
+            {stripe === 'done' && stripeReady && <p className="text-accent text-sm max-w-2xl mt-3 inline-flex items-start gap-1.5"><Icon name="checkCircle" className="w-4 h-4 shrink-0 mt-0.5" strokeWidth={2} />Stripe conectado. Ya puedes recibir reservas pagadas por adelantado.</p>}
             {stripe === 'done' && !stripeReady && <p className="text-ink/70 text-sm max-w-2xl mt-3">Stripe está terminando de revisar tus datos. Vuelve a este enlace en unos minutos para comprobar si ya está activo.</p>}
           </div>
         </section>

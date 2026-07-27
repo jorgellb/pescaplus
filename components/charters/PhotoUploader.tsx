@@ -143,7 +143,9 @@ export default function PhotoUploader({ operatorId, manageToken, photos: initial
                     aria-label="Mover después" className="w-6 h-6 rounded-full bg-white/90 text-ink text-xs disabled:opacity-30">›</button>
                 </span>
                 <button type="button" onClick={() => remove(p)} disabled={busy}
-                  aria-label="Borrar foto" className="w-6 h-6 rounded-full bg-white/90 text-red-600 text-xs">✕</button>
+                  aria-label="Borrar foto" className="w-6 h-6 rounded-full bg-white/90 text-red-600 flex items-center justify-center">
+                  <CharterIcon name="cross" className="w-3.5 h-3.5" strokeWidth={2.2} />
+                </button>
               </div>
             </li>
           ))}

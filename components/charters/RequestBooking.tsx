@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Icon from '@/components/icons/Icon'
 
 /** Request a place on a charter. No online payment yet — the operator confirms
  * and you pay them directly. The Stripe checkout will slot in here later. */
@@ -28,7 +29,7 @@ export default function RequestBooking({ id, full, price }: { id: string; full: 
   if (state === 'done') {
     return (
       <div className="border border-accent/30 rounded-xl bg-accent/[0.06] p-4">
-        <p className="text-sm font-bold text-ink">✅ Solicitud enviada. El patrón la revisará y te contactará para confirmar la plaza y el pago.</p>
+        <p className="text-sm font-bold text-ink inline-flex items-start gap-1.5"><Icon name="checkCircle" className="w-4 h-4 shrink-0 mt-0.5 text-accent" strokeWidth={2} />Solicitud enviada. El patrón la revisará y te contactará para confirmar la plaza y el pago.</p>
       </div>
     )
   }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Icon from '@/components/icons/Icon'
 
 /** Reserve and pay a charter place online. Sends the buyer's data to the
  * checkout route, which returns a Stripe Checkout URL; we then redirect there.
@@ -42,7 +43,7 @@ export default function PayBooking({ id, full, price }: { id: string; full: bool
 
   return (
     <form onSubmit={submit} className="space-y-3 border border-accent/30 rounded-2xl bg-accent/[0.04] p-4">
-      <p className="font-display uppercase text-lg leading-none">💳 Reservar y pagar plaza</p>
+      <p className="font-display uppercase text-lg leading-none inline-flex items-center gap-2"><Icon name="card" className="w-4 h-4" strokeWidth={1.8} />Reservar y pagar plaza</p>
       <p className="text-[13px] text-ink/60">
         Pago seguro con tarjeta a través de <strong>Stripe</strong>. Reservas tu plaza al instante y el patrón recibe tu reserva confirmada.
       </p>

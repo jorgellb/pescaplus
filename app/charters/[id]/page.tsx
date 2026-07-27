@@ -18,10 +18,14 @@ import { getSpecies } from '@/lib/fishing-species'
 import { getMarineForecast, groupByDay, bestWindow, getModality } from '@/lib/marine-forecast'
 import { dayVerdict, navigationWindows, safetyAlerts } from '@/lib/sea-state'
 import { fmtDateLong, fmtWindowRange, todayMadridISO, addDaysISO } from '@/lib/solunar-format'
+import Icon, { type IconName } from '@/components/icons/Icon'
+import Stars from '@/components/Stars'
 
 export const metadata: Metadata = { title: 'Chárter de pesca', robots: { index: false, follow: true } }
 
-const MOD_LABEL: Record<string, string> = { tierra: '🏖️ Orilla', kayak: '🛶 Kayak', barco: '🚤 Barco' }
+const MOD_LABEL: Record<string, { icon: IconName; text: string }> = {
+  tierra: { icon: 'umbrella', text: 'Orilla' }, kayak: { icon: 'kayak', text: 'Kayak' }, barco: { icon: 'boat', text: 'Barco' },
+}
 
 /** Headline fact with its icon (duración, tipo, grupo, idiomas). */
 function SummaryChip({ icon, label, value }: { icon: string; label: string; value: string }) {
@@ -80,9 +84,9 @@ export default async function CharterPage({ params, searchParams }: { params: Pr
             <Link href="/charters" className="hover:text-accent">Chárters</Link> <span className="mx-1">/</span> <span className="text-ink">{spot?.name ?? charter.spotSlug}</span>
           </nav>
           {cancelled && <div className="border border-red-700/40 rounded-xl bg-red-700/[0.07] p-3 mb-5 text-sm font-bold text-red-900">Este chárter se ha cancelado.</div>}
-          {pagado === '1' && <div className="border border-accent/40 rounded-xl bg-accent/[0.08] p-3 mb-5 text-sm font-bold text-ink">✅ ¡Pago completado! Tu plaza está reservada. El patrón recibirá tu reserva y te contactará con los detalles de la salida.</div>}
+          {pagado === '1' && <div className="border border-accent/40 rounded-xl bg-accent/[0.08] p-3 mb-5 text-sm font-bold text-ink inline-flex items-start gap-1.5"><Icon name="checkCircle" className="w-4 h-4 shrink-0 mt-0.5 text-accent" strokeWidth={2} />¡Pago completado! Tu plaza está reservada. El patrón recibirá tu reserva y te contactará con los detalles de la salida.</div>}
           {cancelado === '1' && <div className="border border-ink/12 rounded-xl bg-ink/[0.03] p-3 mb-5 text-sm text-ink/70">Has cancelado el pago. Tu plaza no se ha reservado; puedes intentarlo de nuevo cuando quieras.</div>}
-          <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3">{MOD_LABEL[charter.modality]}{sp ? ` · a por ${sp.name.toLowerCase()}` : ''}</p>
+          <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3"><Icon name={MOD_LABEL[charter.modality].icon} className="w-3.5 h-3.5 inline -mt-0.5" strokeWidth={2} /> {MOD_LABEL[charter.modality].text}{sp ? ` · a por ${sp.name.toLowerCase()}` : ''}</p>
           <h1 className="font-display text-3xl sm:text-4xl md:text-5xl text-ink">{charter.highlights || `Pesca en ${spot?.name ?? charter.spotSlug}`}</h1>
           <p className="text-ink/60 text-[15px] mt-2 flex items-center gap-1.5">
             <CharterIcon name="location" className="w-4 h-4 shrink-0" />
@@ -105,9 +109,9 @@ export default async function CharterPage({ params, searchParams }: { params: Pr
 
         {/* Operador verificado */}
         <div className="border border-accent/30 rounded-2xl bg-accent/[0.04] p-4">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">⚓ Patrón profesional verificado ✓</p>
+          <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent"><Icon name="anchor" className="w-3.5 h-3.5 inline -mt-0.5" strokeWidth={2} /> Patrón profesional verificado <Icon name="checkCircle" className="w-3.5 h-3.5 inline -mt-0.5 text-accent" strokeWidth={2} /></p>
           <p className="text-[15px] font-bold text-ink mt-1">{charter.operator.businessName || charter.operator.name}
-            {charter.operator.reviewCount > 0 && <span className="ml-2 text-[13px] font-normal text-amber-600">★ {charter.operator.avgRating.toFixed(1)} <span className="text-ink/60">({charter.operator.reviewCount})</span></span>}
+            {charter.operator.reviewCount > 0 && <span className="ml-2 text-[13px] font-normal text-amber-600 inline-flex items-center gap-1"><Icon name="star" className="w-3.5 h-3.5" /> {charter.operator.avgRating.toFixed(1)} <span className="text-ink/60">({charter.operator.reviewCount})</span></span>}
           </p>
           <p className="text-[13px] text-ink/70">{charter.operator.boatName} {charter.operator.boatType}{charter.operator.capacity ? ` · ${charter.operator.capacity} plazas` : ''}</p>
           {charter.operator.bio && <p className="text-[13px] text-ink/70 mt-1">{charter.operator.bio}</p>}
@@ -155,10 +159,10 @@ export default async function CharterPage({ params, searchParams }: { params: Pr
         {/* Previsión del día */}
         {outlook && (
           <div className={`border rounded-2xl p-4 ${outlook.danger ? 'border-red-700/40 bg-red-700/[0.07]' : 'border-ink/10 bg-paper'}`}>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">🌊 Previsión del día en {spot?.name}</p>
+            <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent"><Icon name="wave" className="w-3.5 h-3.5 inline -mt-0.5" strokeWidth={2} /> Previsión del día en {spot?.name}</p>
             {outlook.danger
-              ? <p className="text-[14px] text-red-900 mt-1">⚠️ Condiciones exigentes o no navegables ese día. El patrón decide si la salida es segura.</p>
-              : <p className="text-[14px] text-ink/85 mt-1">{outlook.verdict}{outlook.window ? ` · mejor ventana ${outlook.window}` : ''}{outlook.navSafe ? ' · navegación apta ✓' : ''}</p>}
+              ? <p className="text-[14px] text-red-900 mt-1 inline-flex items-start gap-1.5"><Icon name="warning" className="w-4 h-4 shrink-0 mt-0.5" strokeWidth={2} />Condiciones exigentes o no navegables ese día. El patrón decide si la salida es segura.</p>
+              : <p className="text-[14px] text-ink/85 mt-1">{outlook.verdict}{outlook.window ? ` · mejor ventana ${outlook.window}` : ''}{outlook.navSafe ? <> · navegación apta <Icon name="checkCircle" className="w-3 h-3 inline -mt-0.5 text-accent" strokeWidth={2.2} /></> : ''}</p>}
             <Link href={`/mejores-horas/${charter.spotSlug}?modo=barco${charter.targetSpecies ? `&especie=${charter.targetSpecies}` : ''}`} className="inline-block text-[12px] font-bold uppercase tracking-wide text-accent hover:underline mt-1">Ver previsión completa →</Link>
           </div>
         )}
@@ -170,13 +174,13 @@ export default async function CharterPage({ params, searchParams }: { params: Pr
 
         {reviews.length > 0 && (
           <div className="space-y-3 border-t border-ink/[0.07] pt-6">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">⭐ Opiniones de pescadores ({charter.operator.reviewCount})</p>
+            <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent inline-flex items-center gap-1.5"><Icon name="star" className="w-3 h-3" strokeWidth={2} />Opiniones de pescadores ({charter.operator.reviewCount})</p>
             {reviews.map((r) => (
               <div key={r.id} className="border border-ink/[0.07] rounded-2xl bg-paper p-4">
                 <div className="flex items-center gap-2">
                   <span className="text-xl">{r.authorAvatar}</span>
                   <span className="font-bold text-ink text-sm">{r.authorName}</span>
-                  <span className="text-amber-500 text-sm">{'★'.repeat(r.rating)}<span className="text-ink/20">{'★'.repeat(5 - r.rating)}</span></span>
+                  <Stars rating={r.rating} className="w-3.5 h-3.5" />
                 </div>
                 {r.text && <p className="text-[14px] text-ink/80 mt-1.5">{r.text}</p>}
               </div>

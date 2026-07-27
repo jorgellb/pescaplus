@@ -55,6 +55,32 @@ const P: Record<string, JSX.Element> = {
   moon: <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z" />,
   chartBar: <><path d="M3 20h18" /><rect x="5" y="12" width="3.5" height="8" /><rect x="10.3" y="7" width="3.5" height="13" /><rect x="15.5" y="15" width="3.5" height="5" /></>,
   download: <><path d="M12 3v12" /><path d="m7 10.5 5 4.5 5-4.5" /><path d="M4 19.5h16" /></>,
+
+  // — segundo lote: charters, quedadas, cuenta, reseñas, admin —
+  star: <path d="M12 3.5 14.8 9.3 21.2 10.2 16.6 14.7 17.7 21 12 17.9 6.3 21 7.4 14.7 2.8 10.2 9.2 9.3 12 3.5Z" fill="currentColor" strokeWidth="0" />,
+  sparkles: <><path d="M12 3v4M12 17v4M3 12h4M17 12h4" /><path d="m8 8-1.5-1.5M17.5 17.5 16 16M8 16l-1.5 1.5M17.5 6.5 16 8" /><circle cx="12" cy="12" r="2.3" /></>,
+  checkCircle: <><circle cx="12" cy="12" r="9" /><path d="m8 12.5 2.5 2.5 5.5-6" /></>,
+  message: <><path d="M4 5h16v11H9l-4 4V16H4V5Z" /><path d="M8 9h8M8 12h5" /></>,
+  search: <><circle cx="10.5" cy="10.5" r="6.5" /><path d="m20 20-4.5-4.5" /></>,
+  cart: <><circle cx="9.5" cy="20" r="1.3" /><circle cx="17.5" cy="20" r="1.3" /><path d="M2.5 3h2.5l2.3 12.2a2 2 0 0 0 2 1.6h8a2 2 0 0 0 2-1.6L21 7H6" /></>,
+  card: <><rect x="2.5" y="5.5" width="19" height="13" rx="2" /><path d="M2.5 10h19M6 15h4" /></>,
+  package: <><path d="m3.5 7.5 8.5-4 8.5 4-8.5 4-8.5-4Z" /><path d="M3.5 7.5v9l8.5 4 8.5-4v-9" /><path d="M12 11.5v9" /></>,
+  ban: <><circle cx="12" cy="12" r="9" /><path d="m5.5 5.5 13 13" /></>,
+  link: <><path d="M9.5 14.5 14.5 9.5" /><path d="M11 6.5 13 4.5a3.5 3.5 0 0 1 5 5l-2 2" /><path d="M13 17.5 11 19.5a3.5 3.5 0 0 1-5-5l2-2" /></>,
+  clipboard: <><rect x="5" y="4" width="14" height="17" rx="2" /><rect x="8.5" y="2.5" width="7" height="3.5" rx="1" /><path d="M8.5 11h7M8.5 14.5h7M8.5 18h4" /></>,
+  hook: <><path d="M12 2v11" /><path d="M12 13a4 4 0 1 0 4 4c0-2-1.5-3-2.5-4.5" /><circle cx="12" cy="2.6" r="0" /></>,
+  thermometer: <><path d="M12 14.5V5a2 2 0 0 0-4 0v9.5a4 4 0 1 0 4 0Z" /><circle cx="10" cy="17" r="1" fill="currentColor" stroke="none" /></>,
+  wind: <><path d="M2 8h11a2.5 2.5 0 1 0-2.3-3.5" /><path d="M2 13h15a2.5 2.5 0 1 1-2.3 3.5" /><path d="M2 18h8a2 2 0 1 1-1.8 2.8" /></>,
+  umbrella: <><path d="M3 12a9 7.5 0 0 1 18 0Z" /><path d="M12 12v7.3a2 2 0 0 1-3.6 1.2" /><path d="M12 4v2" /></>,
+  kayak: <><path d="M2 16c4-3.5 16-3.5 20 0-4 2-16 2-20 0Z" /><path d="M6 7.5h12" /><path d="M6 7.5v-2.3M18 7.5v-2.3" /></>,
+  robot: <><rect x="4" y="8" width="16" height="12" rx="3" /><path d="M12 8V4" /><circle cx="12" cy="3" r="1.3" /><circle cx="9" cy="14" r="1.3" fill="currentColor" stroke="none" /><circle cx="15" cy="14" r="1.3" fill="currentColor" stroke="none" /><path d="M9 18h6" /></>,
+  camera: <><rect x="2.5" y="7" width="19" height="13" rx="2.5" /><circle cx="12" cy="13.5" r="3.8" /><path d="M8.5 7 10 4.3h4L15.5 7" /></>,
+  plug: <><path d="M9 3v6M15 3v6" /><path d="M6.5 9h11v3a5.5 5.5 0 0 1-11 0V9Z" /><path d="M12 17.5V21" /></>,
+  edit: <><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3Z" /><path d="M14 8l3 3" /></>,
+  recycle: <><path d="M12 3.5 9 8.7h3M12 3.5l3 5.2h-3" /><path d="m18.8 13.5 2.3 4-2.3 4h-4" /><path d="m5.2 13.5-2.3 4 2.3 4h4" /><path d="M9.5 8.7 6.2 14.3M14.5 8.7l3.3 5.6" /></>,
+  starOutline: <path d="M12 3.5 14.8 9.3 21.2 10.2 16.6 14.7 17.7 21 12 17.9 6.3 21 7.4 14.7 2.8 10.2 9.2 9.3 12 3.5Z" />,  // trazo sin rellenar: rating vacío
+  arrowRight: <path d="M4 12h15M13 6l6 6-6 6" />,
+  refresh: <><path d="M4 12a8 8 0 0 1 14-5.3L20 9" /><path d="M20 4v5h-5" /><path d="M20 12a8 8 0 0 1-14 5.3L4 15" /><path d="M4 20v-5h5" /></>,
 }
 
 export type IconName = keyof typeof P

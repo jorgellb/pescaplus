@@ -6,6 +6,8 @@ import ReviewForm from '@/components/account/ReviewForm'
 import CharterForm from './CharterForm'
 import ChipSelect from './ChipSelect'
 import PhotoUploader from './PhotoUploader'
+import CharterIcon from './CharterIcon'
+import Icon from '@/components/icons/Icon'
 import { NAVIGATION, SAFETY, BOAT_AMENITIES, FISHING_GEAR } from '@/lib/charter-options'
 
 interface Opt { slug: string; name: string; region: string }
@@ -85,7 +87,7 @@ export default function OperatorDashboard({ operatorId, manageToken, verified, s
     <div className="space-y-8">
       {!verified ? (
         <div className="border border-amber-700/30 rounded-2xl bg-amber-700/[0.06] p-5">
-          <p className="font-bold text-ink">⏳ Cuenta pendiente de verificación</p>
+          <p className="font-bold text-ink inline-flex items-center gap-2"><Icon name="clock" className="w-4 h-4" strokeWidth={2} />Cuenta pendiente de verificación</p>
           <p className="text-sm text-ink/70 mt-1">Estamos revisando tu titulación y tu seguro. En cuanto quedes verificado podrás publicar chárters aquí. Guarda este enlace para volver.</p>
         </div>
       ) : (
@@ -95,12 +97,12 @@ export default function OperatorDashboard({ operatorId, manageToken, verified, s
       {verified && paymentsAvailable && (
         stripeReady ? (
           <div className="border border-accent/30 rounded-2xl bg-accent/[0.06] p-4 flex flex-wrap items-center gap-3">
-            <p className="font-bold text-ink">💳 Cobros online activos <span className="text-accent">✓</span></p>
+            <p className="font-bold text-ink inline-flex items-center gap-2"><Icon name="card" className="w-4 h-4" strokeWidth={1.8} />Cobros online activos <Icon name="checkCircle" className="w-4 h-4 text-accent" strokeWidth={1.8} /></p>
             <p className="text-sm text-ink/70">Los pescadores pueden reservar y pagar por adelantado. El dinero llega a tu cuenta y nosotros retenemos la comisión de la plataforma.</p>
           </div>
         ) : (
           <div className="border border-ink/10 rounded-2xl bg-paper p-5 space-y-2">
-            <p className="font-display uppercase text-xl leading-none">💳 Activa los cobros online</p>
+            <p className="font-display uppercase text-xl leading-none inline-flex items-center gap-2"><Icon name="card" className="w-5 h-5" strokeWidth={1.7} />Activa los cobros online</p>
             <p className="text-sm text-ink/70">Conecta tu cuenta con Stripe para aceptar reservas pagadas por adelantado. Es gratis, tarda un par de minutos y el dinero va directo a tu banco. {operatorId && <span className="text-ink/60">Sin esto, seguirás recibiendo solicitudes de reserva por contacto.</span>}</p>
             <button onClick={connectStripe} disabled={connecting} className="bg-accent text-paper px-5 py-2.5 text-sm font-semibold rounded-full hover:bg-ink disabled:opacity-60 transition-colors">{connecting ? 'Conectando…' : 'Conectar cobros con Stripe'}</button>
             {msg && <p className="text-sm text-red-700">{msg}</p>}
@@ -114,7 +116,7 @@ export default function OperatorDashboard({ operatorId, manageToken, verified, s
 
       <div className="border border-ink/10 rounded-2xl bg-paper p-5">
         <div className="flex items-center justify-between gap-2">
-          <p className="font-display uppercase text-xl leading-none">🪪 Tu ficha pública</p>
+          <p className="font-display uppercase text-xl leading-none inline-flex items-center gap-2"><CharterIcon name="license" className="w-5 h-5" strokeWidth={1.7} />Tu ficha pública</p>
           {!editProfile && <button onClick={() => { setPf(profile); setEditProfile(true) }} className="text-sm font-semibold text-accent hover:underline">Editar</button>}
         </div>
         {!editProfile ? (
@@ -175,7 +177,7 @@ export default function OperatorDashboard({ operatorId, manageToken, verified, s
               {c.status !== 'cancelled' && (
                 <span className="flex flex-wrap items-center gap-3">
                   {(c.seriesCount ?? 0) > 1 && (
-                    <span className="text-[11px] font-semibold text-accent bg-accent/[0.09] px-2 py-0.5 rounded-full">🔁 serie de {c.seriesCount}</span>
+                    <span className="text-[11px] font-semibold text-accent bg-accent/[0.09] px-2 py-0.5 rounded-full inline-flex items-center gap-1"><Icon name="refresh" className="w-3 h-3" strokeWidth={2.2} />serie de {c.seriesCount}</span>
                   )}
                   <button onClick={() => respond(c.id, 'cancel')} disabled={busy === c.id + 'cancel'} className="text-[10px] text-red-700 hover:underline disabled:opacity-50">Cancelar esta</button>
                   {(c.seriesCount ?? 0) > 1 && (
@@ -190,7 +192,7 @@ export default function OperatorDashboard({ operatorId, manageToken, verified, s
                 {c.bookings.map((b) => (
                   <div key={b.id} className="flex flex-wrap items-center gap-2 text-sm">
                     <span className="font-bold text-ink">{b.name}</span>
-                    {(b.anglerReviews ?? 0) > 0 && <span className="text-amber-600 text-[12px]" title={`${b.anglerReviews} valoraciones de otros patrones`}>★ {(b.anglerRating ?? 0).toFixed(1)}</span>}
+                    {(b.anglerReviews ?? 0) > 0 && <span className="text-amber-600 text-[12px] inline-flex items-center gap-1" title={`${b.anglerReviews} valoraciones de otros patrones`}><Icon name="star" className="w-3 h-3" />{(b.anglerRating ?? 0).toFixed(1)}</span>}
                     <span className="text-ink/60">{b.people} pers · {b.contact}</span>
                     {b.message && <span className="text-ink/60 italic">“{b.message}”</span>}
                     <span className="font-mono text-[10px] uppercase tracking-wide text-ink/60">{b.status}</span>

@@ -7,6 +7,7 @@ import { parseCharterFilter, isFiltered, describeFilter } from '@/lib/charter-fi
 import { FISHING_SPOTS, getSpot } from '@/lib/fishing-spots'
 import { getSpecies } from '@/lib/fishing-species'
 import { todayMadridISO, fmtDayLabel } from '@/lib/solunar-format'
+import Icon, { type IconName } from '@/components/icons/Icon'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,7 +33,7 @@ export async function generateMetadata({ searchParams }: Params): Promise<Metada
   }
 }
 
-const MOD: Record<string, string> = { tierra: '🏖️', kayak: '🛶', barco: '🚤' }
+const MOD: Record<string, IconName> = { tierra: 'umbrella', kayak: 'kayak', barco: 'boat' }
 
 type Params = { searchParams: Promise<Record<string, string | string[] | undefined>> }
 
@@ -45,12 +46,12 @@ export default async function ChartersHub({ searchParams }: Params) {
     <Layout>
       <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
-          <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3">⚓ Chárters con patrón profesional</p>
+          <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3"><Icon name="anchor" className="w-3.5 h-3.5 inline -mt-0.5" strokeWidth={2} /> Chárters con patrón profesional</p>
           <h1 className="font-display uppercase text-4xl sm:text-5xl md:text-6xl leading-[1.02] text-ink">Sal a pescar con un profesional</h1>
           <p className="text-ink/60 text-sm max-w-2xl mt-3">Reserva plaza en salidas de pesca con <strong className="text-ink">patrón profesional verificado</strong> (licencia y seguro comprobados). Con la previsión y la seguridad del día al lado.</p>
           <div className="mt-6">
             <Link href="/charters/operador" className="inline-flex items-center gap-2 bg-ink text-paper px-6 py-3 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift hover:bg-accent hover:border-accent">
-              ⚓ ¿Eres patrón? Ofrece tus salidas
+              <Icon name="anchor" className="w-3.5 h-3.5 inline -mt-0.5" strokeWidth={2} /> ¿Eres patrón? Ofrece tus salidas
             </Link>
           </div>
         </div>
@@ -99,12 +100,12 @@ export default async function ChartersHub({ searchParams }: Params) {
                     )}
                     <div className="p-4">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-[12px] font-semibold text-accent">{MOD[c.modality]} <span className="first-letter:uppercase inline-block">{fmtDayLabel(c.dateISO)}</span> · {c.timeStart}</span>
+                        <span className="text-[12px] font-semibold text-accent"><Icon name={MOD[c.modality]} className="w-3.5 h-3.5 inline -mt-0.5" strokeWidth={2} /> <span className="first-letter:uppercase inline-block">{fmtDayLabel(c.dateISO)}</span> · {c.timeStart}</span>
                         <span className="text-[12px] font-medium text-ink/60">{c.placesTaken}/{c.maxPlaces}</span>
                       </div>
                       <p className="font-display text-xl text-ink mt-1.5">{c.highlights || spot?.name || c.spotSlug}</p>
                       <p className="text-[13px] text-ink/65 mt-1">
-                        {c.operator?.businessName || c.operator?.name} · patrón verificado ✓{sp ? ` · a por ${sp.name.toLowerCase()}` : ''}
+                        {c.operator?.businessName || c.operator?.name} · patrón verificado <Icon name="checkCircle" className="w-3 h-3 inline -mt-0.5 text-accent" strokeWidth={2.2} />{sp ? ` · a por ${sp.name.toLowerCase()}` : ''}
                       </p>
                       <p className="text-[15px] font-bold text-ink mt-1.5">
                         {c.pricePerPerson} €<span className="font-normal text-ink/60">/persona</span>
