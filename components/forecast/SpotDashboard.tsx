@@ -355,6 +355,16 @@ export default async function SpotDashboard({
             >
               📅 Planificador de 12 meses
             </Link>
+            {/* Solo en zonas de mar: la batimetría y el balizamiento son
+                marinos, y en un embalse la carta no tendría nada que enseñar. */}
+            {s.type === 'mar' && (
+              <Link
+                href={`/carta?zona=${s.slug}`}
+                className="inline-flex items-center gap-2 bg-paper text-ink px-4 py-2.5 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift hover:bg-ink hover:text-paper"
+              >
+                🧭 Ver el fondo en la carta náutica
+              </Link>
+            )}
             <Link
               href={`/diario?zona=${s.slug}`}
               className="inline-flex items-center gap-2 bg-paper text-ink px-4 py-2.5 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift hover:bg-ink hover:text-paper"
