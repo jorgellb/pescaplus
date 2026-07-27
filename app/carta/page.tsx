@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import Icon from '@/components/icons/Icon'
 import Layout from '@/components/Layout'
 import ChartLoader from '@/components/carta/ChartLoader'
 import { getChartProvider, attributionFor, NOT_FOR_NAVIGATION } from '@/lib/chart-providers'
@@ -61,12 +62,12 @@ export default async function CartaPage({ searchParams }: Params) {
             <div className="flex flex-wrap gap-2 mt-3">
               <Link href={`/mejores-horas/${spot.slug}`}
                 className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-accent hover:underline">
-                🕐 Mejores horas en {spot.name}
+                <Icon name="clock" className="w-3.5 h-3.5" strokeWidth={2} />Mejores horas en {spot.name}
               </Link>
               <span className="text-ink/25">·</span>
               <Link href={`/diario?zona=${spot.slug}`}
                 className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-accent hover:underline">
-                🎣 Apuntar una captura aquí
+                <Icon name="rod" className="w-3.5 h-3.5" strokeWidth={2} />Apuntar una captura aquí
               </Link>
             </div>
           )}

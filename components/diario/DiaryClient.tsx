@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { FISHING_SPOTS, getSpot } from '@/lib/fishing-spots'
 import { SEA_SPECIES } from '@/lib/fishing-species'
+import Icon from '@/components/icons/Icon'
 import SpeciesPatterns from './SpeciesPatterns'
 import { solunarDay, phaseEmoji } from '@/lib/solunar'
 import { tideCoefficient } from '@/lib/tides'
@@ -218,7 +219,7 @@ export default function DiaryClient() {
     <div className="space-y-6">
       {/* Add form */}
       <div className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-4 sm:p-5 space-y-3">
-        <h2 className="font-display uppercase text-xl leading-none">➕ Apunta una captura</h2>
+        <h2 className="font-display uppercase text-xl leading-none inline-flex items-center gap-2"><Icon name="plus" className="w-5 h-5" strokeWidth={2} />Apunta una captura</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <label className="block">
             <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Día</span>
@@ -304,20 +305,20 @@ export default function DiaryClient() {
       {/* Patterns */}
       {analysis && (
         <div className="border border-accent/30 rounded-2xl bg-accent/[0.04] p-4 sm:p-5 space-y-2">
-          <h2 className="font-display uppercase text-xl leading-none">📊 Tus patrones ({analysis.n} capturas)</h2>
+          <h2 className="font-display uppercase text-xl leading-none inline-flex items-center gap-2"><Icon name="chartBar" className="w-5 h-5" strokeWidth={1.8} />Tus patrones ({analysis.n} capturas)</h2>
           <ul className="text-[15px] text-ink/85 leading-relaxed space-y-1">
             <li>
-              🌙 El <strong>{analysis.topPhasePct}%</strong> de tus capturas fueron con <strong>{analysis.topPhase}</strong>.
+              <Icon name="moon" className="w-4 h-4 inline -mt-0.5" strokeWidth={1.8} /> El <strong>{analysis.topPhasePct}%</strong> de tus capturas fueron con <strong>{analysis.topPhase}</strong>.
             </li>
             <li>
-              📈 La actividad solunar media de tus días de pesca es <strong>{analysis.meanRating}/5</strong>
+              <Icon name="chartUp" className="w-4 h-4 inline -mt-0.5" strokeWidth={1.8} /> La actividad solunar media de tus días de pesca es <strong>{analysis.meanRating}/5</strong>
               {analysis.meanRating >= 3.5 ? ' — sales los días buenos, se nota.' : ' — prueba a elegir días de 4–5 en el planificador.'}
             </li>
             <li>
-              🌊 El <strong>{analysis.bigCoefPct}%</strong> con coeficiente de marea alto (≥70).
+              <Icon name="wave" className="w-4 h-4 inline -mt-0.5" strokeWidth={1.8} /> El <strong>{analysis.bigCoefPct}%</strong> con coeficiente de marea alto (≥70).
             </li>
             <li>
-              🐟 Tu especie estrella: <strong>{analysis.topSpecies}</strong> · tu zona: <strong>{analysis.topSpot}</strong> ({analysis.topSpotCount} salidas).
+              <Icon name="fish" className="w-4 h-4 inline -mt-0.5" strokeWidth={1.8} /> Tu especie estrella: <strong>{analysis.topSpecies}</strong> · tu zona: <strong>{analysis.topSpot}</strong> ({analysis.topSpotCount} salidas).
             </li>
           </ul>
           <p className="font-mono text-[10px] uppercase tracking-wide text-ink/60">
@@ -335,10 +336,10 @@ export default function DiaryClient() {
       {/* Entries */}
       <div className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-display uppercase text-xl leading-none">🎣 Tus capturas</h2>
+          <h2 className="font-display uppercase text-xl leading-none inline-flex items-center gap-2"><Icon name="rod" className="w-5 h-5" strokeWidth={1.8} />Tus capturas</h2>
           {entries.length > 0 && (
             <button onClick={exportJson} className="text-[11px] text-accent hover:underline">
-              ⬇️ Exportar copia (JSON)
+              <Icon name="download" className="w-3.5 h-3.5 inline -mt-0.5" strokeWidth={2} /> Exportar copia (JSON)
             </button>
           )}
         </div>
@@ -367,7 +368,7 @@ export default function DiaryClient() {
                     {e.note && <span className="block text-[13px] text-ink/70 mt-0.5">{e.note}</span>}
                   </span>
                   {shared.includes(e.id) ? (
-                    <span className="text-[12px] font-semibold text-accent" title="Compartida de forma anónima">✓ Compartida</span>
+                    <span className="text-[12px] font-semibold text-accent" title="Compartida de forma anónima"><Icon name="check" className="w-3.5 h-3.5 inline -mt-0.5" strokeWidth={2.2} /> Compartida</span>
                   ) : (
                     <button
                       onClick={() => share(e)}

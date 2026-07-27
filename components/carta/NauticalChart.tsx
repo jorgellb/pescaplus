@@ -10,6 +10,8 @@ import {
   Marea, PointWeather, SeabedReading, SoundingReading, nf,
   type PointConditions,
 } from './PointReadings'
+import Icon from '@/components/icons/Icon'
+import ConfirmDialog from '@/components/ConfirmDialog'
 import { MIN_POI_ZOOM, POI_KINDS } from '@/lib/nautical-poi-types'
 import type { Seabed } from '@/lib/seabed'
 import { SEABED_RESOLUTION } from '@/lib/seabed'
@@ -121,6 +123,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
    */
   const [sinRed, setSinRed] = useState(() => typeof navigator !== 'undefined' && navigator.onLine === false)
   const [savingTrack, setSavingTrack] = useState(false)
+  const [rutaABorrar, setRutaABorrar] = useState<{ id: string; nombre: string } | null>(null)
   const [trackName, setTrackName] = useState('')
   const [trackDone, setTrackDone] = useState<string | null>(null)
   const [savedTracks, setSavedTracks] = useState<{ id: string; name: string; distanceM: number; durationS: number; startedAt: number }[]>([])
@@ -205,7 +208,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
   }
 
   const borrarRuta = async (id: string, nombre: string) => {
-    if (!window.confirm(`¿Borrar la ruta "${nombre}"? No se puede deshacer.`)) return
+    setRutaABorrar(null)
     try {
       const r = await fetch(`/api/rutas/${id}`, { method: 'DELETE' })
       if ((await r.json()).success) {
@@ -715,7 +718,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
     : capasLejos[0] ?? ''
 
   const toggle = (on: boolean) =>
-    `px-3 py-1.5 rounded-full text-[13px] font-semibold transition-colors ${
+    `inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-semibold transition-colors ${
       on ? 'bg-accent text-paper' : 'bg-paper text-ink/70 border border-ink/12 hover:border-accent'
     }`
 
@@ -749,40 +752,40 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
       <div className="flex flex-wrap gap-2 pointer-events-auto">
         {provider.seamarks && (
           <button type="button" onClick={() => setSeamarks((v) => !v)} aria-pressed={seamarks} className={toggle(seamarks)}>
-            ⚓ Balizamiento
+            <Icon name="anchor" className="w-3.5 h-3.5" strokeWidth={2} />Balizamiento
           </button>
         )}
         {provider.bathymetry && (
           <button type="button" onClick={() => setBathy((v) => !v)} aria-pressed={bathy} className={toggle(bathy)}>
-            🌊 Profundidad
+            <Icon name="wave" className="w-3.5 h-3.5" strokeWidth={2} />Profundidad
           </button>
         )}
         {provider.contours && (
           <button type="button" onClick={() => setContours((v) => !v)} aria-pressed={contours} className={toggle(contours)}>
-            📏 Isóbatas
+            <Icon name="ruler" className="w-3.5 h-3.5" strokeWidth={2} />Isóbatas
           </button>
         )}
         <button type="button" onClick={() => setShowCoords((v) => !v)} aria-pressed={showCoords} className={toggle(showCoords)}>
-          🧭 Ir a coordenadas
+          <Icon name="compass" className="w-3.5 h-3.5" strokeWidth={2} />Ir a coordenadas
         </button>
         {provider.substrate && (
           <button type="button" onClick={() => setSubstrate((v) => !v)} aria-pressed={substrate} className={toggle(substrate)}>
-            🪨 Tipo de fondo
+            <Icon name="rock" className="w-3.5 h-3.5" strokeWidth={2} />Tipo de fondo
           </button>
         )}
         {rec.state.status === 'parado' && !rec.state.recovered && rec.state.points.length === 0 && (
           <button type="button" onClick={() => { setTrackDone(null); siguiendo.current = true; rec.empezar() }}
-            className="px-3 py-1.5 rounded-full text-[13px] font-semibold bg-red-700 text-paper hover:bg-red-800 transition-colors">
-            ⏺ Grabar ruta
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-semibold bg-red-700 text-paper hover:bg-red-800 transition-colors">
+            <span className="w-2.5 h-2.5 rounded-full bg-white shrink-0" aria-hidden="true" />Grabar ruta
           </button>
         )}
         {loggedIn && (
           <button type="button" onClick={() => setShowMiFondo((v) => !v)} aria-pressed={showMiFondo} className={toggle(showMiFondo)}>
-            📡 Mi fondo{miFondo && miFondo.sondas > 0 ? ` (${miFondo.sondas})` : ''}
+            <Icon name="radio" className="w-3.5 h-3.5" strokeWidth={2} />Mi fondo{miFondo && miFondo.sondas > 0 ? ` (${miFondo.sondas})` : ''}
           </button>
         )}
         <button type="button" onClick={() => setShowPois((v) => !v)} aria-pressed={showPois} className={toggle(showPois)}>
-          ⚓ Rampas y puertos
+          <Icon name="anchor" className="w-3.5 h-3.5" strokeWidth={2} />Rampas y puertos
         </button>
         {/* Un solo aviso, aunque falten las dos capas. Antes iban por separado
             y salían dos pastillas seguidas empezando las dos por "Acércate para
@@ -808,7 +811,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
         <details className="pointer-events-auto w-72 max-w-full bg-paper rounded-2xl shadow-hard border border-ink/[0.07]"
           open={sounder.state.conectado}>
           <summary className="px-4 py-2.5 text-[14px] font-semibold text-ink cursor-pointer select-none">
-            📡 Sonda de a bordo {sounder.state.conectado && <span className="text-accent">· conectada</span>}
+            <span className="inline-flex items-center gap-1.5"><Icon name="radio" className="w-3.5 h-3.5" strokeWidth={2} />Sonda de a bordo</span> {sounder.state.conectado && <span className="text-accent">· conectada</span>}
           </summary>
           <div className="px-4 pb-3 pt-1 space-y-2">
             {!sounder.state.conectado ? (
@@ -867,7 +870,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
           <div className="flex items-start justify-between gap-2 mb-1.5">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/60">Ir a coordenadas</p>
             <button type="button" onClick={() => setShowCoords(false)} aria-label="Cerrar la entrada de coordenadas"
-              className="text-ink/40 hover:text-ink leading-none text-[15px]">×</button>
+              className="text-ink/40 hover:text-ink leading-none"><Icon name="close" className="w-4 h-4" strokeWidth={2} /></button>
           </div>
           <CoordinateEntry onGo={irACoordenadas} />
         </div>
@@ -982,7 +985,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
           <div className="flex items-start justify-between gap-2">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/60">Sonda</p>
             <button type="button" onClick={() => { setClickedAt(null); setSounding(null) }}
-              aria-label="Cerrar la sonda" className="text-ink/40 hover:text-ink leading-none text-[15px]">×</button>
+              aria-label="Cerrar la sonda" className="text-ink/40 hover:text-ink leading-none"><Icon name="close" className="w-4 h-4" strokeWidth={2} /></button>
           </div>
           <div className="mt-1"><SoundingReading s={sounding} onRetry={() => clickedAt && pedirSonda(clickedAt.lat, clickedAt.lon)} /></div>
           <div className="mt-2"><SeabedReading s={seabed} relief={sounding?.relief ?? null} /></div>
@@ -1099,7 +1102,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
           </div>
           {zone?.coverage === 'inside' && (
             <div className="rounded-xl border border-red-600/35 bg-red-600/[0.07] p-2.5 space-y-1">
-              <p className="text-[12.5px] font-semibold text-red-900">⚠️ Estás dentro de un espacio protegido</p>
+              <p className="text-[12.5px] font-semibold text-red-900 inline-flex items-center gap-1.5"><Icon name="warning" className="w-3.5 h-3.5 shrink-0" strokeWidth={2} />Estás dentro de un espacio protegido</p>
               {zone.areas.map((a) => (
                 <p key={a.name} className="text-[12px] text-red-900/90">
                   <strong>{a.name}</strong>
@@ -1126,7 +1129,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
             </p>
           )}
           {err && <p className="text-[13px] text-red-700">{err}</p>}
-          <p className="text-[11px] text-ink/60">🔒 Solo tú verás esta marca.</p>
+          <p className="text-[11px] text-ink/60 inline-flex items-center gap-1"><Icon name="lock" className="w-3 h-3 shrink-0" strokeWidth={2} />Solo tú verás esta marca.</p>
           <div className="flex gap-2">
             <button onClick={saveDraft} disabled={saving}
               className="bg-accent text-paper px-4 py-2 text-sm font-semibold rounded-full disabled:opacity-60">
@@ -1140,7 +1143,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
       {loggedIn && savedTracks.length > 0 && rec.state.status === 'parado' && !draft && (
         <details className="pointer-events-auto w-64 max-w-full bg-paper rounded-2xl shadow-hard border border-ink/[0.07]">
           <summary className="px-4 py-2.5 text-[14px] font-semibold text-ink cursor-pointer">
-            🧭 Mis rutas ({savedTracks.length})
+            <span className="inline-flex items-center gap-1.5"><Icon name="compass" className="w-4 h-4" strokeWidth={1.8} />Mis rutas ({savedTracks.length})</span>
           </summary>
           <ul className="max-h-72 overflow-y-auto px-2 pb-2 space-y-0.5">
             {savedTracks.map((t) => (
@@ -1153,8 +1156,8 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
                 </button>
                 <a href={`/api/rutas/${t.id}/gpx`} download aria-label={`Descargar ${t.name} en GPX`}
                   className="text-[11px] font-semibold text-accent hover:underline shrink-0">GPX</a>
-                <button onClick={() => borrarRuta(t.id, t.name)} aria-label={`Borrar ${t.name}`}
-                  className="text-[12px] text-ink/40 hover:text-red-700 shrink-0">✕</button>
+                <button onClick={() => setRutaABorrar({ id: t.id, nombre: t.name })} aria-label={`Borrar ${t.name}`}
+                  className="text-ink/40 hover:text-red-700 shrink-0"><Icon name="close" className="w-3.5 h-3.5" strokeWidth={2} /></button>
               </li>
             ))}
           </ul>
@@ -1164,7 +1167,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
       {loggedIn && marks.length > 0 && !draft && (
         <details className="pointer-events-auto w-72 max-w-full bg-paper rounded-2xl shadow-hard border border-ink/[0.07]">
           <summary className="px-4 py-2.5 text-[14px] font-semibold text-ink cursor-pointer">
-            📍 Mis marcas ({marks.length})
+            <span className="inline-flex items-center gap-1.5"><Icon name="pin" className="w-4 h-4" strokeWidth={1.8} />Mis marcas ({marks.length})</span>
           </summary>
           <ul className="max-h-72 overflow-y-auto px-2 pb-2 space-y-0.5">
             {marks.map((w) => (
@@ -1174,7 +1177,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
                   {WAYPOINT_TYPES.find((t) => t.id === w.type)?.emoji} {w.name}
                 </button>
                 <button onClick={() => removeMark(w.id)} aria-label={`Borrar ${w.name}`}
-                  className="text-[12px] text-ink/40 hover:text-red-700">✕</button>
+                  className="text-ink/40 hover:text-red-700"><Icon name="close" className="w-3.5 h-3.5" strokeWidth={2} /></button>
               </li>
             ))}
           </ul>
@@ -1204,6 +1207,14 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
         </p>
       )}
       </div>
+
+      <ConfirmDialog
+        open={rutaABorrar !== null}
+        title="Borrar esta ruta"
+        message={rutaABorrar ? `"${rutaABorrar.nombre}" se borrará y no se puede deshacer.` : ''}
+        onConfirm={() => rutaABorrar && borrarRuta(rutaABorrar.id, rutaABorrar.nombre)}
+        onCancel={() => setRutaABorrar(null)}
+      />
 
       {fatal && (
         <div className="absolute inset-x-3 top-3 z-30 rounded-2xl border border-red-600/35 bg-paper p-4 shadow-hard-lg">

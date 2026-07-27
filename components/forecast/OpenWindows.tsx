@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { getSpotFavorites, onSpotFavoritesChanged } from '@/lib/spot-favorites'
+import Icon from '@/components/icons/Icon'
 
 /**
  * Las ventanas abiertas en TUS zonas.
@@ -74,7 +75,7 @@ export default function OpenWindows() {
   return (
     <section className="bg-paper border border-ink/[0.07] rounded-2xl shadow-hard p-5 space-y-3">
       <div>
-        <h2 className="font-display uppercase text-xl leading-none">🔔 Tus ventanas abiertas</h2>
+        <h2 className="font-display uppercase text-xl leading-none inline-flex items-center gap-2"><Icon name="bell" className="w-5 h-5" strokeWidth={1.8} />Tus ventanas abiertas</h2>
         <p className="text-[12.5px] text-ink/60 mt-1">
           De las zonas que has guardado, con lo que queda por venir.
         </p>

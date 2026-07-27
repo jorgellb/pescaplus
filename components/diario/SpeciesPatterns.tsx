@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { SEA_SPECIES } from '@/lib/fishing-species'
+import Icon from '@/components/icons/Icon'
 import type { PatronEspecie } from '@/lib/catch-patterns'
 
 /**
@@ -60,7 +61,7 @@ export default function SpeciesPatterns() {
   return (
     <section className="bg-paper border border-ink/[0.07] rounded-2xl shadow-hard p-5 space-y-4">
       <div>
-        <h2 className="font-display uppercase text-xl leading-none">🔬 Con qué condiciones pican</h2>
+        <h2 className="font-display uppercase text-xl leading-none inline-flex items-center gap-2"><Icon name="microscope" className="w-5 h-5" strokeWidth={1.7} />Con qué condiciones pican</h2>
         <p className="text-[12.5px] text-ink/60 mt-1">
           De tus {datos.selladas} capturas compartidas, con la marea, el fondo y el mar que había en cada una.
         </p>

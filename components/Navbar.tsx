@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import CategoryIcon from '@/components/graphics/CategoryIcon'
+import Icon, { type IconName } from '@/components/icons/Icon'
 import { openAsesor } from '@/lib/asesor-bus'
 import { getFavorites, onFavoritesChanged } from '@/lib/product-history'
 import { NAV_SECTIONS, SHOP_SHORTCUTS, type NavSection } from '@/lib/nav'
@@ -13,6 +14,16 @@ import { NAV_SECTIONS, SHOP_SHORTCUTS, type NavSection } from '@/lib/nav'
  * open on hover (pointer) and on click/keyboard, and every entry is a real
  * <Link> with descriptive anchor text so the menu doubles as internal linking.
  */
+
+/** Emoji histórico → icono SVG. Vive aquí, no en lib/nav.ts: los datos de
+ * navegación no necesitan saber cómo se dibujan. */
+const NAV_ICON: Record<string, IconName> = {
+  '🕐': 'clock', '📅': 'calendar', '⚖️': 'scale', '📍': 'pin',
+  '🗺️': 'map', '🧭': 'compass', '🎯': 'target', '🐟': 'fish', '⚓': 'anchor',
+  '📖': 'book', '🚤': 'boat', '🤝': 'users', '➕': 'plus',
+  '📚': 'books', '🏆': 'trophy', '🎣': 'rod', '✉️': 'mail', '❤️': 'heart',
+}
+
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [mobileSection, setMobileSection] = useState<string | null>(null)
@@ -191,7 +202,7 @@ export default function Navbar() {
                     {SHOP_SHORTCUTS.map((l) => (
                       <Link key={l.href} href={l.href}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-ink/[0.04] text-sm font-medium text-ink/80 hover:bg-accent/10 hover:text-accent transition-colors">
-                        <span>{l.emoji}</span>{l.label}
+                        <Icon name={(l.emoji && NAV_ICON[l.emoji]) ?? 'target'} className="w-4 h-4 shrink-0" strokeWidth={1.8} />{l.label}
                       </Link>
                     ))}
                   </div>
@@ -201,7 +212,7 @@ export default function Navbar() {
                   {s.links.map((l) => (
                     <Link key={l.href + l.label} href={l.href}
                       className="group flex gap-3 p-3 rounded-xl hover:bg-accent/[0.06] transition-colors">
-                      <span className="text-xl leading-none mt-0.5">{l.emoji}</span>
+                      <Icon name={(l.emoji && NAV_ICON[l.emoji]) ?? 'target'} className="w-5 h-5 shrink-0 mt-0.5 text-ink/70 group-hover:text-accent transition-colors" strokeWidth={1.6} />
                       <span className="min-w-0">
                         <span className="block text-[15px] font-semibold text-ink group-hover:text-accent transition-colors">{l.label}</span>
                         {l.hint && <span className="block text-[13px] text-ink/60 leading-snug mt-0.5">{l.hint}</span>}
@@ -243,7 +254,7 @@ export default function Navbar() {
                             className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[14px] text-ink/85 hover:bg-accent/[0.06] hover:text-accent transition-colors">
                             {s.variant === 'categories'
                               ? <CategoryIcon id={id} className="w-4 h-4 shrink-0 opacity-70" strokeWidth={1.6} />
-                              : <span className="text-base leading-none">{l.emoji}</span>}
+                              : <Icon name={(l.emoji && NAV_ICON[l.emoji]) ?? 'target'} className="w-4 h-4 shrink-0 opacity-70" strokeWidth={1.6} />}
                             <span className="truncate font-medium">{s.variant === 'categories' ? catName(id, l.label) : l.label}</span>
                           </Link>
                         )
