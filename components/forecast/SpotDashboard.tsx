@@ -42,6 +42,7 @@ import { getSpotAccuracy, getSpotAccuracyHistory, type SpotAccuracy, type Accura
 import AccuracyTrend from '@/components/forecast/AccuracyTrend'
 import LiveWeatherMap from '@/components/forecast/LiveWeatherMap'
 import WhosGoingToday from '@/components/forecast/WhosGoingToday'
+import PlanActions from '@/components/forecast/PlanActions'
 import { getModelAgreement, AGREEMENT_LABEL } from '@/lib/model-agreement'
 import { isSpeciesZone } from '@/lib/species-zones'
 import { scoreLabel, scoreHex, windWord, weatherIcon } from '@/lib/forecast-format'
@@ -383,6 +384,15 @@ export default async function SpotDashboard({
       )
     : Promise.resolve('')
 
+  // "Compartir/imprimir esta ficha" — mismo componente y formato que ya usa /plan.
+  const waText = `🎣 Pesca en ${s.name} — ${fmtDateLong(today)}\n${
+    nextWin && todayHours.length > 0 ? `🎯 Mejor ventana: ${fmtWindowRange(Math.max(nextWin.start, now), nextWin.end, todayHours[0].time)} (${nextWin.avg}/100)\n` : ''
+  }Previsión completa: ${SITE_URL}/mejores-horas/${s.slug}`
+
+  // "Modo capitán": ventana de navegación segura de HOY (no de un día del
+  // bucle de 7), para el checklist de seguridad antes de zarpar.
+  const todayOuting = s.type === 'mar' && modality.id !== 'tierra' ? outAndBack(todayHours, modality) : null
+
   const SECTIONS = [
     { id: 'ahora', label: 'Ahora' },
     { id: 'mapa-vivo', label: 'Mapa en vivo' },
@@ -391,6 +401,7 @@ export default async function SpotDashboard({
     ...(aemet?.available ? [{ id: 'aemet', label: 'Parte AEMET' }] : []),
     ...(speciesPicks.length ? [{ id: 'especies', label: 'Qué buscar' }] : []),
     { id: 'equipo', label: 'Equipo' },
+    { id: 'capitan', label: 'Antes de zarpar' },
     { id: 'notas', label: 'Mis notas' },
     { id: 'sol-luna', label: 'Sol y luna' },
     ...(s.type === 'mar' && regulation ? [{ id: 'normativa', label: 'Normativa' }] : []),
@@ -458,11 +469,20 @@ export default async function SpotDashboard({
             </Link>
             <SpotFavButton slug={s.slug} name={s.name} />
           </div>
+          <div className="mt-3">
+            <PlanActions waText={waText} />
+          </div>
           {nextWin && todayHours.length > 0 && (
-            <p className="inline-flex items-center gap-2 mt-4 rounded-xl border border-accent/30 bg-accent/[0.06] px-3.5 py-2">
+            <p className="inline-flex flex-wrap items-center gap-2 mt-4 rounded-xl border border-accent/30 bg-accent/[0.06] px-3.5 py-2">
               <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">Próxima ventana hoy</span>
               <span className="font-display text-lg text-ink">{fmtWindowRange(Math.max(nextWin.start, now), nextWin.end, todayHours[0].time)}</span>
               <span className="text-paper text-[11px] font-bold rounded px-1.5 py-0.5" style={{ background: scoreHex(nextWin.avg) }}>{nextWin.avg}</span>
+              <a
+                href={`/api/calendario-ventana?zona=${s.slug}&inicio=${Math.max(nextWin.start, now)}&fin=${nextWin.end}&puntuacion=${nextWin.avg}`}
+                className="inline-flex items-center gap-1 text-[11px] font-semibold text-accent hover:underline ml-1"
+              >
+                <Icon name="calendar" className="w-3 h-3" strokeWidth={2} />Añadir al calendario
+              </a>
             </p>
           )}
         </div>
@@ -912,6 +932,46 @@ export default async function SpotDashboard({
             </div>
           </div>
         )}
+
+        {/* "Modo capitán": todo lo de seguridad en un solo vistazo antes de zarpar. */}
+        <div id="capitan" className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-6 space-y-4 scroll-mt-28">
+          <h2 className="font-display uppercase text-2xl text-ink leading-none border-b border-ink/[0.07] pb-4 flex items-center gap-2">
+            <Icon name="lifejacket" className="w-5 h-5" strokeWidth={1.7} /> Antes de zarpar
+          </h2>
+          {alerts.length > 0 && (
+            <div className="space-y-2">
+              {alerts.map((a, i) => (
+                <p key={i} className={`text-sm font-semibold rounded-xl border px-3.5 py-2.5 inline-flex items-start gap-2 w-full ${a.level === 'peligro' ? 'border-red-700/40 bg-red-700/[0.07] text-red-900' : 'border-amber-600/40 bg-amber-500/[0.08] text-amber-900'}`}>
+                  <Icon name={a.level === 'peligro' ? 'ban' : 'warning'} className="w-4 h-4 shrink-0 mt-0.5" strokeWidth={2} />{a.text}
+                </p>
+              ))}
+            </div>
+          )}
+          {todayOuting && (
+            <div className="border border-ink/10 rounded-xl bg-paper p-4 flex flex-wrap items-center gap-x-6 gap-y-2">
+              <span className="inline-flex items-center gap-2">
+                <Icon name={MOD_ICON[modality.id]} className="w-4 h-4" strokeWidth={1.8} />
+                <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Ventana de navegación segura hoy</span>
+                <span className="font-display text-xl text-ink">{fmtTime(todayOuting.departure)} – {fmtTime(todayOuting.returnBy)}</span>
+              </span>
+              {todayOuting.returnNote && <span className="text-[13px] text-ink/60">Motivo: {todayOuting.returnNote}.</span>}
+            </div>
+          )}
+          <ul className="space-y-2 text-[14px] text-ink/80">
+            {[
+              'Chaleco salvavidas puesto, no solo a bordo.',
+              'Avisa a alguien en tierra de dónde vas y cuándo vuelves.',
+              `Licencia de pesca de ${s.region} en vigor.`,
+              'Móvil cargado (y VHF si navegas) — última luz hoy a las ' + fmtTime(d0.lastLight) + '.',
+            ].map((tip) => (
+              <li key={tip} className="flex items-start gap-2.5">
+                <span className="mt-0.5 w-4 h-4 border-2 border-ink/30 rounded flex-shrink-0" aria-hidden />
+                <span>{tip}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="font-mono text-[10px] uppercase tracking-wide text-ink/35">Lista orientativa, no sustituye tu propio juicio ni la normativa de navegación vigente.</p>
+        </div>
 
         {/* Private field notes — the section itself handles the logged-out state */}
         <div id="notas" className="scroll-mt-28">
