@@ -8,6 +8,7 @@ import type { Sounding } from '@/lib/soundings'
 import { MIN_POI_ZOOM, POI_KINDS } from '@/lib/nautical-poi-types'
 import type { Seabed } from '@/lib/seabed'
 import { SEABED_RESOLUTION } from '@/lib/seabed'
+import { especiesCompatibles, datosQueFaltan } from '@/lib/species-match'
 import { useTrackRecorder } from './useTrackRecorder'
 import { useSounder } from './useSounder'
 import { formatDistance, formatDuration } from '@/lib/track-types'
@@ -1196,7 +1197,51 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
           <p className="text-[11px] text-ink/60 mt-2.5">
             {formatNautical(clickedAt.lat, clickedAt.lon).lat} · {formatNautical(clickedAt.lat, clickedAt.lon).lon}
           </p>
-          {normativa && (
+          {(() => {
+        /*
+         * Qué pescar aquí. Se calcula EN EL NAVEGADOR con la sonda, el fondo y
+         * el agua que ya se han pedido para este punto: pedir otra vez lo mismo
+         * al servidor solo para cruzarlo sería una llamada de más.
+         */
+        const punto = {
+          sondaM: sounding?.depthM ?? null,
+          sustrato: seabed?.substrate ?? null,
+          aguaC: weather?.ahora?.seaTempC ?? null,
+          mes: new Date().getMonth() + 1,
+        }
+        const faltan = datosQueFaltan(punto)
+        // Con un solo dato la lista sale larguísima y no informa de nada.
+        if (faltan.length >= 3) return null
+        const compatibles = especiesCompatibles(punto, 4)
+        if (compatibles.length === 0) return null
+        return (
+          <details className="mt-2 pt-2 border-t border-ink/[0.07]">
+            <summary className="text-[12px] font-semibold text-ink/70 cursor-pointer">
+              Qué encaja aquí ({compatibles.length})
+            </summary>
+            <ul className="mt-1.5 space-y-1.5">
+              {compatibles.map((c) => (
+                <li key={c.speciesId}>
+                  <p className="text-[13px] text-ink font-semibold">{c.emoji} {c.name}</p>
+                  {/* Se enseña QUÉ ha encajado: quien lee juzga, en vez de
+                      tragarse una puntuación que no puede comprobar. */}
+                  <p className="text-[11.5px] text-ink/60">
+                    {c.criterios.filter((x) => x.encaja).map((x) => x.detalle).join(' · ')}
+                  </p>
+                </li>
+              ))}
+            </ul>
+            {faltan.length > 0 && (
+              <p className="text-[11px] text-ink/50 mt-1.5">Sin {faltan.join(' ni ')}: la lista sería más ajustada con esos datos.</p>
+            )}
+            <p className="text-[11.5px] text-amber-900 mt-1.5">
+              Encajan con estas condiciones según su ficha. No significa que estén aquí.
+            </p>
+          </details>
+        )
+      })()}
+
+      {normativa && (
             <details className="mt-2 pt-2 border-t border-ink/[0.07]">
               <summary className="text-[12px] font-semibold text-ink/70 cursor-pointer">
                 Normativa aquí · {normativa.comunidad.region}
