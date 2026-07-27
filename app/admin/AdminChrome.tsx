@@ -93,7 +93,7 @@ export default function AdminChrome({
                     : 'text-ink/80 hover:bg-white/5 border border-transparent'
                 }`}
               >
-                <span className="mr-1.5">{item.icon}</span>
+                <Icon name={item.icon} className="w-4 h-4 inline-block mr-1.5 -mt-0.5" strokeWidth={1.8} />
                 {item.label}
               </Link>
             )
