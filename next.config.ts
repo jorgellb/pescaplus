@@ -17,6 +17,8 @@ const csp = [
   "connect-src 'self' https://tile.openstreetmap.org https://tiles.openseamap.org https://tiles.emodnet-bathymetry.eu https://ows.emodnet-bathymetry.eu https://ows.emodnet-seabedhabitats.eu",
   // MapLibre crea su worker desde un blob.
   "worker-src 'self' blob:",
+  // El mapa de viento/oleaje en vivo de la ficha de zona es un iframe de Windy.
+  "frame-src https://embed.windy.com",
   "frame-ancestors 'self'",
   "base-uri 'self'",
   "form-action 'self'",

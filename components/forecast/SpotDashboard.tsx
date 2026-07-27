@@ -30,6 +30,10 @@ import { douglasState, safetyAlerts, navigationWindows, outAndBack, dayVerdict, 
 import { seawardBearing, windRelation, windRelationLabel } from '@/lib/coast'
 import { getRegulation, REGULATIONS_REVIEWED, NATIONAL_SIZES_URL } from '@/lib/fishing-regulations'
 import { getZoneGuide } from '@/lib/zone-guides'
+import { getZoneClimate, CLIMATE_YEARS } from '@/lib/zone-climate'
+import { getCachedBriefing } from '@/lib/spot-briefing'
+import { getSessionUser } from '@/lib/auth'
+import SpotNotes from '@/components/forecast/SpotNotes'
 import { getAemetBulletin, AEMET_REVALIDATE_S, type AemetBulletin } from '@/lib/aemet'
 import { aemetZoneFor } from '@/lib/aemet-zones'
 import { getAemetObservation, observationAgeMin, isObservationFresh, type AemetObservation } from '@/lib/aemet-obs'
@@ -43,6 +47,7 @@ import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
 import Icon, { type IconName } from '@/components/icons/Icon'
 
 const MOD_ICON: Record<string, IconName> = { tierra: 'umbrella', kayak: 'kayak', barco: 'boat' }
+const MONTH_NAMES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
 
 interface StationData {
   obs: AemetObservation | null
@@ -144,6 +149,38 @@ async function DayAgreementChip({ promise, dateISO }: { promise: ReturnType<type
   )
 }
 
+/** Streamed: the AI daily briefing reads the day's own computed facts back in
+ * plain language. Never blocks the initial paint — the rest of the dashboard
+ * (which has every number this text merely narrates) is already useful
+ * without it, so it streams in via its own Suspense boundary like the AEMET
+ * station read and the model-agreement chip. */
+async function DailyBriefing({ promise }: { promise: Promise<string> }) {
+  const advice = await promise
+  if (!advice) return null
+  return (
+    <div className="border border-accent/25 rounded-2xl bg-accent/[0.04] p-5 flex items-start gap-3">
+      <Icon name="sparkles" className="w-5 h-5 text-accent shrink-0 mt-0.5" strokeWidth={1.6} />
+      <div className="min-w-0">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent mb-1">El resumen del asesor</p>
+        <p className="text-[14px] text-ink/85 leading-relaxed">{advice}</p>
+      </div>
+    </div>
+  )
+}
+
+function DailyBriefingSkeleton() {
+  return (
+    <div className="border border-ink/[0.07] rounded-2xl bg-ink/[0.02] p-5 flex items-start gap-3 animate-pulse" aria-hidden>
+      <div className="w-5 h-5 rounded-full bg-ink/10 shrink-0" />
+      <div className="flex-1 space-y-2 min-w-0">
+        <div className="h-2.5 w-1/3 rounded bg-ink/10" />
+        <div className="h-3 w-full rounded bg-ink/10" />
+        <div className="h-3 w-2/3 rounded bg-ink/10" />
+      </div>
+    </div>
+  )
+}
+
 function WindArrow({ deg }: { deg: number | null }) {
   if (deg == null) return <span className="text-ink/30">–</span>
   return (
@@ -192,10 +229,11 @@ export default async function SpotDashboard({
   // confidence — are kicked off here but NOT awaited; they stream in via their
   // own Suspense boundaries so the dashboard paints as soon as the forecast is
   // ready instead of waiting for the slowest of six requests.
-  const [forecast, tides, aemet] = await Promise.all([
+  const [forecast, tides, aemet, user] = await Promise.all([
     getMarineForecast(s, species.id === 'general' ? null : species.id, modality.id),
     s.type === 'mar' ? getTides(s.lat, s.lon) : Promise.resolve(null),
     aemetZone ? getAemetBulletin(aemetZone.costa, aemetZone.keyword) : Promise.resolve(null as AemetBulletin | null),
+    getSessionUser(),
   ])
   const agreementPromise = getModelAgreement(s.lat, s.lon)
   const stationPromise: Promise<StationData> = station
@@ -304,13 +342,43 @@ export default async function SpotDashboard({
 
   const guide = getZoneGuide(s.slug)
 
+  // Histórico real (ERA5, ${CLIMATE_YEARS}) para el mes en curso: la única
+  // pregunta que la previsión de 7 días no puede responder por sí sola —
+  // "¿esto es normal para la época, o es un día raro?".
+  const monthClimate = getZoneClimate(s.slug)?.[currentMonth - 1] ?? null
+  const climateWindDiff = monthClimate && nowHour?.windKmh != null ? Math.round(nowHour.windKmh - monthClimate.w) : null
+
+  // "El resumen del asesor": narrates today's own computed facts, never
+  // invents numbers. Same generator as the /plan page's tactical advice.
+  const briefingFacts: string[] = []
+  if (nowHour) briefingFacts.push(`Puntuación general de ahora: ${nowHour.score}/100 (${scoreLabel(nowHour.score)})`)
+  if (nextWin) briefingFacts.push(`Mejor ventana de hoy: ${fmtWindowRange(nextWin.start, nextWin.end, todayHours[0]?.time ?? now)} (puntuación ${nextWin.avg})`)
+  briefingFacts.push(`Solunar de hoy: ${ratingLabel(d0.rating)}`)
+  if (seaNow) briefingFacts.push(`Estado del mar: ${seaNow.name}`)
+  if (risingNow !== null) {
+    briefingFacts.push(
+      `Marea: ${risingNow ? 'subiendo' : 'bajando'}${upcomingTides[0] ? ` · próxima ${upcomingTides[0].type === 'alta' ? 'pleamar' : 'bajamar'} a las ${fmtTime(upcomingTides[0].time)}` : ''}`,
+    )
+  }
+  if (windRel) briefingFacts.push(`Viento: ${windRel.label}`)
+  if (speciesPicks.length) briefingFacts.push(`Especies recomendadas hoy: ${speciesPicks.map((p) => p.species.name).join(', ')}`)
+  if (alerts.length) briefingFacts.push(`Avisos de seguridad: ${alerts.map((a) => a.text).join('; ')}`)
+  const briefingPromise: Promise<string> = briefingFacts.length
+    ? getCachedBriefing(
+        s.slug, today, modality.id, species.id, s.name, fmtDateLong(today), modality.name,
+        species.id === 'general' ? 'cualquier especie' : species.name, briefingFacts,
+      )
+    : Promise.resolve('')
+
   const SECTIONS = [
     { id: 'ahora', label: 'Ahora' },
+    { id: 'mapa-vivo', label: 'Mapa en vivo' },
     { id: 'prevision', label: '7 días' },
     ...(guide ? [{ id: 'guia', label: 'Guía local' }] : []),
     ...(aemet?.available ? [{ id: 'aemet', label: 'Parte AEMET' }] : []),
     ...(speciesPicks.length ? [{ id: 'especies', label: 'Qué buscar' }] : []),
     { id: 'equipo', label: 'Equipo' },
+    { id: 'notas', label: 'Mis notas' },
     { id: 'sol-luna', label: 'Sol y luna' },
     ...(s.type === 'mar' && regulation ? [{ id: 'normativa', label: 'Normativa' }] : []),
   ]
@@ -427,6 +495,11 @@ export default async function SpotDashboard({
             <span>{a.text}</span>
           </div>
         ))}
+
+        {/* AI daily briefing — streamed, never blocks the rest of the page */}
+        <Suspense fallback={<DailyBriefingSkeleton />}>
+          <DailyBriefing promise={briefingPromise} />
+        </Suspense>
 
         {/* Modality + species selectors (sea only) */}
         {s.type === 'mar' && (
@@ -600,6 +673,18 @@ export default async function SpotDashboard({
                   </div>
                 </div>
               )}
+              {monthClimate && (
+                <div className="border border-ink/[0.07] rounded-xl bg-paper px-3.5 py-2.5 flex items-start gap-2.5">
+                  <Icon name="chartBar" className="w-4 h-4 shrink-0 mt-0.5 text-ink/50" strokeWidth={1.7} />
+                  <p className="text-[12.5px] text-ink/70 leading-relaxed">
+                    <strong className="text-ink">Comparado con {MONTH_NAMES[currentMonth - 1]}</strong> (histórico {CLIMATE_YEARS}): media de viento {Math.round(monthClimate.w)} km/h ·{' '}
+                    {monthClimate.ok}% de días pescables.
+                    {climateWindDiff != null && Math.abs(climateWindDiff) >= 3 && (
+                      <> Hoy sopla {Math.abs(climateWindDiff)} km/h {climateWindDiff > 0 ? 'más' : 'menos'} de lo habitual para la época.</>
+                    )}
+                  </p>
+                </div>
+              )}
               <SourceBadge
                 source={s.type === 'mar' ? 'Open-Meteo (meteo + marino)' : 'Open-Meteo'}
                 kind="previsto"
@@ -612,6 +697,22 @@ export default async function SpotDashboard({
         ) : (
           <div className="border border-ink/10 rounded-2xl bg-paper p-6 text-sm text-ink/60">La previsión meteorológica no está disponible ahora mismo. Vuelve a intentarlo en unos minutos.</div>
         )}
+
+        {/* Live wind/wave map — animated, third-party (Windy), purely visual/orientative layer on top of our own scored forecast. */}
+        <div id="mapa-vivo" className="space-y-3 scroll-mt-28">
+          <h2 className="font-display uppercase text-2xl text-ink leading-none border-b border-ink/[0.07] pb-3 flex items-center gap-2">
+            <Icon name="wind" className="w-5 h-5" strokeWidth={1.7} /> Viento y oleaje en vivo
+          </h2>
+          <div className="border border-ink/10 rounded-2xl overflow-hidden shadow-hard bg-paper">
+            <iframe
+              src={`https://embed.windy.com/embed2.html?lat=${s.lat}&lon=${s.lon}&detailLat=${s.lat}&detailLon=${s.lon}&zoom=9&level=surface&overlay=wind&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1`}
+              title={`Mapa de viento y oleaje en vivo sobre ${s.name}`}
+              loading="lazy"
+              className="w-full h-[420px] border-0 block"
+            />
+          </div>
+          <p className="font-mono text-[10px] uppercase tracking-wide text-ink/35">Mapa en vivo de un proveedor externo (Windy.com), independiente de nuestra puntuación · orientativo, no sustituye la previsión de arriba.</p>
+        </div>
 
         {/* Qué buscar hoy — species intelligence from season + live conditions */}
         {speciesPicks.length > 0 && (
@@ -805,6 +906,11 @@ export default async function SpotDashboard({
             </div>
           </div>
         )}
+
+        {/* Private field notes — the section itself handles the logged-out state */}
+        <div id="notas" className="scroll-mt-28">
+          <SpotNotes spotSlug={s.slug} loggedIn={!!user} />
+        </div>
 
         {/* Regulations — honest: official links, never invented bylaws */}
         {s.type === 'mar' && regulation && (
