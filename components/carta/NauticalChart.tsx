@@ -703,6 +703,20 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
     if (res.ok) setMarks((m) => m.filter((w) => w.id !== id))
   }
 
+  /**
+   * Qué hay apagado por estar el mapa demasiado abierto, como una enumeración
+   * en condiciones: "espacios protegidos, rampas, puertos y pecios". Unir dos
+   * frases con "y" daba "espacios protegidos y rampas, puertos y pecios", que
+   * se lee de pena.
+   */
+  const capasLejos = [
+    ...(showAreas && areasFar ? ['espacios protegidos'] : []),
+    ...(showPois && poisFar ? ['rampas', 'puertos', 'pecios'] : []),
+  ]
+  const avisoLejos = capasLejos.length > 1
+    ? `${capasLejos.slice(0, -1).join(', ')} y ${capasLejos[capasLejos.length - 1]}`
+    : capasLejos[0] ?? ''
+
   const toggle = (on: boolean) =>
     `px-3 py-1.5 rounded-full text-[13px] font-semibold transition-colors ${
       on ? 'bg-accent text-paper' : 'bg-paper text-ink/70 border border-ink/12 hover:border-accent'
@@ -766,14 +780,12 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
         <button type="button" onClick={() => setShowPois((v) => !v)} aria-pressed={showPois} className={toggle(showPois)}>
           ⚓ Rampas y puertos
         </button>
-        {showPois && poisFar && (
+        {/* Un solo aviso, aunque falten las dos capas. Antes iban por separado
+            y salían dos pastillas seguidas empezando las dos por "Acércate para
+            ver…": se leían como el mismo mensaje repetido. */}
+        {capasLejos.length > 0 && (
           <span className="px-3 py-1.5 rounded-full bg-paper/90 text-[12px] text-ink/60 border border-ink/12">
-            Acércate para ver rampas, puertos y pecios
-          </span>
-        )}
-        {showAreas && areasFar && (
-          <span className="px-3 py-1.5 rounded-full bg-paper/90 text-[12px] text-ink/60 border border-ink/12">
-            Acércate para ver los espacios protegidos
+            Acércate para ver {avisoLejos}
           </span>
         )}
       </div>
