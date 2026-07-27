@@ -10,6 +10,7 @@ import type { Seabed } from '@/lib/seabed'
 import { useTrackRecorder } from './useTrackRecorder'
 import { formatDistance, formatDuration } from '@/lib/track-types'
 import { trackToGPX } from '@/lib/gpx'
+import MarksTransfer from './MarksTransfer'
 import { SEABED_LEGEND_URL, SEABED_NOTE } from '@/lib/seabed'
 
 interface PointConditions {
@@ -332,13 +333,15 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
   useEffect(() => { cargarRutas() }, [cargarRutas])
 
   // Las marcas se piden solo si hay sesión: son privadas por definición.
-  useEffect(() => {
+  const recargarMarcas = useCallback(() => {
     if (!loggedIn) return
     fetch('/api/waypoints')
       .then((r) => r.json())
       .then((d) => { if (d.success) setMarks(d.waypoints) })
       .catch(() => {})
   }, [loggedIn])
+
+  useEffect(() => { recargarMarcas() }, [recargarMarcas])
 
   /*
    * La carta ocupa exactamente lo que queda de ventana bajo la cabecera.
@@ -990,7 +993,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
       )}
 
       {loggedIn && marks.length > 0 && !draft && (
-        <details className="pointer-events-auto w-64 max-w-full bg-paper rounded-2xl shadow-hard border border-ink/[0.07]">
+        <details className="pointer-events-auto w-72 max-w-full bg-paper rounded-2xl shadow-hard border border-ink/[0.07]">
           <summary className="px-4 py-2.5 text-[14px] font-semibold text-ink cursor-pointer">
             📍 Mis marcas ({marks.length})
           </summary>
@@ -1006,11 +1009,22 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
               </li>
             ))}
           </ul>
-          {/* Descarga de fichero, no navegación: un <Link> haría transición de
-              cliente y el navegador nunca recibiría el GPX. */}
-          <a href="/api/waypoints/gpx" download className="block px-4 py-2 text-[13px] font-semibold text-accent hover:underline">
-            Descargar en GPX ↓
-          </a>
+          <div className="px-4 pb-3 pt-1 border-t border-ink/[0.07]">
+            <MarksTransfer onImported={recargarMarcas} />
+          </div>
+        </details>
+      )}
+
+      {/* Sin marcas todavía no hay listado donde meterlo, y es justo cuando más
+          falta hace: la primera vez lo que quieres es traerte las de la sonda. */}
+      {loggedIn && marks.length === 0 && !draft && rec.state.status === 'parado' && (
+        <details className="pointer-events-auto w-72 max-w-full bg-paper rounded-2xl shadow-hard border border-ink/[0.07]">
+          <summary className="px-4 py-2.5 text-[14px] font-semibold text-ink cursor-pointer">
+            📥 Traer mis marcas de la sonda
+          </summary>
+          <div className="px-4 pb-3 pt-1">
+            <MarksTransfer onImported={recargarMarcas} />
+          </div>
         </details>
       )}
 
