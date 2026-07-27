@@ -69,7 +69,10 @@ function leerGuardado(): Guardado | null {
  */
 export function useTrackRecorder(sondaActual?: () => number | null) {
   const sonda = useRef(sondaActual)
-  sonda.current = sondaActual
+  // En un efecto y no en el cuerpo del render: escribir una referencia mientras
+  // React renderiza no es seguro con el render concurrente. Al manejador del GPS
+  // le vale igual, porque se dispara mucho después de cualquier render.
+  useEffect(() => { sonda.current = sondaActual }, [sondaActual])
 
   // Se lee al crear el estado, no en un efecto: es un hecho del aparato, y así
   // no hay un primer render que diga "no hay nada" antes de encontrarlo.

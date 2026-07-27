@@ -300,7 +300,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
   const puntoMarker = useRef<Marker | null>(null)
   const sounder = useSounder()
   const sondaRef = useRef<number | null>(null)
-  sondaRef.current = sounder.state.depthM
+  useEffect(() => { sondaRef.current = sounder.state.depthM }, [sounder.state.depthM])
   // Se pasa como función: si se pasara el valor, cada punto de la derrota se
   // quedaría con la profundidad del render anterior.
   const rec = useTrackRecorder(() => sondaRef.current)
@@ -423,6 +423,25 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
     } catch { /* se queda como estaba */ }
   }
 
+  const pedirSonda = (lat: number, lon: number) => {
+    setSounding(null)
+    fetch(`/api/sonda?lat=${lat}&lon=${lon}`)
+      .then((r) => r.json())
+      .then((d: Sounding & { success?: boolean }) => {
+        if (!d?.success) return
+        setSounding(d)
+        // Se rellena la sonda solo si el patrón no ha escrito la suya: el dato
+        // de a bordo siempre manda sobre el del modelo.
+        if (d.depthM != null && d.depthM >= 0.5) setDepth((cur) => (cur === '' ? String(d.depthM) : cur))
+      })
+      .catch(() => setSounding({
+        kind: 'desconocida', depthM: null, minM: null, maxM: null, elevationM: null,
+        source: null, sourceUrl: null, label: 'Sonda no disponible ahora mismo',
+        relief: { kind: 'desconocido', rangeM: null, label: 'Sin datos de relieve', hint: null },
+        cells: null,
+      }))
+  }
+
   /**
    * Todo lo que se sabe de un punto: sonda, fondo, mar y —con sesión— el panel
    * para guardarlo como marca.
@@ -468,7 +487,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
    * Una referencia al día resuelve las dos cosas.
    */
   const marcarPuntoRef = useRef(marcarPunto)
-  marcarPuntoRef.current = marcarPunto
+  useEffect(() => { marcarPuntoRef.current = marcarPunto })
 
   /** Lleva la carta a unas coordenadas escritas a mano y las marca. */
   const irACoordenadas = (lat: number, lon: number) => {
@@ -476,25 +495,6 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
     siguiendo.current = false
     map.current?.flyTo({ center: [lon, lat], zoom: Math.max(map.current.getZoom(), 13), duration: 900 })
     marcarPunto(lat, lon)
-  }
-
-  const pedirSonda = (lat: number, lon: number) => {
-    setSounding(null)
-    fetch(`/api/sonda?lat=${lat}&lon=${lon}`)
-      .then((r) => r.json())
-      .then((d: Sounding & { success?: boolean }) => {
-        if (!d?.success) return
-        setSounding(d)
-        // Se rellena la sonda solo si el patrón no ha escrito la suya: el dato
-        // de a bordo siempre manda sobre el del modelo.
-        if (d.depthM != null && d.depthM >= 0.5) setDepth((cur) => (cur === '' ? String(d.depthM) : cur))
-      })
-      .catch(() => setSounding({
-        kind: 'desconocida', depthM: null, minM: null, maxM: null, elevationM: null,
-        source: null, sourceUrl: null, label: 'Sonda no disponible ahora mismo',
-        relief: { kind: 'desconocido', rangeM: null, label: 'Sin datos de relieve', hint: null },
-        cells: null,
-      }))
   }
 
   const cargarRutas = useCallback(() => {

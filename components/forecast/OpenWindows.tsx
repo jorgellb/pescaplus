@@ -51,7 +51,11 @@ export default function OpenWindows() {
 
   const cargar = useCallback(() => {
     const favs = getSpotFavorites()
-    if (favs.length === 0) { setZonas([]); setCargando(false); return }
+    if (favs.length === 0) {
+      // Fuera del cuerpo del efecto: llamarlo ahí encadena un render sobre otro.
+      queueMicrotask(() => { setZonas([]); setCargando(false) })
+      return
+    }
     fetch(`/api/ventanas?zonas=${favs.join(',')}`)
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => { if (d?.success) setZonas(d.zonas.filter((z: Zona) => z.ventanas.length > 0)) })

@@ -19,6 +19,8 @@
  *     polígono —cientos de KB por clic—. Con `propertyName=substrate` la
  *     respuesta baja a 262 bytes.
  */
+import { getSounding } from '@/lib/soundings'
+
 const WMS = 'https://ows.emodnet-seabedhabitats.eu/geoserver/emodnet_open/wms'
 const LAYER = 'eusm2025_subs_full'
 const LAYER_HABITAT = 'eusm2025_eunis2019_full'
@@ -153,19 +155,20 @@ function leerConfianza(v: unknown): Seabed['confidence'] {
   return null
 }
 
-/** Una sonda suelta, sin caché ni traducción: solo el número. */
+/**
+ * Una sonda suelta, con su signo: negativa bajo el agua, positiva en tierra.
+ *
+ * Pasa por `getSounding` a propósito, en vez de pedirlo por su cuenta. Antes
+ * hacía un fetch crudo y cada consulta de fondo volvía a pedir a EMODnet las
+ * cinco sondas de la pendiente, incluso para un punto ya visto: con todo lo
+ * demás cacheado, /api/fondo seguía costando 649 ms mientras el resto bajaba a
+ * 5 ms. Reutilizar el lector aprovecha su caché y de paso sus reintentos.
+ */
 async function profundidad(lat: number, lon: number): Promise<number | null> {
-  try {
-    const res = await fetch(`${DEPTH}?geom=POINT(${lon.toFixed(6)}%20${lat.toFixed(6)})`, {
-      signal: AbortSignal.timeout(8000),
-      headers: { Accept: 'application/json', 'User-Agent': 'PescaPlus/1.0 (+https://pescaplus.es)' },
-    })
-    if (!res.ok) return null
-    const d = (await res.json()) as { avg?: number }
-    return typeof d.avg === 'number' && Number.isFinite(d.avg) ? d.avg : null
-  } catch {
-    return null
-  }
+  const s = await getSounding(lat, lon)
+  if (s.depthM != null) return -s.depthM
+  if (s.elevationM != null) return s.elevationM
+  return null
 }
 
 /**
