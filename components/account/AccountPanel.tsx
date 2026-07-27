@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import ProfileForm from './ProfileForm'
 import ReviewForm from './ReviewForm'
+import Icon from '@/components/icons/Icon'
+import Stars from '@/components/Stars'
 
 export interface BookingRow {
   id: string; charterId: string; status: string; people: number; priceTotal: number
@@ -17,10 +19,10 @@ export interface ReceivedReview { id: string; authorName: string; authorAvatar: 
 interface U { name: string; phone: string; bio: string; avatar: string; email: string; avgRating: number; reviewCount: number }
 type Tab = 'reservas' | 'mensajes' | 'perfil' | 'patron'
 
-const BOOKING_STATUS: Record<string, { label: string; cls: string }> = {
+const BOOKING_STATUS: Record<string, { label: string; done?: boolean; cls: string }> = {
   requested: { label: 'Solicitada', cls: 'text-amber-700' },
-  accepted: { label: 'Aceptada ✓', cls: 'text-accent' },
-  paid: { label: 'Pagada ✓', cls: 'text-accent' },
+  accepted: { label: 'Aceptada', done: true, cls: 'text-accent' },
+  paid: { label: 'Pagada', done: true, cls: 'text-accent' },
   cancelled: { label: 'Cancelada', cls: 'text-red-700' },
 }
 
@@ -49,10 +51,10 @@ export default function AccountPanel({ user, avatarChoices, bookings, rsvps, thr
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap gap-2 border-b border-ink/10 pb-3">
-        <button onClick={() => setTab('reservas')} className={tabCls('reservas')}>🎣 Mis reservas</button>
-        <button onClick={() => setTab('mensajes')} className={tabCls('mensajes')}>💬 Mensajes{totalUnread > 0 && <span className="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 bg-red-600 text-paper text-[10px] font-bold rounded-full align-middle">{totalUnread}</span>}</button>
-        {hasOperator && <button onClick={() => setTab('patron')} className={tabCls('patron')}>⚓ Panel de patrón</button>}
-        <button onClick={() => setTab('perfil')} className={tabCls('perfil')}>👤 Mi perfil</button>
+        <button onClick={() => setTab('reservas')} className={`${tabCls('reservas')} inline-flex items-center gap-1.5`}><Icon name="rod" className="w-4 h-4" strokeWidth={1.8} />Mis reservas</button>
+        <button onClick={() => setTab('mensajes')} className={`${tabCls('mensajes')} inline-flex items-center gap-1.5`}><Icon name="message" className="w-4 h-4" strokeWidth={1.8} />Mensajes{totalUnread > 0 && <span className="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 bg-red-600 text-paper text-[10px] font-bold rounded-full align-middle">{totalUnread}</span>}</button>
+        {hasOperator && <button onClick={() => setTab('patron')} className={`${tabCls('patron')} inline-flex items-center gap-1.5`}><Icon name="anchor" className="w-4 h-4" strokeWidth={1.8} />Panel de patrón</button>}
+        <button onClick={() => setTab('perfil')} className={`${tabCls('perfil')} inline-flex items-center gap-1.5`}><Icon name="person" className="w-4 h-4" strokeWidth={1.8} />Mi perfil</button>
       </div>
       {err && <p className="text-sm text-red-700 border border-red-700/30 bg-red-700/[0.06] rounded-xl p-3">{err}</p>}
 
@@ -72,7 +74,7 @@ export default function AccountPanel({ user, avatarChoices, bookings, rsvps, thr
                       <Link href={`/charters/${b.charterId}`} className="font-bold text-ink hover:text-accent">{b.spotName}</Link>
                       <p className="text-[13px] text-ink/65 capitalize">{b.dayLabel} · {b.people} {b.people === 1 ? 'plaza' : 'plazas'} · {b.priceTotal} € · {b.operatorName}</p>
                     </div>
-                    <span className={`font-mono text-[10px] uppercase tracking-widest ${st.cls}`}>{st.label}</span>
+                    <span className={`font-mono text-[10px] uppercase tracking-widest inline-flex items-center gap-1 ${st.cls}`}>{st.done && <Icon name="checkCircle" className="w-3 h-3" strokeWidth={2.2} />}{st.label}</span>
                   </div>
                   {b.canReview && <div className="mt-1"><ReviewForm charterId={b.charterId} initialRating={b.reviewedRating} done={b.reviewedRating > 0} pending={b.reviewPending} /></div>}
                   {!b.isPast && (b.status === 'requested' || b.status === 'accepted') && (
@@ -98,7 +100,7 @@ export default function AccountPanel({ user, avatarChoices, bookings, rsvps, thr
                   <p className="text-[13px] text-ink/65 capitalize">{r.dayLabel} · {r.kind === 'llamada' ? '¿quién se apunta?' : 'quedada'}</p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className={`font-mono text-[10px] uppercase tracking-widest ${r.status === 'wait' ? 'text-amber-700' : 'text-accent'}`}>{r.status === 'wait' ? 'En lista de espera' : 'Apuntado ✓'}</span>
+                  <span className={`font-mono text-[10px] uppercase tracking-widest inline-flex items-center gap-1 ${r.status === 'wait' ? 'text-amber-700' : 'text-accent'}`}>{r.status === 'wait' ? 'En lista de espera' : <><Icon name="checkCircle" className="w-3 h-3" strokeWidth={2.2} />Apuntado</>}</span>
                   <button onClick={() => leaveMeetup(r.id)} disabled={busy === 'r' + r.id} className="text-[10px] text-red-700 hover:underline disabled:opacity-50">Salir</button>
                 </div>
               </div>
@@ -107,7 +109,7 @@ export default function AccountPanel({ user, avatarChoices, bookings, rsvps, thr
 
           {!hasOperator && (
             <div className="border border-ink/10 rounded-2xl bg-paper p-5">
-              <p className="font-display uppercase text-lg leading-none">⚓ ¿Eres patrón profesional?</p>
+              <p className="font-display uppercase text-lg leading-none inline-flex items-center gap-2"><Icon name="anchor" className="w-4 h-4" strokeWidth={1.7} />¿Eres patrón profesional?</p>
               <p className="text-sm text-ink/70 mt-1">Ofrece tus salidas, recibe reservas y cobra por adelantado. Verificamos tu licencia y seguro.</p>
               <Link href="/charters/operador" className="inline-block mt-3 bg-accent text-paper px-5 py-2.5 text-sm font-semibold rounded-full hover:bg-ink transition-colors">Darme de alta como patrón</Link>
             </div>
@@ -140,8 +142,8 @@ export default function AccountPanel({ user, avatarChoices, bookings, rsvps, thr
             <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Tu reputación como pescador</p>
             {user.reviewCount > 0 ? (
               <>
-                <p className="font-display text-2xl leading-tight mt-1 text-ink">
-                  <span className="text-amber-500">★</span> {user.avgRating.toFixed(1)}
+                <p className="font-display text-2xl leading-tight mt-1 text-ink inline-flex items-center gap-1.5">
+                  <Icon name="star" className="w-5 h-5 text-amber-500" /> {user.avgRating.toFixed(1)}
                   <span className="text-ink/60 text-base"> · {user.reviewCount} {user.reviewCount === 1 ? 'valoración' : 'valoraciones'}</span>
                 </p>
                 <div className="space-y-2 mt-3">
@@ -150,7 +152,7 @@ export default function AccountPanel({ user, avatarChoices, bookings, rsvps, thr
                       <p className="text-sm">
                         <span className="mr-1">{r.authorAvatar}</span>
                         <span className="font-bold text-ink">{r.authorName}</span>
-                        <span className="ml-2 text-amber-500">{'★'.repeat(r.rating)}<span className="text-ink/20">{'★'.repeat(5 - r.rating)}</span></span>
+                        <Stars rating={r.rating} className="w-3.5 h-3.5 ml-2" />
                       </p>
                       {r.text && <p className="text-[13px] text-ink/75 mt-0.5">{r.text}</p>}
                     </div>

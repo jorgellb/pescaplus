@@ -15,6 +15,7 @@ import { stripeConfigured, PLATFORM_FEE_PERCENT } from '@/lib/stripe'
 import { FISHING_SPOTS, getSpot } from '@/lib/fishing-spots'
 import { SEA_SPECIES } from '@/lib/fishing-species'
 import { fmtDayLabel, todayMadridISO } from '@/lib/solunar-format'
+import Icon from '@/components/icons/Icon'
 
 export const metadata: Metadata = {
   title: 'Mi cuenta',
@@ -101,8 +102,8 @@ export default async function CuentaPage({ searchParams }: { searchParams: Promi
     operatorSlot = (
       <div className="space-y-6">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <Stat label="Estado" value={owned.verified ? 'Verificado ✓' : 'Pendiente'} accent={owned.verified} />
-          <Stat label="Valoración" value={owned.reviewCount ? `★ ${owned.avgRating.toFixed(1)} (${owned.reviewCount})` : '— sin reseñas'} />
+          <Stat label="Estado" value={owned.verified ? <span className="inline-flex items-center gap-1">Verificado <Icon name="checkCircle" className="w-3.5 h-3.5" strokeWidth={2} /></span> : 'Pendiente'} accent={owned.verified} />
+          <Stat label="Valoración" value={owned.reviewCount ? <span className="inline-flex items-center gap-1"><Icon name="star" className="w-3.5 h-3.5 text-amber-500" />{owned.avgRating.toFixed(1)} ({owned.reviewCount})</span> : '— sin reseñas'} />
           <Stat label="Reservas pagadas" value={String(paidCount)} />
           <Stat label={`Tu parte (−${PLATFORM_FEE_PERCENT}%)`} value={`${net} €`} accent />
         </div>
@@ -132,7 +133,7 @@ export default async function CuentaPage({ searchParams }: { searchParams: Promi
               <p className="font-mono text-[11px] uppercase tracking-widest text-ink/60 mt-1">{user.email}</p>
             </div>
           </div>
-          {bienvenida === '1' && <p className="text-accent text-sm mt-3">✓ Sesión iniciada. ¡Bienvenido a bordo!</p>}
+          {bienvenida === '1' && <p className="text-accent text-sm mt-3 inline-flex items-center gap-1.5"><Icon name="checkCircle" className="w-4 h-4" strokeWidth={2} />Sesión iniciada. ¡Bienvenido a bordo!</p>}
         </div>
       </section>
       <section className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
@@ -152,7 +153,7 @@ export default async function CuentaPage({ searchParams }: { searchParams: Promi
   )
 }
 
-function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+function Stat({ label, value, accent }: { label: string; value: React.ReactNode; accent?: boolean }) {
   return (
     <div className={`border rounded-2xl p-3 ${accent ? 'border-accent/30 bg-accent/[0.06]' : 'border-ink/10 bg-paper'}`}>
       <p className="font-mono text-[10px] uppercase tracking-widest text-ink/60">{label}</p>

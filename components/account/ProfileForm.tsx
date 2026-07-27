@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Icon from '@/components/icons/Icon'
 
 interface U { name: string; phone: string; bio: string; avatar: string; email: string }
 
@@ -45,7 +46,7 @@ export default function ProfileForm({ user, avatarChoices }: { user: U; avatarCh
       <label className="block"><span className={L}>Sobre ti (opcional)</span>
         <textarea value={f.bio} onChange={(e) => setF((s) => ({ ...s, bio: e.target.value }))} maxLength={600} rows={3} placeholder="Tu experiencia, modalidades favoritas…" className={I} /></label>
       {state === 'error' && <p className="text-sm text-red-700">{msg}</p>}
-      {state === 'ok' && <p className="text-sm text-accent">✓ Guardado.</p>}
+      {state === 'ok' && <p className="text-sm text-accent inline-flex items-center gap-1.5"><Icon name="checkCircle" className="w-4 h-4" strokeWidth={2} />Guardado.</p>}
       <button type="submit" disabled={state === 'saving'} className="bg-accent text-paper px-5 py-2.5 text-sm font-semibold rounded-full hover:bg-ink disabled:opacity-60 transition-colors">{state === 'saving' ? 'Guardando…' : 'Guardar perfil'}</button>
     </form>
   )
