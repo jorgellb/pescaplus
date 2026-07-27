@@ -454,7 +454,7 @@ export default async function SpotDashboard({
               Hora local (España peninsular): {nowHour.hourLabel} · previsión actualizada {forecast.meta.fetchedAt ? fmtTime(forecast.meta.fetchedAt) : '—'}
             </p>
           )}
-          <div className="flex flex-wrap items-center gap-3 mt-4">
+          <div className="flex flex-wrap items-center gap-3 mt-4 print:hidden">
             <Link
               href={`/mejores-horas/${s.slug}/plan${especie || modo ? `?${new URLSearchParams({ ...(especie ? { especie } : {}), ...(modo ? { modo } : {}) })}` : ''}`}
               className="inline-flex items-center gap-2 bg-ink text-paper px-4 py-2.5 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift hover:bg-accent hover:border-accent"
@@ -511,7 +511,7 @@ export default async function SpotDashboard({
       </section>
 
       {/* In-page sticky nav */}
-      <nav className="sticky top-16 z-40 bg-paper/95 backdrop-blur-sm border-b border-ink/10" aria-label="Secciones de la previsión">
+      <nav className="sticky top-16 z-40 bg-paper/95 backdrop-blur-sm border-b border-ink/10 print:hidden" aria-label="Secciones de la previsión">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex gap-1.5 overflow-x-auto py-2 scrollbar-none">
           {SECTIONS.map((sec) => (
             <a
@@ -558,7 +558,7 @@ export default async function SpotDashboard({
 
         {/* Modality + species selectors (sea only) */}
         {s.type === 'mar' && (
-          <div className="border border-ink/10 rounded-2xl bg-paper p-4 space-y-4">
+          <div className="border border-ink/10 rounded-2xl bg-paper p-4 space-y-4 print:hidden">
             <div className="space-y-2">
               <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60">¿Desde dónde pescas?</p>
               <div className="flex flex-wrap gap-2">
@@ -604,7 +604,7 @@ export default async function SpotDashboard({
 
         {/* NOW dashboard */}
         {nowHour ? (
-          <div id="ahora" className="grid grid-cols-1 lg:grid-cols-3 gap-6 scroll-mt-28">
+          <div id="ahora" className="grid grid-cols-1 lg:grid-cols-3 print:grid-cols-1 gap-6 scroll-mt-28">
             <div className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-6 flex flex-col justify-between">
               <div className="flex items-center justify-between gap-3 border-b border-ink/[0.07] pb-4">
                 <h2 className="font-display uppercase text-2xl text-ink leading-none">Ahora</h2>
@@ -754,7 +754,7 @@ export default async function SpotDashboard({
         )}
 
         {/* Live wind/rain/wave map — animated, third-party (Windy), purely visual/orientative layer on top of our own scored forecast. */}
-        <div id="mapa-vivo" className="space-y-3 scroll-mt-28">
+        <div id="mapa-vivo" className="space-y-3 scroll-mt-28 print:hidden">
           <h2 className="font-display uppercase text-2xl text-ink leading-none border-b border-ink/[0.07] pb-3 flex items-center gap-2">
             <Icon name="wind" className="w-5 h-5" strokeWidth={1.7} /> Mapa en vivo
           </h2>
@@ -764,7 +764,7 @@ export default async function SpotDashboard({
 
         {/* Qué buscar hoy — species intelligence from season + live conditions */}
         {speciesPicks.length > 0 && (
-          <div id="especies" className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-6 space-y-4 scroll-mt-28">
+          <div id="especies" className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-6 space-y-4 scroll-mt-28 print:hidden">
             <div className="flex items-center justify-between gap-3 border-b border-ink/[0.07] pb-4">
               <h2 className="font-display uppercase text-2xl text-ink leading-none flex items-center gap-2"><Icon name="target" className="w-5 h-5" strokeWidth={1.8} /> Qué buscar hoy</h2>
               <Link href="/especies" className="text-[11px] font-semibold text-accent hover:underline whitespace-nowrap">Todas las fichas →</Link>
@@ -801,11 +801,13 @@ export default async function SpotDashboard({
         )}
 
         {/* Lo que ninguna previsión sabe: qué está entrando de verdad aquí. */}
-        <SpotCatchActivity activity={await getSpotActivity(s.slug)} spotName={s.name} />
+        <div className="print:hidden">
+          <SpotCatchActivity activity={await getSpotActivity(s.slug)} spotName={s.name} />
+        </div>
 
         {/* 7-day hourly forecast with day selector */}
         {byDay.length > 0 && (
-          <div id="prevision" className="space-y-3 scroll-mt-28">
+          <div id="prevision" className="space-y-3 scroll-mt-28 print:hidden">
             <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3">Previsión hora a hora · 7 días</h2>
             <p className="text-[12px] text-ink/60">Elige el día. «Activ.» es la actividad prevista de los peces{species.id !== 'general' ? ` (adaptada a ${species.name})` : ''} y «Cond.» las condiciones para {modality.name.toLowerCase()}; verde = mejor. Desliza la tabla para ver todas las horas.</p>
             <DayTabs labels={byDay.map((g, i) => (
@@ -938,7 +940,7 @@ export default async function SpotDashboard({
 
         {/* Gear for current conditions */}
         {gearTips.length > 0 && (
-          <div id="equipo" className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-6 space-y-4 scroll-mt-28">
+          <div id="equipo" className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-6 space-y-4 scroll-mt-28 print:hidden">
             <h2 className="font-display uppercase text-2xl text-ink leading-none border-b border-ink/[0.07] pb-4 flex items-center gap-2">
               <Icon name="package" className="w-5 h-5" strokeWidth={1.7} /> Equipo para estas condiciones
             </h2>
@@ -961,13 +963,10 @@ export default async function SpotDashboard({
             <Icon name="lifejacket" className="w-5 h-5" strokeWidth={1.7} /> Antes de zarpar
           </h2>
           {alerts.length > 0 && (
-            <div className="space-y-2">
-              {alerts.map((a, i) => (
-                <p key={i} className={`text-sm font-semibold rounded-xl border px-3.5 py-2.5 inline-flex items-start gap-2 w-full ${a.level === 'peligro' ? 'border-red-700/40 bg-red-700/[0.07] text-red-900' : 'border-amber-600/40 bg-amber-500/[0.08] text-amber-900'}`}>
-                  <Icon name={a.level === 'peligro' ? 'ban' : 'warning'} className="w-4 h-4 shrink-0 mt-0.5" strokeWidth={2} />{a.text}
-                </p>
-              ))}
-            </div>
+            <p className={`text-sm font-semibold rounded-xl border px-3.5 py-2.5 inline-flex items-start gap-2 w-full ${alerts.some((a) => a.level === 'peligro') ? 'border-red-700/40 bg-red-700/[0.07] text-red-900' : 'border-amber-600/40 bg-amber-500/[0.08] text-amber-900'}`}>
+              <Icon name={alerts.some((a) => a.level === 'peligro') ? 'ban' : 'warning'} className="w-4 h-4 shrink-0 mt-0.5" strokeWidth={2} />
+              Hay avisos activos para hoy (arriba en esta misma página) — revísalos antes de zarpar.
+            </p>
           )}
           {todayOuting && (
             <div className="border border-ink/10 rounded-xl bg-paper p-4 flex flex-wrap items-center gap-x-6 gap-y-2">
@@ -998,7 +997,7 @@ export default async function SpotDashboard({
         {/* Tus propias capturas compartidas en esta zona — no confundir con
             SpotCatchActivity, que es el agregado de toda la comunidad. */}
         {userCatches && (
-          <div className="border border-ink/[0.07] rounded-2xl bg-paper p-5 space-y-2">
+          <div className="border border-ink/[0.07] rounded-2xl bg-paper p-5 space-y-2 print:hidden">
             <p className="font-display uppercase text-lg leading-none inline-flex items-center gap-2">
               <Icon name="fish" className="w-4 h-4" strokeWidth={1.8} />Tus capturas en esta zona
             </p>
@@ -1014,13 +1013,13 @@ export default async function SpotDashboard({
         )}
 
         {/* Private field notes — the section itself handles the logged-out state */}
-        <div id="notas" className="scroll-mt-28">
+        <div id="notas" className="scroll-mt-28 print:hidden">
           <SpotNotes spotSlug={s.slug} loggedIn={!!user} />
         </div>
 
         {/* Regulations — honest: official links, never invented bylaws */}
         {s.type === 'mar' && regulation && (
-          <div id="normativa" className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-6 space-y-4 scroll-mt-28">
+          <div id="normativa" className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-6 space-y-4 scroll-mt-28 print:hidden">
             <h2 className="font-display uppercase text-2xl text-ink leading-none border-b border-ink/[0.07] pb-4 flex items-center gap-2">
               <Icon name="book" className="w-5 h-5" strokeWidth={1.7} /> ¿Puedo pescar aquí? Normativa en {s.region}
             </h2>
@@ -1061,7 +1060,7 @@ export default async function SpotDashboard({
         )}
 
         {/* Sun & moon */}
-        <div id="sol-luna" className="grid grid-cols-1 lg:grid-cols-3 gap-6 scroll-mt-28">
+        <div id="sol-luna" className="grid grid-cols-1 lg:grid-cols-3 gap-6 scroll-mt-28 print:hidden">
           <div className="lg:col-span-2 border border-ink/10 rounded-2xl bg-paper shadow-hard p-6 space-y-4">
             <h2 className="font-display uppercase text-2xl text-ink leading-none border-b border-ink/[0.07] pb-4">Sol, luna y solunar</h2>
             <div>
@@ -1098,7 +1097,7 @@ export default async function SpotDashboard({
         </div>
 
         {/* 7-day outlook */}
-        <div className="space-y-4">
+        <div className="space-y-4 print:hidden">
           <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3">Próximos 7 días</h2>
           {bestStreak && (
             <p className="inline-flex items-center gap-2 rounded-xl border border-accent/30 bg-accent/[0.06] px-3.5 py-2 text-sm">
@@ -1136,7 +1135,7 @@ export default async function SpotDashboard({
 
         {/* Official AEMET coastal bulletin */}
         {aemet?.available && (
-          <div id="aemet" className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-6 space-y-4 scroll-mt-28">
+          <div id="aemet" className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-6 space-y-4 scroll-mt-28 print:hidden">
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-ink/[0.07] pb-4">
               <h2 className="font-display uppercase text-2xl text-ink leading-none flex items-center gap-2">
                 <Icon name="building" className="w-5 h-5" strokeWidth={1.7} /> El parte oficial de AEMET
@@ -1167,7 +1166,7 @@ export default async function SpotDashboard({
 
         {/* Local editorial guide — the unique content layer of each zone */}
         {guide && (
-          <div id="guia" className="border-t-2 border-ink pt-8 space-y-6 scroll-mt-28">
+          <div id="guia" className="border-t-2 border-ink pt-8 space-y-6 scroll-mt-28 print:hidden">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <h2 className="font-display uppercase text-3xl md:text-4xl leading-none text-ink">Pescar en {s.name}: la guía local</h2>
               <span className="font-mono text-[10px] uppercase tracking-widest text-ink/35">Guía orientativa · revisada {new Date(guide.generatedAt).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}</span>
@@ -1201,7 +1200,7 @@ export default async function SpotDashboard({
         )}
 
         {/* SEO copy + internal links */}
-        <div className="border-t border-ink/[0.07] pt-8 space-y-3 text-[15px] text-ink/80 leading-relaxed">
+        <div className="border-t border-ink/[0.07] pt-8 space-y-3 text-[15px] text-ink/80 leading-relaxed print:hidden">
           <h2 className="font-display uppercase text-2xl text-ink">Cómo leer la previsión de pesca de {s.name}</h2>
           <p>
             La <strong>puntuación de pesca</strong> combina la teoría solunar (posición de la luna), el viento, la tendencia de
@@ -1218,18 +1217,24 @@ export default async function SpotDashboard({
         </div>
 
         {/* "Voy hoy" — lightweight social signal, separate from a full quedada */}
-        <WhosGoingToday spotSlug={s.slug} loggedIn={!!user} />
+        <div className="print:hidden">
+          <WhosGoingToday spotSlug={s.slug} loggedIn={!!user} />
+        </div>
 
         {/* Quedadas de pesca en esta zona — streamed so it never blocks the forecast */}
-        <Suspense fallback={null}>
-          <ZoneMeetups spotSlug={s.slug} spotName={s.name} />
-        </Suspense>
+        <div className="print:hidden">
+          <Suspense fallback={null}>
+            <ZoneMeetups spotSlug={s.slug} spotName={s.name} />
+          </Suspense>
+        </div>
 
         {/* Window alerts by email */}
-        <AlertSignup spotSlug={s.slug} spotName={s.name} isSea={s.type === 'mar'} />
+        <div className="print:hidden">
+          <AlertSignup spotSlug={s.slug} spotName={s.name} isSea={s.type === 'mar'} />
+        </div>
 
         {/* Nearby zones — true nearest by distance */}
-        <div className="border-t border-ink/[0.07] pt-8">
+        <div className="border-t border-ink/[0.07] pt-8 print:hidden">
           <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60 mb-3">Zonas cercanas</p>
           <div className="flex flex-wrap gap-2">
             {nearby.map((o) => (
