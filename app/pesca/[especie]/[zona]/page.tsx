@@ -11,6 +11,7 @@ import { getZoneClimate, CLIMATE_YEARS } from '@/lib/zone-climate'
 import { getRegulation, NATIONAL_SIZES_URL } from '@/lib/fishing-regulations'
 import { getTaxonomy, categoryName } from '@/lib/taxonomy-store'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
+import { safeJsonLd } from '@/lib/json-ld'
 
 export const revalidate = 86400
 
@@ -104,8 +105,8 @@ export default async function SpeciesZonePage({ params }: Params) {
 
   return (
     <Layout>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(faqLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }} />
 
       <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Space_Mono } from "next/font/google";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import "./globals.css";
+import { safeJsonLd } from '@/lib/json-ld'
 
 // One text face for body AND headings: the condensed display face (Oswald) was
 // what made every page read like a sports poster, so it's gone — one less font
@@ -87,7 +88,7 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${grotesk.variable} ${mono.variable}`}>
       <body>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(orgJsonLd) }} />
         {children}
         <ServiceWorkerRegister />
       </body>

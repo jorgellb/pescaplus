@@ -3,6 +3,7 @@ import { getUserFromRequest } from '@/lib/auth'
 import { listWaypoints } from '@/lib/waypoints-store'
 import { toGPX } from '@/lib/gpx'
 import { toCSV, toKML } from '@/lib/marks-io'
+import { rateLimit, clientIp } from '@/lib/rate-limit'
 
 const TIPOS: Record<string, { mime: string; ext: string }> = {
   gpx: { mime: 'application/gpx+xml', ext: 'gpx' },
@@ -12,6 +13,8 @@ const TIPOS: Record<string, { mime: string; ext: string }> = {
 
 /** Las marcas propias en el formato que pida el aparato de destino. */
 export async function GET(request: NextRequest) {
+  const limit = rateLimit(`export:${clientIp(request)}`, 30, 60 * 60_000)
+  if (!limit.ok) return NextResponse.json({ success: false, error: 'Demasiadas descargas seguidas.' }, { status: 429 })
   const user = await getUserFromRequest(request)
   if (!user) return NextResponse.json({ success: false, error: 'Inicia sesión.' }, { status: 401 })
 

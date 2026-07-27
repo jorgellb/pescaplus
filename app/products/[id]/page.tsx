@@ -13,6 +13,7 @@ import { resolveProduct, relatedProducts } from '@/lib/product-service'
 import { renderDescription } from '@/lib/markdown'
 import { CATALOG } from '@/lib/catalog'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
+import { safeJsonLd } from '@/lib/json-ld'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -144,9 +145,9 @@ export default async function ProductPage({ params }: Params) {
 
   return (
     <Layout>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(faqLd) }} />
       <RecentTracker {...snapshot} />
       <div className="max-w-7xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
         <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/60 mb-8">

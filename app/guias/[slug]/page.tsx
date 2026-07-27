@@ -8,6 +8,7 @@ import { fishingLabel } from '@/lib/fishing'
 import { renderDescription } from '@/lib/markdown'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
 import { proxiedImage, absoluteProxiedImage } from '@/lib/img-proxy'
+import { safeJsonLd } from '@/lib/json-ld'
 
 type Params = { params: Promise<{ slug: string }> }
 
@@ -64,8 +65,8 @@ export default async function GuidePage({ params }: Params) {
 
   return (
     <Layout>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }} />
 
       <article className="max-w-3xl mx-auto px-4 py-12 sm:px-6">
         <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/60 mb-6">

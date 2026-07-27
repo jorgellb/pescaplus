@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getUserFromRequest } from '@/lib/auth'
 import { listUserCatchesWithContext } from '@/lib/catch-reports'
 import { patrones, MIN_MUESTRAS } from '@/lib/catch-patterns'
+import { rateLimit, clientIp } from '@/lib/rate-limit'
 
 /**
  * Con qué condiciones pican TUS especies.
@@ -10,6 +11,8 @@ import { patrones, MIN_MUESTRAS } from '@/lib/catch-patterns'
  * marea sales. No hay listado global ni forma de ver el de nadie más.
  */
 export async function GET(request: NextRequest) {
+  const limit = rateLimit(`patrones:${clientIp(request)}`, 60, 60 * 60_000)
+  if (!limit.ok) return NextResponse.json({ success: false, error: 'Demasiadas consultas.' }, { status: 429 })
   const user = await getUserFromRequest(request)
   if (!user) return NextResponse.json({ success: false, error: 'Inicia sesión.' }, { status: 401 })
 

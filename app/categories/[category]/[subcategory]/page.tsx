@@ -9,6 +9,7 @@ import { listProducts } from '@/lib/products-store'
 import { getTrendingRanked } from '@/lib/trending'
 import { getTaxonomy, categoryName, subcategoriesOf } from '@/lib/taxonomy-store'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
+import { safeJsonLd } from '@/lib/json-ld'
 
 type Params = { params: Promise<{ category: string; subcategory: string }> }
 
@@ -71,7 +72,7 @@ export default async function SubcategoryPage({ params }: Params) {
 
   return (
     <Layout>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }} />
 
       <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">

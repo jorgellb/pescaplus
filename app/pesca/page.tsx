@@ -5,6 +5,7 @@ import { SEA_SPECIES, MONTHS_SHORT } from '@/lib/fishing-species'
 import { zonesForSpecies, allSpeciesZonePairs } from '@/lib/species-zones'
 import { FISHING_SPOTS } from '@/lib/fishing-spots'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
+import { safeJsonLd } from '@/lib/json-ld'
 
 export const revalidate = 86400
 
@@ -105,8 +106,8 @@ export default function PescaHub() {
 
   return (
     <Layout>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(listLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(faqLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(listLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{
         __html: JSON.stringify(breadcrumbJsonLd([
           { name: 'Inicio', url: SITE_URL },

@@ -9,6 +9,7 @@ import { getRoundup, roundupSlugs, ROUNDUP_YEAR } from '@/lib/roundups'
 import { getFishingType } from '@/lib/fishing'
 import { SITE_URL, absoluteUrl, breadcrumbJsonLd } from '@/lib/seo'
 import { absoluteProxiedImage } from '@/lib/img-proxy'
+import { safeJsonLd } from '@/lib/json-ld'
 
 type Params = { params: Promise<{ slug: string }> }
 
@@ -85,9 +86,9 @@ export default async function RoundupPage({ params }: Params) {
 
   return (
     <Layout>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(itemListLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(faqLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }} />
 
       {/* HERO */}
       <section className="bg-paper border-b border-ink/[0.07]">

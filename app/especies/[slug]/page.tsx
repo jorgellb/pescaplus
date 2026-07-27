@@ -7,6 +7,7 @@ import { zonesForSpecies } from '@/lib/species-zones'
 import { getTaxonomy, categoryName } from '@/lib/taxonomy-store'
 import { NATIONAL_SIZES_URL } from '@/lib/fishing-regulations'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
+import { safeJsonLd } from '@/lib/json-ld'
 
 export const revalidate = 86400
 
@@ -57,7 +58,7 @@ export default async function SpeciesPage({ params }: Params) {
 
   return (
     <Layout>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }} />
 
       <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10">

@@ -12,6 +12,7 @@ import { getTrendingProducts } from '@/lib/trending'
 import { getRoundupPreviews } from '@/lib/roundups'
 import { getTaxonomy, categoryName } from '@/lib/taxonomy-store'
 import { proxiedImage } from '@/lib/img-proxy'
+import { safeJsonLd } from '@/lib/json-ld'
 
 export const metadata: Metadata = {
   title: { absolute: 'PescaPlus | Tienda de pesca online en España al mejor precio' },
@@ -81,7 +82,7 @@ export default async function Home() {
 
   return (
     <Layout>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(faqLd) }} />
 
       {/* HERO */}
       <section className="bg-paper border-b border-ink/[0.07]">

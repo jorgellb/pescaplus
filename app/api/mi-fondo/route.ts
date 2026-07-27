@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getUserFromRequest } from '@/lib/auth'
 import { listTracks } from '@/lib/tracks-store'
 import { toGrid, CSB_DISCLAIMER, type Sounding } from '@/lib/csb'
+import { rateLimit, clientIp } from '@/lib/rate-limit'
 
 /**
  * El fondo medido por TI: las sondas de tus propias derrotas, agregadas.
@@ -14,6 +15,8 @@ import { toGrid, CSB_DISCLAIMER, type Sounding } from '@/lib/csb'
  * agrupar.
  */
 export async function GET(request: NextRequest) {
+  const limit = rateLimit(`mifondo:${clientIp(request)}`, 120, 60 * 60_000)
+  if (!limit.ok) return NextResponse.json({ success: false, error: 'Demasiadas consultas.' }, { status: 429 })
   const user = await getUserFromRequest(request)
   if (!user) return NextResponse.json({ success: false, error: 'Inicia sesión.' }, { status: 401 })
 
