@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { proxiedImage } from '@/lib/img-proxy'
+import Icon from '@/components/icons/Icon'
 
 interface ProductImageProps {
   src: string
@@ -35,9 +36,9 @@ export default function ProductImage({
       <div
         role="img"
         aria-label={alt}
-        className="absolute inset-0 flex items-center justify-center bg-ink/[0.05] text-5xl select-none"
+        className="absolute inset-0 flex items-center justify-center bg-ink/[0.05] select-none"
       >
-        <span className="opacity-25">🎣</span>
+        <Icon name="image" className="w-10 h-10 opacity-25" strokeWidth={1.4} />
       </div>
     )
   }

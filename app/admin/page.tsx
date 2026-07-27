@@ -5,6 +5,7 @@ import type { Product } from '@/types'
 import { fishingLabel } from '@/lib/fishing'
 import ProductImage from '@/components/ProductImage'
 import ProductEditor from '@/components/admin/ProductEditor'
+import Icon, { type IconName } from '@/components/icons/Icon'
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
@@ -166,16 +167,16 @@ export default function AdminProductsPage() {
           onClick={() => setCreating(true)}
           className="inline-flex items-center gap-2 bg-ink text-paper hover:bg-accent font-extrabold text-sm px-5 py-2.5 rounded-xl shadow-md  active:scale-[0.98] transition-all"
         >
-          <span className="text-base leading-none">＋</span> Nuevo producto
+          <Icon name="plus" className="w-4 h-4" strokeWidth={2.2} /> Nuevo producto
         </button>
       </div>
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Productos" value={String(stats.total)} icon="📦" />
-        <StatCard label="Modalidades" value={String(stats.categories)} icon="🎯" />
-        <StatCard label="SEO optimizado" value={`${stats.optimized}/${stats.total}`} icon="✨" />
-        <StatCard label="Precio medio" value={`${stats.avgPrice.toFixed(2)} €`} icon="💶" />
+        <StatCard label="Productos" value={String(stats.total)} icon="package" />
+        <StatCard label="Modalidades" value={String(stats.categories)} icon="target" />
+        <StatCard label="SEO optimizado" value={`${stats.optimized}/${stats.total}`} icon="sparkles" />
+        <StatCard label="Precio medio" value={`${stats.avgPrice.toFixed(2)} €`} icon="euro" />
       </div>
 
       {backend && (
@@ -240,7 +241,7 @@ export default function AdminProductsPage() {
               disabled={!!bulk || selected.size === 0}
               className="inline-flex items-center gap-2 bg-ink text-paper hover:bg-accent font-extrabold text-sm px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
-              {bulk ? `Optimizando… ${bulk.done}/${bulk.total}` : `✨ Pulir SEO (${selected.size})`}
+              {bulk ? `Optimizando… ${bulk.done}/${bulk.total}` : <><Icon name="sparkles" className="w-4 h-4" strokeWidth={1.8} />Pulir SEO ({selected.size})</>}
             </button>
           </div>
         </div>
@@ -295,7 +296,7 @@ export default function AdminProductsPage() {
                         <p className="font-semibold text-ink truncate max-w-[280px]">{p.title}</p>
                         <div className="flex items-center gap-2 mt-0.5">
                           {p.aiOptimized ? (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-accent bg-accent/10 border border-accent/30 px-1.5 py-0.5 rounded">✓ Optimizado</span>
+                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-accent bg-accent/10 border border-accent/30 px-1.5 py-0.5 rounded"><Icon name="checkCircle" className="w-2.5 h-2.5" strokeWidth={2.2} />Optimizado</span>
                           ) : (
                             <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-700 bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 rounded">Sin optimizar</span>
                           )}
@@ -312,8 +313,8 @@ export default function AdminProductsPage() {
                   <td className="px-4 py-3 font-bold text-accent">
                     {p.price.toFixed(2)} <span className="text-xs text-ink/60 font-medium">{p.currency}</span>
                   </td>
-                  <td className="px-4 py-3 text-ink/80">
-                    <span className="text-amber-400">★</span> {p.rating.toFixed(1)}{' '}
+                  <td className="px-4 py-3 text-ink/80 inline-flex items-center gap-1">
+                    <Icon name="star" className="w-3 h-3 text-amber-400" /> {p.rating.toFixed(1)}{' '}
                     <span className="text-xs text-ink/60">({p.reviews})</span>
                   </td>
                   <td className="px-4 py-3">
@@ -346,10 +347,10 @@ export default function AdminProductsPage() {
   )
 }
 
-function StatCard({ label, value, icon }: { label: string; value: string; icon: string }) {
+function StatCard({ label, value, icon }: { label: string; value: string; icon: IconName }) {
   return (
     <div className="rounded-2xl border border-ink/10 bg-white p-4 flex items-center gap-3">
-      <span className="text-2xl p-2.5 bg-paper rounded-xl border border-ink/10">{icon}</span>
+      <span className="p-2.5 bg-paper rounded-xl border border-ink/10 text-accent"><Icon name={icon} className="w-5 h-5" strokeWidth={1.7} /></span>
       <div>
         <p className="text-xl font-extrabold text-ink leading-none">{value}</p>
         <p className="text-[11px] uppercase tracking-widest text-ink/60 mt-1">{label}</p>

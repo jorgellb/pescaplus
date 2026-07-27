@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import type { Guide } from '@/types'
 import { FISHING_TYPES } from '@/lib/fishing'
 import { renderDescription } from '@/lib/markdown'
+import Icon from '@/components/icons/Icon'
 
 interface GuideEditorProps {
   initial: Guide | null
@@ -177,19 +178,19 @@ export default function GuideEditor({ initial, onClose, onSaved }: GuideEditorPr
       <div className="w-full max-w-3xl my-4 bg-white border border-ink/10 rounded-xl shadow-hard-lg" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-ink/[0.07] sticky top-0 bg-white z-10">
           <h2 className="font-display uppercase text-xl text-ink">{initial ? 'Editar guía' : 'Nueva guía'}</h2>
-          <button onClick={onClose} className="text-ink/60 hover:text-ink text-xl">✕</button>
+          <button onClick={onClose} className="text-ink/60 hover:text-ink"><Icon name="close" className="w-5 h-5" strokeWidth={2} /></button>
         </div>
 
         <div className="p-6 space-y-6">
           <div className="border-2 border-accent/30 bg-accent/5 p-4 space-y-3">
             <div className="flex items-center gap-2 text-accent">
-              <span className="text-lg">🤖</span>
+              <Icon name="robot" className="w-5 h-5" strokeWidth={1.7} />
               <span className="text-xs font-bold uppercase tracking-widest">Generar con IA</span>
             </div>
             <div className="flex flex-col sm:flex-row gap-2">
               <input value={aiTopic} onChange={(e) => setAiTopic(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && generateWithAI()} placeholder="Ej: cómo elegir tu primer carrete de spinning" className={field} />
               <button onClick={generateWithAI} disabled={aiLoading || !aiTopic.trim()} className="whitespace-nowrap bg-ink text-paper hover:bg-accent font-bold text-sm px-4 py-2.5 transition-colors disabled:opacity-40">
-                {aiLoading ? 'Generando…' : 'Generar ✨'}
+                {aiLoading ? 'Generando…' : <>Generar <Icon name="sparkles" className="w-3.5 h-3.5 inline -mt-0.5" strokeWidth={1.8} /></>}
               </button>
             </div>
 
@@ -261,8 +262,8 @@ export default function GuideEditor({ initial, onClose, onSaved }: GuideEditorPr
                 <div className="flex flex-wrap gap-1.5">
                   <button onClick={() => surround('**', '**', 'Título de sección')} className="px-2.5 py-1 text-xs font-bold border border-ink/25 bg-paper hover:bg-ink/5">B</button>
                   <button onClick={() => surround('_', '_', 'cursiva')} className="px-2.5 py-1 text-xs italic border border-ink/25 bg-paper hover:bg-ink/5">i</button>
-                  <button onClick={() => surround('[', '](https://)', 'texto')} className="px-2.5 py-1 text-xs border border-ink/25 bg-paper hover:bg-ink/5">🔗 Enlace</button>
-                  <button onClick={() => surround('\n![', '](https://)\n', 'texto alt de la imagen')} className="px-2.5 py-1 text-xs border border-ink/25 bg-paper hover:bg-ink/5">🖼️ Imagen</button>
+                  <button onClick={() => surround('[', '](https://)', 'texto')} className="px-2.5 py-1 text-xs border border-ink/25 bg-paper hover:bg-ink/5 inline-flex items-center gap-1"><Icon name="link" className="w-3 h-3" strokeWidth={2} />Enlace</button>
+                  <button onClick={() => surround('\n![', '](https://)\n', 'texto alt de la imagen')} className="px-2.5 py-1 text-xs border border-ink/25 bg-paper hover:bg-ink/5 inline-flex items-center gap-1"><Icon name="image" className="w-3 h-3" strokeWidth={2} />Imagen</button>
                 </div>
                 <textarea ref={contentRef} value={form.content} onChange={(e) => set('content', e.target.value)} rows={12} className={`${field} resize-y font-mono text-xs leading-relaxed`} />
               </>

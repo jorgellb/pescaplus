@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Icon from '@/components/icons/Icon'
 
 interface Sub {
   id: string
@@ -141,7 +142,7 @@ export default function TaxonomyAdminPage() {
                   />
                   <button onClick={() => moveSub(c.id, i, -1)} disabled={i === 0} className="w-6 h-7 flex-shrink-0 rounded bg-white border border-ink/10 text-ink/60 hover:text-ink disabled:opacity-30 text-xs">↑</button>
                   <button onClick={() => moveSub(c.id, i, 1)} disabled={i === c.subcategories.length - 1} className="w-6 h-7 flex-shrink-0 rounded bg-white border border-ink/10 text-ink/60 hover:text-ink disabled:opacity-30 text-xs">↓</button>
-                  <button onClick={() => removeSub(c.id, i)} className="w-6 h-7 flex-shrink-0 rounded bg-white border border-red-200 text-red-500 hover:bg-red-50 text-xs">✕</button>
+                  <button onClick={() => removeSub(c.id, i)} className="w-6 h-7 flex-shrink-0 rounded bg-white border border-red-200 text-red-500 hover:bg-red-50 flex items-center justify-center"><Icon name="close" className="w-3 h-3" strokeWidth={2.2} /></button>
                 </div>
               ))}
             </div>

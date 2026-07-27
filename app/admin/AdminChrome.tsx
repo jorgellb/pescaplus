@@ -2,16 +2,17 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import Icon, { type IconName } from '@/components/icons/Icon'
 
-const NAV = [
-  { href: '/admin', label: 'Productos', icon: '📦' },
-  { href: '/admin/taxonomia', label: 'Taxonomía', icon: '🗂️' },
-  { href: '/admin/import', label: 'Importar IA', icon: '🛒' },
-  { href: '/admin/guides', label: 'Guías', icon: '📝' },
-  { href: '/admin/analytics', label: 'Analítica', icon: '📊' },
-  { href: '/admin/mensajes', label: 'Mensajes', icon: '✉️' },
-  { href: '/admin/operadores', label: 'Operadores', icon: '⚓' },
-  { href: '/admin/settings', label: 'Configuración', icon: '⚙️' },
+const NAV: { href: string; label: string; icon: IconName }[] = [
+  { href: '/admin', label: 'Productos', icon: 'package' },
+  { href: '/admin/taxonomia', label: 'Taxonomía', icon: 'folder' },
+  { href: '/admin/import', label: 'Importar IA', icon: 'cart' },
+  { href: '/admin/guides', label: 'Guías', icon: 'notepad' },
+  { href: '/admin/analytics', label: 'Analítica', icon: 'chartBar' },
+  { href: '/admin/mensajes', label: 'Mensajes', icon: 'mail' },
+  { href: '/admin/operadores', label: 'Operadores', icon: 'anchor' },
+  { href: '/admin/settings', label: 'Configuración', icon: 'gear' },
 ]
 
 export default function AdminChrome({
@@ -35,7 +36,7 @@ export default function AdminChrome({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-6">
             <Link href="/admin" className="flex items-center gap-2">
-              <span className="text-2xl">🎣</span>
+              <Icon name="rod" className="w-6 h-6" strokeWidth={1.6} />
               <span className="font-black tracking-tight text-ink">
                 PescaPlus <span className="text-accent">Admin</span>
               </span>
@@ -53,7 +54,7 @@ export default function AdminChrome({
                         : 'text-ink/80 hover:text-ink hover:bg-white/5 border border-transparent'
                     }`}
                   >
-                    <span className="mr-1.5">{item.icon}</span>
+                    <Icon name={item.icon} className="w-4 h-4 inline-block mr-1.5 -mt-0.5" strokeWidth={1.8} />
                     {item.label}
                   </Link>
                 )
@@ -101,8 +102,8 @@ export default function AdminChrome({
       </header>
 
       {usingDefaultPassword && (
-        <div className="bg-amber-500/10 border-b border-amber-500/20 text-amber-300 text-xs text-center py-2 px-4">
-          ⚠️ Estás usando la contraseña de administración por defecto. Define{' '}
+        <div className="bg-amber-500/10 border-b border-amber-500/20 text-amber-300 text-xs text-center py-2 px-4 inline-flex items-center justify-center gap-1.5 w-full">
+          <Icon name="warning" className="w-3.5 h-3.5 shrink-0" strokeWidth={2} />Estás usando la contraseña de administración por defecto. Define{' '}
           <code className="font-mono font-bold">ADMIN_PASSWORD</code> antes de desplegar en producción.
         </div>
       )}

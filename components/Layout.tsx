@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Navbar from './Navbar'
 import ChatWidget from './ChatWidget'
 import { NAV_SECTIONS } from '@/lib/nav'
+import Icon from '@/components/icons/Icon'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -26,7 +27,7 @@ export default function Layout({ children }: LayoutProps) {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
             <div className="lg:col-span-3 space-y-4">
               <Link href="/" className="inline-flex items-center gap-2">
-                <span className="text-2xl">🎣</span>
+                <Icon name="rod" className="w-6 h-6" strokeWidth={1.6} />
                 <span className="font-display text-2xl tracking-tight text-ink">Pesca<span className="text-accent">Plus</span></span>
               </Link>
               <p className="text-sm text-ink/60 max-w-sm leading-relaxed">

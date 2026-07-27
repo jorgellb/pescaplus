@@ -97,7 +97,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between gap-4 h-16">
           <Link href="/" className="flex items-center gap-2 shrink-0 group">
-            <span className="text-2xl">🎣</span>
+            <Icon name="rod" className="w-6 h-6" strokeWidth={1.6} />
             <span className="font-display text-2xl tracking-tight text-ink group-hover:text-accent transition-colors">
               Pesca<span className="text-accent group-hover:text-ink transition-colors">Plus</span>
             </span>
@@ -134,7 +134,7 @@ export default function Navbar() {
                 aria-label="Buscar productos"
                 className="w-40 lg:w-56 pl-9 pr-3 py-2 bg-ink/[0.04] border border-transparent rounded-full text-ink placeholder-ink/60 text-sm focus:outline-none focus:bg-paper focus:border-accent/50 transition-colors"
               />
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/60 text-sm pointer-events-none">🔍</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/60 pointer-events-none"><Icon name="search" className="w-4 h-4" strokeWidth={2} /></span>
             </form>
 
             <Link href="/favoritos" aria-label={`Favoritos${favCount > 0 ? ` (${favCount})` : ''}`}
@@ -274,8 +274,8 @@ export default function Navbar() {
                 {account ? `${account.avatar} Mi cuenta` : 'Entrar'}
               </Link>
               <Link href="/advice" onClick={(e) => { if (openAsesor()) e.preventDefault() }}
-                className="col-span-2 text-center px-4 py-3 bg-accent text-paper font-semibold text-sm rounded-full">
-                🎣 Asesor de pesca
+                className="col-span-2 text-center px-4 py-3 bg-accent text-paper font-semibold text-sm rounded-full inline-flex items-center justify-center gap-1.5">
+                <Icon name="rod" className="w-4 h-4" strokeWidth={1.8} />Asesor de pesca
               </Link>
             </div>
           </div>

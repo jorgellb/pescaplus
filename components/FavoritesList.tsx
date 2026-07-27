@@ -5,6 +5,7 @@ import Link from 'next/link'
 import ProductImage from '@/components/ProductImage'
 import FavoriteButton from '@/components/FavoriteButton'
 import { getFavorites, onFavoritesChanged, type ProductSnapshot } from '@/lib/product-history'
+import Icon from '@/components/icons/Icon'
 
 export default function FavoritesList() {
   const [items, setItems] = useState<ProductSnapshot[] | null>(null)
@@ -22,7 +23,7 @@ export default function FavoritesList() {
   if (items.length === 0) {
     return (
       <div className="text-center py-16 border border-ink/10 rounded-xl shadow-hard bg-paper max-w-lg mx-auto px-8 space-y-4">
-        <span className="inline-block text-5xl">💚</span>
+        <Icon name="heart" className="w-12 h-12 mx-auto text-accent" strokeWidth={1.4} />
         <h2 className="font-display uppercase text-2xl text-ink">Aún no tienes favoritos</h2>
         <p className="text-sm text-ink/60">Pulsa el corazón en cualquier producto para guardarlo aquí y encontrarlo fácilmente.</p>
         <Link href="/categories/canas" className="inline-block bg-ink text-paper px-6 py-3 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift">

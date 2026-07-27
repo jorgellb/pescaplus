@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { FISHING_TYPES } from '@/lib/fishing'
+import Icon from '@/components/icons/Icon'
 
 interface Integrations {
   database: { configured: boolean; backend: 'database' | 'memory' }
@@ -155,7 +156,7 @@ export default function AdminSettingsPage() {
           <IntegrationRow
             title="Contraseña de admin"
             ok={!integrations.adminPassword.usingDefault}
-            detail={integrations.adminPassword.usingDefault ? 'Usando la contraseña por defecto ⚠️' : 'ADMIN_PASSWORD configurada'}
+            detail={integrations.adminPassword.usingDefault ? <>Usando la contraseña por defecto <Icon name="warning" className="w-3 h-3 inline -mt-0.5" strokeWidth={2.2} /></> : 'ADMIN_PASSWORD configurada'}
           />
         </div>
       </section>
@@ -224,19 +225,19 @@ export default function AdminSettingsPage() {
             onClick={refreshPrices}
             className="text-sm font-semibold text-emerald-300 bg-ink/5 hover:bg-ink/10 border border-emerald-500/20 px-4 py-2.5 rounded-xl transition-all"
           >
-            ♻️ Refrescar precios y enlaces (AliExpress)
+            <Icon name="refresh" className="w-4 h-4 inline -mt-0.5 mr-1" strokeWidth={2} />Refrescar precios y enlaces (AliExpress)
           </button>
           <button
             onClick={exportCatalog}
             className="text-sm font-semibold text-ink bg-ink/5 hover:bg-ink/10 border border-ink/10 px-4 py-2.5 rounded-xl transition-all"
           >
-            ⬇️ Exportar catálogo (JSON)
+            <Icon name="download" className="w-4 h-4 inline -mt-0.5 mr-1" strokeWidth={2} />Exportar catálogo (JSON)
           </button>
           <button
             onClick={resetCatalog}
             className="text-sm font-semibold text-amber-300 bg-amber-500/5 hover:bg-amber-500/10 border border-amber-500/20 px-4 py-2.5 rounded-xl transition-all"
           >
-            ♻️ Restablecer al catálogo original
+            <Icon name="refresh" className="w-4 h-4 inline -mt-0.5 mr-1" strokeWidth={2} />Restablecer al catálogo original
           </button>
         </div>
       </section>
@@ -283,7 +284,7 @@ function FeedRow({
           {...(download ? { download: '' } : {})}
           className="text-xs font-bold text-paper bg-ink hover:bg-accent px-3 py-2 rounded-lg transition-colors"
         >
-          {download ? '⬇️ Descargar' : '↗ Abrir'}
+          {download ? <><Icon name="download" className="w-3.5 h-3.5 inline -mt-0.5 mr-1" strokeWidth={2} />Descargar</> : '↗ Abrir'}
         </a>
         <button
           onClick={() => onCopy(url)}
@@ -296,7 +297,7 @@ function FeedRow({
   )
 }
 
-function IntegrationRow({ title, ok, detail }: { title: string; ok: boolean; detail: string }) {
+function IntegrationRow({ title, ok, detail }: { title: string; ok: boolean; detail: React.ReactNode }) {
   return (
     <div className="flex items-start gap-3 p-3.5 rounded-xl border border-ink/10 bg-paper">
       <span className={`mt-0.5 w-2.5 h-2.5 rounded-full flex-shrink-0 ${ok ? 'bg-emerald-500' : 'bg-ink/30'}`} />

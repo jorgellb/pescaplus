@@ -5,6 +5,7 @@ import type { Product } from '@/types'
 import { FISHING_TYPES, SUBCATEGORIES, type Subcategory } from '@/lib/fishing'
 import { renderDescription } from '@/lib/markdown'
 import ProductImage from '@/components/ProductImage'
+import Icon from '@/components/icons/Icon'
 
 type TaxCategory = { id: string; name: string; subcategories: Subcategory[] }
 const DEFAULT_TAX: TaxCategory[] = FISHING_TYPES.map((t) => ({
@@ -361,14 +362,14 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-ink/10 sticky top-0 bg-white rounded-t-2xl z-10">
           <h2 className="text-lg font-extrabold text-ink">{initial ? 'Editar producto' : 'Nuevo producto'}</h2>
-          <button onClick={onClose} className="text-ink/60 hover:text-ink/80 text-xl leading-none">✕</button>
+          <button onClick={onClose} className="text-ink/60 hover:text-ink/80"><Icon name="close" className="w-5 h-5" strokeWidth={2} /></button>
         </div>
 
         <div className="p-6 space-y-7">
           {/* AI assistant */}
           <div className="rounded-xl border border-accent/30 bg-accent/5 p-4 space-y-3">
             <div className="flex items-center gap-2 text-accent">
-              <span className="text-lg">🤖</span>
+              <Icon name="robot" className="w-5 h-5" strokeWidth={1.7} />
               <span className="text-xs font-bold uppercase tracking-widest">Generar ficha con IA</span>
             </div>
             <div className="flex flex-col sm:flex-row gap-2">
@@ -384,7 +385,7 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
                 disabled={aiLoading || !aiPrompt.trim()}
                 className="whitespace-nowrap bg-ink hover:bg-accent text-ink font-bold text-sm px-4 py-2.5 rounded-lg active:scale-[0.98] transition-all disabled:opacity-40"
               >
-                {aiLoading ? 'Generando…' : 'Generar ✨'}
+                {aiLoading ? 'Generando…' : <>Generar <Icon name="sparkles" className="w-3.5 h-3.5 inline -mt-0.5" strokeWidth={1.8} /></>}
               </button>
             </div>
 
@@ -415,7 +416,7 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
                 disabled={polishLoading || !form.title.trim()}
                 className="w-full bg-accent text-paper hover:opacity-90 font-bold text-sm px-4 py-2.5 rounded-lg active:scale-[0.99] transition-all disabled:opacity-40"
               >
-                {polishLoading ? 'Puliendo SEO…' : '✨ Pulir SEO (limpia el título, describe y optimiza)'}
+                {polishLoading ? 'Puliendo SEO…' : <><Icon name="sparkles" className="w-3.5 h-3.5 inline -mt-0.5" strokeWidth={1.8} /> Pulir SEO (limpia el título, describe y optimiza)</>}
               </button>
               <p className="text-[10px] text-ink/60 mt-1.5">Un clic: quita nombres de vendedor del título y genera título, descripción y metadatos optimizados para SEO.</p>
             </div>
@@ -447,7 +448,7 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
           {/* Categories (multi) + stock */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="sm:col-span-2 space-y-1.5">
-              <label className={labelCls}>Categorías (marca una o varias · ★ = principal)</label>
+              <label className={`${labelCls} inline-flex items-center gap-1`}>Categorías (marca una o varias · <Icon name="star" className="w-2.5 h-2.5" /> = principal)</label>
               <div className="flex flex-wrap gap-1.5">
                 {tax.map((t) => {
                   const on = form.categories.includes(t.id)
@@ -462,7 +463,7 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
                       }`}
                       title={on ? 'Quitar de esta categoría' : 'Añadir a esta categoría'}
                     >
-                      {isPrimary && '★ '}{t.name}
+                      {isPrimary && <Icon name="star" className="w-2.5 h-2.5 inline -mt-0.5 mr-0.5" />}{t.name}
                     </button>
                   )
                 })}
@@ -553,7 +554,7 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
                   <div className="flex flex-col gap-1">
                     <button onClick={() => moveImage(i, -1)} disabled={i === 0} className="w-6 h-6 rounded bg-white border border-ink/10 text-ink/60 hover:text-ink disabled:opacity-30 text-xs">↑</button>
                     <button onClick={() => moveImage(i, 1)} disabled={i === form.images.length - 1} className="w-6 h-6 rounded bg-white border border-ink/10 text-ink/60 hover:text-ink disabled:opacity-30 text-xs">↓</button>
-                    <button onClick={() => removeImage(i)} className="w-6 h-6 rounded bg-white border border-red-200 text-red-500 hover:bg-red-50 text-xs">✕</button>
+                    <button onClick={() => removeImage(i)} className="w-6 h-6 rounded bg-white border border-red-200 text-red-500 hover:bg-red-50 flex items-center justify-center"><Icon name="close" className="w-3 h-3" strokeWidth={2.2} /></button>
                   </div>
                 </div>
               ))}
@@ -582,7 +583,7 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
                 <div className="flex flex-wrap gap-1.5">
                   <button onClick={() => surround('**', '**', 'negrita')} className="px-2.5 py-1 text-xs font-bold rounded border border-ink/10 bg-white hover:bg-paper text-ink/80">B</button>
                   <button onClick={() => surround('_', '_', 'cursiva')} className="px-2.5 py-1 text-xs italic rounded border border-ink/10 bg-white hover:bg-paper text-ink/80">i</button>
-                  <button onClick={() => surround('[', '](https://)', 'texto del enlace')} className="px-2.5 py-1 text-xs rounded border border-ink/10 bg-white hover:bg-paper text-ink/80">🔗 Enlace</button>
+                  <button onClick={() => surround('[', '](https://)', 'texto del enlace')} className="px-2.5 py-1 text-xs rounded border border-ink/10 bg-white hover:bg-paper text-ink/80 inline-flex items-center gap-1"><Icon name="link" className="w-3 h-3" strokeWidth={2} />Enlace</button>
                   <button onClick={bulletLines} className="px-2.5 py-1 text-xs rounded border border-ink/10 bg-white hover:bg-paper text-ink/80">• Lista</button>
                 </div>
                 <textarea

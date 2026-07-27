@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Icon from '@/components/icons/Icon'
 
 type Status = 'idle' | 'sending' | 'sent' | 'error'
 
@@ -34,7 +35,7 @@ export default function ContactForm() {
   if (status === 'sent') {
     return (
       <div className="border border-ink/10 rounded-xl shadow-hard bg-paper p-8 text-center space-y-3">
-        <span className="inline-block text-4xl">✅</span>
+        <Icon name="checkCircle" className="w-10 h-10 mx-auto text-accent" strokeWidth={1.5} />
         <h2 className="font-display uppercase text-2xl text-ink">Mensaje enviado</h2>
         <p className="text-ink/60 text-sm">Gracias por escribirnos. Te responderemos lo antes posible.</p>
         <button

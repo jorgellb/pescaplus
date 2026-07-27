@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import type { Guide } from '@/types'
 import { fishingLabel } from '@/lib/fishing'
 import GuideEditor from '@/components/admin/GuideEditor'
+import Icon from '@/components/icons/Icon'
 
 export default function AdminGuidesPage() {
   const [guides, setGuides] = useState<Guide[]>([])
@@ -61,8 +62,8 @@ export default function AdminGuidesPage() {
       {loading ? (
         <div className="py-24 text-center text-ink/60 text-sm">Cargando guías…</div>
       ) : guides.length === 0 ? (
-        <div className="py-20 text-center text-ink/60 text-sm border border-ink/10 bg-white rounded-2xl">
-          Aún no hay guías. Crea la primera con IA ✨
+        <div className="py-20 text-center text-ink/60 text-sm border border-ink/10 bg-white rounded-2xl inline-flex items-center justify-center gap-1.5 w-full">
+          Aún no hay guías. Crea la primera con IA <Icon name="sparkles" className="w-4 h-4" strokeWidth={1.8} />
         </div>
       ) : (
         <div className="overflow-x-auto border border-ink/10 rounded-2xl bg-white">

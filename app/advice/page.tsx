@@ -6,6 +6,7 @@ import Layout from '@/components/Layout'
 import { FISHING_TYPES } from '@/lib/fishing'
 import CategoryIcon from '@/components/graphics/CategoryIcon'
 import ProductImage from '@/components/ProductImage'
+import Icon from '@/components/icons/Icon'
 import { toSafeHtml } from '@/lib/chat-format'
 import type { ChatMessage, ChatProductRef } from '@/types'
 
@@ -249,7 +250,7 @@ export default function AdvicePage() {
           <div ref={messagesRef} aria-live="polite" className="flex-1 overflow-y-auto p-4 md:p-6 space-y-5 bg-[#eae6db]">
             {messages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center gap-4 max-w-sm mx-auto">
-                <span className="text-5xl w-20 h-20 flex items-center justify-center bg-paper border border-ink/10 rounded-xl shadow-hard">🎣</span>
+                <span className="w-20 h-20 flex items-center justify-center bg-paper border border-ink/10 rounded-xl shadow-hard text-accent"><Icon name="rod" className="w-9 h-9" strokeWidth={1.4} /></span>
                 <div className="space-y-1">
                   <h3 className="font-display uppercase text-xl text-ink">Tu asesor de pesca</h3>
                   <p className="text-xs text-ink/60 leading-relaxed">Elige una modalidad o escribe tu pregunta abajo.</p>
@@ -260,7 +261,7 @@ export default function AdvicePage() {
                 {messages.map((message, index) => (
                   <div key={index} className={`flex items-start gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     {message.role === 'assistant' && (
-                      <div className="flex-shrink-0 w-8 h-8 bg-paper border border-ink/10 rounded-xl flex items-center justify-center text-sm">🎣</div>
+                      <div className="flex-shrink-0 w-8 h-8 bg-paper border border-ink/10 rounded-xl flex items-center justify-center text-accent"><Icon name="rod" className="w-4 h-4" strokeWidth={1.8} /></div>
                     )}
                     <div className={`flex flex-col gap-2 max-w-[85%] md:max-w-[75%] ${message.role === 'user' ? 'items-end' : 'items-start'}`}>
                       <div className={`w-full p-4 border border-ink/10 rounded-xl ${message.role === 'user' ? 'bg-accent text-paper' : 'bg-paper'}`}>
@@ -302,13 +303,13 @@ export default function AdvicePage() {
                       )}
                     </div>
                     {message.role === 'user' && (
-                      <div className="flex-shrink-0 w-8 h-8 bg-ink text-paper flex items-center justify-center text-sm">👤</div>
+                      <div className="flex-shrink-0 w-8 h-8 bg-ink text-paper flex items-center justify-center"><Icon name="person" className="w-4 h-4" strokeWidth={1.8} /></div>
                     )}
                   </div>
                 ))}
                 {loading && messages[messages.length - 1]?.role !== 'assistant' && (
                   <div className="flex items-start gap-3 justify-start">
-                    <div className="flex-shrink-0 w-8 h-8 bg-paper border border-ink/10 rounded-xl flex items-center justify-center text-sm">🎣</div>
+                    <div className="flex-shrink-0 w-8 h-8 bg-paper border border-ink/10 rounded-xl flex items-center justify-center text-accent"><Icon name="rod" className="w-4 h-4" strokeWidth={1.8} /></div>
                     <div className="bg-paper border border-ink/10 rounded-xl p-4">
                       <div className="flex items-center gap-1.5">
                         <div className="w-2 h-2 bg-accent animate-bounce" />

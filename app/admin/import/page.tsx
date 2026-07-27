@@ -4,6 +4,7 @@ import { useState } from 'react'
 import type { Product } from '@/types'
 import { FISHING_TYPES, fishingLabel } from '@/lib/fishing'
 import ProductImage from '@/components/ProductImage'
+import Icon from '@/components/icons/Icon'
 
 type ImportState = 'idle' | 'loading' | 'done' | 'error'
 
@@ -117,7 +118,7 @@ export default function AdminImportPage() {
   if (notConfigured) {
     return (
       <div className="max-w-xl mx-auto text-center py-24 space-y-4">
-        <span className="text-5xl">🔌</span>
+        <Icon name="plug" className="w-12 h-12 mx-auto text-ink/40" strokeWidth={1.5} />
         <h1 className="text-xl font-bold text-ink">AliExpress no está configurado</h1>
         <p className="text-sm text-ink/60">
           Define <code className="font-mono text-accent">ALIEXPRESS_APP_KEY</code> y{' '}
@@ -165,7 +166,7 @@ export default function AdminImportPage() {
           disabled={loading}
           className="bg-ink text-paper hover:bg-accent font-extrabold text-sm px-6 py-2.5 rounded-lg active:scale-[0.98] transition-all disabled:opacity-40"
         >
-          {loading ? 'Buscando…' : 'Buscar 🔍'}
+          {loading ? 'Buscando…' : <><Icon name="search" className="w-4 h-4 inline -mt-0.5" strokeWidth={2} /> Buscar</>}
         </button>
       </form>
 
@@ -210,26 +211,26 @@ export default function AdminImportPage() {
                   </p>
                   <div className="flex items-center justify-between text-[11px] text-ink/60">
                     <span>{fishingLabel(category)}</span>
-                    <span>{p.reviews.toLocaleString('es-ES')} vendidos · {p.images.length} 📷</span>
+                    <span className="inline-flex items-center gap-1">{p.reviews.toLocaleString('es-ES')} vendidos · {p.images.length} <Icon name="camera" className="w-3 h-3" strokeWidth={2} /></span>
                   </div>
                   {st === 'done' ? (
-                    <span className="text-center text-xs font-bold text-emerald-400 bg-ink/10 border border-emerald-500/20 rounded-lg py-2">
-                      ✓ Importado con IA
+                    <span className="text-center text-xs font-bold text-emerald-400 bg-ink/10 border border-emerald-500/20 rounded-lg py-2 inline-flex items-center justify-center gap-1">
+                      <Icon name="checkCircle" className="w-3.5 h-3.5" strokeWidth={2} />Importado con IA
                     </span>
                   ) : st === 'error' ? (
                     <button
                       onClick={() => importProduct(p)}
-                      className="text-xs font-bold text-red-300 bg-red-500/10 border border-red-500/20 rounded-lg py-2"
+                      className="text-xs font-bold text-red-300 bg-red-500/10 border border-red-500/20 rounded-lg py-2 inline-flex items-center justify-center gap-1"
                     >
-                      ✕ Error · reintentar
+                      <Icon name="close" className="w-3.5 h-3.5" strokeWidth={2.2} />Error · reintentar
                     </button>
                   ) : (
                     <button
                       onClick={() => importProduct(p)}
                       disabled={st === 'loading'}
-                      className="text-xs font-extrabold text-paper bg-ink hover:bg-accent rounded-lg py-2 active:scale-[0.98] transition-all disabled:opacity-50"
+                      className="text-xs font-extrabold text-paper bg-ink hover:bg-accent rounded-lg py-2 active:scale-[0.98] transition-all disabled:opacity-50 inline-flex items-center justify-center gap-1"
                     >
-                      {st === 'loading' ? 'Generando ficha SEO…' : 'Importar con IA ✨'}
+                      {st === 'loading' ? 'Generando ficha SEO…' : <><Icon name="sparkles" className="w-3.5 h-3.5" strokeWidth={1.8} />Importar con IA</>}
                     </button>
                   )}
                 </div>

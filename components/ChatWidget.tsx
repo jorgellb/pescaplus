@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import ProductImage from '@/components/ProductImage'
+import Icon from '@/components/icons/Icon'
 import { toSafeHtml } from '@/lib/chat-format'
 import { onOpenAsesor } from '@/lib/asesor-bus'
 import type { ChatMessage, ChatProductRef } from '@/types'
@@ -206,7 +207,7 @@ export default function ChatWidget() {
           aria-label="Abrir asesor de pesca"
           className="fixed bottom-4 right-4 z-[60] flex items-center gap-2 bg-ink text-paper pl-3.5 pr-4 py-3 rounded-full border border-ink/10 shadow-hard-md hover:bg-accent hover:border-accent transition-colors group"
         >
-          <span className="text-xl leading-none">🎣</span>
+          <Icon name="rod" className="w-5 h-5" strokeWidth={1.7} />
           <span className="font-mono text-[11px] font-bold uppercase tracking-widest hidden sm:inline">Asesor</span>
           {messages.length === 0 && (
             <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-accent border-2 border-paper group-hover:bg-ink" />
@@ -220,7 +221,7 @@ export default function ChatWidget() {
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-ink/[0.07] bg-ink text-paper">
             <div className="flex items-center gap-2 min-w-0">
-              <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-paper/10 rounded-full text-base">🎣</span>
+              <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-paper/10 rounded-full"><Icon name="rod" className="w-4 h-4" strokeWidth={1.8} /></span>
               <div className="min-w-0">
                 <p className="font-display uppercase text-base leading-none truncate">Asesor de pesca</p>
                 <p className="font-mono text-[10px] uppercase tracking-widest text-paper/60 leading-none mt-1">En línea</p>
@@ -250,9 +251,9 @@ export default function ChatWidget() {
           <div ref={messagesRef} aria-live="polite" className="flex-1 overflow-y-auto p-3 space-y-3 bg-[#eae6db]">
             {messages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center gap-3 px-2">
-                <span className="text-4xl w-16 h-16 flex items-center justify-center bg-paper border border-ink/10 rounded-2xl shadow-hard">🎣</span>
+                <span className="w-16 h-16 flex items-center justify-center bg-paper border border-ink/10 rounded-2xl shadow-hard text-accent"><Icon name="rod" className="w-7 h-7" strokeWidth={1.5} /></span>
                 <p className="text-[13px] text-ink/70 leading-relaxed max-w-[16rem]">
-                  Hola 👋 Soy tu asesor de pesca. Pregúntame por equipo, técnicas o señuelos.
+                  Hola. Soy tu asesor de pesca. Pregúntame por equipo, técnicas o señuelos.
                 </p>
                 <div className="w-full space-y-1.5 pt-1">
                   {QUICK_QUESTIONS.map((q) => (
@@ -270,7 +271,7 @@ export default function ChatWidget() {
               messages.map((message, index) => (
                 <div key={index} className={`flex items-start gap-2 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   {message.role === 'assistant' && (
-                    <div className="flex-shrink-0 w-7 h-7 bg-paper border border-ink/10 rounded-full flex items-center justify-center text-xs">🎣</div>
+                    <div className="flex-shrink-0 w-7 h-7 bg-paper border border-ink/10 rounded-full flex items-center justify-center text-accent"><Icon name="rod" className="w-3.5 h-3.5" strokeWidth={1.8} /></div>
                   )}
                   <div className={`flex flex-col gap-1.5 max-w-[80%] ${message.role === 'user' ? 'items-end' : 'items-start'}`}>
                     <div className={`w-full p-3 border border-ink/10 rounded-xl ${message.role === 'user' ? 'bg-accent text-paper' : 'bg-paper'}`}>
@@ -313,7 +314,7 @@ export default function ChatWidget() {
             )}
             {loading && messages[messages.length - 1]?.role !== 'assistant' && (
               <div className="flex items-start gap-2 justify-start">
-                <div className="flex-shrink-0 w-7 h-7 bg-paper border border-ink/10 rounded-full flex items-center justify-center text-xs">🎣</div>
+                <div className="flex-shrink-0 w-7 h-7 bg-paper border border-ink/10 rounded-full flex items-center justify-center text-accent"><Icon name="rod" className="w-3.5 h-3.5" strokeWidth={1.8} /></div>
                 <div className="bg-paper border border-ink/10 rounded-xl p-3">
                   <div className="flex items-center gap-1.5">
                     <div className="w-1.5 h-1.5 rounded-full bg-accent animate-bounce" />

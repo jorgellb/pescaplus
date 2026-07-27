@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Icon from '@/components/icons/Icon'
 
 export default function AdminLogin({ usingDefaultPassword }: { usingDefaultPassword: boolean }) {
   const [password, setPassword] = useState('')
@@ -37,7 +38,7 @@ export default function AdminLogin({ usingDefaultPassword }: { usingDefaultPassw
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center space-y-2">
           <div className="flex items-center justify-center gap-2">
-            <span className="text-3xl">🎣</span>
+            <Icon name="rod" className="w-7 h-7" strokeWidth={1.6} />
             <span className="font-display text-3xl uppercase tracking-tight text-ink">
               Pesca<span className="text-accent">Plus</span>
             </span>
@@ -81,10 +82,11 @@ export default function AdminLogin({ usingDefaultPassword }: { usingDefaultPassw
           </button>
 
           {usingDefaultPassword && (
-            <p className="text-[11px] text-amber-400/90 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2 leading-relaxed">
-              ⚠️ No hay <code className="font-mono">ADMIN_PASSWORD</code> configurada. Contraseña de
+            <p className="text-[11px] text-amber-400/90 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2 leading-relaxed inline-flex items-start gap-1.5">
+              <Icon name="warning" className="w-3.5 h-3.5 shrink-0 mt-0.5" strokeWidth={2} />
+              <span>No hay <code className="font-mono">ADMIN_PASSWORD</code> configurada. Contraseña de
               desarrollo: <code className="font-mono font-bold">pescaplus-admin</code>. Define
-              <code className="font-mono"> ADMIN_PASSWORD</code> antes de desplegar.
+              <code className="font-mono"> ADMIN_PASSWORD</code> antes de desplegar.</span>
             </p>
           )}
         </form>

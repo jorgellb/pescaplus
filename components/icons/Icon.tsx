@@ -110,6 +110,14 @@ const P: Record<string, JSX.Element> = {
   moonWaningGibbous: <path d="M12,3 A9,9 0 0,0 12,21 A5,9 0 0,1 12,3 Z" fill="currentColor" stroke="none" />,
   moonLastQuarter: <path d="M12,3 A9,9 0 0,0 12,21 Z" fill="currentColor" stroke="none" />,
   moonWaningCrescent: <path d="M12,3 A9,9 0 0,0 12,21 A5,9 0 0,0 12,3 Z" fill="currentColor" stroke="none" />,
+
+  // — quinto lote: panel de administración —
+  gear: <><circle cx="12" cy="12" r="3" /><circle cx="12" cy="12" r="6.5" /><path d="M12 3.5v2M12 18.5v2M3.5 12h2M18.5 12h2M6 6l1.4 1.4M16.6 16.6 18 18M18 6l-1.4 1.4M7.4 16.6 6 18" /></>,
+  folder: <path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2.5h8.5A1.5 1.5 0 0 1 21 9v8.5A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5V6.5Z" />,
+  notepad: <><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M8 8h8M8 12h8M8 16h5" /></>,
+  euro: <><circle cx="12" cy="12" r="9" /><path d="M16 8.5a4.5 4.5 0 1 0 0 7M7 11h6M7 13.5h6" /></>,
+  cursor: <path d="M5 3 19 9l-6 2-2 6-6-14Z" strokeLinejoin="round" />,
+  image: <><rect x="3" y="4" width="18" height="16" rx="2" /><circle cx="8.5" cy="9.5" r="1.5" /><path d="M3 16l5-5 4 4 3-3 6 6" /></>,
 }
 
 export type IconName = keyof typeof P

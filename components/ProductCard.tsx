@@ -4,6 +4,7 @@ import { fishingLabel } from '@/lib/fishing'
 import { proxiedImage } from '@/lib/img-proxy'
 import ProductImage from './ProductImage'
 import FavoriteButton from './FavoriteButton'
+import Icon from '@/components/icons/Icon'
 
 type ProductCardProps = Pick<
   Product,
@@ -61,7 +62,7 @@ export default function ProductCard({
         </Link>
 
         <div className="mt-2 flex items-center gap-1 font-mono text-[11px] text-ink/60">
-          <span className="text-accent">★</span>
+          <Icon name="star" className="w-3 h-3 text-accent" />
           <span className="font-bold text-ink/80">{rating.toFixed(1)}</span>
           <span>· {reviews.toLocaleString('es-ES')} vend.</span>
         </div>

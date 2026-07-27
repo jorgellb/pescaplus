@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { fishingLabel } from '@/lib/fishing'
+import Icon, { type IconName } from '@/components/icons/Icon'
 
 interface Stats {
   total: number
@@ -51,7 +52,7 @@ export default function AdminAnalyticsPage() {
 
       {stats.total === 0 ? (
         <div className="py-20 text-center border border-ink/10 rounded-2xl bg-white space-y-3">
-          <span className="text-5xl">📊</span>
+          <Icon name="chartBar" className="w-12 h-12 mx-auto text-ink/40" strokeWidth={1.5} />
           <p className="text-ink/80 font-semibold">Aún no hay clics registrados</p>
           <p className="text-sm text-ink/60 max-w-md mx-auto">
             Cuando los visitantes pulsen <span className="text-emerald-400 font-semibold">Comprar</span>, verás aquí qué
@@ -62,10 +63,10 @@ export default function AdminAnalyticsPage() {
         <>
           {/* KPIs */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <Kpi label="Clics totales" value={stats.total.toLocaleString('es-ES')} icon="🖱️" />
-            <Kpi label="Clics (7 días)" value={stats.last7.toLocaleString('es-ES')} icon="📈" />
-            <Kpi label="Productos con clics" value={String(stats.byProduct.length)} icon="📦" />
-            <Kpi label="Categoría top" value={topCat ? fishingLabel(topCat.typeFishing) : '—'} icon="🏆" small />
+            <Kpi label="Clics totales" value={stats.total.toLocaleString('es-ES')} icon="cursor" />
+            <Kpi label="Clics (7 días)" value={stats.last7.toLocaleString('es-ES')} icon="chartUp" />
+            <Kpi label="Productos con clics" value={String(stats.byProduct.length)} icon="package" />
+            <Kpi label="Categoría top" value={topCat ? fishingLabel(topCat.typeFishing) : '—'} icon="trophy" small />
           </div>
 
           {/* Daily bar chart (single series) */}
@@ -132,10 +133,10 @@ export default function AdminAnalyticsPage() {
   )
 }
 
-function Kpi({ label, value, icon, small }: { label: string; value: string; icon: string; small?: boolean }) {
+function Kpi({ label, value, icon, small }: { label: string; value: string; icon: IconName; small?: boolean }) {
   return (
     <div className="rounded-2xl border border-ink/10 bg-white p-4 flex items-center gap-3">
-      <span className="text-2xl p-2.5 bg-paper rounded-xl border border-ink/10">{icon}</span>
+      <span className="p-2.5 bg-paper rounded-xl border border-ink/10 text-accent"><Icon name={icon} className="w-5 h-5" strokeWidth={1.7} /></span>
       <div className="min-w-0">
         <p className={`font-extrabold text-ink leading-none truncate ${small ? 'text-base' : 'text-xl'}`}>{value}</p>
         <p className="text-[11px] uppercase tracking-widest text-ink/60 mt-1">{label}</p>
