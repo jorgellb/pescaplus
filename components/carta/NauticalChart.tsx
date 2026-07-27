@@ -207,7 +207,13 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
   const [bathy, setBathy] = useState(true)
   const [contours, setContours] = useState(true)
   const [substrate, setSubstrate] = useState(false)
-  const [showAreas, setShowAreas] = useState(true)
+  /*
+   * Los espacios protegidos ya no tienen botón: ocupaba sitio en una fila que se
+   * había quedado larga. La CAPA se queda encendida a propósito y sin forma de
+   * apagarla. Es información legal —pescar dentro de una reserva es una multa— y
+   * no es lo mismo quitar un interruptor que quitar el aviso.
+   */
+  const showAreas = true
   const [showPois, setShowPois] = useState(true)
   const [poisFar, setPoisFar] = useState(false)
   const [areasFar, setAreasFar] = useState(false)
@@ -249,7 +255,12 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
    * seguirlo está el botón de posición de MapLibre.
    */
   const siguiendo = useRef(true)
-  const [anchoSuficiente] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 640)
+  /*
+   * La entrada de coordenadas nace apagada: es una herramienta puntual —"llévame
+   * a este sitio"— y tenerla siempre desplegada le comía un tercio de la carta a
+   * quien no la usa.
+   */
+  const [showCoords, setShowCoords] = useState(false)
   const [savingTrack, setSavingTrack] = useState(false)
   const [trackName, setTrackName] = useState('')
   const [trackDone, setTrackDone] = useState<string | null>(null)
@@ -380,6 +391,16 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
       .then((d) => { if (d.success) setZone(d) })
       .catch(() => {})
   }
+
+  /*
+   * El efecto que crea el mapa se ejecuta una sola vez —está guardado con
+   * `map.current`— así que se quedaría con la copia de `marcarPunto` del primer
+   * render, y con ella el `loggedIn` de entonces. Meterla en las dependencias no
+   * vale: la limpieza destruiría el mapa y volvería a crearlo en cada render.
+   * Una referencia al día resuelve las dos cosas.
+   */
+  const marcarPuntoRef = useRef(marcarPunto)
+  marcarPuntoRef.current = marcarPunto
 
   /** Lleva la carta a unas coordenadas escritas a mano y las marca. */
   const irACoordenadas = (lat: number, lon: number) => {
@@ -652,7 +673,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
       const lat = Math.round(e.lngLat.lat * 1e6) / 1e6
       const lon = Math.round(e.lngLat.lng * 1e6) / 1e6
 
-      marcarPunto(lat, lon)
+      marcarPuntoRef.current(lat, lon)
     })
     map.current = m
     } catch (err) {
@@ -851,8 +872,8 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
             📏 Isóbatas
           </button>
         )}
-        <button type="button" onClick={() => setShowAreas((v) => !v)} aria-pressed={showAreas} className={toggle(showAreas)}>
-          🛑 Espacios protegidos
+        <button type="button" onClick={() => setShowCoords((v) => !v)} aria-pressed={showCoords} className={toggle(showCoords)}>
+          🧭 Ir a coordenadas
         </button>
         {provider.substrate && (
           <button type="button" onClick={() => setSubstrate((v) => !v)} aria-pressed={substrate} className={toggle(substrate)}>
@@ -878,16 +899,16 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
         )}
       </div>
 
-      {/* Ir a unas coordenadas. Abierto de inicio en pantallas grandes y
-          plegado en el móvil, donde cada panel se come media carta. */}
-      <details className="pointer-events-auto w-72 max-w-full bg-paper rounded-2xl shadow-hard border border-ink/[0.07]" open={anchoSuficiente}>
-        <summary className="px-4 py-2.5 text-[14px] font-semibold text-ink cursor-pointer select-none">
-          🧭 Ir a unas coordenadas
-        </summary>
-        <div className="px-4 pb-3 pt-1">
+      {showCoords && (
+        <div className="pointer-events-auto w-72 max-w-full bg-paper rounded-2xl shadow-hard border border-ink/[0.07] px-4 py-3">
+          <div className="flex items-start justify-between gap-2 mb-1.5">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/60">Ir a coordenadas</p>
+            <button type="button" onClick={() => setShowCoords(false)} aria-label="Cerrar la entrada de coordenadas"
+              className="text-ink/40 hover:text-ink leading-none text-[15px]">×</button>
+          </div>
           <CoordinateEntry onGo={irACoordenadas} />
         </div>
-      </details>
+      )}
 
       {/* Grabación de la derrota. Va la primera de la columna porque mientras
           se graba es lo único que se mira, y con guantes o con el barco
