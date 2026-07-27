@@ -129,4 +129,45 @@ export async function updateUserProfile(id: string, input: ProfileInput): Promis
   return { ...u }
 }
 
+// ---------------------------------------------------------------------------
+// Admin (gestión de cuentas — moderación/soporte)
+// ---------------------------------------------------------------------------
+
+/** Panel admin: todos los usuarios registrados. */
+export async function adminListUsers(limit = 500): Promise<User[]> {
+  if (isDatabaseConfigured()) {
+    try {
+      const { prisma } = await import('@/lib/prisma')
+      const rows = await prisma.user.findMany({ orderBy: { createdAt: 'desc' }, take: limit })
+      return rows.map(rowToUser)
+    } catch (error) {
+      console.warn('Admin users read failed:', error)
+      return []
+    }
+  }
+  return mem().slice().sort((a, b) => b.createdAt - a.createdAt).slice(0, limit)
+}
+
+/**
+ * Panel admin: borra la cuenta. Por las FK de Prisma esto arrastra en cascada
+ * sus sesiones, reseñas escritas, notas, check-ins, waypoints y rutas; y
+ * desvincula (sin borrar) sus reservas, RSVPs y su perfil de operador si tenía.
+ */
+export async function adminDeleteUser(id: string): Promise<boolean> {
+  if (isDatabaseConfigured()) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+      await prisma.user.delete({ where: { id } })
+      return true
+    } catch (error) {
+      console.error('Admin user delete failed:', error)
+      return false
+    }
+  }
+  const idx = mem().findIndex((u) => u.id === id)
+  if (idx === -1) return false
+  mem().splice(idx, 1)
+  return true
+}
+
 export const AVATAR_CHOICES = AVATARS

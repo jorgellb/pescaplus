@@ -410,6 +410,91 @@ export async function setOperatorVerified(id: string, verified: boolean): Promis
   return true
 }
 
+// ---------------------------------------------------------------------------
+// Admin (bypasses el manageToken — actúa con autoridad de panel)
+// ---------------------------------------------------------------------------
+
+export interface AdminOperatorUpdate {
+  name?: string
+  businessName?: string
+  email?: string
+  phone?: string
+  spotSlug?: string
+  boatName?: string
+  boatType?: string
+  capacity?: number
+  licenseRef?: string
+  insuranceRef?: string
+  bio?: string
+  marina?: string
+  boatLength?: number | string | null
+  boatBeam?: number | string | null
+  boatEngineHp?: number | string | null
+  boatMaxSpeedKn?: number | string | null
+  boatYear?: number | string | null
+  crewSize?: number
+  verified?: boolean
+}
+
+/** Panel admin: edita cualquier campo del perfil (incluidos licencia/seguro/verificación), sin token. */
+export async function adminUpdateOperator(id: string, input: AdminOperatorUpdate): Promise<Operator | null> {
+  const data: Record<string, unknown> = {}
+  if (input.name !== undefined) data.name = String(input.name).trim().slice(0, 80)
+  if (input.businessName !== undefined) data.businessName = String(input.businessName).trim().slice(0, 120)
+  if (input.email !== undefined) data.email = String(input.email).trim().toLowerCase().slice(0, 160)
+  if (input.phone !== undefined) data.phone = String(input.phone).trim().slice(0, 40)
+  if (input.spotSlug !== undefined) data.spotSlug = String(input.spotSlug).trim().slice(0, 80)
+  if (input.boatName !== undefined) data.boatName = String(input.boatName).trim().slice(0, 80)
+  if (input.boatType !== undefined) data.boatType = String(input.boatType).trim().slice(0, 80)
+  if (input.capacity !== undefined) data.capacity = Math.min(50, Math.max(1, Math.round(Number(input.capacity) || 1)))
+  if (input.licenseRef !== undefined) data.licenseRef = String(input.licenseRef).trim().slice(0, 120)
+  if (input.insuranceRef !== undefined) data.insuranceRef = String(input.insuranceRef).trim().slice(0, 120)
+  if (input.bio !== undefined) data.bio = String(input.bio).trim().slice(0, 800)
+  if (input.marina !== undefined) data.marina = String(input.marina).trim().slice(0, 160)
+  if (input.boatLength !== undefined) data.boatLength = spec(input.boatLength, 2, 60, 2)
+  if (input.boatBeam !== undefined) data.boatBeam = spec(input.boatBeam, 1, 20, 2)
+  if (input.boatEngineHp !== undefined) data.boatEngineHp = spec(input.boatEngineHp, 1, 5000)
+  if (input.boatMaxSpeedKn !== undefined) data.boatMaxSpeedKn = spec(input.boatMaxSpeedKn, 1, 80)
+  if (input.boatYear !== undefined) data.boatYear = spec(input.boatYear, 1900, new Date().getFullYear() + 1)
+  if (input.crewSize !== undefined) data.crewSize = Math.min(20, Math.max(1, Math.round(Number(input.crewSize) || 1)))
+
+  if (isDatabaseConfigured()) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+      const dbData = { ...data, ...(input.verified !== undefined ? { verified: input.verified, verifiedAt: input.verified ? new Date() : null } : {}) }
+      if (Object.keys(dbData).length === 0) return getOperator(id)
+      const row = await prisma.operator.update({ where: { id }, data: dbData })
+      return rowToOperator(row)
+    } catch (error) {
+      console.error('Admin operator update failed:', error)
+      throw new Error(WRITE_FAIL)
+    }
+  }
+  const stored = mem().find((o) => o.id === id)
+  if (!stored) return null
+  Object.assign(stored, data)
+  if (input.verified !== undefined) { stored.verified = input.verified; stored.verifiedAt = input.verified ? Date.now() : null }
+  return { ...stored }
+}
+
+/** Panel admin: borra el operador. Sus chárters se borran en cascada (FK de Prisma). */
+export async function adminDeleteOperator(id: string): Promise<boolean> {
+  if (isDatabaseConfigured()) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+      await prisma.operator.delete({ where: { id } })
+      return true
+    } catch (error) {
+      console.error('Admin operator delete failed:', error)
+      return false
+    }
+  }
+  const idx = mem().findIndex((o) => o.id === id)
+  if (idx === -1) return false
+  mem().splice(idx, 1)
+  return true
+}
+
 export async function listOperators(opts: { verified?: boolean } = {}): Promise<Operator[]> {
   if (isDatabaseConfigured()) {
     try {

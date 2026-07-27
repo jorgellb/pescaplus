@@ -674,6 +674,146 @@ export async function cancelBooking(charterId: string, bookingId: string, operat
   return true
 }
 
+// ---------------------------------------------------------------------------
+// Admin (bypasses el manageToken del operador — actúa con autoridad de panel)
+// ---------------------------------------------------------------------------
+
+export interface AdminCharterUpdate {
+  dateISO?: string
+  timeStart?: string
+  durationH?: number | null
+  modality?: 'tierra' | 'kayak' | 'barco'
+  targetSpecies?: string
+  level?: string
+  pricePerPerson?: number
+  maxPlaces?: number
+  minToConfirm?: number
+  includes?: string
+  notes?: string
+  status?: 'open' | 'confirmed' | 'cancelled'
+  tripType?: 'privada' | 'compartida'
+  meetingPoint?: string
+  highlights?: string
+  privatePrice?: number | null
+}
+
+/** Panel admin: crea un chárter en nombre de un operador verificado, sin token. */
+export async function adminCreateCharter(operatorId: string, input: CharterInput): Promise<Charter> {
+  const op = await getOperator(operatorId)
+  if (!op) throw new Error('Operador no encontrado.')
+  if (!op.verified) throw new Error('Este operador aún no está verificado. Verifícalo antes de publicarle chárters.')
+  const err = validateCharter(input)
+  if (err) throw new Error(err)
+  const data = cleanCharter(input)
+
+  if (isDatabaseConfigured()) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+      const row = await prisma.charter.create({ data: { ...data, operatorId } })
+      return assemble(baseFromRow(row), op, [])
+    } catch (error) {
+      console.error('Admin charter create failed:', error)
+      throw new Error(WRITE_FAIL)
+    }
+  }
+  const stored: StoredCharter = { id: `mem-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, operatorId, ...data, seriesId: '', status: 'open', createdAt: Date.now() }
+  memC().unshift(stored)
+  return assemble(stored, op, [])
+}
+
+/** Panel admin: todos los chárters, de cualquier operador y en cualquier estado. */
+export async function adminListCharters(limit = 300): Promise<Charter[]> {
+  if (isDatabaseConfigured()) {
+    try {
+      const { prisma } = await import('@/lib/prisma')
+      const rows = await prisma.charter.findMany({
+        orderBy: [{ dateISO: 'desc' }, { timeStart: 'asc' }],
+        include: { bookings: true, operator: true },
+        take: limit,
+      })
+      return rows.map((r) => assemble(baseFromRow(r), r.operator ? rowOperatorToOperator(r.operator) : null, r.bookings.map(bookingFromRow)))
+    } catch (error) {
+      console.warn('Admin charters read failed:', error)
+      return []
+    }
+  }
+  const out: Charter[] = []
+  for (const c of memC()) {
+    const op = await getOperator(c.operatorId)
+    out.push(assemble(c, op, memB().filter((b) => b.charterId === c.id)))
+  }
+  return out.sort((a, b) => b.dateISO.localeCompare(a.dateISO) || a.timeStart.localeCompare(b.timeStart))
+}
+
+/** Panel admin: edita los campos operativos de cualquier chárter, sin token. */
+export async function adminUpdateCharter(id: string, patch: AdminCharterUpdate): Promise<Charter | null> {
+  const data: Record<string, unknown> = {}
+  if (patch.dateISO !== undefined) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(patch.dateISO)) throw new Error('Fecha no válida.')
+    data.dateISO = patch.dateISO
+  }
+  if (patch.timeStart !== undefined) {
+    if (!/^\d{2}:\d{2}$/.test(patch.timeStart)) throw new Error('Hora no válida.')
+    data.timeStart = patch.timeStart
+  }
+  if (patch.durationH !== undefined) {
+    data.durationH = patch.durationH != null && Number.isFinite(patch.durationH) ? Math.min(24, Math.max(0.5, patch.durationH)) : null
+  }
+  if (patch.modality !== undefined) data.modality = (['tierra', 'kayak', 'barco'] as const).includes(patch.modality) ? patch.modality : 'barco'
+  if (patch.targetSpecies !== undefined) data.targetSpecies = patch.targetSpecies.trim().slice(0, 40)
+  if (patch.level !== undefined) data.level = patch.level.trim().slice(0, 20)
+  if (patch.pricePerPerson !== undefined) data.pricePerPerson = Math.min(5000, Math.max(0, Number(patch.pricePerPerson) || 0))
+  if (patch.maxPlaces !== undefined) data.maxPlaces = Math.min(50, Math.max(1, Math.round(Number(patch.maxPlaces) || 6)))
+  if (patch.minToConfirm !== undefined) data.minToConfirm = Math.max(1, Math.round(Number(patch.minToConfirm) || 1))
+  if (patch.includes !== undefined) data.includes = patch.includes.trim().slice(0, 400)
+  if (patch.notes !== undefined) data.notes = patch.notes.trim().slice(0, 4000)
+  if (patch.status !== undefined) data.status = (['open', 'confirmed', 'cancelled'] as const).includes(patch.status) ? patch.status : 'open'
+  if (patch.tripType !== undefined) data.tripType = patch.tripType === 'privada' ? 'privada' : 'compartida'
+  if (patch.meetingPoint !== undefined) data.meetingPoint = patch.meetingPoint.trim().slice(0, 200)
+  if (patch.highlights !== undefined) data.highlights = patch.highlights.trim().slice(0, 300)
+  if (patch.privatePrice !== undefined) {
+    data.privatePrice = patch.privatePrice != null && Number.isFinite(Number(patch.privatePrice)) && Number(patch.privatePrice) > 0
+      ? Math.min(50000, Math.round(Number(patch.privatePrice)))
+      : null
+  }
+  if (Object.keys(data).length === 0) return getCharter(id)
+
+  if (isDatabaseConfigured()) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+      await prisma.charter.update({ where: { id }, data })
+    } catch (error) {
+      console.error('Admin charter update failed:', error)
+      throw new Error(WRITE_FAIL)
+    }
+    return getCharter(id)
+  }
+  const stored = memC().find((x) => x.id === id)
+  if (!stored) return null
+  Object.assign(stored, data)
+  return getCharter(id)
+}
+
+/** Panel admin: borra el chárter y sus reservas de forma permanente. */
+export async function adminDeleteCharter(id: string): Promise<boolean> {
+  if (isDatabaseConfigured()) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+      await prisma.charter.delete({ where: { id } })
+      return true
+    } catch (error) {
+      console.error('Admin charter delete failed:', error)
+      return false
+    }
+  }
+  const idx = memC().findIndex((x) => x.id === id)
+  if (idx === -1) return false
+  memC().splice(idx, 1)
+  const bookings = memB()
+  for (let i = bookings.length - 1; i >= 0; i--) if (bookings[i].charterId === id) bookings.splice(i, 1)
+  return true
+}
+
 const PAID_CANCEL_MSG = 'Esta reserva ya está pagada. Para cancelarla y gestionar el reembolso, contacta con el patrón.'
 
 /**

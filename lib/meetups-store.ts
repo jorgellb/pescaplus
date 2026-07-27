@@ -536,6 +536,102 @@ export async function removeRsvp(id: string, rsvpId: string, manageToken: string
   return (await getMeetup(id))!
 }
 
+// ---------------------------------------------------------------------------
+// Admin (bypasses el manageToken del anfitrión — actúa con autoridad de panel)
+// ---------------------------------------------------------------------------
+
+export interface AdminMeetupUpdate {
+  dateISO?: string
+  timeStart?: string
+  durationH?: number | null
+  modality?: 'tierra' | 'kayak' | 'barco'
+  targetSpecies?: string
+  level?: string
+  maxPlaces?: number
+  minToConfirm?: number
+  meetingPoint?: string
+  notes?: string
+  status?: 'open' | 'confirmed' | 'cancelled'
+}
+
+/** Panel admin: todas las quedadas, pasadas o futuras, canceladas o no. */
+export async function adminListMeetups(limit = 300): Promise<Meetup[]> {
+  if (isDatabaseConfigured()) {
+    try {
+      const { prisma } = await import('@/lib/prisma')
+      const rows = await prisma.meetup.findMany({
+        orderBy: [{ dateISO: 'desc' }, { timeStart: 'asc' }],
+        include: { rsvps: true },
+        take: limit,
+      })
+      return rows.map((r) => assemble(rowToBase(r), r.rsvps.map(rowToRsvp)))
+    } catch (error) {
+      console.warn('Admin meetups read failed:', error)
+      return []
+    }
+  }
+  const rsvps = memRsvps()
+  return memMeetups()
+    .slice()
+    .sort((a, b) => b.dateISO.localeCompare(a.dateISO))
+    .map((m) => assemble(m, rsvps.filter((r) => r.meetupId === m.id)))
+}
+
+/** Panel admin: edita los campos operativos de cualquier quedada, sin token. */
+export async function adminUpdateMeetup(id: string, patch: AdminMeetupUpdate): Promise<Meetup | null> {
+  const data: Record<string, unknown> = {}
+  if (patch.dateISO !== undefined) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(patch.dateISO)) throw new Error('Fecha no válida.')
+    data.dateISO = patch.dateISO
+  }
+  if (patch.timeStart !== undefined) data.timeStart = patch.timeStart.trim().slice(0, 20)
+  if (patch.durationH !== undefined) data.durationH = patch.durationH != null && Number.isFinite(patch.durationH) ? Math.min(24, Math.max(0.5, patch.durationH)) : null
+  if (patch.modality !== undefined) data.modality = MODALITIES.has(patch.modality) ? patch.modality : 'tierra'
+  if (patch.targetSpecies !== undefined) data.targetSpecies = patch.targetSpecies.trim().slice(0, 60)
+  if (patch.level !== undefined) data.level = LEVELS.has(patch.level) ? patch.level : 'cualquiera'
+  if (patch.maxPlaces !== undefined) data.maxPlaces = Math.min(30, Math.max(1, Math.round(Number(patch.maxPlaces) || 4)))
+  if (patch.minToConfirm !== undefined) data.minToConfirm = Math.max(1, Math.round(Number(patch.minToConfirm) || 1))
+  if (patch.meetingPoint !== undefined) data.meetingPoint = patch.meetingPoint.trim().slice(0, 120)
+  if (patch.notes !== undefined) data.notes = patch.notes.trim().slice(0, 600)
+  if (patch.status !== undefined) data.status = (['open', 'confirmed', 'cancelled'] as const).includes(patch.status) ? patch.status : 'open'
+  if (Object.keys(data).length === 0) return getMeetup(id)
+
+  if (isDatabaseConfigured()) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+      await prisma.meetup.update({ where: { id }, data })
+    } catch (error) {
+      console.error('Admin meetup update failed:', error)
+      throw new Error(WRITE_FAIL)
+    }
+    return getMeetup(id)
+  }
+  const stored = memMeetups().find((x) => x.id === id)
+  if (!stored) return null
+  Object.assign(stored, data)
+  return getMeetup(id)
+}
+
+/** Panel admin: borra la quedada y sus inscripciones de forma permanente. */
+export async function adminDeleteMeetup(id: string): Promise<boolean> {
+  if (isDatabaseConfigured()) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+      await prisma.meetup.delete({ where: { id } })
+      return true
+    } catch (error) {
+      console.error('Admin meetup delete failed:', error)
+      return false
+    }
+  }
+  const idx = memMeetups().findIndex((x) => x.id === id)
+  if (idx === -1) return false
+  memMeetups().splice(idx, 1)
+  const rsvps = memRsvps()
+  for (let i = rsvps.length - 1; i >= 0; i--) if (rsvps[i].meetupId === id) rsvps.splice(i, 1)
+  return true
+}
+
 export async function cancelMeetup(id: string, manageToken: string): Promise<boolean> {
   const ok = await getMeetupByToken(id, manageToken)
   if (!ok) return false

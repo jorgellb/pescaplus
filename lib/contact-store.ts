@@ -50,6 +50,42 @@ export async function saveContactMessage(input: ContactInput): Promise<void> {
   if (store.length > 2000) store.splice(0, store.length - 2000)
 }
 
+/** Panel admin: marca (o desmarca) un mensaje como respondido. */
+export async function setContactMessageHandled(id: string, handled: boolean): Promise<boolean> {
+  if (isDatabaseConfigured()) {
+    try {
+      const { prisma } = await import('@/lib/prisma')
+      await prisma.contactMessage.update({ where: { id }, data: { handled } })
+      return true
+    } catch (error) {
+      console.error('Contact message update failed:', error)
+      return false
+    }
+  }
+  const m = memory().find((x) => x.id === id)
+  if (!m) return false
+  m.handled = handled
+  return true
+}
+
+/** Panel admin: borra un mensaje (spam o ya resuelto). */
+export async function deleteContactMessage(id: string): Promise<boolean> {
+  if (isDatabaseConfigured()) {
+    try {
+      const { prisma } = await import('@/lib/prisma')
+      await prisma.contactMessage.delete({ where: { id } })
+      return true
+    } catch (error) {
+      console.error('Contact message delete failed:', error)
+      return false
+    }
+  }
+  const idx = memory().findIndex((x) => x.id === id)
+  if (idx === -1) return false
+  memory().splice(idx, 1)
+  return true
+}
+
 export async function listContactMessages(limit = 200): Promise<ContactMessage[]> {
   if (isDatabaseConfigured()) {
     try {

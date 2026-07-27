@@ -261,6 +261,56 @@ export async function anglerRatingsForCharter(charterId: string, authorUserId: s
   return out
 }
 
+// ---------------------------------------------------------------------------
+// Admin (moderación — ve y borra cualquier reseña, publicada o aún ciega)
+// ---------------------------------------------------------------------------
+
+/** Panel admin: todas las reseñas, sin filtrar por visibilidad (para moderación). */
+export async function adminListReviews(limit = 300): Promise<Review[]> {
+  if (isDatabaseConfigured()) {
+    try {
+      const { prisma } = await import('@/lib/prisma')
+      const rows = await prisma.review.findMany({ orderBy: { createdAt: 'desc' }, take: limit, include: { author: true } })
+      return rows.map((r) => {
+        const direction = r.direction as ReviewDirection
+        const publishedAt = r.publishedAt ? r.publishedAt.getTime() : null
+        return {
+          id: r.id, operatorId: r.operatorId, charterId: r.charterId, authorUserId: r.authorUserId,
+          direction, subjectUserId: r.subjectUserId,
+          authorName: r.author?.name || (direction === 'toAngler' ? 'Patrón' : 'Pescador'),
+          authorAvatar: r.author?.avatar || (direction === 'toAngler' ? '⚓' : '🎣'),
+          rating: r.rating, text: r.text, publishedAt,
+          pending: !isVisible({ publishedAt, createdAt: r.createdAt.getTime() }),
+          createdAt: r.createdAt.getTime(),
+        }
+      })
+    } catch (error) {
+      console.warn('Admin reviews read failed:', error)
+      return []
+    }
+  }
+  return Promise.all(mem().slice().sort((a, b) => b.createdAt - a.createdAt).slice(0, limit).map(withAuthor))
+}
+
+/** Panel admin: borra una reseña (spam, abuso, error) y recalcula la media afectada. */
+export async function adminDeleteReview(id: string): Promise<boolean> {
+  if (isDatabaseConfigured()) {
+    const { prisma } = await import('@/lib/prisma')
+    try {
+      const row = await prisma.review.delete({ where: { id } })
+      await recomputeAverage(row.direction as ReviewDirection, row.operatorId, row.subjectUserId)
+      return true
+    } catch (error) {
+      console.error('Admin review delete failed:', error)
+      return false
+    }
+  }
+  const idx = mem().findIndex((r) => r.id === id)
+  if (idx === -1) return false
+  mem().splice(idx, 1)
+  return true
+}
+
 /**
  * Publish reviews whose blind period expired without an answer, and refresh the
  * averages they now affect. Runs from the daily cron: visibility itself is

@@ -12,6 +12,10 @@ const NAV: { href: string; label: string; icon: IconName }[] = [
   { href: '/admin/analytics', label: 'Analítica', icon: 'chartBar' },
   { href: '/admin/mensajes', label: 'Mensajes', icon: 'mail' },
   { href: '/admin/operadores', label: 'Operadores', icon: 'anchor' },
+  { href: '/admin/charters', label: 'Chárters', icon: 'boat' },
+  { href: '/admin/quedadas', label: 'Quedadas', icon: 'users' },
+  { href: '/admin/resenas', label: 'Reseñas', icon: 'star' },
+  { href: '/admin/usuarios', label: 'Usuarios', icon: 'person' },
   { href: '/admin/settings', label: 'Configuración', icon: 'gear' },
 ]
 
