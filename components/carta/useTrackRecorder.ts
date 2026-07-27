@@ -61,7 +61,16 @@ function leerGuardado(): Guardado | null {
   }
 }
 
-export function useTrackRecorder() {
+/**
+ * @param sondaActual  De dónde sacar la profundidad de cada punto. Se pasa como
+ *   función y no como valor para leerla EN EL MOMENTO en que llega la posición:
+ *   con un valor, el grabador se quedaría con la sonda del render anterior y
+ *   cada punto llevaría la profundidad del punto de antes.
+ */
+export function useTrackRecorder(sondaActual?: () => number | null) {
+  const sonda = useRef(sondaActual)
+  sonda.current = sondaActual
+
   // Se lee al crear el estado, no en un efecto: es un hecho del aparato, y así
   // no hay un primer render que diga "no hay nada" antes de encontrarlo.
   const [recovered, setRecovered] = useState(() => leerGuardado() !== null)
@@ -126,6 +135,8 @@ export function useTrackRecorder() {
           ...(pos.coords.accuracy != null ? { acc: Math.round(pos.coords.accuracy) } : {}),
           ...(pos.coords.speed != null && Number.isFinite(pos.coords.speed) ? { spd: pos.coords.speed } : {}),
         }
+        const prof = sonda.current?.()
+        if (prof != null && Number.isFinite(prof) && prof > 0) p.depthM = Math.round(prof * 100) / 100
         setAccuracyM(p.acc ?? null)
         setKnots(pos.coords.speed != null && Number.isFinite(pos.coords.speed) ? pos.coords.speed * 1.94384 : null)
 

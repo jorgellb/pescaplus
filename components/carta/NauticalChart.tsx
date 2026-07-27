@@ -9,6 +9,7 @@ import { MIN_POI_ZOOM, POI_KINDS } from '@/lib/nautical-poi-types'
 import type { Seabed } from '@/lib/seabed'
 import { SEABED_RESOLUTION } from '@/lib/seabed'
 import { useTrackRecorder } from './useTrackRecorder'
+import { useSounder } from './useSounder'
 import { formatDistance, formatDuration } from '@/lib/track-types'
 import { trackToGPX } from '@/lib/gpx'
 import MarksTransfer from './MarksTransfer'
@@ -259,6 +260,8 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
   const [contours, setContours] = useState(true)
   const [substrate, setSubstrate] = useState(false)
   const [showPois, setShowPois] = useState(true)
+  const [showMiFondo, setShowMiFondo] = useState(false)
+  const [miFondo, setMiFondo] = useState<{ sondas: number; celdaM: number } | null>(null)
   const [poisFar, setPoisFar] = useState(false)
   // WebGL se comprueba al crear el estado, no en un efecto: es un hecho del
   // navegador, no algo que dependa del ciclo de vida.
@@ -290,7 +293,12 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
   const markers = useRef<{ remove(): void }[]>([])
   /** La chincheta del punto que se está mirando, distinta de las marcas guardadas. */
   const puntoMarker = useRef<Marker | null>(null)
-  const rec = useTrackRecorder()
+  const sounder = useSounder()
+  const sondaRef = useRef<number | null>(null)
+  sondaRef.current = sounder.state.depthM
+  // Se pasa como función: si se pasara el valor, cada punto de la derrota se
+  // quedaría con la profundidad del render anterior.
+  const rec = useTrackRecorder(() => sondaRef.current)
   /**
    * Si el mapa sigue al barco. Se apaga en cuanto el usuario arrastra: grabando
    * una derrota es normal querer mirar la costa de al lado, y recentrar en cada
@@ -601,6 +609,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
     // Fuentes vacías: se rellenan al mover, con lo que entre en pantalla.
     sources.pois = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } }
     sources.ruta = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } }
+    sources.mifondo = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } }
     layers.push(
       // Un círculo con borde claro se lee sobre la batimetría y sobre tierra;
       // un icono de color plano se pierde en cuanto el fondo cambia de tono.
@@ -611,6 +620,23 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
           'circle-color': ['match', ['get', 'kind'],
             'rampa', '#0a7d72', 'puerto', '#1d4ed8', 'pecio', '#7c2d12', '#0a7d72'],
           'circle-stroke-width': 1.6,
+          'circle-stroke-color': '#ffffff',
+        },
+      },
+      /*
+       * Tus propias sondas. Lo somero en cálido y lo hondo en azul, que es el
+       * convenio de cualquier carta: así una piedra que sube salta a la vista
+       * entre lo que la rodea, que es justo para lo que sirve esta capa.
+       */
+      {
+        id: 'mifondo', type: 'circle', source: 'mifondo',
+        layout: { visibility: 'none' },
+        paint: {
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 3, 16, 9],
+          'circle-color': ['interpolate', ['linear'], ['get', 'depthM'],
+            0, '#b91c1c', 10, '#ea580c', 25, '#eab308', 50, '#22c55e', 100, '#0ea5e9', 300, '#1e3a8a'],
+          'circle-opacity': 0.9,
+          'circle-stroke-width': 0.5,
           'circle-stroke-color': '#ffffff',
         },
       },
@@ -644,6 +670,19 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
     // A pantalla completa se le pasa el marco, no el div del mapa: si no, los
     // paneles y los botones se quedan fuera y solo se ve la carta pelada.
     if (shell.current) m.addControl(new FullscreenControl({ container: shell.current }), 'top-right')
+    const loadMiFondo = () => {
+      const src = m.getSource('mifondo') as { setData(d: unknown): void } | undefined
+      if (!src || !loggedIn) return
+      const b = m.getBounds()
+      fetch(`/api/mi-fondo?w=${b.getWest()}&s=${b.getSouth()}&e=${b.getEast()}&n=${b.getNorth()}`)
+        .then((r) => r.json())
+        .then((d) => {
+          if (!d.success) return
+          src.setData(d.geojson)
+          setMiFondo({ sondas: d.sondas, celdaM: d.celdaM })
+        })
+        .catch(() => {})
+    }
     const loadPois = () => {
       const src = m.getSource('pois') as { setData(d: unknown): void } | undefined
       if (!src) return
@@ -668,13 +707,14 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
       if (/webgl|context|style/i.test(msg)) setFatal(`La carta no ha podido dibujarse: ${msg}`)
     })
     m.on('data', (e) => { if (e.dataType === 'source' && e.isSourceLoaded) setTilesOk(true) })
-    m.on('load', () => { setReady(true); m.resize(); loadPois() })
+    m.on('load', () => { setReady(true); m.resize(); loadPois(); loadMiFondo() })
 
     // Si el contenedor cambia de tamaño (fuentes, rotación, barra del móvil)
     // el mapa no se entera solo.
     ro = new ResizeObserver(() => m.resize())
     ro.observe(holder.current)
     m.on('moveend', loadPois)
+    m.on('moveend', loadMiFondo)
     // `dragstart` y no `movestart`: este último lo dispara también el recentrado
     // automático, que se apagaría a sí mismo en cuanto empezara.
     m.on('dragstart', () => { siguiendo.current = false })
@@ -701,6 +741,16 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
         + subtitulo
         + filas
         + `<div style="font-size:11px;margin-top:6px"><a href="${p.osmUrl}" target="_blank" rel="noopener noreferrer" style="color:#0a7d72">Ver en OpenStreetMap</a></div>`,
+      ).addTo(m)
+    })
+    m.on('click', 'mifondo', (e) => {
+      const f = e.features?.[0]
+      if (!f) return
+      const p = f.properties as { depthM: number; samples: number; spreadM: number }
+      new Popup({ offset: 10 }).setLngLat(e.lngLat).setHTML(
+        `<strong>${String(p.depthM).replace('.', ',')} m</strong>`
+        + `<div style="font-size:12px;color:#5b6469">tu sonda · ${p.samples} pasada${p.samples === 1 ? '' : 's'}`
+        + (p.spreadM > 0 ? ` · ${String(p.spreadM).replace('.', ',')} m de diferencia entre ellas` : '') + '</div>',
       ).addTo(m)
     })
     m.on('mouseenter', 'pois', () => { m.getCanvas().style.cursor = 'pointer' })
@@ -814,6 +864,12 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
 
   useEffect(() => {
     const m = map.current
+    if (!m || !ready || !m.getLayer('mifondo')) return
+    m.setLayoutProperty('mifondo', 'visibility', showMiFondo ? 'visible' : 'none')
+  }, [showMiFondo, ready])
+
+  useEffect(() => {
+    const m = map.current
     if (!m || !ready || !m.getLayer('pois')) return
     m.setLayoutProperty('pois', 'visibility', showPois ? 'visible' : 'none')
   }, [showPois, ready])
@@ -914,6 +970,11 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
             ⏺ Grabar ruta
           </button>
         )}
+        {loggedIn && (
+          <button type="button" onClick={() => setShowMiFondo((v) => !v)} aria-pressed={showMiFondo} className={toggle(showMiFondo)}>
+            📡 Mi fondo{miFondo && miFondo.sondas > 0 ? ` (${miFondo.sondas})` : ''}
+          </button>
+        )}
         <button type="button" onClick={() => setShowPois((v) => !v)} aria-pressed={showPois} className={toggle(showPois)}>
           ⚓ Rampas y puertos
         </button>
@@ -935,6 +996,64 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
             de la última vez que tuviste cobertura.
           </p>
         </div>
+      )}
+
+      {sounder.state.soportado && (
+        <details className="pointer-events-auto w-72 max-w-full bg-paper rounded-2xl shadow-hard border border-ink/[0.07]"
+          open={sounder.state.conectado}>
+          <summary className="px-4 py-2.5 text-[14px] font-semibold text-ink cursor-pointer select-none">
+            📡 Sonda de a bordo {sounder.state.conectado && <span className="text-accent">· conectada</span>}
+          </summary>
+          <div className="px-4 pb-3 pt-1 space-y-2">
+            {!sounder.state.conectado ? (
+              <>
+                <p className="text-[12px] text-ink/60">
+                  Conecta la sonda por cable USB y la profundidad se guardará en tu derrota mientras navegas.
+                </p>
+                <label className="block text-[12px] text-ink/70">
+                  Calado del transductor
+                  <span className="block text-[11px] text-ink/50">
+                    Cuánto baja el transductor bajo la flotación. Sin esto la sonda lleva un error fijo.
+                  </span>
+                  <input type="number" step="0.05" min="0" max="10" value={sounder.caladoM}
+                    onChange={(e) => sounder.guardarCalado(Number(e.target.value))}
+                    className="mt-1 w-24 border border-ink/12 rounded-lg px-2 py-1.5 text-[13px] focus:outline-none focus:border-accent" />
+                  <span className="text-[12px] text-ink/60"> m</span>
+                </label>
+                <button type="button" onClick={sounder.conectar}
+                  className="bg-accent text-paper px-4 py-2 text-[13px] font-semibold rounded-full">
+                  Conectar sonda
+                </button>
+              </>
+            ) : (
+              <>
+                <dl className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-[13px]">
+                  <div>
+                    <dt className="text-ink/60 text-[11px]">Sonda</dt>
+                    <dd className="font-display text-[22px] leading-none text-ink">
+                      {sounder.state.depthM != null ? `${nf(sounder.state.depthM, 1)} m` : '—'}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-ink/60 text-[11px]">Agua</dt>
+                    <dd className="text-ink font-semibold">
+                      {sounder.state.waterTempC != null ? `${nf(sounder.state.waterTempC, 1)} °C` : '—'}
+                    </dd>
+                  </div>
+                </dl>
+                {/* Las frases descartadas miden la salud del cable: si suben sin
+                    parar, hay ruido o el conector está sulfatado. */}
+                <p className="text-[11px] text-ink/50">
+                  {sounder.state.frases.leidas} frases · {sounder.state.frases.descartadas} descartadas
+                  {' · '}calado {nf(sounder.caladoM, 2)} m
+                </p>
+                <button type="button" onClick={sounder.desconectar}
+                  className="px-3 py-1.5 text-[13px] text-ink/60 hover:text-ink">Desconectar</button>
+              </>
+            )}
+            {sounder.state.error && <p className="text-[12.5px] text-red-700">{sounder.state.error}</p>}
+          </div>
+        </details>
       )}
 
       {showCoords && (

@@ -16,6 +16,11 @@ export interface TrackPoint {
   acc?: number
   /** Velocidad en m/s si el aparato la da. */
   spd?: number
+  /**
+   * Profundidad en metros bajo la superficie, si había una sonda conectada.
+   * Ya lleva sumado el calado del transductor: aquí nunca entra un valor crudo.
+   */
+  depthM?: number
 }
 
 export type Visibility = 'private' | 'public'

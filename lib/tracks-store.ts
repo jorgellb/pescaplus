@@ -72,6 +72,8 @@ function clean(input: TrackInput) {
         t: Math.round(p.t),
         ...(p.acc != null && Number.isFinite(p.acc) ? { acc: Math.round(p.acc) } : {}),
         ...(p.spd != null && Number.isFinite(p.spd) ? { spd: Math.round(p.spd * 10) / 10 } : {}),
+        ...(p.depthM != null && Number.isFinite(p.depthM) && p.depthM > 0
+          ? { depthM: Math.round(p.depthM * 100) / 100 } : {}),
       }))
       .sort((a, b) => a.t - b.t),
   )

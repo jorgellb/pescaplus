@@ -11,6 +11,8 @@ const punto = z.object({
   t: z.number().int(),
   acc: z.number().nonnegative().optional(),
   spd: z.number().optional(),
+  /** Sonda con el calado ya sumado; el crudo no llega hasta aquí. */
+  depthM: z.number().positive().max(11000).optional(),
 })
 
 const schema = z.object({
