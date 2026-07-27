@@ -9,6 +9,7 @@ import FavoriteZones from '@/components/forecast/FavoriteZones'
 import { FISHING_SPOTS } from '@/lib/fishing-spots'
 import { lunarInfo, phaseEmoji } from '@/lib/solunar'
 import { todayMadridISO, fmtDateLong } from '@/lib/solunar-format'
+import OpenWindows from '@/components/forecast/OpenWindows'
 
 export const revalidate = 3600
 
@@ -56,6 +57,12 @@ export default function MejoresHorasHub() {
           </div>
           <FavoriteZones />
         </div>
+      </section>
+
+      {/* Lo primero al entrar, si hay zonas guardadas: dónde y cuándo conviene
+          salir. El componente se esconde solo cuando no hay nada que contar. */}
+      <section className="max-w-6xl mx-auto px-4 pt-8 sm:px-6 lg:px-8">
+        <OpenWindows />
       </section>
 
       <section className="max-w-6xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
