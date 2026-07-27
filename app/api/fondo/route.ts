@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSeabed, SEABED_NOTE } from '@/lib/seabed'
+import { getSeabedDetail, SEABED_NOTE, SEABED_RESOLUTION } from '@/lib/seabed'
 import { rateLimit, clientIp } from '@/lib/rate-limit'
 
 /** ¿Qué fondo hay en este punto: roca, arena, fango? */
@@ -17,9 +17,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: false, error: 'Coordenadas no válidas.' }, { status: 400 })
   }
 
-  const seabed = await getSeabed(lat, lon)
+  const seabed = await getSeabedDetail(lat, lon)
   return NextResponse.json(
-    { success: true, ...seabed, note: SEABED_NOTE },
+    { success: true, ...seabed, note: SEABED_NOTE, resolution: SEABED_RESOLUTION },
     // El sustrato del fondo no cambia de un día para otro.
     { headers: { 'Cache-Control': 'public, max-age=86400, s-maxage=2592000' } },
   )

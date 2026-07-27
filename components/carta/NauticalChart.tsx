@@ -7,6 +7,7 @@ import type { ChartProvider } from '@/lib/chart-providers'
 import type { Sounding } from '@/lib/soundings'
 import { MIN_POI_ZOOM, POI_KINDS } from '@/lib/nautical-poi-types'
 import type { Seabed } from '@/lib/seabed'
+import { SEABED_RESOLUTION } from '@/lib/seabed'
 import { useTrackRecorder } from './useTrackRecorder'
 import { formatDistance, formatDuration } from '@/lib/track-types'
 import { trackToGPX } from '@/lib/gpx'
@@ -108,6 +109,44 @@ import { WAYPOINT_TYPES, type Waypoint } from '@/lib/waypoint-types'
  * CSP sin abrirla a terceros.
  */
 setWorkerUrl('/maplibre/maplibre-gl-worker.mjs')
+
+/**
+ * Lo que se sabe del fondo en un punto.
+ *
+ * Se enseña en dos alturas a propósito. Arriba, lo que sale de una fuente
+ * medida —el relieve, que viene del reparto de sondas dentro de la celda—.
+ * Debajo, lo que sale de un modelo —el sustrato y el hábitat—, con su confianza
+ * declarada. No es lo mismo y no debe parecerlo.
+ */
+function SeabedReading({ s, relief }: { s: Seabed | null; relief: Sounding['relief'] | null }) {
+  const hayAlgo = s?.substrate || (relief && relief.kind !== 'desconocido') || s?.slope
+  if (!hayAlgo) return null
+  return (
+    <div className="space-y-1">
+      {relief && relief.kind !== 'desconocido' && (
+        <p className="text-[13px] text-ink">
+          <span className="text-ink/60">Relieve:</span> <span className="font-semibold">{relief.label}</span>
+          {relief.hint && <span className="block text-[11.5px] text-ink/60">{relief.hint}</span>}
+        </p>
+      )}
+      {s?.slope && (
+        <p className="text-[13px] text-ink">
+          <span className="text-ink/60">Pendiente:</span> <span className="font-semibold">{s.slope.label}</span>
+          {s.slope.hint && <span className="block text-[11.5px] text-ink/60">{s.slope.hint}</span>}
+        </p>
+      )}
+      {s?.substrate && (
+        <p className="text-[13px] text-ink">
+          <span className="text-ink/60">Fondo:</span> <span className="font-semibold">{s.label}</span>
+          {/* La confianza va pegada al dato que califica, no en una nota aparte
+              que nadie lee. */}
+          {s.confidence && <span className="text-[11.5px] text-ink/60"> · fiabilidad {s.confidence}</span>}
+        </p>
+      )}
+      {s?.habitat && <p className="text-[11.5px] text-ink/60">{s.habitat}{s.biozone ? ` · ${s.biozone}` : ''}</p>}
+    </div>
+  )
+}
 
 /**
  * La lectura del fondo. Cada caso se cuenta como es: una medida de un
@@ -364,6 +403,8 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
       .catch(() => setSounding({
         kind: 'desconocida', depthM: null, minM: null, maxM: null, elevationM: null,
         source: null, sourceUrl: null, label: 'Sonda no disponible ahora mismo',
+        relief: { kind: 'desconocido', rangeM: null, label: 'Sin datos de relieve', hint: null },
+        cells: null,
       }))
   }
 
@@ -791,7 +832,9 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
           chips: en móvil los chips envuelven a dos filas y el aviso de sesión
           tapaba "Espacios protegidos". Apilados en columna, se colocan solos.
           El contenedor no intercepta el ratón; sus hijos sí. */}
-      <div className="absolute top-3 left-3 right-14 z-20 flex flex-col items-start gap-2 pointer-events-none">
+      {/* La columna se desplaza sola: con la entrada de coordenadas, la ficha del
+          punto y el resto, el último panel se salía por debajo de la carta. */}
+      <div className="absolute top-3 left-3 right-14 bottom-10 z-20 flex flex-col items-start gap-2 pointer-events-none overflow-y-auto overscroll-contain">
       <div className="flex flex-wrap gap-2 pointer-events-auto">
         {provider.seamarks && (
           <button type="button" onClick={() => setSeamarks((v) => !v)} aria-pressed={seamarks} className={toggle(seamarks)}>
@@ -958,11 +1001,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
               aria-label="Cerrar la sonda" className="text-ink/40 hover:text-ink leading-none text-[15px]">×</button>
           </div>
           <div className="mt-1"><SoundingReading s={sounding} onRetry={() => clickedAt && pedirSonda(clickedAt.lat, clickedAt.lon)} /></div>
-          {seabed?.substrate && (
-            <p className="text-[13px] text-ink mt-1.5">
-              <span className="text-ink/60">Fondo:</span> <span className="font-semibold">{seabed.label}</span>
-            </p>
-          )}
+          <div className="mt-2"><SeabedReading s={seabed} relief={sounding?.relief ?? null} /></div>
           <div className="mt-3 pt-3 border-t border-ink/[0.07]">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/60 mb-1.5">El mar aquí</p>
             <PointWeather c={weather} />
@@ -970,6 +1009,12 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
           <p className="text-[11px] text-ink/60 mt-2.5">
             {formatNautical(clickedAt.lat, clickedAt.lon).lat} · {formatNautical(clickedAt.lat, clickedAt.lon).lon}
           </p>
+          {(seabed?.substrate || sounding?.relief.kind !== 'desconocido') && (
+            <details className="mt-1.5">
+              <summary className="text-[11px] text-ink/50 cursor-pointer">Hasta dónde llega este dato</summary>
+              <p className="text-[11px] text-ink/60 mt-1">{SEABED_RESOLUTION} Para saber si hay una piedra concreta bajo la quilla, la ecosonda de a bordo.</p>
+            </details>
+          )}
         </div>
       )}
 
@@ -981,11 +1026,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
           </p>
           <div className="rounded-xl bg-ink/[0.03] px-3 py-2 space-y-2">
             <SoundingReading s={sounding} onRetry={() => draft && pedirSonda(draft.lat, draft.lon)} />
-            {seabed?.substrate && (
-              <p className="text-[13px] text-ink">
-                <span className="text-ink/60">Fondo:</span> <span className="font-semibold">{seabed.label}</span>
-              </p>
-            )}
+            <SeabedReading s={seabed} relief={sounding?.relief ?? null} />
             <div className="pt-2 border-t border-ink/[0.07]"><PointWeather c={weather} /></div>
           </div>
           <input autoFocus value={name} onChange={(e) => setName(e.target.value)} maxLength={80}

@@ -21,6 +21,9 @@
  */
 const WMS = 'https://ows.emodnet-seabedhabitats.eu/geoserver/emodnet_open/wms'
 const LAYER = 'eusm2025_subs_full'
+const LAYER_HABITAT = 'eusm2025_eunis2019_full'
+const LAYER_CONF = 'eusm2025_subs_conf'
+const DEPTH = 'https://rest.emodnet-bathymetry.eu/depth_sample'
 
 export const SEABED_ATTRIBUTION = '© EMODnet Seabed Habitats (EUSeaMap)'
 export const SEABED_NOTE =
@@ -30,15 +33,45 @@ export const SEABED_NOTE =
 export const SEABED_LEGEND_URL =
   `${WMS}?service=WMS&version=1.3.0&request=GetLegendGraphic&layer=${LAYER}&format=image%2Fpng`
 
+/**
+ * La resolución REAL de cada fuente, dicha sin adornos.
+ *
+ * Se enseña en la interfaz porque sin ella el mapa miente por omisión: un color
+ * uniforme parece un dato uniforme, y lo que hay debajo son polígonos de
+ * doscientos kilómetros cuadrados. Medido: los polígonos de sustrato del
+ * Estrecho miden 228, 160 y 7 km²; la batimetría no distingue dos puntos
+ * separados 60 m.
+ */
+export const SEABED_RESOLUTION =
+  'El tipo de fondo procede de un modelo de escala amplia: sus manchas miden kilómetros, no metros. El relieve y la pendiente salen de la batimetría, con celdas de unos 100 m.'
+
+export interface Slope {
+  /** Pendiente máxima alrededor del punto, en porcentaje. */
+  percent: number | null
+  label: string
+  hint: string | null
+}
+
 export interface Seabed {
   /** null cuando no hay dato en ese punto: no se rellena con lo más probable. */
   substrate: string | null
   /** El valor original en inglés, por si la traducción se queda corta. */
   raw: string | null
   label: string
+  /** Hábitat EUNIS: dice bastante más que "roca" (p. ej. coralígeno). */
+  habitat: string | null
+  /** Piso: infralitoral, circalitoral… Marca la luz y con ella la vida. */
+  biozone: string | null
+  /** Cuánta confianza declara la fuente en su propia clasificación. */
+  confidence: 'alta' | 'media' | 'baja' | null
+  /** Pendiente del fondo alrededor: fuerte es indicio de roca. */
+  slope: Slope | null
 }
 
-const DESCONOCIDO: Seabed = { substrate: null, raw: null, label: 'Sin datos de fondo aquí' }
+const DESCONOCIDO: Seabed = {
+  substrate: null, raw: null, label: 'Sin datos de fondo aquí',
+  habitat: null, biozone: null, confidence: null, slope: null,
+}
 
 /**
  * Las clases de EUSeaMap, en cristiano. Lo que no esté aquí se enseña tal cual
@@ -63,7 +96,10 @@ export function translateSubstrate(raw: string | null | undefined): Seabed {
   const limpio = (raw ?? '').trim()
   if (!limpio) return DESCONOCIDO
   const es = CLASES[limpio.toLowerCase()]
-  return { substrate: es ?? limpio, raw: limpio, label: es ?? limpio }
+  return {
+    substrate: es ?? limpio, raw: limpio, label: es ?? limpio,
+    habitat: null, biozone: null, confidence: null, slope: null,
+  }
 }
 
 /**
@@ -77,6 +113,123 @@ function bboxAlrededor(lat: number, lon: number): string {
   const y = (Math.log(Math.tan(((90 + lat) * Math.PI) / 360)) / (Math.PI / 180)) * (R / 180)
   const d = 30 // metros a cada lado: la resolución de la fuente es mucho mayor
   return `${x - d},${y - d},${x + d},${y + d}`
+}
+
+/** Una consulta a GetFeatureInfo con reintentos, devolviendo las propiedades. */
+async function consultarWMS(
+  lat: number, lon: number, capa: string, propiedades: string,
+): Promise<Record<string, unknown> | null> {
+  const url = `${WMS}?service=WMS&version=1.3.0&request=GetFeatureInfo`
+    + `&layers=${capa}&query_layers=${capa}&styles=&format=image%2Fpng`
+    + `&info_format=application%2Fjson&crs=EPSG%3A3857`
+    + `&width=3&height=3&i=1&j=1&feature_count=1`
+    + (propiedades ? `&propertyName=${propiedades}` : '')
+    + `&bbox=${encodeURIComponent(bboxAlrededor(lat, lon))}`
+
+  // Mismo motivo que en las sondas: la primera conexión saliente puede morir.
+  for (const espera of [0, 400, 1200]) {
+    if (espera > 0) await new Promise((r) => setTimeout(r, espera))
+    try {
+      const res = await fetch(url, {
+        signal: AbortSignal.timeout(8000),
+        headers: { Accept: 'application/json', 'User-Agent': 'PescaPlus/1.0 (+https://pescaplus.es)' },
+      })
+      if (!res.ok) continue
+      const data = (await res.json()) as { features?: { properties?: Record<string, unknown> }[] }
+      return data.features?.[0]?.properties ?? null
+    } catch (error) {
+      if (espera === 1200) console.warn(`Capa de fondo ${capa} no disponible:`, error)
+    }
+  }
+  return null
+}
+
+/** La confianza que declara la fuente: 1 baja, 2 media, 3 alta. */
+function leerConfianza(v: unknown): Seabed['confidence'] {
+  const n = Number(v)
+  if (n >= 3) return 'alta'
+  if (n === 2) return 'media'
+  if (n === 1) return 'baja'
+  return null
+}
+
+/** Una sonda suelta, sin caché ni traducción: solo el número. */
+async function profundidad(lat: number, lon: number): Promise<number | null> {
+  try {
+    const res = await fetch(`${DEPTH}?geom=POINT(${lon.toFixed(6)}%20${lat.toFixed(6)})`, {
+      signal: AbortSignal.timeout(8000),
+      headers: { Accept: 'application/json', 'User-Agent': 'PescaPlus/1.0 (+https://pescaplus.es)' },
+    })
+    if (!res.ok) return null
+    const d = (await res.json()) as { avg?: number }
+    return typeof d.avg === 'number' && Number.isFinite(d.avg) ? d.avg : null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Pendiente del fondo alrededor del punto.
+ *
+ * Se mide contra cuatro vecinos a 200 m, y no a menos, porque la celda de la
+ * batimetría ronda los 100 m: a 60 m devuelve el mismo valor y la pendiente
+ * saldría siempre cero. Está comprobado midiendo.
+ *
+ * Una caída fuerte es de los mejores indicios de roca que se pueden sacar a
+ * distancia — en Columbretes da 27,8% hacia el islote— pero es un INDICIO: un
+ * talud de arena también baja.
+ */
+export async function getSlope(lat: number, lon: number): Promise<Slope | null> {
+  const D = 0.0018 // ≈ 200 m
+  const dLon = D / Math.max(0.2, Math.cos((lat * Math.PI) / 180))
+  const [centro, n, s, e, o] = await Promise.all([
+    profundidad(lat, lon),
+    profundidad(lat + D, lon), profundidad(lat - D, lon),
+    profundidad(lat, lon + dLon), profundidad(lat, lon - dLon),
+  ])
+  if (centro == null) return null
+  const desniveles = [n, s, e, o]
+    .filter((v): v is number => v != null)
+    .map((v) => Math.abs(v - centro) / 200 * 100)
+  if (desniveles.length === 0) return null
+
+  const pct = Math.round(Math.max(...desniveles) * 10) / 10
+  const t = pct.toLocaleString('es-ES', { maximumFractionDigits: 1 })
+  if (pct >= 15) return { percent: pct, label: `Fuerte · ${t}%`, hint: 'Caída pronunciada: suele haber roca o veril.' }
+  if (pct >= 5) return { percent: pct, label: `Acusada · ${t}%`, hint: 'Cambio de fondo marcado.' }
+  return { percent: pct, label: `Suave · ${t}%`, hint: null }
+}
+
+/**
+ * Todo lo que se puede saber del fondo en un punto, de varias fuentes a la vez.
+ *
+ * Van en paralelo porque son ocho peticiones a dos servicios distintos y en
+ * serie el usuario esperaría medio minuto mirando un panel vacío.
+ */
+export async function getSeabedDetail(lat: number, lon: number): Promise<Seabed> {
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return DESCONOCIDO
+  if (lat < -90 || lat > 90 || lon < -180 || lon > 180) return DESCONOCIDO
+
+  const [base, habitat, conf, slope] = await Promise.all([
+    getSeabed(lat, lon),
+    consultarWMS(lat, lon, LAYER_HABITAT, 'substrate,biozone,all2019d,all2019dl2'),
+    consultarWMS(lat, lon, LAYER_CONF, ''),
+    getSlope(lat, lon),
+  ])
+
+  const texto = (v: unknown) => {
+    const t = String(v ?? '').trim()
+    return t && t !== ' ' ? t : null
+  }
+  return {
+    ...base,
+    // El nivel 2 ("MC1: Circalittoral rock") describe mejor para pescar que el
+    // detalle completo, que a veces baja a una especie concreta.
+    habitat: texto(habitat?.all2019d) ?? texto(habitat?.all2019dl2),
+    biozone: texto(habitat?.biozone),
+    confidence: leerConfianza(conf?.GRAY_INDEX),
+    slope,
+  }
 }
 
 /** Qué fondo hay en un punto. No lanza: sin respuesta, se dice que no se sabe. */

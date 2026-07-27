@@ -32,6 +32,42 @@ export type SoundingKind =
   /** No se ha podido consultar. */
   | 'desconocida'
 
+/**
+ * Cómo de movido está el fondo dentro de la celda muestreada.
+ *
+ * Sale GRATIS: la fuente ya devuelve el mínimo, el máximo y la desviación de las
+ * sondas que promedió, y ese reparto es una medida directa del relieve. Un
+ * desnivel de 32 m dentro de una celda es roca; uno de 0,4 m es un llano de
+ * arena. Está comprobado: Columbretes da 32,1 m de rango y el golfo de Cádiz
+ * 0,4 m.
+ *
+ * OJO CON LO QUE ES Y LO QUE NO: es un INDICIO de relieve, no una lectura del
+ * sustrato. Una roca cubierta de arena y una duna dan la misma señal.
+ */
+export type Relief = 'muy-irregular' | 'irregular' | 'poco-movido' | 'liso' | 'desconocido'
+
+export interface ReliefReading {
+  kind: Relief
+  /** Desnivel entre el punto más hondo y el menos hondo de la celda, en metros. */
+  rangeM: number | null
+  label: string
+  /** Qué sugiere, dicho como sugerencia. */
+  hint: string | null
+}
+
+export function readRelief(rangeM: number | null, cells: number | null): ReliefReading {
+  // Con una sola celda la fuente no da reparto: no hay nada que medir.
+  if (rangeM == null || cells == null || cells < 2) {
+    return { kind: 'desconocido', rangeM: null, label: 'Sin datos de relieve', hint: null }
+  }
+  const r = Math.round(rangeM * 10) / 10
+  const t = metros(r)
+  if (r >= 10) return { kind: 'muy-irregular', rangeM: r, label: `Muy irregular · ${t} m de desnivel`, hint: 'Compatible con roca o piedra suelta.' }
+  if (r >= 3) return { kind: 'irregular', rangeM: r, label: `Irregular · ${t} m de desnivel`, hint: 'Puede haber cantos o roca dispersa.' }
+  if (r >= 1) return { kind: 'poco-movido', rangeM: r, label: `Poco movido · ${t} m de desnivel`, hint: null }
+  return { kind: 'liso', rangeM: r, label: `Liso · ${t} m de desnivel`, hint: 'Compatible con arena o fango.' }
+}
+
 export interface Sounding {
   kind: SoundingKind
   /** Metros de fondo, SIEMPRE positivos. null salvo en 'medida'/'aproximada'. */
@@ -47,6 +83,10 @@ export interface Sounding {
   sourceUrl: string | null
   /** Texto listo para pintar. Nunca promete más de lo que hay. */
   label: string
+  /** El relieve dentro de la celda: el mejor indicio de roca que da la fuente. */
+  relief: ReliefReading
+  /** Cuántas sondas promedió la fuente aquí: mide lo fino que es el dato. */
+  cells: number | null
 }
 
 const ENDPOINT = 'https://rest.emodnet-bathymetry.eu/depth_sample'
@@ -59,13 +99,17 @@ interface RawSample {
   min?: number
   max?: number
   stdev?: number
+  elementarySurfaces?: number
   interpolationType?: boolean
   reference?: { identifier?: string; type?: string; metadata_url?: string }
 }
 
+const SIN_RELIEVE: ReliefReading = { kind: 'desconocido', rangeM: null, label: 'Sin datos de relieve', hint: null }
+
 const UNKNOWN: Sounding = {
   kind: 'desconocida', depthM: null, minM: null, maxM: null, elevationM: null,
   source: null, sourceUrl: null, label: 'Sonda no disponible aquí',
+  relief: SIN_RELIEVE, cells: null,
 }
 
 /**
@@ -110,12 +154,17 @@ export function interpretSample(raw: RawSample): Sounding {
   const source = rawId && /^\d+$/.test(rawId) ? `Levantamiento nº ${rawId}` : rawId
   const sourceUrl = raw.reference?.metadata_url?.trim() || null
 
+  const cells = typeof raw.elementarySurfaces === 'number' ? raw.elementarySurfaces : null
+  const rango = typeof raw.min === 'number' && typeof raw.max === 'number' ? raw.max - raw.min : null
+  const relief = readRelief(rango, cells)
+
   // Positivo = por encima del nivel del mar. No es un fondo de 0 m.
   if (avg >= 0) {
     return {
       kind: 'tierra', depthM: null, minM: null, maxM: null,
       elevationM: round(avg), source, sourceUrl,
       label: 'Este punto está en tierra',
+      relief: SIN_RELIEVE, cells,
     }
   }
 
@@ -140,6 +189,8 @@ export function interpretSample(raw: RawSample): Sounding {
     label: enLaOrilla
       ? 'Justo en la orilla (menos de 0,5 m)'
       : aproximada ? `≈ ${metros(depthM)} m (modelo global)` : `${metros(depthM)} m`,
+    relief,
+    cells,
   }
 }
 
