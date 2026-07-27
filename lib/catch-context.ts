@@ -80,11 +80,19 @@ export async function buildCatchContext(
   const dias = Math.abs(Date.now() - t) / 86_400_000
   const dentroDeParte = dias <= DIAS_CON_PARTE
 
+  /*
+   * Tope total. Apuntar una captura no puede quedarse colgado porque una fuente
+   * externa tarde: lo que no llegue a tiempo se queda en null y se dice en
+   * `faltan`, que es justo para lo que existe ese campo.
+   */
+  const aTiempo = <T,>(p: Promise<T>): Promise<T | null> =>
+    Promise.race([p.catch(() => null), new Promise<null>((r) => setTimeout(() => r(null), 9000))])
+
   const [tides, sonda, seabed, fc] = await Promise.all([
-    getTides(lat, lon).catch(() => null),
-    getSounding(lat, lon).catch(() => null),
-    getSeabed(lat, lon).catch(() => null),
-    dentroDeParte ? getForecastAt(lat, lon).catch(() => null) : Promise.resolve(null),
+    aTiempo(getTides(lat, lon)),
+    aTiempo(getSounding(lat, lon)),
+    aTiempo(getSeabed(lat, lon)),
+    dentroDeParte ? aTiempo(getForecastAt(lat, lon)) : Promise.resolve(null),
   ])
 
   // La hora del parte más cercana al momento de la captura.

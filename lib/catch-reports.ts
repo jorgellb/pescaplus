@@ -96,12 +96,23 @@ export async function shareCatch(input: CatchInput, userId?: string | null): Pro
    * están caídas se guarda sin ella: perder el registro por no poder consultar
    * el viento sería absurdo.
    */
+  /*
+   * El sello solo se construye si hay base de datos.
+   *
+   * Sin ella estamos en el camino de memoria —pruebas y demo—, donde la captura
+   * no se persiste en ningún sitio y las cuatro llamadas de red no aportan nada.
+   * Peor: colgaban la suite de pruebas esperando a EMODnet y a Open-Meteo, con
+   * fallos intermitentes según lo rápido que estuviera cada servicio ese día.
+   * Una prueba unitaria no debe salir a internet.
+   */
   let context: object | null = null
-  try {
-    const { buildCatchContext } = await import('@/lib/catch-context')
-    context = { ...(await buildCatchContext(lat, lon, input.dateISO, timeISO)), puntoExacto: exacto }
-  } catch (error) {
-    console.warn('No se ha podido sellar la captura con sus condiciones:', error)
+  if (isDatabaseConfigured()) {
+    try {
+      const { buildCatchContext } = await import('@/lib/catch-context')
+      context = { ...(await buildCatchContext(lat, lon, input.dateISO, timeISO)), puntoExacto: exacto }
+    } catch (error) {
+      console.warn('No se ha podido sellar la captura con sus condiciones:', error)
+    }
   }
 
   const row = {
