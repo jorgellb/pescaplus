@@ -228,3 +228,36 @@ export async function listUserCatchesWithContext(userId: string, days = 730) {
     return []
   }
 }
+
+export interface UserSpotCatches {
+  count: number
+  lastDateISO: string
+  topSpeciesIds: string[]
+}
+
+/**
+ * Resumen personal de lo que TÚ has compartido en esta zona — no confundir
+ * con `getSpotActivity` (agregado de toda la comunidad). El diario en sí
+ * sigue viviendo solo en el navegador; esto solo ve lo que ya decidiste
+ * compartir, igual que el resto del sistema de capturas.
+ */
+export async function getUserSpotCatches(userId: string, spotSlug: string, days = 730): Promise<UserSpotCatches | null> {
+  if (!userId || !isDatabaseConfigured()) return null
+  const desde = addDaysISO(todayMadridISO(), -days)
+  try {
+    const { prisma } = await import('@/lib/prisma')
+    const rows = await prisma.catchReport.findMany({
+      where: { userId, spotSlug, dateISO: { gte: desde } },
+      orderBy: { dateISO: 'desc' },
+      select: { speciesId: true, dateISO: true, qty: true },
+    })
+    if (rows.length === 0) return null
+    const bySpecies = new Map<string, number>()
+    for (const r of rows) bySpecies.set(r.speciesId, (bySpecies.get(r.speciesId) ?? 0) + r.qty)
+    const topSpeciesIds = [...bySpecies.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([id]) => id)
+    return { count: rows.length, lastDateISO: rows[0].dateISO, topSpeciesIds }
+  } catch (error) {
+    console.warn('User spot catches read failed:', error)
+    return null
+  }
+}

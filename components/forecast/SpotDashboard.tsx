@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import SpotCatchActivity from './SpotCatchActivity'
-import { getSpotActivity } from '@/lib/catch-reports'
+import { getSpotActivity, getUserSpotCatches } from '@/lib/catch-reports'
 import Link from 'next/link'
 import Layout from '@/components/Layout'
 import FishRating from '@/components/FishRating'
@@ -248,6 +248,7 @@ export default async function SpotDashboard({
     aemetZone ? getAemetBulletin(aemetZone.costa, aemetZone.keyword) : Promise.resolve(null as AemetBulletin | null),
     getSessionUser(),
   ])
+  const userCatches = user ? await getUserSpotCatches(user.id, s.slug) : null
   const agreementPromise = getModelAgreement(s.lat, s.lon)
   const stationPromise: Promise<StationData> = station
     ? Promise.all([
@@ -331,6 +332,27 @@ export default async function SpotDashboard({
   // Best of the 7 days (to plan the weekend at a glance).
   const dayAverages = byDay.map((g) => Math.round(g.hours.reduce((sum, h) => sum + h.score, 0) / g.hours.length))
   const bestDayIdx = dayAverages.length ? dayAverages.indexOf(Math.max(...dayAverages)) : -1
+
+  // Racha de días "Excelente" (≥70) seguidos en los próximos 7 días — la
+  // pregunta real al planificar un fin de semana no es "¿qué día es mejor?"
+  // sino "¿hay una racha para aprovechar?".
+  const GOOD_SCORE = 70
+  const streaks: { start: number; end: number }[] = []
+  let streakStart = -1
+  for (let i = 0; i <= dayAverages.length; i++) {
+    const good = i < dayAverages.length && dayAverages[i] >= GOOD_SCORE
+    if (good) {
+      if (streakStart === -1) streakStart = i
+    } else {
+      if (streakStart !== -1 && i - streakStart >= 2) streaks.push({ start: streakStart, end: i - 1 })
+      streakStart = -1
+    }
+  }
+  const bestStreak = streaks.length ? streaks.reduce((a, b) => (b.end - b.start > a.end - a.start ? b : a)) : null
+
+  // Mareas de la semana de un vistazo: mismo coeficiente que ya se calcula
+  // día a día en la previsión horaria, aquí simplemente listado para los 7.
+  const weekTides = s.type === 'mar' ? days.map((d) => tideCoefficient(d.moonPhase)) : []
 
   const regulation = getRegulation(s.region)
   const conditionsWord = (v: number) => (v >= 70 ? 'Buenas' : v >= 45 ? 'Regulares' : 'Desfavorables')
@@ -973,6 +995,24 @@ export default async function SpotDashboard({
           <p className="font-mono text-[10px] uppercase tracking-wide text-ink/35">Lista orientativa, no sustituye tu propio juicio ni la normativa de navegación vigente.</p>
         </div>
 
+        {/* Tus propias capturas compartidas en esta zona — no confundir con
+            SpotCatchActivity, que es el agregado de toda la comunidad. */}
+        {userCatches && (
+          <div className="border border-ink/[0.07] rounded-2xl bg-paper p-5 space-y-2">
+            <p className="font-display uppercase text-lg leading-none inline-flex items-center gap-2">
+              <Icon name="fish" className="w-4 h-4" strokeWidth={1.8} />Tus capturas en esta zona
+            </p>
+            <p className="text-sm text-ink/70">
+              Has compartido <strong className="text-ink">{userCatches.count}</strong> {userCatches.count === 1 ? 'captura' : 'capturas'} aquí
+              {userCatches.topSpeciesIds.length > 0 && <> · {userCatches.topSpeciesIds.map((id) => getSpecies(id).name).join(', ')}</>}
+              {' '}· última el {fmtDateLong(userCatches.lastDateISO)}.
+            </p>
+            <Link href={`/diario?zona=${s.slug}`} className="text-sm font-semibold text-accent hover:underline inline-flex items-center gap-1">
+              Ver en tu diario →
+            </Link>
+          </div>
+        )}
+
         {/* Private field notes — the section itself handles the logged-out state */}
         <div id="notas" className="scroll-mt-28">
           <SpotNotes spotSlug={s.slug} loggedIn={!!user} />
@@ -1060,12 +1100,23 @@ export default async function SpotDashboard({
         {/* 7-day outlook */}
         <div className="space-y-4">
           <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3">Próximos 7 días</h2>
+          {bestStreak && (
+            <p className="inline-flex items-center gap-2 rounded-xl border border-accent/30 bg-accent/[0.06] px-3.5 py-2 text-sm">
+              <Icon name="chartUp" className="w-4 h-4 text-accent shrink-0" strokeWidth={1.8} />
+              <span className="text-ink/85">
+                <strong className="text-ink">Racha de {bestStreak.end - bestStreak.start + 1} días buenos</strong> seguidos:{' '}
+                {fmtDayLabel(days[bestStreak.start].date)} a {fmtDayLabel(days[bestStreak.end].date)}.
+              </span>
+            </p>
+          )}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
             {days.map((d, di) => {
               const dmajors = d.periods.filter((p) => p.kind === 'mayor')
               const isBest = di === bestDayIdx
+              const inStreak = bestStreak != null && di >= bestStreak.start && di <= bestStreak.end
+              const coef = weekTides[di] ?? null
               return (
-                <div key={d.date} className={`border rounded-xl p-3 space-y-2 text-center ${isBest ? 'border-accent bg-accent/[0.06]' : 'border-ink/[0.07] bg-paper'}`}>
+                <div key={d.date} className={`border rounded-xl p-3 space-y-2 text-center ${isBest ? 'border-accent bg-accent/[0.06]' : inStreak ? 'border-accent/40 bg-accent/[0.03]' : 'border-ink/[0.07] bg-paper'}`}>
                   <p className="font-mono text-[11px] font-bold uppercase tracking-wide text-ink/60 capitalize inline-flex items-center justify-center gap-1">{isBest && <Icon name="star" className="w-3 h-3 text-amber-500" />}{fmtDayLabel(d.date)}</p>
                   <FishRating value={d.rating} className="justify-center" />
                   <div className="font-mono text-[11px] text-ink/60 space-y-0.5">
@@ -1073,6 +1124,9 @@ export default async function SpotDashboard({
                       <div key={i}>{fmtTime(p.start)}</div>
                     ))}
                   </div>
+                  {coef != null && (
+                    <p className="font-mono text-[10px] text-ink/50">Coef. {coef} · {coefficientLabel(coef)}</p>
+                  )}
                   {isBest && <p className="font-mono text-[9px] uppercase tracking-widest text-accent">Mejor día</p>}
                 </div>
               )
