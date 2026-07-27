@@ -33,7 +33,18 @@ function rowTo(row: {
   }
 }
 
-/** Los puntos que caen dentro de un recuadro del mapa. */
+/** Tope POR TIPO, no total: ver el porqué en `poisInBBox`. */
+const TOPE_POR_TIPO = 250
+
+/**
+ * Los puntos que caen dentro de un recuadro del mapa.
+ *
+ * El tope se aplica a cada tipo por separado, y no al conjunto, a propósito. Con
+ * un único `take` sobre toda la consulta, en una costa densa las 500 primeras
+ * filas pueden ser todas rampas y dejar fuera los pecios enteros —que son los
+ * menos y los que más interesan a quien pesca—. Truncar es inevitable; truncar
+ * siempre lo mismo, no.
+ */
 export async function poisInBBox(
   w: number, s: number, e: number, n: number,
   kinds?: PoiKind[],
@@ -41,18 +52,16 @@ export async function poisInBBox(
   if (!isDatabaseConfigured()) return []
   if (![w, s, e, n].every(Number.isFinite)) return []
   const pedidos = (kinds ?? []).filter((k) => KINDS.has(k))
+  const buscados = pedidos.length > 0 ? pedidos : POI_KINDS.map((k) => k.id)
   try {
     const { prisma } = await import('@/lib/prisma')
-    const rows = await prisma.nauticalPoi.findMany({
-      where: {
-        lat: { gte: s, lte: n },
-        lon: { gte: w, lte: e },
-        ...(pedidos.length > 0 ? { kind: { in: pedidos } } : {}),
-      },
-      // Un tope duro: con el mapa muy abierto podrían entrar miles.
-      take: 500,
-    })
-    return rows.map(rowTo)
+    const porTipo = await Promise.all(buscados.map((kind) =>
+      prisma.nauticalPoi.findMany({
+        where: { kind, lat: { gte: s, lte: n }, lon: { gte: w, lte: e } },
+        take: TOPE_POR_TIPO,
+      }),
+    ))
+    return porTipo.flat().map(rowTo)
   } catch (error) {
     console.warn('Puntos náuticos: lectura fallida:', error)
     return []
