@@ -1,4 +1,7 @@
-import type { Waypoint, WaypointInput } from '@/lib/waypoints-store'
+// Desde los módulos de tipos, no desde los stores: así este fichero puede
+// usarse también en el navegador sin arrastrar Prisma detrás.
+import type { Waypoint, WaypointInput } from '@/lib/waypoint-types'
+import type { Track, TrackPoint } from '@/lib/track-types'
 
 /**
  * GPX 1.1 import/export — the format every plotter and chartplotter app reads.
@@ -81,6 +84,62 @@ export function fromGPX(xml: string, max = 2000): WaypointInput[] {
       depthM: depth,
       notes: tag(body, 'desc') || tag(body, 'cmt'),
       visibility: 'private',
+    })
+  }
+  return out
+}
+
+/**
+ * Una ruta grabada, como `<trk>` de GPX 1.1.
+ *
+ * Los `<trkpt>` llevan su `<time>` porque sin él la derrota deja de ser una
+ * derrota: un plotter no puede sacar velocidades ni saber en qué sentido se
+ * navegó, y queda como una línea muerta sobre la carta.
+ */
+export function trackToGPX(track: Track, creator = 'PescaPlus'): string {
+  const pts = track.points.map((p) => {
+    const cuerpo = [`      <time>${new Date(p.t).toISOString()}</time>`]
+      .concat(p.spd != null ? [`      <extensions><speed>${p.spd}</speed></extensions>`] : [])
+      .join('\n')
+    return `    <trkpt lat="${p.lat}" lon="${p.lon}">\n${cuerpo}\n    </trkpt>`
+  }).join('\n')
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="${esc(creator)}" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata>
+    <name>${esc(track.name)}</name>
+    <time>${new Date(track.startedAt).toISOString()}</time>
+  </metadata>
+  <trk>
+    <name>${esc(track.name)}</name>
+${track.notes ? `    <desc>${esc(track.notes)}</desc>\n` : ''}    <trkseg>
+${pts}
+    </trkseg>
+  </trk>
+</gpx>`
+}
+
+/**
+ * Lee los `<trkpt>` de un GPX. Tolerante como el de waypoints: los ficheros
+ * reales vienen de una docena de aparatos con prefijos y extensiones distintas.
+ * Un punto sin hora no se descarta —muchos plotters no la escriben—, se le pone
+ * la del anterior más un segundo para no romper el orden.
+ */
+export function trackFromGPX(xml: string, max = 20000): TrackPoint[] {
+  const out: TrackPoint[] = []
+  const re = /<(?:\w+:)?trkpt\b([^>]*)>([\s\S]*?)<\/(?:\w+:)?trkpt>|<(?:\w+:)?trkpt\b([^>]*)\/>/gi
+  let m: RegExpExecArray | null
+  while ((m = re.exec(xml)) && out.length < max) {
+    const attrs = m[1] ?? m[3] ?? ''
+    const lat = Number(/lat\s*=\s*["']([^"']+)["']/i.exec(attrs)?.[1])
+    const lon = Number(/lon\s*=\s*["']([^"']+)["']/i.exec(attrs)?.[1])
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue
+    if (Math.abs(lat) > 90 || Math.abs(lon) > 180) continue
+    const iso = /<(?:\w+:)?time>([^<]+)<\/(?:\w+:)?time>/i.exec(m[2] ?? '')?.[1]
+    const t = iso ? Date.parse(iso) : NaN
+    out.push({
+      lat, lon,
+      t: Number.isFinite(t) ? t : (out.length > 0 ? out[out.length - 1].t + 1000 : Date.now()),
     })
   }
   return out

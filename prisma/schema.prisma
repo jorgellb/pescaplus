@@ -156,6 +156,8 @@ model User {
   reviews  Review[]         @relation("ReviewAuthor")
   waypoints Waypoint[]
 
+  tracks    Track[]   
+
   @@index([email])
 }
 
@@ -332,6 +334,37 @@ model NauticalPoi {
   @@unique([osmType, osmId])
   @@index([kind])
   @@index([lat, lon])
+}
+
+/**
+ * Rutas grabadas con el GPS.
+ *
+ * Valen exactamente lo mismo que un waypoint en cuanto a privacidad: la derrota
+ * de una jornada enseña dónde pesca alguien, cuánto tarda y por dónde entra.
+ * Nacen PRIVADAS y el dueño va en el WHERE de cada consulta, igual que en
+ * lib/waypoints-store.ts.
+ *
+ * Los puntos van en JSON y no en tabla aparte porque una ruta se lee y se
+ * escribe entera, nunca por trozos, y así se ahorra un join en cada lectura.
+ */
+model Track {
+  id         String   @id @default(cuid())
+  userId     String
+  name       String
+  notes      String   @default("")
+  /** [{ lat, lon, t, alt?, acc? }], en orden. Ver lib/track-types.ts. */
+  points     Json
+  /** Métricas ya calculadas: listarlas no debe obligar a recorrer los puntos. */
+  distanceM  Float    @default(0)
+  durationS  Int      @default(0)
+  startedAt  DateTime
+  /** private | public. Nunca por defecto otra cosa que 'private'. */
+  visibility String   @default("private")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, startedAt])
 }
 
 model ProtectedArea {

@@ -1,12 +1,15 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { Map as MapLibreMap, NavigationControl, ScaleControl, GeolocateControl, Marker, Popup, setWorkerUrl, type StyleSpecification } from 'maplibre-gl'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Map as MapLibreMap, NavigationControl, ScaleControl, GeolocateControl, FullscreenControl, Marker, Popup, setWorkerUrl, type StyleSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import type { ChartProvider } from '@/lib/chart-providers'
 import type { Sounding } from '@/lib/soundings'
 import { MIN_POI_ZOOM, POI_KINDS } from '@/lib/nautical-poi-types'
 import type { Seabed } from '@/lib/seabed'
+import { useTrackRecorder } from './useTrackRecorder'
+import { formatDistance, formatDuration } from '@/lib/track-types'
+import { trackToGPX } from '@/lib/gpx'
 import { SEABED_LEGEND_URL, SEABED_NOTE } from '@/lib/seabed'
 
 interface PointConditions {
@@ -194,6 +197,19 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
   const [zone, setZone] = useState<{ coverage: string; areas: { name: string; recreationalFishing: boolean | null; requiresPermit: boolean | null; rulesUrl: string; sourceName: string; sourceDate: string }[]; pescarec: { note: string; url: string } | null } | null>(null)
   const [err, setErr] = useState('')
   const markers = useRef<{ remove(): void }[]>([])
+  const rec = useTrackRecorder()
+  /**
+   * Si el mapa sigue al barco. Se apaga en cuanto el usuario arrastra: grabando
+   * una derrota es normal querer mirar la costa de al lado, y recentrar en cada
+   * posición nueva le arranca el mapa de debajo del dedo. Para volver a
+   * seguirlo está el botón de posición de MapLibre.
+   */
+  const siguiendo = useRef(true)
+  const [savingTrack, setSavingTrack] = useState(false)
+  const [trackName, setTrackName] = useState('')
+  const [trackDone, setTrackDone] = useState<string | null>(null)
+  const [savedTracks, setSavedTracks] = useState<{ id: string; name: string; distanceM: number; durationS: number; startedAt: number }[]>([])
+  const [shownTrack, setShownTrack] = useState<string | null>(null)
 
   /**
    * Pide la sonda de un punto. EMODnet falla de vez en cuando —la primera
@@ -202,6 +218,92 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
    * Solo toca setters, cuya identidad React garantiza estable, así que al efecto
    * del mapa (que se ejecuta una vez) le sirve la copia que capturó.
    */
+  /**
+   * La derrota, a un fichero GPX, sin pasar por el servidor.
+   *
+   * Grabar no exige cuenta: quien acaba de descubrir la página puede salir a
+   * navegar, grabar su derrota y llevársela al plotter. Guardarla en PescaPlus
+   * sí la exige, porque hay que saber de quién es.
+   */
+  const descargarGPX = () => {
+    const pts = rec.state.points
+    if (pts.length < 2) return
+    const nombre = trackName.trim() || `Salida del ${new Date(pts[0].t).toLocaleDateString('es-ES')}`
+    const xml = trackToGPX({
+      id: 'local', userId: '', name: nombre, notes: '', points: pts,
+      distanceM: rec.state.distanceM, durationS: rec.state.durationS,
+      startedAt: pts[0].t, visibility: 'private', createdAt: Date.now(), updatedAt: Date.now(),
+    })
+    const url = URL.createObjectURL(new Blob([xml], { type: 'application/gpx+xml' }))
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${nombre.replace(/[^\p{L}\p{N} _-]/gu, '').trim() || 'ruta'}.gpx`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const guardarRuta = async () => {
+    const pts = rec.terminar()
+    if (pts.length < 2) { setTrackDone('La ruta no tiene puntos suficientes para guardarse.'); return }
+    setSavingTrack(true)
+    try {
+      const r = await fetch('/api/rutas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: trackName.trim() || `Salida del ${new Date(pts[0].t).toLocaleDateString('es-ES')}`, points: pts }),
+      })
+      const d = await r.json()
+      if (d.success) {
+        rec.limpiar()
+        setTrackName('')
+        setTrackDone('Ruta guardada. Es privada: solo la ves tú.')
+        cargarRutas()
+      } else {
+        // La grabación NO se borra si el guardado falla: se puede reintentar.
+        setTrackDone(d.error ?? 'No se ha podido guardar la ruta.')
+      }
+    } catch {
+      setTrackDone('No se ha podido guardar la ruta. Sigue aquí: inténtalo otra vez.')
+    } finally {
+      setSavingTrack(false)
+    }
+  }
+
+  /** Pinta una ruta guardada sobre la carta y encuadra su recorrido. */
+  const verRuta = async (id: string) => {
+    // Grabando NO se pisa la derrota en curso con otra: se perdería de vista lo
+    // que se está haciendo, que es lo último que quiere nadie en el agua.
+    if (rec.state.status === 'grabando') { setTrackDone('Termina o pausa la grabación para ver otra ruta.'); return }
+    try {
+      const r = await fetch(`/api/rutas/${id}`)
+      const d = await r.json()
+      if (!d.success || !Array.isArray(d.track?.points) || d.track.points.length < 2) return
+      const pts = d.track.points as { lat: number; lon: number }[]
+      const src = map.current?.getSource('ruta') as { setData(d: unknown): void } | undefined
+      src?.setData({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: pts.map((p) => [p.lon, p.lat]) } })
+      setShownTrack(id)
+      siguiendo.current = false
+      const lats = pts.map((p) => p.lat)
+      const lons = pts.map((p) => p.lon)
+      map.current?.fitBounds([[Math.min(...lons), Math.min(...lats)], [Math.max(...lons), Math.max(...lats)]], { padding: 60, duration: 800 })
+    } catch { /* si falla, la carta se queda como estaba */ }
+  }
+
+  const borrarRuta = async (id: string, nombre: string) => {
+    if (!window.confirm(`¿Borrar la ruta "${nombre}"? No se puede deshacer.`)) return
+    try {
+      const r = await fetch(`/api/rutas/${id}`, { method: 'DELETE' })
+      if ((await r.json()).success) {
+        setSavedTracks((prev) => prev.filter((t) => t.id !== id))
+        if (shownTrack === id) {
+          const src = map.current?.getSource('ruta') as { setData(d: unknown): void } | undefined
+          src?.setData({ type: 'FeatureCollection', features: [] })
+          setShownTrack(null)
+        }
+      }
+    } catch { /* se queda como estaba */ }
+  }
+
   const pedirSonda = (lat: number, lon: number) => {
     setSounding(null)
     fetch(`/api/sonda?lat=${lat}&lon=${lon}`)
@@ -218,6 +320,16 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
         source: null, sourceUrl: null, label: 'Sonda no disponible ahora mismo',
       }))
   }
+
+  const cargarRutas = useCallback(() => {
+    if (!loggedIn) return
+    fetch('/api/rutas')
+      .then((r) => r.json())
+      .then((d) => { if (d.success) setSavedTracks(d.tracks) })
+      .catch(() => {})
+  }, [loggedIn])
+
+  useEffect(() => { cargarRutas() }, [cargarRutas])
 
   // Las marcas se piden solo si hay sesión: son privadas por definición.
   useEffect(() => {
@@ -316,6 +428,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
     // Fuente vacía: se rellena al mover, con lo que entre en pantalla.
     sources.areas = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } }
     sources.pois = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } }
+    sources.ruta = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } }
     layers.push(
       { id: 'areas-fill', type: 'fill', source: 'areas', paint: { 'fill-color': '#b91c1c', 'fill-opacity': 0.14 } },
       { id: 'areas-line', type: 'line', source: 'areas', paint: { 'line-color': '#b91c1c', 'line-width': 1.6, 'line-opacity': 0.75 } },
@@ -331,6 +444,14 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
           'circle-stroke-color': '#ffffff',
         },
       },
+      // La derrota va encima de todo: mientras se graba es lo que se mira. Dos
+      // trazos, uno oscuro debajo, para que se lea sobre agua clara y oscura.
+      { id: 'ruta-borde', type: 'line', source: 'ruta',
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': '#ffffff', 'line-width': 6, 'line-opacity': 0.9 } },
+      { id: 'ruta', type: 'line', source: 'ruta',
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': '#b45309', 'line-width': 3 } },
     )
 
     let m: MapLibreMap
@@ -348,7 +469,11 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
     m.addControl(new GeolocateControl({
       positionOptions: { enableHighAccuracy: true },
       trackUserLocation: true,
+      showUserLocation: true,
     }), 'top-right')
+    // A pantalla completa se le pasa el marco, no el div del mapa: si no, los
+    // paneles y los botones se quedan fuera y solo se ve la carta pelada.
+    if (shell.current) m.addControl(new FullscreenControl({ container: shell.current }), 'top-right')
     const loadAreas = () => {
       const src = m.getSource('areas') as { setData(d: unknown): void } | undefined
       if (!src) return
@@ -391,6 +516,10 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
     ro.observe(holder.current)
     m.on('moveend', loadAreas)
     m.on('moveend', loadPois)
+    // `dragstart` y no `movestart`: este último lo dispara también el recentrado
+    // automático, que se apagaría a sí mismo en cuanto empezara.
+    m.on('dragstart', () => { siguiendo.current = false })
+    m.on('zoomstart', (e) => { if ((e as unknown as { originalEvent?: unknown }).originalEvent) siguiendo.current = false })
 
     // Pulsar un espacio protegido cuenta su nombre y enlaza su ficha.
     m.on('click', 'areas-fill', (e) => {
@@ -510,6 +639,26 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
 
   useEffect(() => {
     const m = map.current
+    if (!m || !ready) return
+    const src = m.getSource('ruta') as { setData(d: unknown): void } | undefined
+    if (!src) return
+    const pts = rec.state.points
+    src.setData(pts.length >= 2
+      ? { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: pts.map((p) => [p.lon, p.lat]) } }
+      : { type: 'FeatureCollection', features: [] })
+  }, [rec.state.points, ready])
+
+  // Grabando, la carta sigue al barco — hasta que el usuario decida mirar otra
+  // cosa. Ver `siguiendo`.
+  useEffect(() => {
+    const m = map.current
+    const ultimo = rec.state.points[rec.state.points.length - 1]
+    if (!m || !ready || rec.state.status !== 'grabando' || !ultimo || !siguiendo.current) return
+    m.easeTo({ center: [ultimo.lon, ultimo.lat], duration: 800 })
+  }, [rec.state.points, rec.state.status, ready])
+
+  useEffect(() => {
+    const m = map.current
     if (!m || !ready || !m.getLayer('substrate')) return
     m.setLayoutProperty('substrate', 'visibility', substrate ? 'visible' : 'none')
   }, [substrate, ready])
@@ -605,6 +754,12 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
             🪨 Tipo de fondo
           </button>
         )}
+        {rec.state.status === 'parado' && !rec.state.recovered && rec.state.points.length === 0 && (
+          <button type="button" onClick={() => { setTrackDone(null); siguiendo.current = true; rec.empezar() }}
+            className="px-3 py-1.5 rounded-full text-[13px] font-semibold bg-red-700 text-paper hover:bg-red-800 transition-colors">
+            ⏺ Grabar ruta
+          </button>
+        )}
         <button type="button" onClick={() => setShowPois((v) => !v)} aria-pressed={showPois} className={toggle(showPois)}>
           ⚓ Rampas y puertos
         </button>
@@ -619,6 +774,92 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
           </span>
         )}
       </div>
+
+      {/* Grabación de la derrota. Va la primera de la columna porque mientras
+          se graba es lo único que se mira, y con guantes o con el barco
+          moviéndose los botones tienen que ser grandes. */}
+      {(rec.state.status !== 'parado' || rec.state.recovered || rec.state.points.length > 0 || trackDone) && (
+        <div className="pointer-events-auto w-64 max-w-full bg-paper rounded-2xl shadow-hard-lg border border-ink/[0.07] px-4 py-3">
+          {rec.state.recovered ? (
+            <>
+              <p className="text-[13px] text-ink">Hay una ruta a medias sin cerrar.</p>
+              <div className="flex gap-2 mt-2">
+                <button type="button" onClick={rec.retomar}
+                  className="bg-accent text-paper px-3 py-2 text-[13px] font-semibold rounded-full">Continuarla</button>
+                <button type="button" onClick={rec.descartarRecuperada}
+                  className="px-3 py-2 text-[13px] text-ink/60 hover:text-ink">Descartar</button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/60">
+                  {rec.state.status === 'grabando' ? 'Grabando ruta' : rec.state.status === 'pausa' ? 'Ruta en pausa' : 'Ruta'}
+                </p>
+                {rec.state.status === 'grabando' && (
+                  <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse" aria-label="grabando" />
+                )}
+              </div>
+              <p className="font-display text-[26px] leading-none text-ink mt-1">{formatDistance(rec.state.distanceM)}</p>
+              <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-[13px] mt-2">
+                <div>
+                  <dt className="text-ink/60 text-[11px]">Tiempo</dt>
+                  <dd className="text-ink font-semibold">{formatDuration(rec.state.durationS)}</dd>
+                </div>
+                <div>
+                  <dt className="text-ink/60 text-[11px]">Velocidad</dt>
+                  <dd className="text-ink font-semibold">
+                    {rec.state.knots != null ? `${rec.state.knots.toLocaleString('es-ES', { maximumFractionDigits: 1 })} kn` : '—'}
+                  </dd>
+                </div>
+              </dl>
+              {/* Decir por qué NO avanza la ruta evita que parezca rota. */}
+              {rec.state.status === 'grabando' && rec.state.waiting && (
+                <p className="text-[12px] text-ink/60 mt-1.5">
+                  {rec.state.waiting}
+                  {rec.state.accuracyM != null && ` · ±${rec.state.accuracyM} m`}
+                </p>
+              )}
+              {rec.state.error && <p className="text-[12.5px] text-red-700 mt-1.5">{rec.state.error}</p>}
+              {trackDone && <p className="text-[12.5px] text-accent mt-1.5">{trackDone}</p>}
+
+              <div className="flex flex-wrap gap-2 mt-2.5">
+                {rec.state.status === 'grabando' && (
+                  <button type="button" onClick={rec.pausar}
+                    className="px-3 py-2 text-[13px] font-semibold rounded-full border border-ink/12 hover:border-accent">Pausa</button>
+                )}
+                {rec.state.status === 'pausa' && (
+                  <button type="button" onClick={rec.continuar}
+                    className="bg-accent text-paper px-3 py-2 text-[13px] font-semibold rounded-full">Continuar</button>
+                )}
+                {rec.state.points.length >= 2 && loggedIn && (
+                  <button type="button" onClick={guardarRuta} disabled={savingTrack}
+                    className="bg-accent text-paper px-3 py-2 text-[13px] font-semibold rounded-full disabled:opacity-60">
+                    {savingTrack ? 'Guardando…' : 'Terminar y guardar'}
+                  </button>
+                )}
+                {rec.state.points.length >= 2 && (
+                  <button type="button" onClick={descargarGPX}
+                    className="px-3 py-2 text-[13px] font-semibold rounded-full border border-ink/12 hover:border-accent">
+                    Descargar GPX
+                  </button>
+                )}
+                {rec.state.points.length >= 2 && !loggedIn && (
+                  <p className="text-[12px] text-ink/60 w-full">
+                    <a href="/entrar" className="font-semibold text-accent hover:underline">Inicia sesión</a> para
+                    guardarla en tu cuenta. Es privada: solo la ves tú.
+                  </p>
+                )}
+              </div>
+              {rec.state.points.length >= 2 && rec.state.status !== 'parado' && (
+                <input value={trackName} onChange={(e) => setTrackName(e.target.value)} maxLength={90}
+                  placeholder="Nombre de la ruta (opcional)"
+                  className="w-full mt-2 border border-ink/12 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-accent" />
+              )}
+            </>
+          )}
+        </div>
+      )}
 
       {substrate && (
         <details className="pointer-events-auto w-64 max-w-full bg-paper rounded-2xl shadow-hard border border-ink/[0.07]">
@@ -722,6 +963,30 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
             <button onClick={() => setDraft(null)} className="px-3 py-2 text-sm text-ink/60 hover:text-ink">Cancelar</button>
           </div>
         </div>
+      )}
+
+      {loggedIn && savedTracks.length > 0 && rec.state.status === 'parado' && !draft && (
+        <details className="pointer-events-auto w-64 max-w-full bg-paper rounded-2xl shadow-hard border border-ink/[0.07]">
+          <summary className="px-4 py-2.5 text-[14px] font-semibold text-ink cursor-pointer">
+            🧭 Mis rutas ({savedTracks.length})
+          </summary>
+          <ul className="max-h-72 overflow-y-auto px-2 pb-2 space-y-0.5">
+            {savedTracks.map((t) => (
+              <li key={t.id} className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg hover:bg-ink/[0.04]">
+                <button onClick={() => verRuta(t.id)} className="flex-1 text-left min-w-0">
+                  <span className="block text-[13.5px] text-ink/85 truncate">{t.name}</span>
+                  <span className="block text-[11.5px] text-ink/60">
+                    {formatDistance(t.distanceM)} · {formatDuration(t.durationS)} · {new Date(t.startedAt).toLocaleDateString('es-ES')}
+                  </span>
+                </button>
+                <a href={`/api/rutas/${t.id}/gpx`} download aria-label={`Descargar ${t.name} en GPX`}
+                  className="text-[11px] font-semibold text-accent hover:underline shrink-0">GPX</a>
+                <button onClick={() => borrarRuta(t.id, t.name)} aria-label={`Borrar ${t.name}`}
+                  className="text-[12px] text-ink/40 hover:text-red-700 shrink-0">✕</button>
+              </li>
+            ))}
+          </ul>
+        </details>
       )}
 
       {loggedIn && marks.length > 0 && !draft && (
