@@ -13,6 +13,9 @@ import { outAndBack, safetyAlerts, dayVerdict, gearForConditions, douglasState }
 import { rankSpeciesToday } from '@/lib/what-to-fish'
 import { buildTimeline } from '@/lib/plan'
 import { getRegulation } from '@/lib/fishing-regulations'
+import Icon, { type IconName } from '@/components/icons/Icon'
+
+const MOD_ICON: Record<string, IconName> = { tierra: 'umbrella', kayak: 'kayak', barco: 'boat' }
 import { getAemetBulletin, type AemetBulletin } from '@/lib/aemet'
 import { aemetZoneFor } from '@/lib/aemet-zones'
 import { generatePlanAdvice } from '@/lib/nvidia-ai'
@@ -117,7 +120,7 @@ export default async function PlanPage({ params, searchParams }: Params) {
             <Link href={`/mejores-horas/${s.slug}`} className="hover:text-accent">{s.name}</Link> <span className="mx-1">/</span>{' '}
             <span className="text-ink">Plan</span>
           </nav>
-          <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3">🧾 Plan de pesca · {modality.name}{targetSpecies ? ` · ${targetSpecies.name}` : ''}</p>
+          <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3 inline-flex items-center gap-1.5"><Icon name="clipboard" className="w-3.5 h-3.5" strokeWidth={2} />Plan de pesca · {modality.name}{targetSpecies ? ` · ${targetSpecies.name}` : ''}</p>
           <h1 className="font-display uppercase text-3xl sm:text-4xl md:text-5xl leading-[1.02] text-ink">
             {s.name} — <span className="inline-block first-letter:uppercase">{fmtDateLong(targetDay)}</span>
           </h1>
@@ -162,20 +165,20 @@ export default async function PlanPage({ params, searchParams }: Params) {
                 )}
                 {outing && (
                   <span className="inline-flex items-center gap-2 rounded-xl border border-ink/10 px-3.5 py-2">
-                    <span aria-hidden>{modality.emoji}</span>
+                    <Icon name={MOD_ICON[modality.id]} className="w-4 h-4" strokeWidth={1.8} />
                     <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Salida {fmtTime(outing.departure)} · regreso {outing.returnBy >= dayStart + 24 * 3600000 ? '24:00' : fmtTime(outing.returnBy)}</span>
                   </span>
                 )}
               </div>
-              {verdict && <p className="text-[15px] text-ink/85 leading-relaxed"><span className="font-bold">📋 </span>{verdict}</p>}
+              {verdict && <p className="text-[15px] text-ink/85 leading-relaxed inline-flex items-start gap-1.5"><Icon name="clipboard" className="w-4 h-4 shrink-0 mt-0.5" strokeWidth={1.8} />{verdict}</p>}
               {aemet?.hasAviso && (
-                <p className="text-sm font-semibold rounded-xl border border-red-700/40 bg-red-700/[0.07] text-red-900 px-4 py-3">
-                  ⚠️ Aviso oficial de AEMET: {aemet.avisoTexto}
+                <p className="text-sm font-semibold rounded-xl border border-red-700/40 bg-red-700/[0.07] text-red-900 px-4 py-3 inline-flex items-start gap-1.5">
+                  <Icon name="warning" className="w-4 h-4 shrink-0 mt-0.5" strokeWidth={2} />Aviso oficial de AEMET: {aemet.avisoTexto}
                 </p>
               )}
               {alerts.map((a, i) => (
-                <p key={i} className={`text-sm font-semibold rounded-xl border px-4 py-3 ${a.level === 'peligro' ? 'border-red-700/40 bg-red-700/[0.07] text-red-900' : 'border-amber-600/40 bg-amber-500/[0.08] text-amber-900'}`}>
-                  {a.level === 'peligro' ? '🚫' : '⚠️'} {a.text}
+                <p key={i} className={`text-sm font-semibold rounded-xl border px-4 py-3 inline-flex items-start gap-1.5 ${a.level === 'peligro' ? 'border-red-700/40 bg-red-700/[0.07] text-red-900' : 'border-amber-600/40 bg-amber-500/[0.08] text-amber-900'}`}>
+                  <Icon name={a.level === 'peligro' ? 'ban' : 'warning'} className="w-4 h-4 shrink-0 mt-0.5" strokeWidth={2} />{a.text}
                 </p>
               ))}
             </div>
@@ -183,7 +186,7 @@ export default async function PlanPage({ params, searchParams }: Params) {
             {/* AI advice */}
             {advice && (
               <div className="border-l-4 border-accent bg-accent/[0.05] rounded-r-2xl px-5 py-4">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent mb-2">🎣 El consejo de nuestro asesor</p>
+                <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent mb-2 inline-flex items-center gap-1.5"><Icon name="rod" className="w-3.5 h-3.5" strokeWidth={1.8} />El consejo de nuestro asesor</p>
                 <p className="text-[15px] text-ink/85 leading-relaxed whitespace-pre-line">{advice}</p>
               </div>
             )}
@@ -197,7 +200,7 @@ export default async function PlanPage({ params, searchParams }: Params) {
                     <span className={`absolute -left-[27px] top-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center text-[8px] ${t.highlight ? 'bg-accent border-accent' : 'bg-paper border-ink/30'}`} aria-hidden />
                     <div className={`rounded-xl border px-4 py-3 ${t.highlight ? 'border-accent/40 bg-accent/[0.05]' : 'border-ink/[0.07] bg-paper'}`}>
                       <p className="flex items-center gap-2 font-bold text-ink text-sm">
-                        <span aria-hidden>{t.icon}</span>
+                        <Icon name={t.icon} className="w-4 h-4" strokeWidth={1.8} />
                         <span className="font-display text-lg">{fmtTime(t.time)}</span>
                         {t.title}
                       </p>
@@ -212,7 +215,7 @@ export default async function PlanPage({ params, searchParams }: Params) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {picks.length > 0 && (
                 <div className="border border-ink/10 rounded-2xl bg-paper p-5 space-y-3">
-                  <h2 className="font-display uppercase text-xl text-ink leading-none border-b border-ink/[0.07] pb-3">🎯 Objetivo del día</h2>
+                  <h2 className="font-display uppercase text-xl text-ink leading-none border-b border-ink/[0.07] pb-3 flex items-center gap-2"><Icon name="target" className="w-4 h-4" strokeWidth={1.8} />Objetivo del día</h2>
                   {(targetSpecies ? [{ species: targetSpecies, reasons: picks.find((p) => p.species.id === targetSpecies.id)?.reasons ?? [] }] : picks).map((p) => (
                     <div key={p.species.id} className="space-y-1.5">
                       <p className="font-display uppercase text-lg text-ink">{p.species.name}</p>
@@ -226,7 +229,7 @@ export default async function PlanPage({ params, searchParams }: Params) {
               )}
 
               <div className="border border-ink/10 rounded-2xl bg-paper p-5 space-y-3">
-                <h2 className="font-display uppercase text-xl text-ink leading-none border-b border-ink/[0.07] pb-3">🎒 Checklist de equipo</h2>
+                <h2 className="font-display uppercase text-xl text-ink leading-none border-b border-ink/[0.07] pb-3 flex items-center gap-2"><Icon name="package" className="w-4 h-4" strokeWidth={1.7} />Checklist de equipo</h2>
                 <ul className="space-y-2 text-[14px] text-ink/80">
                   {gearTips.map((t) => (
                     <li key={t.text} className="flex items-start gap-2.5">
@@ -266,7 +269,7 @@ export default async function PlanPage({ params, searchParams }: Params) {
 
             {/* Safety footer */}
             <div className="border border-ink/10 rounded-2xl bg-paper p-5 space-y-2">
-              <h2 className="font-display uppercase text-xl text-ink leading-none">🦺 Seguridad</h2>
+              <h2 className="font-display uppercase text-xl text-ink leading-none flex items-center gap-2"><Icon name="lifejacket" className="w-4 h-4" strokeWidth={1.8} />Seguridad</h2>
               <p className="text-[13px] text-ink/70 leading-relaxed">
                 Emergencias: <strong>112</strong>{s.type === 'mar' ? <> · Salvamento Marítimo: <strong>900 202 202</strong></> : null}. Avisa de tu plan a alguien,
                 revisa el estado del mar al llegar{modality.id !== 'tierra' ? ', lleva chaleco y medios de comunicación' : ' y no des la espalda al mar en la roca'}.

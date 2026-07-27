@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { SpotActivity } from '@/lib/catch-reports'
 import { fmtDayLabel } from '@/lib/solunar-format'
+import Icon from '@/components/icons/Icon'
 
 /**
  * What anglers have actually been catching here lately — the one thing no
@@ -16,7 +17,7 @@ export default function SpotCatchActivity({ activity, spotName }: {
   if (!activity.enough) {
     return (
       <div className="border border-ink/[0.07] rounded-2xl bg-paper p-5">
-        <h3 className="font-display text-xl text-ink">🐟 Qué se está pescando en {spotName}</h3>
+        <h3 className="font-display text-xl text-ink inline-flex items-center gap-2"><Icon name="fish" className="w-4 h-4" strokeWidth={1.8} />Qué se está pescando en {spotName}</h3>
         <p className="text-[14px] text-ink/70 mt-2 leading-relaxed">
           Todavía no hay capturas suficientes de esta zona. Es el dato que ninguna previsión
           puede darte —lo que de verdad está entrando— y sale de lo que comparte la gente.
@@ -34,7 +35,7 @@ export default function SpotCatchActivity({ activity, spotName }: {
   return (
     <div className="border border-accent/25 rounded-2xl bg-accent/[0.04] p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <h3 className="font-display text-xl text-ink">🐟 Qué se está pescando en {spotName}</h3>
+        <h3 className="font-display text-xl text-ink inline-flex items-center gap-2"><Icon name="fish" className="w-4 h-4" strokeWidth={1.8} />Qué se está pescando en {spotName}</h3>
         <p className="text-[12.5px] text-ink/60">
           {activity.reports} capturas · últimos {activity.days} días
           {activity.lastDateISO && <> · última <span className="first-letter:uppercase inline-block">{fmtDayLabel(activity.lastDateISO)}</span></>}

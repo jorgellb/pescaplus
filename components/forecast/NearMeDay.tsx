@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { scoreHex, scoreLabel } from '@/lib/forecast-format'
 import type { SpotDayScore } from '@/lib/day-scores'
+import Icon from '@/components/icons/Icon'
 
 /**
  * "Best zones near me" for the selected day. Geolocation runs client-side
@@ -71,7 +72,7 @@ export default function NearMeDay({ spots, showNav }: { spots: SpotDayScore[]; s
   return (
     <div className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-4 sm:p-5 space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="font-display uppercase text-xl sm:text-2xl leading-none">📍 Las mejores cerca de ti</h2>
+        <h2 className="font-display uppercase text-xl sm:text-2xl leading-none inline-flex items-center gap-2"><Icon name="pin" className="w-5 h-5" strokeWidth={1.8} />Las mejores cerca de ti</h2>
         <button
           onClick={locate}
           disabled={state === 'loading'}
@@ -97,7 +98,7 @@ export default function NearMeDay({ spots, showNav }: { spots: SpotDayScore[]; s
 
       {rankedMar.length > 0 && (
         <div className="space-y-2">
-          {rankedInterior.length > 0 && <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">🌊 Costa</p>}
+          {rankedInterior.length > 0 && <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60 inline-flex items-center gap-1"><Icon name="wave" className="w-3 h-3" strokeWidth={2} />Costa</p>}
           <ol className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {rankedMar.map((s, i) => (
               <NearRow key={s.slug} s={s} i={i} showNav={showNav} />
@@ -108,7 +109,7 @@ export default function NearMeDay({ spots, showNav }: { spots: SpotDayScore[]; s
 
       {rankedInterior.length > 0 && (
         <div className="space-y-2">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">🎣 Embalses y ríos</p>
+          <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60 inline-flex items-center gap-1"><Icon name="rod" className="w-3 h-3" strokeWidth={2} />Embalses y ríos</p>
           <ol className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {rankedInterior.map((s, i) => (
               <NearRow key={s.slug} s={s} i={i} showNav={showNav} />

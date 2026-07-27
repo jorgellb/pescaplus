@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { FISHING_SPOTS } from '@/lib/fishing-spots'
+import Icon from '@/components/icons/Icon'
 
 const normalize = (s: string) =>
   s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -55,7 +56,7 @@ export default function SpotSearch() {
         aria-label="Buscar localidad de pesca"
         className="w-full pl-10 pr-4 py-3.5 bg-paper border border-ink/10 rounded-xl text-ink placeholder-ink/60 focus:outline-none focus:border-accent text-[15px] shadow-hard transition-colors"
       />
-      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink/60 pointer-events-none" aria-hidden>🔍</span>
+      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink/60 pointer-events-none" aria-hidden><Icon name="search" className="w-4 h-4" strokeWidth={2} /></span>
 
       {open && results.length > 0 && (
         <ul className="absolute z-30 left-0 right-0 mt-2 bg-paper border border-ink/10 rounded-xl shadow-hard-md overflow-hidden">
@@ -66,7 +67,7 @@ export default function SpotSearch() {
                 onClick={() => setOpen(false)}
                 className={`flex items-center justify-between gap-3 px-4 py-2.5 hover:bg-ink hover:text-paper transition-colors ${i === 0 ? 'bg-ink/[0.04]' : ''}`}
               >
-                <span className="font-bold text-sm">{s.type === 'mar' ? '🌊' : '🎣'} {s.name}</span>
+                <span className="font-bold text-sm inline-flex items-center gap-1.5"><Icon name={s.type === 'mar' ? 'wave' : 'rod'} className="w-3.5 h-3.5" strokeWidth={1.8} />{s.name}</span>
                 <span className="font-mono text-[10px] uppercase tracking-widest opacity-60">{s.region}</span>
               </Link>
             </li>

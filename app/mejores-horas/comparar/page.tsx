@@ -6,6 +6,7 @@ import { getSpot, nearestSpots, type FishingSpot } from '@/lib/fishing-spots'
 import { getMarineForecast, bestWindow, groupByDay, type FishingWindow } from '@/lib/marine-forecast'
 import { scoreHex, scoreLabel } from '@/lib/forecast-format'
 import { fmtDayLabel, fmtWindowRange, fmtDateLong, todayMadridISO } from '@/lib/solunar-format'
+import Icon from '@/components/icons/Icon'
 
 export const metadata: Metadata = {
   title: 'Comparador de zonas de pesca: ¿dónde y qué día salir?',
@@ -65,7 +66,7 @@ export default async function CompararPage({ searchParams }: SP) {
             <Link href="/mejores-horas" className="hover:text-accent">Mejores horas</Link> <span className="mx-1">/</span>{' '}
             <span className="text-ink">Comparar</span>
           </nav>
-          <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3">⚖️ Comparador de zonas</p>
+          <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3 inline-flex items-center gap-1.5"><Icon name="scale" className="w-3.5 h-3.5" strokeWidth={1.8} />Comparador de zonas</p>
           <h1 className="font-display uppercase text-4xl sm:text-5xl md:text-6xl leading-[1.02] text-ink">¿Dónde y qué día?</h1>
           <p className="text-ink/60 text-sm max-w-2xl mt-3">
             Compara hasta tres zonas con la puntuación real de cada día de la próxima semana y decide tu salida. {fmtDateLong(today)}.
@@ -81,7 +82,7 @@ export default async function CompararPage({ searchParams }: SP) {
                   aria-label={`Quitar ${s.name}`}
                   className="w-6 h-6 flex items-center justify-center rounded-full bg-paper/15 hover:bg-paper hover:text-ink transition-colors text-xs"
                 >
-                  ✕
+                  <Icon name="close" className="w-3 h-3" strokeWidth={2.2} />
                 </Link>
               </span>
             ))}
@@ -107,7 +108,7 @@ export default async function CompararPage({ searchParams }: SP) {
       <section className="max-w-6xl mx-auto px-4 py-10 sm:px-6 space-y-8">
         {zones.length === 0 ? (
           <div className="border border-ink/10 rounded-2xl bg-paper p-8 text-center space-y-3">
-            <span className="text-4xl inline-block">⚖️</span>
+            <Icon name="scale" className="w-10 h-10 mx-auto text-ink/40" strokeWidth={1.5} />
             <p className="text-ink/60 text-sm max-w-md mx-auto">Elige zonas para comparar. Consejo: abre una localidad en <Link href="/mejores-horas" className="text-accent underline">Mejores horas</Link> y pulsa «Comparar con zonas cercanas».</p>
           </div>
         ) : (
@@ -115,7 +116,7 @@ export default async function CompararPage({ searchParams }: SP) {
             {/* Verdict */}
             {best && (
               <div className="border-2 border-ink rounded-2xl bg-paper shadow-hard-md p-5 flex flex-wrap items-center gap-3">
-                <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">🏆 Mejor plan de la semana</span>
+                <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent inline-flex items-center gap-1.5"><Icon name="trophy" className="w-3.5 h-3.5" strokeWidth={1.8} />Mejor plan de la semana</span>
                 <span className="font-display uppercase text-2xl text-ink capitalize">{fmtDayLabel(best.dateISO)} en {best.zone}</span>
                 {best.win && (
                   <span className="inline-flex items-center gap-2">
@@ -124,7 +125,7 @@ export default async function CompararPage({ searchParams }: SP) {
                   </span>
                 )}
                 <Link href={`/mejores-horas/${best.slug}/plan?dia=${best.dateISO}`} className="inline-flex items-center gap-2 bg-ink text-paper px-4 py-2 text-sm font-semibold rounded-full hover:bg-accent transition-colors">
-                  🧾 Generar plan →
+                  <Icon name="clipboard" className="w-4 h-4" strokeWidth={1.8} />Generar plan →
                 </Link>
               </div>
             )}
@@ -163,7 +164,7 @@ export default async function CompararPage({ searchParams }: SP) {
                                 <span className="text-paper text-xs font-bold rounded px-2 py-1 min-w-[34px] text-center" style={{ background: scoreHex(score) }}>{score}</span>
                                 <div className="leading-tight">
                                   <p className="text-[13px] font-bold text-ink">{d.win ? fmtWindowRange(d.win.start, d.win.end, d.dayStart) : '—'}</p>
-                                  <p className="font-mono text-[9px] uppercase tracking-widest text-ink/60">{scoreLabel(score)}{isBest ? ' · 🏆' : ''}</p>
+                                  <p className="font-mono text-[9px] uppercase tracking-widest text-ink/60 inline-flex items-center gap-1">{scoreLabel(score)}{isBest && <><span>·</span><Icon name="trophy" className="w-2.5 h-2.5" strokeWidth={2} /></>}</p>
                                 </div>
                               </div>
                             </td>

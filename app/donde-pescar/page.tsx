@@ -8,6 +8,9 @@ import { getDayBoard, DAY_BOARD_REVALIDATE_S } from '@/lib/day-scores'
 import { MODALITIES } from '@/lib/marine-forecast'
 import { scoreHex, scoreLabel, windWord } from '@/lib/forecast-format'
 import { fmtDayLabel, fmtDateLong, todayMadridISO } from '@/lib/solunar-format'
+import Icon, { type IconName } from '@/components/icons/Icon'
+
+const MOD_ICON: Record<string, IconName> = { tierra: 'umbrella', kayak: 'kayak', barco: 'boat' }
 
 export const metadata: Metadata = {
   title: '¿Dónde pescar hoy? Mapa del día y ranking de zonas de España',
@@ -73,9 +76,9 @@ export default async function DondePescarPage({ searchParams }: Params) {
                   m.id === board.modality.id
                     ? 'bg-accent text-paper border-accent'
                     : 'bg-paper text-ink/70 border-ink/10 hover:border-accent hover:text-accent'
-                }`}
+                } inline-flex items-center gap-1.5`}
               >
-                {m.emoji} {m.name}
+                <Icon name={MOD_ICON[m.id]} className="w-3.5 h-3.5" strokeWidth={2} />{m.name}
               </Link>
             ))}
           </div>
@@ -92,10 +95,11 @@ export default async function DondePescarPage({ searchParams }: Params) {
         )}
 
         {board.available && !board.marineAvailable && (
-          <div className="border border-amber-700/30 rounded-2xl bg-amber-700/[0.06] p-4 text-sm text-ink/75">
-            ⚠️ El servicio de oleaje no responde ahora mismo, así que el estado del mar de las zonas de costa no está
+          <div className="border border-amber-700/30 rounded-2xl bg-amber-700/[0.06] p-4 text-sm text-ink/75 inline-flex items-start gap-1.5">
+            <Icon name="warning" className="w-4 h-4 shrink-0 mt-0.5" strokeWidth={2} />
+            <span>El servicio de oleaje no responde ahora mismo, así que el estado del mar de las zonas de costa no está
             confirmado. Las puntuaciones que ves abajo se basan solo en el viento y la actividad: úsalas con cautela y
-            confirma el oleaje en la ficha de la zona antes de salir.
+            confirma el oleaje en la ficha de la zona antes de salir.</span>
           </div>
         )}
 
@@ -104,8 +108,8 @@ export default async function DondePescarPage({ searchParams }: Params) {
             <NearMeDay spots={board.spots} showNav={showNav} />
 
             <div className="space-y-3">
-              <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3">
-                🗺️ España, zona a zona
+              <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3 flex items-center gap-2">
+                <Icon name="map" className="w-5 h-5" strokeWidth={1.7} />España, zona a zona
               </h2>
               <DayScoreMap spots={board.spots} showNav={showNav} />
               <SourceBadge
@@ -119,8 +123,8 @@ export default async function DondePescarPage({ searchParams }: Params) {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
               <div className="lg:col-span-2 space-y-3">
-                <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3">
-                  🏆 Top 15 de la costa · <span className="capitalize">{dayName}</span>
+                <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3 flex items-center gap-2">
+                  <Icon name="trophy" className="w-5 h-5" strokeWidth={1.7} />Top 15 de la costa · <span className="capitalize">{dayName}</span>
                 </h2>
                 <ol className="space-y-2">
                   {top.map((s, i) => (
@@ -140,14 +144,20 @@ export default async function DondePescarPage({ searchParams }: Params) {
                           <span className="block font-bold text-ink truncate">{s.name}</span>
                           <span className="block font-mono text-[10px] uppercase tracking-widest text-ink/60 truncate">
                             {s.region} · {scoreLabel(s.score)}
-                            {s.waveUnknown ? ' · ⚠️ sin dato de oleaje' : showNav && s.navegabilidad === 'no' ? ' · ⚠️ no navegable' : showNav && s.navegabilidad === 'unknown' ? ' · navegación sin confirmar' : ''}
+                            {s.waveUnknown
+                              ? <> · <Icon name="warning" className="w-3 h-3 inline -mt-0.5" strokeWidth={2.2} /> sin dato de oleaje</>
+                              : showNav && s.navegabilidad === 'no'
+                                ? <> · <Icon name="warning" className="w-3 h-3 inline -mt-0.5" strokeWidth={2.2} /> no navegable</>
+                                : showNav && s.navegabilidad === 'unknown'
+                                  ? ' · navegación sin confirmar'
+                                  : ''}
                           </span>
                         </span>
                         <span className="hidden sm:block text-right shrink-0 font-mono text-[11px] text-ink/60 leading-relaxed">
                           {s.windMax != null && (
-                            <span className="block">💨 {Math.round(s.windMax)} km/h · {windWord(s.windMax)}</span>
+                            <span className="flex items-center gap-1"><Icon name="wind" className="w-3 h-3" strokeWidth={2} />{Math.round(s.windMax)} km/h · {windWord(s.windMax)}</span>
                           )}
-                          {s.waveMax != null && <span className="block">🌊 {s.waveMax.toFixed(1)} m máx</span>}
+                          {s.waveMax != null && <span className="flex items-center gap-1"><Icon name="wave" className="w-3 h-3" strokeWidth={2} />{s.waveMax.toFixed(1)} m máx</span>}
                         </span>
                       </Link>
                     </li>
@@ -158,8 +168,8 @@ export default async function DondePescarPage({ searchParams }: Params) {
               <div className="space-y-6">
                 {topInterior.length > 0 && (
                   <div className="space-y-3">
-                    <h2 className="font-display uppercase text-xl md:text-2xl leading-none border-b border-ink/[0.07] pb-3">
-                      🎣 Embalses
+                    <h2 className="font-display uppercase text-xl md:text-2xl leading-none border-b border-ink/[0.07] pb-3 flex items-center gap-2">
+                      <Icon name="rod" className="w-4 h-4" strokeWidth={1.8} />Embalses
                     </h2>
                     <ol className="space-y-2">
                       {topInterior.map((s) => (
@@ -186,7 +196,7 @@ export default async function DondePescarPage({ searchParams }: Params) {
                 )}
 
                 <div className="border border-red-700/25 rounded-2xl bg-red-700/[0.04] p-4 space-y-2">
-                  <h2 className="font-display uppercase text-lg leading-none">🚫 Mejor evita</h2>
+                  <h2 className="font-display uppercase text-lg leading-none flex items-center gap-2"><Icon name="ban" className="w-4 h-4" strokeWidth={1.8} />Mejor evita</h2>
                   <p className="font-mono text-[10px] uppercase tracking-widest text-ink/60">Las peores del día en la costa</p>
                   <ul className="space-y-1.5">
                     {worst.map((s) => (
@@ -197,9 +207,9 @@ export default async function DondePescarPage({ searchParams }: Params) {
                         <Link href={`/mejores-horas/${s.slug}`} className="font-bold text-ink hover:text-accent truncate">
                           {s.name}
                         </Link>
-                        <span className="font-mono text-[10px] uppercase text-ink/60 ml-auto shrink-0">
-                          {s.windMax != null ? `💨 ${Math.round(s.windMax)}` : ''}
-                          {s.waveMax != null ? ` 🌊 ${s.waveMax.toFixed(1)}m` : ''}
+                        <span className="font-mono text-[10px] uppercase text-ink/60 ml-auto shrink-0 inline-flex items-center gap-1.5">
+                          {s.windMax != null && <span className="inline-flex items-center gap-0.5"><Icon name="wind" className="w-2.5 h-2.5" strokeWidth={2.2} />{Math.round(s.windMax)}</span>}
+                          {s.waveMax != null && <span className="inline-flex items-center gap-0.5"><Icon name="wave" className="w-2.5 h-2.5" strokeWidth={2.2} />{s.waveMax.toFixed(1)}m</span>}
                         </span>
                       </li>
                     ))}

@@ -85,6 +85,31 @@ const P: Record<string, JSX.Element> = {
   // — tercer lote: quedadas —
   key: <><circle cx="8" cy="15" r="4.3" /><path d="M11 12 20 3" /><path d="M16.5 6.5 17.5 7.5" /><path d="M18 5 19 6" /></>,
   person: <><circle cx="12" cy="8" r="3.3" /><path d="M5.5 20a6.5 6.5 0 0 1 13 0" /></>,
+
+  // — cuarto lote: previsión (cielo, sol) —
+  sunny: <><circle cx="12" cy="12" r="4.5" /><path d="M12 3v2.2M12 18.8V21M3 12h2.2M18.8 12H21M5.6 5.6l1.5 1.5M16.9 16.9l1.5 1.5M5.6 18.4l1.5-1.5M16.9 7.1l1.5-1.5" /></>,
+  partlyCloudyDay: <><path d="M8 8.5V7M5 10l-1-1M11 10l1-1" /><circle cx="8" cy="10.5" r="2.6" /><path d="M6.5 20a3.7 3.7 0 0 1-.4-7.37A5 5 0 0 1 16 11a3.7 3.7 0 0 1 .7 7H6.5Z" /></>,
+  cloudy: <path d="M6.5 19a4 4 0 0 1-.4-7.96 5.5 5.5 0 0 1 10.6-1.8A4 4 0 0 1 16.5 19H6.5Z" />,
+  fog: <><path d="M7 10.5a3 3 0 0 1-.3-6A4.3 4.3 0 0 1 15 3.2 3 3 0 0 1 15.3 9H7Z" /><path d="M3 14h18M5 17.5h14M7 21h10" /></>,
+  rain: <><path d="M6.5 15.5a3.8 3.8 0 0 1-.4-7.56A5.3 5.3 0 0 1 16.3 5.8 3.8 3.8 0 0 1 16.8 13H6.5Z" /><path d="M8 18l-1 3M12 18l-1 3M16 18l-1 3" /></>,
+  snow: <><path d="M6.5 15.5a3.8 3.8 0 0 1-.4-7.56A5.3 5.3 0 0 1 16.3 5.8 3.8 3.8 0 0 1 16.8 13H6.5Z" /><circle cx="8" cy="19" r="0.6" fill="currentColor" stroke="none" /><circle cx="12" cy="20.5" r="0.6" fill="currentColor" stroke="none" /><circle cx="16" cy="19" r="0.6" fill="currentColor" stroke="none" /></>,
+  drizzle: <><path d="M8 8.5V7M5 10l-1-1M11 10l1-1" /><circle cx="8" cy="10.5" r="2.2" /><path d="M6.5 18a3.6 3.6 0 0 1-.4-7.16A4.8 4.8 0 0 1 15.5 9.2 3.6 3.6 0 0 1 16 16H6.5Z" /><path d="M9 20.5l-1 2M14 20.5l-1 2" /></>,
+  storm: <><path d="M6.5 14a3.8 3.8 0 0 1-.4-7.56A5.3 5.3 0 0 1 16.3 4.3 3.8 3.8 0 0 1 16.8 11.5H6.5Z" /><path d="M12.5 13l-3 5h3l-1.5 4 4-6h-3l1-3Z" fill="currentColor" stroke="none" /></>,
+  sunrise: <><path d="M3 18h18" /><path d="M6.5 18a5.5 5.5 0 0 1 11 0" /><path d="M12 4v3M6 8l1.8 1.8M18 8l-1.8 1.8" /><path d="M9 21l3-3 3 3" /></>,
+  sunset: <><path d="M3 18h18" /><path d="M6.5 18a5.5 5.5 0 0 1 11 0" /><path d="M12 4v3M6 8l1.8 1.8M18 8l-1.8 1.8" /><path d="M9 21l3 3 3-3" /></>,
+  building: <path d="M4 21h16M5 21V10M19 21V10M3 10l9-6 9 6M8 10v7M12 10v7M16 10v7" />,
+  printer: <><rect x="4" y="8" width="16" height="9" rx="1.5" /><path d="M7 8V4h10v4" /><path d="M7 17v3h10v-3" /><circle cx="16.5" cy="11.5" r="0.6" fill="currentColor" stroke="none" /></>,
+  lifejacket: <><path d="M8 3h8l2 6v12H6V9l2-6z" /><path d="M10 3v18M14 3v18M6 12h12" /></>,
+
+  // — fases lunares (calendario solunar) —
+  moonNew: <circle cx="12" cy="12" r="9" fill="currentColor" stroke="none" />,
+  moonWaxingCrescent: <path d="M12,3 A9,9 0 0,1 12,21 A5,9 0 0,1 12,3 Z" fill="currentColor" stroke="none" />,
+  moonFirstQuarter: <path d="M12,3 A9,9 0 0,1 12,21 Z" fill="currentColor" stroke="none" />,
+  moonWaxingGibbous: <path d="M12,3 A9,9 0 0,1 12,21 A5,9 0 0,0 12,3 Z" fill="currentColor" stroke="none" />,
+  moonFull: <circle cx="12" cy="12" r="9" />,
+  moonWaningGibbous: <path d="M12,3 A9,9 0 0,0 12,21 A5,9 0 0,1 12,3 Z" fill="currentColor" stroke="none" />,
+  moonLastQuarter: <path d="M12,3 A9,9 0 0,0 12,21 Z" fill="currentColor" stroke="none" />,
+  moonWaningCrescent: <path d="M12,3 A9,9 0 0,0 12,21 A5,9 0 0,0 12,3 Z" fill="currentColor" stroke="none" />,
 }
 
 export type IconName = keyof typeof P

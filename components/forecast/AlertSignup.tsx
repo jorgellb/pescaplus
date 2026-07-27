@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { SEA_SPECIES } from '@/lib/fishing-species'
+import Icon from '@/components/icons/Icon'
 
 /** Email alert signup for a zone: "avísame cuando haya ventana buena". */
 export default function AlertSignup({ spotSlug, spotName, isSea }: { spotSlug: string; spotName: string; isSea: boolean }) {
@@ -32,7 +33,7 @@ export default function AlertSignup({ spotSlug, spotName, isSea }: { spotSlug: s
   if (status === 'done') {
     return (
       <div className="border border-accent/40 bg-accent/[0.06] rounded-2xl p-5 text-center space-y-1">
-        <p className="text-2xl" aria-hidden>🔔</p>
+        <Icon name="bell" className="w-7 h-7 mx-auto text-accent" strokeWidth={1.6} />
         <p className="font-bold text-ink">¡Alerta activada!</p>
         <p className="text-[13px] text-ink/60">Te avisaremos por email cuando {spotName} tenga una ventana de pesca excelente.</p>
       </div>
@@ -42,7 +43,7 @@ export default function AlertSignup({ spotSlug, spotName, isSea }: { spotSlug: s
   return (
     <form onSubmit={submit} className="border border-ink/10 rounded-2xl bg-paper p-5 space-y-3">
       <div className="flex items-center gap-2">
-        <span className="text-xl" aria-hidden>🔔</span>
+        <Icon name="bell" className="w-5 h-5" strokeWidth={1.7} />
         <p className="font-display uppercase text-lg text-ink leading-none">Avísame cuando esté bueno</p>
       </div>
       <p className="text-[13px] text-ink/60 leading-relaxed">

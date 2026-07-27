@@ -7,9 +7,10 @@ import SpotMap from '@/components/forecast/SpotMap'
 import RegionAccordion from '@/components/forecast/RegionAccordion'
 import FavoriteZones from '@/components/forecast/FavoriteZones'
 import { FISHING_SPOTS } from '@/lib/fishing-spots'
-import { lunarInfo, phaseEmoji } from '@/lib/solunar'
+import { lunarInfo, phaseIcon } from '@/lib/solunar'
 import { todayMadridISO, fmtDateLong } from '@/lib/solunar-format'
 import OpenWindows from '@/components/forecast/OpenWindows'
+import Icon from '@/components/icons/Icon'
 
 export const revalidate = 3600
 
@@ -41,18 +42,18 @@ export default function MejoresHorasHub() {
           <div className="flex flex-wrap items-center gap-3 mt-4">
             <UseMyLocation />
             <span className="inline-flex items-center gap-2 border border-ink/10 rounded-xl px-3 py-2 bg-paper text-sm">
-              <span className="text-lg" aria-hidden>{phaseEmoji(moon.phase)}</span>
+              <Icon name={phaseIcon(moon.phase)} className="w-5 h-5" />
               <span className="font-bold text-ink">{moon.name}</span>
               <span className="font-mono text-[11px] uppercase tracking-widest text-ink/60">{Math.round(moon.illumination * 100)}%</span>
             </span>
             <Link href="/donde-pescar" className="inline-flex items-center gap-2 bg-ink text-paper px-4 py-2.5 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift hover:bg-accent hover:border-accent">
-              🗺️ ¿Dónde pescar? · Mapa del día
+              <Icon name="map" className="w-4 h-4" strokeWidth={1.8} />¿Dónde pescar? · Mapa del día
             </Link>
             <Link href="/calendario" className="inline-flex items-center gap-2 bg-ink text-paper px-4 py-2.5 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift hover:bg-accent hover:border-accent">
-              🌙 Calendario del pescador
+              <Icon name="moon" className="w-4 h-4" strokeWidth={1.6} />Calendario del pescador
             </Link>
             <Link href="/mejores-horas/comparar" className="inline-flex items-center gap-2 bg-paper text-ink px-4 py-2.5 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift hover:bg-ink hover:text-paper">
-              ⚖️ Comparador
+              <Icon name="scale" className="w-4 h-4" strokeWidth={1.7} />Comparador
             </Link>
           </div>
           <FavoriteZones />
@@ -70,7 +71,7 @@ export default function MejoresHorasHub() {
           {/* Map — the real IGN coastline with every spot on top */}
           <div className="lg:col-span-3 space-y-3 lg:sticky lg:top-24">
             <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3 flex items-center gap-2">
-              <span aria-hidden>🗺️</span> Elige tu zona en el mapa
+              <Icon name="map" className="w-5 h-5" strokeWidth={1.7} /> Elige tu zona en el mapa
             </h2>
             <SpotMap />
           </div>
@@ -78,7 +79,7 @@ export default function MejoresHorasHub() {
           {/* Per-comunidad accordions */}
           <div className="lg:col-span-2 space-y-3">
             <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3 flex items-center gap-2">
-              <span aria-hidden>📍</span> Por comunidad
+              <Icon name="pin" className="w-5 h-5" strokeWidth={1.7} /> Por comunidad
             </h2>
             <RegionAccordion />
           </div>

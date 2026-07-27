@@ -6,7 +6,7 @@ import { FISHING_SPOTS, getSpot } from '@/lib/fishing-spots'
 import { SEA_SPECIES } from '@/lib/fishing-species'
 import Icon from '@/components/icons/Icon'
 import SpeciesPatterns from './SpeciesPatterns'
-import { solunarDay, phaseEmoji } from '@/lib/solunar'
+import { solunarDay, phaseIcon } from '@/lib/solunar'
 import { tideCoefficient } from '@/lib/tides'
 import { todayMadridISO, fmtDateLong } from '@/lib/solunar-format'
 
@@ -363,7 +363,7 @@ export default function DiaryClient() {
                     </span>
                     <span className="block font-mono text-[10px] uppercase tracking-widest text-ink/60">
                       {fmtDateLong(e.dateISO)}
-                      {c ? ` · ${phaseEmoji(c.phase)} ${PHASE_LABEL[c.phaseBucket]} · actividad ${c.rating}/5 · coef ${c.coef}` : ''}
+                      {c ? <> · <Icon name={phaseIcon(c.phase)} className="w-3 h-3 inline -mt-0.5" /> {PHASE_LABEL[c.phaseBucket]} · actividad {c.rating}/5 · coef {c.coef}</> : ''}
                     </span>
                     {e.note && <span className="block text-[13px] text-ink/70 mt-0.5">{e.note}</span>}
                   </span>

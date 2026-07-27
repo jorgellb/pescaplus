@@ -298,3 +298,14 @@ export function phaseEmoji(phase: number): string {
   const icons = ['🌑', '🌒', '🌓', '🌔', '🌕', '🌖', '🌗', '🌘']
   return icons[Math.round(phase * 8) % 8]
 }
+
+/** Same 8-phase mapping as `phaseEmoji`, but as an icon name for `<Icon>` —
+ * use this wherever the result renders as JSX; `phaseEmoji` stays for the
+ * handful of spots that need a plain string (title attributes, share text). */
+export function phaseIcon(phase: number): import('@/components/icons/Icon').IconName {
+  const icons = [
+    'moonNew', 'moonWaxingCrescent', 'moonFirstQuarter', 'moonWaxingGibbous',
+    'moonFull', 'moonWaningGibbous', 'moonLastQuarter', 'moonWaningCrescent',
+  ] as const
+  return icons[Math.round(phase * 8) % 8]
+}

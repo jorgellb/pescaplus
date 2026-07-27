@@ -1,6 +1,7 @@
 import type { HourPoint } from '@/lib/marine-forecast'
-import { scoreHex, windHex, waveHex, weatherEmoji } from '@/lib/forecast-format'
+import { scoreHex, windHex, waveHex, weatherIcon } from '@/lib/forecast-format'
 import { fmtDayLabel } from '@/lib/solunar-format'
+import Icon from '@/components/icons/Icon'
 
 function WindArrow({ deg }: { deg: number | null }) {
   if (deg == null) return <span className="text-ink/30">–</span>
@@ -61,9 +62,14 @@ export default function HourlyTable({
             {/* Sky */}
             <tr>
               <td className={LABEL}>Cielo</td>
-              {hours.map((h, i) => (
-                <td key={i} className={`${CELL} ${colBg(h)}`}>{weatherEmoji(h.code, h.isDay)}</td>
-              ))}
+              {hours.map((h, i) => {
+                const icon = weatherIcon(h.code, h.isDay)
+                return (
+                  <td key={i} className={`${CELL} ${colBg(h)}`}>
+                    {icon && <Icon name={icon} className="w-4 h-4 inline-block" strokeWidth={1.8} />}
+                  </td>
+                )
+              })}
             </tr>
             {/* Fish activity */}
             <tr>

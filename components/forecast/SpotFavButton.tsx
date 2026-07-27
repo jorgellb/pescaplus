@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { isSpotFavorite, toggleSpotFavorite, onSpotFavoritesChanged } from '@/lib/spot-favorites'
+import Icon from '@/components/icons/Icon'
 
 export default function SpotFavButton({ slug, name }: { slug: string; name: string }) {
   const [fav, setFav] = useState(false)
@@ -21,7 +22,9 @@ export default function SpotFavButton({ slug, name }: { slug: string; name: stri
         fav ? 'bg-accent text-paper border-accent' : 'bg-paper text-ink border-ink/10 hover:bg-ink hover:text-paper'
       }`}
     >
-      {fav ? '★ Zona guardada' : '☆ Guardar zona'}
+      {fav
+        ? <><Icon name="star" className="w-4 h-4" />Zona guardada</>
+        : <><Icon name="starOutline" className="w-4 h-4" strokeWidth={1.8} />Guardar zona</>}
     </button>
   )
 }

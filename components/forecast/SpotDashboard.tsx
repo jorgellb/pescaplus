@@ -37,9 +37,12 @@ import { AEMET_STATIONS } from '@/lib/aemet-stations'
 import { getSpotAccuracy, type SpotAccuracy } from '@/lib/verification-store'
 import { getModelAgreement, AGREEMENT_LABEL } from '@/lib/model-agreement'
 import { isSpeciesZone } from '@/lib/species-zones'
-import { scoreLabel, scoreHex, windWord, weatherEmoji } from '@/lib/forecast-format'
+import { scoreLabel, scoreHex, windWord, weatherIcon } from '@/lib/forecast-format'
 import { fmtTime, fmtDayLabel, fmtDateLong, fmtWindowRange, todayMadridISO, addDaysISO, ratingLabel } from '@/lib/solunar-format'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
+import Icon, { type IconName } from '@/components/icons/Icon'
+
+const MOD_ICON: Record<string, IconName> = { tierra: 'umbrella', kayak: 'kayak', barco: 'boat' }
 
 interface StationData {
   obs: AemetObservation | null
@@ -67,8 +70,8 @@ async function StationPanel({
       {obs?.available && (
         <div className={`border rounded-xl p-3.5 space-y-2 ${obsFresh ? 'border-accent/30 bg-accent/[0.04]' : 'border-ink/10 bg-ink/[0.02]'}`}>
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className={`font-mono text-[10px] font-bold uppercase tracking-widest ${obsFresh ? 'text-accent' : 'text-ink/60'}`}>
-              📡 {obsFresh ? 'Observado ahora' : 'Última medición'} · estación {obs.stationName} (a {station.km} km)
+            <p className={`font-mono text-[10px] font-bold uppercase tracking-widest inline-flex items-center gap-1.5 ${obsFresh ? 'text-accent' : 'text-ink/60'}`}>
+              <Icon name="radio" className="w-3.5 h-3.5" strokeWidth={2} />{obsFresh ? 'Observado ahora' : 'Última medición'} · estación {obs.stationName} (a {station.km} km)
             </p>
             {obs.time && (
               <span className="font-mono text-[10px] uppercase tracking-widest text-ink/60">
@@ -82,8 +85,8 @@ async function StationPanel({
                 <strong>Viento medido: {obs.windKmh} km/h</strong>
                 {obs.gustKmh != null && ` (rachas ${obs.gustKmh})`}
                 {obsFresh && nowWindKmh != null && (
-                  <span className={Math.abs(obs.windKmh - nowWindKmh) <= 5 ? 'text-accent' : 'text-amber-700'}>
-                    {' '}· modelo {Math.round(nowWindKmh)} {Math.abs(obs.windKmh - nowWindKmh) <= 5 ? '✓' : `(Δ${Math.abs(Math.round(obs.windKmh - nowWindKmh))})`}
+                  <span className={`inline-flex items-center gap-1 ${Math.abs(obs.windKmh - nowWindKmh) <= 5 ? 'text-accent' : 'text-amber-700'}`}>
+                    {' '}· modelo {Math.round(nowWindKmh)} {Math.abs(obs.windKmh - nowWindKmh) <= 5 ? <Icon name="checkCircle" className="w-3 h-3" strokeWidth={2.2} /> : `(Δ${Math.abs(Math.round(obs.windKmh - nowWindKmh))})`}
                   </span>
                 )}
               </span>
@@ -98,11 +101,12 @@ async function StationPanel({
         </div>
       )}
       {station.km <= 15 && (
-        <p className="font-mono text-[10px] uppercase tracking-wide text-ink/60 leading-relaxed">
-          🎯 Fiabilidad verificada:{' '}
+        <p className="font-mono text-[10px] uppercase tracking-wide text-ink/60 leading-relaxed inline-flex items-start gap-1.5">
+          <Icon name="target" className="w-3.5 h-3.5 shrink-0 mt-0.5" strokeWidth={2} />
+          <span>Fiabilidad verificada:{' '}
           {accuracy
             ? `error medio del viento ±${accuracy.maeKmh} km/h · ${Math.round(accuracy.within5 * 100)}% de días dentro de ±5 (últimas ${accuracy.n} verificaciones contra la estación oficial)`
-            : 'comparamos a diario nuestra previsión con la estación oficial de AEMET; primeras cifras públicas en cuanto acumulemos 3 días.'}
+            : 'comparamos a diario nuestra previsión con la estación oficial de AEMET; primeras cifras públicas en cuanto acumulemos 3 días.'}</span>
         </p>
       )}
     </>
@@ -112,7 +116,7 @@ async function StationPanel({
 function StationSkeleton({ km }: { km: number }) {
   return (
     <div className="border border-ink/[0.07] rounded-xl bg-ink/[0.02] p-3.5 space-y-2 animate-pulse" aria-hidden>
-      <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/30">📡 Consultando estación oficial (a {km} km)…</p>
+      <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/30 inline-flex items-center gap-1.5"><Icon name="radio" className="w-3.5 h-3.5" strokeWidth={2} />Consultando estación oficial (a {km} km)…</p>
       <div className="h-3 w-2/3 rounded bg-ink/10" />
     </div>
   )
@@ -131,7 +135,7 @@ async function DayAgreementChip({ promise, dateISO }: { promise: ReturnType<type
       }`}
       title={`Dispersión media del viento entre los modelos ECMWF (europeo), GFS (americano) e ICON (alemán) para este día: ±${agr.spreadKmh} km/h. Cuanto más coinciden, más fiable es la previsión.`}
     >
-      <span aria-hidden>🧭</span>
+      <Icon name="compass" className="w-4 h-4" strokeWidth={1.8} />
       <span className="font-mono text-[10px] font-bold uppercase tracking-widest">
         Confianza {agr.level} · ±{agr.spreadKmh} km/h
       </span>
@@ -341,19 +345,19 @@ export default async function SpotDashboard({
               href={`/mejores-horas/${s.slug}/plan${especie || modo ? `?${new URLSearchParams({ ...(especie ? { especie } : {}), ...(modo ? { modo } : {}) })}` : ''}`}
               className="inline-flex items-center gap-2 bg-ink text-paper px-4 py-2.5 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift hover:bg-accent hover:border-accent"
             >
-              🧾 Genera mi plan de pesca
+              <Icon name="clipboard" className="w-4 h-4" strokeWidth={1.8} />Genera mi plan de pesca
             </Link>
             <Link
               href={`/mejores-horas/comparar?zonas=${[s.slug, ...nearby.slice(0, 2).map((n) => n.slug)].join(',')}`}
               className="inline-flex items-center gap-2 bg-paper text-ink px-4 py-2.5 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift hover:bg-ink hover:text-paper"
             >
-              ⚖️ Comparar con zonas cercanas
+              <Icon name="scale" className="w-4 h-4" strokeWidth={1.7} />Comparar con zonas cercanas
             </Link>
             <Link
               href={`/mejores-horas/${s.slug}/planificador`}
               className="inline-flex items-center gap-2 bg-paper text-ink px-4 py-2.5 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift hover:bg-ink hover:text-paper"
             >
-              📅 Planificador de 12 meses
+              <Icon name="calendar" className="w-4 h-4" strokeWidth={1.8} />Planificador de 12 meses
             </Link>
             {/* Solo en zonas de mar: la batimetría y el balizamiento son
                 marinos, y en un embalse la carta no tendría nada que enseñar. */}
@@ -362,14 +366,14 @@ export default async function SpotDashboard({
                 href={`/carta?zona=${s.slug}`}
                 className="inline-flex items-center gap-2 bg-paper text-ink px-4 py-2.5 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift hover:bg-ink hover:text-paper"
               >
-                🧭 Ver el fondo en la carta náutica
+                <Icon name="compass" className="w-4 h-4" strokeWidth={1.8} />Ver el fondo en la carta náutica
               </Link>
             )}
             <Link
               href={`/diario?zona=${s.slug}`}
               className="inline-flex items-center gap-2 bg-paper text-ink px-4 py-2.5 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift hover:bg-ink hover:text-paper"
             >
-              🎣 Apunta tu captura
+              <Icon name="rod" className="w-4 h-4" strokeWidth={1.8} />Apunta tu captura
             </Link>
             <SpotFavButton slug={s.slug} name={s.name} />
           </div>
@@ -402,7 +406,7 @@ export default async function SpotDashboard({
         {/* Official AEMET coastal warning */}
         {aemet?.hasAviso && (
           <div role="alert" className="rounded-2xl border border-red-700/40 bg-red-700/[0.07] text-red-900 px-5 py-4 text-sm font-semibold flex items-start gap-3">
-            <span className="text-xl leading-none" aria-hidden>⚠️</span>
+            <Icon name="warning" className="w-5 h-5 shrink-0" strokeWidth={2} />
             <span>
               <span className="font-mono text-[10px] font-bold uppercase tracking-widest block mb-1">Aviso oficial de AEMET · fenómenos costeros</span>
               {aemet.avisoTexto}
@@ -419,7 +423,7 @@ export default async function SpotDashboard({
               a.level === 'peligro' ? 'border-red-700/40 bg-red-700/[0.07] text-red-900' : 'border-amber-600/40 bg-amber-500/[0.08] text-amber-900'
             }`}
           >
-            <span className="text-xl leading-none" aria-hidden>{a.level === 'peligro' ? '🚫' : '⚠️'}</span>
+            <Icon name={a.level === 'peligro' ? 'ban' : 'warning'} className="w-5 h-5 shrink-0" strokeWidth={2} />
             <span>{a.text}</span>
           </div>
         ))}
@@ -437,9 +441,9 @@ export default async function SpotDashboard({
                       key={m.id}
                       href={buildHref({ especie, modo: m.id === 'tierra' ? null : m.id })}
                       scroll={false}
-                      className={`px-3.5 py-2 text-sm font-bold rounded-xl border transition-colors ${active ? 'bg-accent text-paper border-accent' : 'bg-paper text-ink/80 border-ink/10 hover:bg-ink/5'}`}
+                      className={`inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-bold rounded-xl border transition-colors ${active ? 'bg-accent text-paper border-accent' : 'bg-paper text-ink/80 border-ink/10 hover:bg-ink/5'}`}
                     >
-                      {m.emoji} {m.name}
+                      <Icon name={MOD_ICON[m.id]} className="w-4 h-4" strokeWidth={2} />{m.name}
                     </Link>
                   )
                 })}
@@ -491,7 +495,7 @@ export default async function SpotDashboard({
                 </div>
                 {modalitySnapshot.map(({ m, score: cs }) => (
                   <div key={m.id} className="flex items-center justify-between text-[13px]">
-                    <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">{m.emoji} {m.name}</span>
+                    <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60 inline-flex items-center gap-1"><Icon name={MOD_ICON[m.id]} className="w-3 h-3" strokeWidth={2} />{m.name}</span>
                     <span className="font-bold" style={{ color: scoreHex(cs) }}>{conditionsWord(cs)} ({Math.round(cs)})</span>
                   </div>
                 ))}
@@ -509,30 +513,30 @@ export default async function SpotDashboard({
             <div className="lg:col-span-2 border border-ink/10 rounded-2xl bg-paper shadow-hard p-6 space-y-4">
               <h2 className="font-display uppercase text-2xl text-ink leading-none border-b border-ink/[0.07] pb-4">Condiciones actuales</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                <Metric label="Viento" icon="💨" value={<span className="inline-flex items-center gap-1.5">{nowHour.windKmh ?? '–'} km/h <WindArrow deg={nowHour.windDir} /> {nowHour.windDirLabel}</span>} sub={windWord(nowHour.windKmh)} />
-                <Metric label="Rachas" icon="🌬️" value={nowHour.gustKmh != null ? `${nowHour.gustKmh} km/h` : '–'} />
-                <Metric label="Presión" icon="📊" value={nowHour.pressure != null ? `${Math.round(nowHour.pressure)} hPa` : '–'} sub={pressureTrend ?? undefined} />
+                <Metric label="Viento" icon={<Icon name="wind" className="w-3.5 h-3.5" strokeWidth={1.8} />} value={<span className="inline-flex items-center gap-1.5">{nowHour.windKmh ?? '–'} km/h <WindArrow deg={nowHour.windDir} /> {nowHour.windDirLabel}</span>} sub={windWord(nowHour.windKmh)} />
+                <Metric label="Rachas" icon={<Icon name="wind" className="w-3.5 h-3.5" strokeWidth={1.8} />} value={nowHour.gustKmh != null ? `${nowHour.gustKmh} km/h` : '–'} />
+                <Metric label="Presión" icon={<Icon name="chartBar" className="w-3.5 h-3.5" strokeWidth={1.8} />} value={nowHour.pressure != null ? `${Math.round(nowHour.pressure)} hPa` : '–'} sub={pressureTrend ?? undefined} />
                 {s.type === 'mar' && (
                   <Metric
                     label="Estado del mar"
-                    icon="🌊"
+                    icon={<Icon name="wave" className="w-3.5 h-3.5" strokeWidth={1.8} />}
                     value={seaNow ? seaNow.name : nowHour.waveM != null ? `${nowHour.waveM.toFixed(1)} m` : '–'}
                     sub={nowHour.waveM != null ? `${nowHour.waveM.toFixed(1)} m · periodo ${nowHour.wavePeriod != null ? Math.round(nowHour.wavePeriod) : '–'}s` : undefined}
                   />
                 )}
                 {s.type === 'mar' && nowHour.swellM != null && (
-                  <Metric label="Mar de fondo" icon="〰️" value={`${nowHour.swellM.toFixed(1)} m`} sub={nowHour.swellPeriod != null ? `periodo ${Math.round(nowHour.swellPeriod)}s` : undefined} />
+                  <Metric label="Mar de fondo" icon={<Icon name="wave" className="w-3.5 h-3.5" strokeWidth={1.8} />} value={`${nowHour.swellM.toFixed(1)} m`} sub={nowHour.swellPeriod != null ? `periodo ${Math.round(nowHour.swellPeriod)}s` : undefined} />
                 )}
                 {s.type === 'mar' && nowHour.currentKmh != null && (
-                  <Metric label="Corriente" icon="🧭" value={<span className="inline-flex items-center gap-1.5">{(nowHour.currentKmh / 1.852).toFixed(1)} kn <WindArrow deg={nowHour.currentDir} /></span>} />
+                  <Metric label="Corriente" icon={<Icon name="compass" className="w-3.5 h-3.5" strokeWidth={1.8} />} value={<span className="inline-flex items-center gap-1.5">{(nowHour.currentKmh / 1.852).toFixed(1)} kn <WindArrow deg={nowHour.currentDir} /></span>} />
                 )}
-                {s.type === 'mar' && <Metric label="Tª del mar" icon="🐟" value={nowHour.seaTempC != null ? `${nowHour.seaTempC}°C` : '–'} />}
-                <Metric label="Temp. aire" icon="🌡️" value={nowHour.temp != null ? `${Math.round(nowHour.temp)}°C` : '–'} sub={uvMaxToday >= 7 ? `UV máx ${Math.round(uvMaxToday)} · protégete` : undefined} />
-                <Metric label="Cielo" icon={weatherEmoji(nowHour.code, nowHour.isDay)} value={nowHour.precipProb != null ? `${nowHour.precipProb}% lluvia` : '—'} sub={nowHour.visibilityKm != null ? `visibilidad ${nowHour.visibilityKm} km` : undefined} />
+                {s.type === 'mar' && <Metric label="Tª del mar" icon={<Icon name="fish" className="w-3.5 h-3.5" strokeWidth={1.8} />} value={nowHour.seaTempC != null ? `${nowHour.seaTempC}°C` : '–'} />}
+                <Metric label="Temp. aire" icon={<Icon name="thermometer" className="w-3.5 h-3.5" strokeWidth={1.8} />} value={nowHour.temp != null ? `${Math.round(nowHour.temp)}°C` : '–'} sub={uvMaxToday >= 7 ? `UV máx ${Math.round(uvMaxToday)} · protégete` : undefined} />
+                <Metric label="Cielo" icon={(() => { const wi = weatherIcon(nowHour.code, nowHour.isDay); return wi ? <Icon name={wi} className="w-3.5 h-3.5" strokeWidth={1.8} /> : null })()} value={nowHour.precipProb != null ? `${nowHour.precipProb}% lluvia` : '—'} sub={nowHour.visibilityKm != null ? `visibilidad ${nowHour.visibilityKm} km` : undefined} />
                 {risingNow !== null && (
-                  <Metric label="Marea" icon="🌊" value={risingNow ? 'Subiendo ↑' : 'Bajando ↓'} sub={upcomingTides[0] ? `${upcomingTides[0].type === 'alta' ? 'pleamar' : 'bajamar'} ${fmtTime(upcomingTides[0].time)}` : undefined} />
+                  <Metric label="Marea" icon={<Icon name="wave" className="w-3.5 h-3.5" strokeWidth={1.8} />} value={risingNow ? 'Subiendo ↑' : 'Bajando ↓'} sub={upcomingTides[0] ? `${upcomingTides[0].type === 'alta' ? 'pleamar' : 'bajamar'} ${fmtTime(upcomingTides[0].time)}` : undefined} />
                 )}
-                <Metric label="Primera luz" icon="🌄" value={fmtTime(d0.firstLight)} sub={`última luz ${fmtTime(d0.lastLight)}`} />
+                <Metric label="Primera luz" icon={<Icon name="sunrise" className="w-3.5 h-3.5" strokeWidth={1.8} />} value={fmtTime(d0.firstLight)} sub={`última luz ${fmtTime(d0.lastLight)}`} />
               </div>
               {windRel && (
                 <p className="text-[13px] text-ink/70 leading-relaxed border border-ink/[0.07] rounded-xl px-3.5 py-2.5 bg-paper">
@@ -613,14 +617,14 @@ export default async function SpotDashboard({
         {speciesPicks.length > 0 && (
           <div id="especies" className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-6 space-y-4 scroll-mt-28">
             <div className="flex items-center justify-between gap-3 border-b border-ink/[0.07] pb-4">
-              <h2 className="font-display uppercase text-2xl text-ink leading-none flex items-center gap-2"><span aria-hidden>🎯</span> Qué buscar hoy</h2>
+              <h2 className="font-display uppercase text-2xl text-ink leading-none flex items-center gap-2"><Icon name="target" className="w-5 h-5" strokeWidth={1.8} /> Qué buscar hoy</h2>
               <Link href="/especies" className="text-[11px] font-semibold text-accent hover:underline whitespace-nowrap">Todas las fichas →</Link>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {speciesPicks.map((p, i) => (
                 <div key={p.species.id} className={`border rounded-xl p-4 flex flex-col gap-2.5 ${i === 0 ? 'border-accent/40 bg-accent/[0.04]' : 'border-ink/[0.07] bg-paper'}`}>
                   <div className="flex items-center justify-between gap-2">
-                    <p className="font-display uppercase text-xl text-ink leading-none">{i === 0 && '⭐ '}{p.species.name}</p>
+                    <p className="font-display uppercase text-xl text-ink leading-none inline-flex items-center gap-1.5">{i === 0 && <Icon name="star" className="w-4 h-4 text-amber-500" />}{p.species.name}</p>
                     <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">#{i + 1}</span>
                   </div>
                   <p className="text-[13px] text-ink/65 leading-relaxed flex-1">
@@ -655,7 +659,11 @@ export default async function SpotDashboard({
           <div id="prevision" className="space-y-3 scroll-mt-28">
             <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3">Previsión hora a hora · 7 días</h2>
             <p className="text-[12px] text-ink/60">Elige el día. «Activ.» es la actividad prevista de los peces{species.id !== 'general' ? ` (adaptada a ${species.name})` : ''} y «Cond.» las condiciones para {modality.name.toLowerCase()}; verde = mejor. Desliza la tabla para ver todas las horas.</p>
-            <DayTabs labels={byDay.map((g, i) => `${i === bestDayIdx ? '⭐ ' : ''}${dayLabel(g.dateISO, i)}`)}>
+            <DayTabs labels={byDay.map((g, i) => (
+              <span key={g.dateISO} className="inline-flex items-center gap-1">
+                {i === bestDayIdx && <Icon name="star" className="w-3 h-3 text-amber-500" />}{dayLabel(g.dateISO, i)}
+              </span>
+            ))}>
               {byDay.map((g) => {
                 const sol = solByDate.get(g.dateISO)
                 const win = bestWindow(g.hours)
@@ -676,7 +684,7 @@ export default async function SpotDashboard({
                   <div key={g.dateISO} className="space-y-5">
                     {verdict && (
                       <p className="text-[15px] text-ink/85 leading-relaxed border-l-4 border-accent bg-accent/[0.05] rounded-r-xl px-4 py-3">
-                        <span className="font-bold">📋 Veredicto:</span> {verdict}
+                        <span className="font-bold inline-flex items-center gap-1.5"><Icon name="clipboard" className="w-4 h-4" strokeWidth={1.8} />Veredicto:</span> {verdict}
                       </p>
                     )}
                     <div className="flex flex-wrap items-center gap-3">
@@ -708,7 +716,7 @@ export default async function SpotDashboard({
                       </Suspense>
                       {navWins.map((w, i) => (
                         <span key={i} className="inline-flex items-center gap-2 rounded-xl border border-ink/10 px-3 py-2" title="Tramo con viento y olas aptos para embarcación menor">
-                          <span aria-hidden>🚤</span>
+                          <Icon name="boat" className="w-4 h-4" strokeWidth={1.8} />
                           <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Navegación</span>
                           <span className="font-display text-lg text-ink">{fmtWindowRange(w.start, w.end, gStart)}</span>
                         </span>
@@ -720,7 +728,7 @@ export default async function SpotDashboard({
                       outing ? (
                         <div className="border border-ink/10 rounded-2xl bg-paper p-4 flex flex-wrap items-center gap-x-6 gap-y-2">
                           <span className="inline-flex items-center gap-2">
-                            <span aria-hidden>{modality.emoji}</span>
+                            <Icon name={MOD_ICON[modality.id]} className="w-4 h-4" strokeWidth={1.8} />
                             <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Salida</span>
                             <span className="font-display text-xl text-ink">{outing.departure <= gStart ? '00:00' : fmtTime(outing.departure)}</span>
                           </span>
@@ -731,21 +739,21 @@ export default async function SpotDashboard({
                           {outing.returnNote && <span className="text-[13px] text-ink/60">Motivo: {outing.returnNote}.</span>}
                         </div>
                       ) : (
-                        <div className="border border-amber-600/40 bg-amber-500/[0.07] rounded-2xl p-4 text-sm font-semibold text-amber-900">
-                          {modality.emoji} Sin ventana segura para {modality.name.toLowerCase()} este día (viento u olas por encima del umbral). Considera pescar desde tierra.
+                        <div className="border border-amber-600/40 bg-amber-500/[0.07] rounded-2xl p-4 text-sm font-semibold text-amber-900 inline-flex items-start gap-1.5">
+                          <Icon name={MOD_ICON[modality.id]} className="w-4 h-4 shrink-0 mt-0.5" strokeWidth={1.8} />Sin ventana segura para {modality.name.toLowerCase()} este día (viento u olas por encima del umbral). Considera pescar desde tierra.
                         </div>
                       )
                     )}
 
                     <div className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-5 space-y-3">
-                      <h3 className="font-display uppercase text-lg text-ink leading-none flex items-center gap-2"><span aria-hidden>📈</span> Actividad de pesca del día</h3>
+                      <h3 className="font-display uppercase text-lg text-ink leading-none flex items-center gap-2"><Icon name="chartUp" className="w-4 h-4" strokeWidth={1.8} /> Actividad de pesca del día</h3>
                       <ActivityChart hours={g.hours} window={win} now={now} />
                       <p className="text-[11px] text-ink/60">Curva de puntuación 0-100 · banda verde: mejor ventana · punto: pico del día.</p>
                     </div>
 
                     <div className={`grid grid-cols-1 ${showTide ? 'lg:grid-cols-2' : ''} gap-6`}>
                       <div className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-5 space-y-3">
-                        <h3 className="font-display uppercase text-lg text-ink leading-none flex items-center gap-2"><span aria-hidden>💨</span> Viento (km/h)</h3>
+                        <h3 className="font-display uppercase text-lg text-ink leading-none flex items-center gap-2"><Icon name="wind" className="w-4 h-4" strokeWidth={1.8} /> Viento (km/h)</h3>
                         <WindChart hours={g.hours} sunrise={sol?.sunrise ?? null} sunset={sol?.sunset ?? null} periods={sol?.periods ?? []} now={now} />
                         <p className="text-[11px] text-ink/60">Barras: viento medio · línea: rachas · franjas verdes: periodos solunares · sombreado: noche.</p>
                         <SourceBadge
@@ -758,7 +766,7 @@ export default async function SpotDashboard({
                       </div>
                       {showTide && (
                         <div className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-5 space-y-3">
-                          <h3 className="font-display uppercase text-lg text-ink leading-none flex items-center gap-2"><span aria-hidden>🌊</span> Marea</h3>
+                          <h3 className="font-display uppercase text-lg text-ink leading-none flex items-center gap-2"><Icon name="wave" className="w-4 h-4" strokeWidth={1.8} /> Marea</h3>
                           <TideChart extremes={dayExtremes} dayStart={gStart} now={now} />
                           <p className="text-[11px] text-ink/60">{TIDE_DATUM_NOTE}</p>
                           <SourceBadge
@@ -783,7 +791,7 @@ export default async function SpotDashboard({
         {gearTips.length > 0 && (
           <div id="equipo" className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-6 space-y-4 scroll-mt-28">
             <h2 className="font-display uppercase text-2xl text-ink leading-none border-b border-ink/[0.07] pb-4 flex items-center gap-2">
-              <span aria-hidden>🎒</span> Equipo para estas condiciones
+              <Icon name="package" className="w-5 h-5" strokeWidth={1.7} /> Equipo para estas condiciones
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {gearTips.map((t) => (
@@ -802,7 +810,7 @@ export default async function SpotDashboard({
         {s.type === 'mar' && regulation && (
           <div id="normativa" className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-6 space-y-4 scroll-mt-28">
             <h2 className="font-display uppercase text-2xl text-ink leading-none border-b border-ink/[0.07] pb-4 flex items-center gap-2">
-              <span aria-hidden>📜</span> ¿Puedo pescar aquí? Normativa en {s.region}
+              <Icon name="book" className="w-5 h-5" strokeWidth={1.7} /> ¿Puedo pescar aquí? Normativa en {s.region}
             </h2>
             <ul className="space-y-2 text-[14px] text-ink/80 leading-relaxed">
               <li className="flex gap-2">
@@ -862,15 +870,15 @@ export default async function SpotDashboard({
               </div>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
-              <Metric label="Amanecer" icon="🌅" value={fmtTime(d0.sunrise)} />
-              <Metric label="Atardecer" icon="🌇" value={fmtTime(d0.sunset)} />
-              <Metric label="Sale la luna" icon="🌘" value={fmtTime(d0.moonrise)} />
-              <Metric label="Se pone la luna" icon="🌒" value={fmtTime(d0.moonset)} />
+              <Metric label="Amanecer" icon={<Icon name="sunrise" className="w-3.5 h-3.5" strokeWidth={1.8} />} value={fmtTime(d0.sunrise)} />
+              <Metric label="Atardecer" icon={<Icon name="sunset" className="w-3.5 h-3.5" strokeWidth={1.8} />} value={fmtTime(d0.sunset)} />
+              <Metric label="Sale la luna" icon={<Icon name="moon" className="w-3.5 h-3.5" strokeWidth={1.8} />} value={fmtTime(d0.moonrise)} />
+              <Metric label="Se pone la luna" icon={<Icon name="moon" className="w-3.5 h-3.5" strokeWidth={1.8} />} value={fmtTime(d0.moonset)} />
             </div>
             <SourceBadge source="PescaPlus (astronomía propia)" kind="calculado" extra="precisión ±2 min en salidas y puestas" />
           </div>
           <div className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-6 flex flex-col items-center justify-center text-center gap-2">
-            <span className="text-5xl">🌙</span>
+            <Icon name="moon" className="w-14 h-14 text-ink" strokeWidth={1.3} />
             <p className="font-bold text-ink text-lg">{d0.moonPhaseName}</p>
             <p className="font-mono text-[11px] uppercase tracking-widest text-ink/60">{Math.round(d0.moonIllumination * 100)}% iluminada</p>
             <Link href="/calendario" className="mt-2 text-xs font-semibold text-accent hover:underline">Ver calendario →</Link>
@@ -886,7 +894,7 @@ export default async function SpotDashboard({
               const isBest = di === bestDayIdx
               return (
                 <div key={d.date} className={`border rounded-xl p-3 space-y-2 text-center ${isBest ? 'border-accent bg-accent/[0.06]' : 'border-ink/[0.07] bg-paper'}`}>
-                  <p className="font-mono text-[11px] font-bold uppercase tracking-wide text-ink/60 capitalize">{isBest && '⭐ '}{fmtDayLabel(d.date)}</p>
+                  <p className="font-mono text-[11px] font-bold uppercase tracking-wide text-ink/60 capitalize inline-flex items-center justify-center gap-1">{isBest && <Icon name="star" className="w-3 h-3 text-amber-500" />}{fmtDayLabel(d.date)}</p>
                   <FishRating value={d.rating} className="justify-center" />
                   <div className="font-mono text-[11px] text-ink/60 space-y-0.5">
                     {dmajors.map((p, i) => (
@@ -905,10 +913,10 @@ export default async function SpotDashboard({
           <div id="aemet" className="border border-ink/10 rounded-2xl bg-paper shadow-hard p-6 space-y-4 scroll-mt-28">
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-ink/[0.07] pb-4">
               <h2 className="font-display uppercase text-2xl text-ink leading-none flex items-center gap-2">
-                <span aria-hidden>🏛️</span> El parte oficial de AEMET
+                <Icon name="building" className="w-5 h-5" strokeWidth={1.7} /> El parte oficial de AEMET
               </h2>
-              <span className={`text-[10px] font-semibold st px-2.5 py-1 rounded-full border${aemet.hasAviso ? 'border-red-700/40 text-red-800 bg-red-700/[0.06]' : 'border-accent/40 text-accent'}`}>
-                {aemet.hasAviso ? '⚠️ Con avisos' : '✓ Sin avisos'}
+              <span className={`text-[10px] font-semibold st px-2.5 py-1 rounded-full border inline-flex items-center gap-1${aemet.hasAviso ? 'border-red-700/40 text-red-800 bg-red-700/[0.06]' : 'border-accent/40 text-accent'}`}>
+                {aemet.hasAviso ? <><Icon name="warning" className="w-3 h-3" strokeWidth={2.2} />Con avisos</> : <><Icon name="checkCircle" className="w-3 h-3" strokeWidth={2.2} />Sin avisos</>}
               </span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -941,16 +949,16 @@ export default async function SpotDashboard({
             <p className="text-[16px] text-ink/85 leading-relaxed max-w-3xl first-letter:font-display first-letter:text-5xl first-letter:float-left first-letter:mr-2 first-letter:leading-[0.85]">{guide.intro}</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="border border-ink/[0.07] rounded-2xl bg-paper p-5 space-y-2">
-                <h3 className="font-display uppercase text-xl text-ink leading-none flex items-center gap-2"><span aria-hidden>🐟</span> Qué se pesca</h3>
+                <h3 className="font-display uppercase text-xl text-ink leading-none flex items-center gap-2"><Icon name="fish" className="w-4 h-4" strokeWidth={1.8} /> Qué se pesca</h3>
                 <p className="text-[14px] text-ink/75 leading-relaxed">{guide.species}</p>
               </div>
               <div className="border border-ink/[0.07] rounded-2xl bg-paper p-5 space-y-2">
-                <h3 className="font-display uppercase text-xl text-ink leading-none flex items-center gap-2"><span aria-hidden>🎣</span> Cómo se pesca</h3>
+                <h3 className="font-display uppercase text-xl text-ink leading-none flex items-center gap-2"><Icon name="rod" className="w-4 h-4" strokeWidth={1.8} /> Cómo se pesca</h3>
                 <p className="text-[14px] text-ink/75 leading-relaxed">{guide.techniques}</p>
               </div>
             </div>
             <div className="border-l-4 border-accent bg-accent/[0.05] rounded-r-2xl px-5 py-4">
-              <h3 className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent mb-1.5">📅 Cuándo ir</h3>
+              <h3 className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent mb-1.5 inline-flex items-center gap-1"><Icon name="calendar" className="w-3 h-3" strokeWidth={2} />Cuándo ir</h3>
               <p className="text-[14px] text-ink/80 leading-relaxed">{guide.seasons}</p>
             </div>
             <div>

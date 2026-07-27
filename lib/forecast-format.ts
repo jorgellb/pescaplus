@@ -49,16 +49,18 @@ export function windWord(k: number | null): string {
   return 'Muy fuerte'
 }
 
-/** WMO weather code → emoji. */
-export function weatherEmoji(code: number | null, isDay = true): string {
-  if (code == null) return ''
-  if (code === 0) return isDay ? '☀️' : '🌙'
-  if (code <= 2) return isDay ? '🌤️' : '☁️'
-  if (code === 3) return '☁️'
-  if (code <= 48) return '🌫️'
-  if (code <= 67) return '🌧️'
-  if (code <= 77) return '🌨️'
-  if (code <= 82) return '🌦️'
-  if (code <= 86) return '🌨️'
-  return '⛈️'
+/** WMO weather code → icon name (matches a key in components/icons/Icon.tsx). */
+export type WeatherIconName = 'sunny' | 'moon' | 'partlyCloudyDay' | 'cloudy' | 'fog' | 'rain' | 'snow' | 'drizzle' | 'storm'
+
+export function weatherIcon(code: number | null, isDay = true): WeatherIconName | null {
+  if (code == null) return null
+  if (code === 0) return isDay ? 'sunny' : 'moon'
+  if (code <= 2) return isDay ? 'partlyCloudyDay' : 'cloudy'
+  if (code === 3) return 'cloudy'
+  if (code <= 48) return 'fog'
+  if (code <= 67) return 'rain'
+  if (code <= 77) return 'snow'
+  if (code <= 82) return 'drizzle'
+  if (code <= 86) return 'snow'
+  return 'storm'
 }

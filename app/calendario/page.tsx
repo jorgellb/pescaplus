@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Layout from '@/components/Layout'
-import { lunarInfo, phaseEmoji } from '@/lib/solunar'
+import { lunarInfo, phaseIcon } from '@/lib/solunar'
 import { SPECIES_SEASONS, MONTHS_ABBR } from '@/lib/fishing-seasons'
 import { todayMadridISO } from '@/lib/solunar-format'
+import Icon from '@/components/icons/Icon'
 
 export const revalidate = 3600
 
@@ -77,7 +78,7 @@ export default function CalendarioPage() {
                   }`}
                 >
                   <span className="text-[11px] font-bold text-ink/60">{c.day}</span>
-                  <span className="text-lg leading-none" aria-hidden>{phaseEmoji(c.phase)}</span>
+                  <Icon name={phaseIcon(c.phase)} className="w-4 h-4" />
                 </div>
               ),
             )}

@@ -9,6 +9,7 @@ import { tideCoefficient } from '@/lib/tides'
 import { getZoneClimate, CLIMATE_YEARS } from '@/lib/zone-climate'
 import { SEA_SPECIES, SPECIES_KNOWN_TERMS } from '@/lib/fishing-species'
 import { todayMadridISO, addDaysISO, fmtDayLabel } from '@/lib/solunar-format'
+import Icon from '@/components/icons/Icon'
 
 export const revalidate = 86400
 
@@ -91,7 +92,7 @@ export default async function PlanificadorPage({ params }: { params: Promise<{ s
             <Link href={`/mejores-horas/${s.slug}`} className="hover:text-accent">{s.name}</Link> <span className="mx-1">/</span>{' '}
             <span className="text-ink">Planificador</span>
           </nav>
-          <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3">📅 Planificador de 12 meses</p>
+          <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3 inline-flex items-center gap-1.5"><Icon name="calendar" className="w-3.5 h-3.5" strokeWidth={2} />Planificador de 12 meses</p>
           <h1 className="font-display uppercase text-3xl sm:text-4xl md:text-5xl leading-[1.02] text-ink">
             Mejores días en {s.name}
           </h1>
@@ -136,7 +137,7 @@ export default async function PlanificadorPage({ params }: { params: Promise<{ s
                       className="font-mono text-[9.5px] uppercase tracking-wide text-ink/60 text-right"
                       title={`Histórico ${CLIMATE_YEARS}: media del viento máximo diario y porcentaje de días con máxima ≤ 20 km/h`}
                     >
-                      hist. 💨 {Math.round(clim.w)} km/h · {clim.ok}% días buenos
+                      hist. <Icon name="wind" className="w-3 h-3 inline -mt-0.5" strokeWidth={2} /> {Math.round(clim.w)} km/h · {clim.ok}% días buenos
                     </span>
                   )}
                 </div>
@@ -174,8 +175,8 @@ export default async function PlanificadorPage({ params }: { params: Promise<{ s
                     ))}
                   </p>
                   {inSeason.length > 0 && (
-                    <p className="text-[12px] text-ink/60">
-                      🐟 En temporada:{' '}
+                    <p className="text-[12px] text-ink/60 inline-flex items-center gap-1">
+                      <Icon name="fish" className="w-3 h-3" strokeWidth={2} />En temporada:{' '}
                       {inSeason.map((sp, i) => (
                         <span key={sp.id}>
                           {i > 0 && ', '}

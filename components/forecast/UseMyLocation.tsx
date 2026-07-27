@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Icon from '@/components/icons/Icon'
 
 export default function UseMyLocation({ className = '' }: { className?: string }) {
   const router = useRouter()
@@ -37,7 +38,7 @@ export default function UseMyLocation({ className = '' }: { className?: string }
         disabled={state === 'loading'}
         className="inline-flex items-center gap-2 bg-accent text-paper px-4 py-2.5 text-sm font-semibold border border-accent rounded-full shadow-hard hover-shift hover:bg-ink hover:border-ink disabled:opacity-60 transition-colors"
       >
-        📍 {state === 'loading' ? 'Localizando…' : 'Usar mi ubicación'}
+        <Icon name="pin" className="w-4 h-4" strokeWidth={1.8} />{state === 'loading' ? 'Localizando…' : 'Usar mi ubicación'}
       </button>
       {state === 'error' && <p className="text-xs text-red-700 mt-1.5">{msg}</p>}
     </div>

@@ -3,7 +3,7 @@
 import { Children, useState } from 'react'
 
 /** Client-side day switcher: renders one server-rendered day panel at a time. */
-export default function DayTabs({ labels, children }: { labels: string[]; children: React.ReactNode }) {
+export default function DayTabs({ labels, children }: { labels: React.ReactNode[]; children: React.ReactNode }) {
   const [active, setActive] = useState(0)
   const panels = Children.toArray(children)
 
