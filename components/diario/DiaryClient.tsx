@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { FISHING_SPOTS, getSpot } from '@/lib/fishing-spots'
 import { SEA_SPECIES } from '@/lib/fishing-species'
+import SpeciesPatterns from './SpeciesPatterns'
 import { solunarDay, phaseEmoji } from '@/lib/solunar'
 import { tideCoefficient } from '@/lib/tides'
 import { todayMadridISO, fmtDateLong } from '@/lib/solunar-format'
@@ -21,6 +22,12 @@ const SHARED_KEY = 'pescaplus-diario-compartidas'
 interface CatchEntry {
   id: string
   dateISO: string
+  /**
+   * Hora local "HH:MM". Sin ella no se puede casar una captura con la marea ni
+   * con la actividad solunar de ESE momento, que es justo lo que hace que el
+   * diario enseñe algo en vez de acumular filas.
+   */
+  timeISO?: string
   spotSlug: string
   speciesId: string
   qty: number
@@ -93,7 +100,12 @@ export default function DiaryClient() {
     try {
       const res = await fetch('/api/capturas', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ spotSlug: e.spotSlug, speciesId: e.speciesId, dateISO: e.dateISO, qty: e.qty }),
+        // La hora va si se anotó: con ella la captura se sella con la marea y
+        // la actividad de ese momento, no con las del mediodía por defecto.
+        body: JSON.stringify({
+          spotSlug: e.spotSlug, speciesId: e.speciesId, dateISO: e.dateISO, qty: e.qty,
+          ...(e.timeISO ? { timeISO: e.timeISO } : {}),
+        }),
       })
       const data = await res.json()
       if (res.ok && data.success) {
@@ -104,7 +116,7 @@ export default function DiaryClient() {
     } catch { /* sin red: se puede reintentar */ } finally { setSharing(null) }
   }
   const [ready, setReady] = useState(false)
-  const [form, setForm] = useState({ dateISO: '', spotSlug: '', speciesId: 'lubina', qty: 1, note: '' })
+  const [form, setForm] = useState({ dateISO: '', timeISO: '', spotSlug: '', speciesId: 'lubina', qty: 1, note: '' })
 
   useEffect(() => {
     const init = () => {
@@ -130,6 +142,9 @@ export default function DiaryClient() {
     const entry: CatchEntry = {
       id: `c-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       dateISO: form.dateISO,
+      // La hora es opcional: quien no la recuerde no debe quedarse sin apuntar
+      // la captura. Lo que no se sabe se queda fuera, no se rellena.
+      ...(/^\d{2}:\d{2}$/.test(form.timeISO) ? { timeISO: form.timeISO } : {}),
       spotSlug: form.spotSlug,
       speciesId: form.speciesId,
       qty: Math.max(1, Math.round(form.qty)),
@@ -212,6 +227,15 @@ export default function DiaryClient() {
               value={form.dateISO}
               max={todayMadridISO()}
               onChange={(ev) => setForm((f) => ({ ...f, dateISO: ev.target.value }))}
+              className="mt-1 w-full border border-ink/12 rounded-xl bg-paper px-3 py-2 text-sm"
+            />
+          </label>
+          <label className="block">
+            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Hora</span>
+            <input
+              type="time"
+              value={form.timeISO ?? ''}
+              onChange={(ev) => setForm((f) => ({ ...f, timeISO: ev.target.value }))}
               className="mt-1 w-full border border-ink/12 rounded-xl bg-paper px-3 py-2 text-sm"
             />
           </label>
@@ -301,6 +325,12 @@ export default function DiaryClient() {
           </p>
         </div>
       )}
+
+      {/* Los patrones por especie salen de las capturas COMPARTIDAS y del
+          servidor; los de arriba, del diario local que no sale del navegador.
+          Van separados a propósito: mezclarlos confundiría de dónde viene cada
+          cosa y qué promesa de privacidad aplica a cada una. */}
+      <SpeciesPatterns />
 
       {/* Entries */}
       <div className="space-y-3">
