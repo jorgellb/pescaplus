@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import Layout from '@/components/Layout'
 import { getSpot } from '@/lib/fishing-spots'
-import { SEA_SPECIES, MONTHS_SHORT } from '@/lib/fishing-species'
+import { SEA_SPECIES, MONTHS_SHORT, deSpecies, elSpecies } from '@/lib/fishing-species'
 import { speciesForZone, zonesForSpecies, isSpeciesZone } from '@/lib/species-zones'
 import { buildZoneFacts } from '@/lib/zone-facts'
 import { getSpeciesActivity } from '@/lib/catch-reports'
@@ -13,6 +13,8 @@ import { getTaxonomy, categoryName } from '@/lib/taxonomy-store'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
 import { safeJsonLd } from '@/lib/json-ld'
 import Icon from '@/components/icons/Icon'
+import ProductImage from '@/components/ProductImage'
+import { gearPicks } from '@/lib/gear-picks'
 
 export const revalidate = 86400
 
@@ -22,6 +24,14 @@ type Params = { params: Promise<{ especie: string; zona: string }> }
 // the sitemap makes them discoverable. Keeps the build fast.
 export function generateStaticParams() {
   return [] as { especie: string; zona: string }[]
+}
+
+/** "buscarlo" / "buscarla" / "buscarlos" / "buscarlas", según la especie. */
+const PRONOMBRE: Record<string, string> = {
+  el: 'buscarlo',
+  la: 'buscarla',
+  los: 'buscarlos',
+  las: 'buscarlas',
 }
 
 function monthsPhrase(months: number[]): string {
@@ -53,6 +63,8 @@ export default async function SpeciesZonePage({ params }: Params) {
   const climate = getZoneClimate(spot.slug)
   const regulation = getRegulation(spot.region)
   const taxonomy = await getTaxonomy()
+  // Aparejos reales para esta especie (las categorías salen de su ficha).
+  const picks = await gearPicks(sp)
   const n = sp.name.toLowerCase()
 
   // The calmest of the species' best months here (from real ERA5 climatology).
@@ -72,10 +84,10 @@ export default async function SpeciesZonePage({ params }: Params) {
   const faqs: { q: string; a: string }[] = [
     {
       q: `¿Cuándo es la mejor época para pescar ${n} en ${spot.name}?`,
-      a: `Los mejores meses para la ${n} en ${spot.name} son ${monthsPhrase(sp.bestMonths)}, cuando el agua ronda los ${sp.seaTempC[0]}–${sp.seaTempC[1]} °C.${bestCalmMonth ? ` Según el histórico de la zona, ${MONTHS_SHORT[bestCalmMonth.m - 1].toLowerCase()} suele ser el más apacible (${bestCalmMonth.ok}% de días de mar tratable).` : ''}`,
+      a: `Los mejores meses para ${elSpecies(sp)} en ${spot.name} son ${monthsPhrase(sp.bestMonths)}, cuando el agua ronda los ${sp.seaTempC[0]}–${sp.seaTempC[1]} °C.${bestCalmMonth ? ` Según el histórico de la zona, ${MONTHS_SHORT[bestCalmMonth.m - 1].toLowerCase()} suele ser el más apacible (${bestCalmMonth.ok}% de días de mar tratable).` : ''}`,
     },
     {
-      q: `¿Qué cebo o técnica funciona mejor con la ${n}?`,
+      q: `¿Qué cebo o técnica funciona mejor con ${elSpecies(sp)}?`,
       a: `${sp.technique}. Cebos que dan resultado: ${sp.baits}. Busca ${sp.habitat.toLowerCase()}, a ${sp.depth}.`,
     },
     {
@@ -83,7 +95,7 @@ export default async function SpeciesZonePage({ params }: Params) {
       a: `${sp.hours}. Afínalo con el calendario solunar y la previsión de ${spot.name}, que marca las ventanas hora a hora para ${n}.`,
     },
     {
-      q: `¿Cuál es la talla mínima de la ${n}?`,
+      q: `¿Cuál es la talla mínima ${deSpecies(sp)}?`,
       a: `${sp.minSizeNote}. La talla legal la fija ${regulation ? regulation.authority : 'la comunidad autónoma'}; confírmala siempre antes de salir.`,
     },
   ]
@@ -125,7 +137,7 @@ export default async function SpeciesZonePage({ params }: Params) {
             {sp.name} en {spot.name} ({spot.region}), sobre {facts.sea}
             {facts.orientation ? `, costa orientada al ${facts.orientation}` : ''}. {sp.tagline}. Su temporada fuerte aquí va de{' '}
             <strong className="text-ink">{monthsPhrase(sp.bestMonths)}</strong>, con el agua entre {sp.seaTempC[0]} y {sp.seaTempC[1]} °C.
-            Aquí tienes cuándo, cómo y con qué buscarla, más la previsión de mejores horas de la zona.
+            Aquí tienes cuándo, cómo y con qué {PRONOMBRE[sp.article]}, más la previsión de mejores horas de la zona.
           </p>
 
           {/* Quick facts */}
@@ -188,7 +200,7 @@ export default async function SpeciesZonePage({ params }: Params) {
             })}
           </div>
           <p className="text-[15px] text-ink/80 leading-relaxed">
-            La {n} entra mejor de <strong className="text-ink">{monthsPhrase(sp.bestMonths)}</strong>, con el agua entre {sp.seaTempC[0]} y {sp.seaTempC[1]} °C.
+            {elSpecies(sp, true)} entra mejor de <strong className="text-ink">{monthsPhrase(sp.bestMonths)}</strong>, con el agua entre {sp.seaTempC[0]} y {sp.seaTempC[1]} °C.
             {bestCalmMonth && (
               <> En {spot.name}, de esos meses <strong className="text-ink">{MONTHS_SHORT[bestCalmMonth.m - 1].toLowerCase()}</strong> suele dar el mar más tratable ({bestCalmMonth.ok}% de días buenos según el histórico {CLIMATE_YEARS}), buen momento para planificar la salida.</>
             )}{' '}
@@ -220,7 +232,7 @@ export default async function SpeciesZonePage({ params }: Params) {
         <div className="space-y-3">
           <h2 className="font-display uppercase text-2xl md:text-3xl text-ink border-b border-ink/[0.07] pb-3">Condiciones y previsión en {spot.name}</h2>
           <p className="text-[15px] text-ink/80 leading-relaxed">
-            La {n} responde mejor {waveWord} y con {windWord}. En {spot.name} eso depende del día: nuestra previsión cruza viento, oleaje,
+            {elSpecies(sp, true)} responde mejor {waveWord} y con {windWord}. En {spot.name} eso depende del día: nuestra previsión cruza viento, oleaje,
             mareas y solunar para puntuar cada hora pensando en esta especie. Antes de coger los bártulos, mira la ventana del día.
           </p>
           <Link
@@ -251,7 +263,7 @@ export default async function SpeciesZonePage({ params }: Params) {
 
         {/* EQUIPO */}
         <div className="space-y-3">
-          <h2 className="font-display uppercase text-2xl md:text-3xl text-ink border-b border-ink/[0.07] pb-3">Equipo para la {n}</h2>
+          <h2 className="font-display uppercase text-2xl md:text-3xl text-ink border-b border-ink/[0.07] pb-3">Equipo para {elSpecies(sp)}</h2>
           <div className="flex flex-wrap gap-2">
             {sp.gearCats.map((c) => (
               <Link key={c} href={`/categories/${c}`} className="inline-flex items-center gap-1.5 text-sm font-semibold text-paper bg-ink hover:bg-accent px-3.5 py-2 rounded-lg transition-colors">
@@ -259,6 +271,39 @@ export default async function SpeciesZonePage({ params }: Params) {
               </Link>
             ))}
           </div>
+
+          {/* Los aparejos concretos, no solo la categoría: quien busca "pescar
+              lubina en Tarifa" ya sabe QUÉ quiere, así que enseñarle el
+              producto ahorra un salto. */}
+          {picks.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+              {picks.map(({ product, reason }) => (
+                <Link
+                  key={product.id}
+                  href={`/products/${product.id}`}
+                  className="group border border-ink/[0.07] rounded-xl bg-paper overflow-hidden hover:border-accent/40 transition-colors flex flex-col"
+                >
+                  <div className="relative aspect-square bg-ink/[0.05]">
+                    <ProductImage
+                      src={product.imageUrl}
+                      alt={product.title}
+                      sizes="(max-width: 640px) 100vw, 220px"
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-3 flex flex-col gap-1.5 flex-1">
+                    <p className="font-mono text-[10px] uppercase tracking-widest text-accent">{reason}</p>
+                    <p className="text-[13px] font-semibold text-ink leading-snug line-clamp-2 group-hover:text-accent transition-colors">
+                      {product.title}
+                    </p>
+                    <p className="mt-auto text-sm font-bold text-ink">
+                      {product.price.toFixed(2)} {product.currency}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* FAQ */}

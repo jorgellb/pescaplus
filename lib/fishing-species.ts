@@ -614,6 +614,17 @@ export function deSpecies(sp: SpeciesProfile): string {
   }
 }
 
+/**
+ * El nombre con su artículo: "el mero", "la lubina", "los calamares",
+ * "las potas". Para frases como `Equipo para ${elSpecies(sp)}`.
+ *
+ * Con `capitalizado` para cuando abre la frase: "El mero entra mejor…".
+ */
+export function elSpecies(sp: SpeciesProfile, capitalizado = false): string {
+  const art = capitalizado ? sp.article.charAt(0).toUpperCase() + sp.article.slice(1) : sp.article
+  return `${art} ${sp.name.toLowerCase()}`
+}
+
 export const MONTHS_SHORT = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
 
 /** Which spot `known` descriptions mention each species (shared by fichas + zone facts). */
