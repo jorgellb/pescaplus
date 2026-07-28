@@ -1,6 +1,6 @@
 /**
- * Generate lib/guides-data.ts — a few SEO buying guides written by the NVIDIA
- * agent. Run: `node scripts/gen-guides.mjs`
+ * Generate lib/guides-data.ts — a few SEO buying guides written by the
+ * OpenRouter agent. Run: `node scripts/gen-guides.mjs`
  */
 import 'dotenv/config'
 import { readFileSync, writeFileSync } from 'fs'
@@ -10,16 +10,15 @@ import { dirname, join } from 'path'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const OUT = join(__dirname, '..', 'lib', 'guides-data.ts')
 
-const KEY = process.env.NVIDIA_API_KEY
-const URL = process.env.NVIDIA_BASE_URL ?? 'https://integrate.api.nvidia.com/v1'
-const MODELS = (process.env.NVIDIA_MODELS?.split(',').map((s) => s.trim()).filter(Boolean)) || [
-  'nvidia/nemotron-3-super-120b-a12b',
-  'nvidia/llama-3.3-nemotron-super-49b-v1.5',
-  'nvidia/nemotron-3-nano-30b-a3b',
-  'nvidia/nvidia-nemotron-nano-9b-v2',
-  'nvidia/nemotron-mini-4b-instruct',
+const KEY = process.env.OPENROUTER_API_KEY
+const URL = process.env.OPENROUTER_BASE_URL ?? 'https://openrouter.ai/api/v1'
+const MODELS = (process.env.OPENROUTER_MODELS?.split(',').map((s) => s.trim()).filter(Boolean)) || [
+  'openai/gpt-4o-mini',
+  'google/gemini-2.5-flash',
+  'meta-llama/llama-3.3-70b-instruct',
+  'mistralai/mistral-small-3.1-24b-instruct',
 ]
-const nvidiaOn = KEY && KEY !== 'your_nvidia_api_key'
+const nvidiaOn = KEY && KEY !== 'your_openrouter_api_key'
 
 const TOPICS = [
   { topic: 'Cómo elegir tu primera caña de pescar', typeFishing: 'canas' },

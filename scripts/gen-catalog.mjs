@@ -1,7 +1,7 @@
 /**
  * Generate lib/catalog-data.ts from REAL AliExpress products, with SEO copy
- * written by the NVIDIA agent. Run: `node scripts/gen-catalog.mjs`
- * Requires ALIEXPRESS_APP_KEY/SECRET and (optionally) NVIDIA_API_KEY in .env.
+ * written by the OpenRouter agent. Run: `node scripts/gen-catalog.mjs`
+ * Requires ALIEXPRESS_APP_KEY/SECRET and (optionally) OPENROUTER_API_KEY in .env.
  */
 import 'dotenv/config'
 import crypto from 'crypto'
@@ -16,18 +16,16 @@ const APP_KEY = process.env.ALIEXPRESS_APP_KEY
 const APP_SECRET = process.env.ALIEXPRESS_APP_SECRET
 const TRACKING_ID = process.env.ALIEXPRESS_TRACKING_ID ?? 'pescaplus'
 const GATEWAY = process.env.ALIEXPRESS_GATEWAY ?? 'https://api-sg.aliexpress.com/sync'
-const NVIDIA_API_KEY = process.env.NVIDIA_API_KEY
-const NVIDIA_BASE_URL = process.env.NVIDIA_BASE_URL ?? 'https://integrate.api.nvidia.com/v1'
+const NVIDIA_API_KEY = process.env.OPENROUTER_API_KEY
+const NVIDIA_BASE_URL = process.env.OPENROUTER_BASE_URL ?? 'https://openrouter.ai/api/v1'
 const DEFAULT_MODELS = [
-  'nvidia/nemotron-3-super-120b-a12b',
-  'nvidia/llama-3.3-nemotron-super-49b-v1.5',
-  'nvidia/nemotron-3-nano-30b-a3b',
-  'nvidia/nvidia-nemotron-nano-9b-v2',
-  'nvidia/nemotron-mini-4b-instruct',
-  'nvidia/llama-3.1-nemotron-nano-8b-v1',
+  'openai/gpt-4o-mini',
+  'google/gemini-2.5-flash',
+  'meta-llama/llama-3.3-70b-instruct',
+  'mistralai/mistral-small-3.1-24b-instruct',
 ]
-const NVIDIA_MODELS = (process.env.NVIDIA_MODELS?.split(',').map((s) => s.trim()).filter(Boolean)) || DEFAULT_MODELS
-const nvidiaOn = NVIDIA_API_KEY && NVIDIA_API_KEY !== 'your_nvidia_api_key'
+const NVIDIA_MODELS = (process.env.OPENROUTER_MODELS?.split(',').map((s) => s.trim()).filter(Boolean)) || DEFAULT_MODELS
+const nvidiaOn = NVIDIA_API_KEY && NVIDIA_API_KEY !== 'your_openrouter_api_key'
 
 const PER_CATEGORY = Number(process.env.GEN_PER_CATEGORY ?? 6)
 

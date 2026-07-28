@@ -1,5 +1,5 @@
 /**
- * Bulk SEO polish for every product in lib/catalog-data.ts using the NVIDIA agent:
+ * Bulk SEO polish for every product in lib/catalog-data.ts using the OpenRouter agent:
  * cleans the title (strips marketplace seller/brand names) and rewrites an
  * SEO-optimised title, meta title, description and meta description.
  *
@@ -22,17 +22,15 @@ const WRITE = process.argv.includes('--write')
 const limitArg = process.argv.indexOf('--limit')
 const LIMIT = limitArg > -1 ? Number(process.argv[limitArg + 1]) : Infinity
 
-const NVIDIA_API_KEY = process.env.NVIDIA_API_KEY
-const NVIDIA_BASE_URL = process.env.NVIDIA_BASE_URL ?? 'https://integrate.api.nvidia.com/v1'
-const NVIDIA_MODELS = (process.env.NVIDIA_MODELS?.split(',').map((s) => s.trim()).filter(Boolean)) || [
-  'nvidia/nemotron-3-super-120b-a12b',
-  'nvidia/llama-3.3-nemotron-super-49b-v1.5',
-  'nvidia/nemotron-3-nano-30b-a3b',
-  'nvidia/nvidia-nemotron-nano-9b-v2',
-  'nvidia/nemotron-mini-4b-instruct',
-  'nvidia/llama-3.1-nemotron-nano-8b-v1',
+const NVIDIA_API_KEY = process.env.OPENROUTER_API_KEY
+const NVIDIA_BASE_URL = process.env.OPENROUTER_BASE_URL ?? 'https://openrouter.ai/api/v1'
+const NVIDIA_MODELS = (process.env.OPENROUTER_MODELS?.split(',').map((s) => s.trim()).filter(Boolean)) || [
+  'openai/gpt-4o-mini',
+  'google/gemini-2.5-flash',
+  'meta-llama/llama-3.3-70b-instruct',
+  'mistralai/mistral-small-3.1-24b-instruct',
 ]
-const nvidiaOn = NVIDIA_API_KEY && NVIDIA_API_KEY !== 'your_nvidia_api_key'
+const nvidiaOn = NVIDIA_API_KEY && NVIDIA_API_KEY !== 'your_openrouter_api_key'
 
 const LABELS = {
   anzuelos: 'Anzuelos', lineas: 'Líneas de pesca', senuelos: 'Señuelos', canas: 'Cañas de pesca',
@@ -89,7 +87,7 @@ Devuelve SOLO JSON: {"title": string, "seoTitle": string, "description": string,
 const str = (v, f) => (typeof v === 'string' && v.trim() ? v.trim() : f)
 
 async function main() {
-  if (!nvidiaOn) throw new Error('NVIDIA no está configurado (define NVIDIA_API_KEY)')
+  if (!nvidiaOn) throw new Error('OpenRouter no está configurado (define OPENROUTER_API_KEY)')
   const srcFile = readFileSync(OUT, 'utf8')
   const start = srcFile.indexOf('[', srcFile.indexOf('= [', srcFile.indexOf('CATALOG_SEED')))
   const end = srcFile.lastIndexOf(']')

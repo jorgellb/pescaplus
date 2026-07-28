@@ -2,12 +2,12 @@
 
 [![CI](https://github.com/jorgellb/pescaplus/actions/workflows/ci.yml/badge.svg)](https://github.com/jorgellb/pescaplus/actions/workflows/ci.yml)
 
-Tienda de afiliados de pesca con integración de AliExpress y asistente IA de NVIDIA.
+Tienda de afiliados de pesca con integración de AliExpress y asistente IA vía OpenRouter.
 
 > **Funciona sin configuración.** El catálogo de productos vive en `lib/catalog.ts`
 > y es la fuente de la verdad: puedes ejecutar `npm run dev` y navegar toda la web
 > (catálogo, categorías, fichas de producto y el asistente IA) sin base de datos ni
-> claves de API. La base de datos (Neon/Prisma) y las APIs de AliExpress y NVIDIA son
+> claves de API. La base de datos (Neon/Prisma) y las APIs de AliExpress y OpenRouter son
 > **mejoras opcionales** que se activan solas cuando defines sus variables de entorno,
 > y cualquier fallo degrada de forma transparente al catálogo local y al asistente
 > experto offline.
@@ -19,8 +19,7 @@ Tienda de afiliados de pesca con integración de AliExpress y asistente IA de NV
 - **Prisma** - ORM para base de datos
 - **Neon PostgreSQL** - Base de datos serverless
 - **AliExpress API** - Productos y afiliados
-- **NVIDIA AI** - Asistente de IA para consejos de pesca
-- **LangChain** - Integración con modelos de IA
+- **OpenRouter** - Asistente de IA para consejos de pesca (varios proveedores con fallback)
 - **Tailwind CSS** - Estilos
 - **Vercel** - Despliegue
 
@@ -52,8 +51,8 @@ Variables (todas **opcionales** — la app funciona sin ellas):
 - `DATABASE_URL`: URL de Neon PostgreSQL. Si está, el panel persiste en la DB; si no, usa un store en memoria.
 - `ALIEXPRESS_APP_KEY` / `ALIEXPRESS_APP_SECRET` / `ALIEXPRESS_APP_TOKEN`: credenciales de afiliado.
 - `ALIEXPRESS_TRACKING_ID`: tracking id de afiliado (por defecto `pescaplus`).
-- `NVIDIA_API_KEY`: clave de NVIDIA para el asistente y la generación de fichas con IA.
-- `NVIDIA_MODEL` / `NVIDIA_BASE_URL`: modelo y endpoint (opcional; hay valores por defecto).
+- `OPENROUTER_API_KEY`: clave de OpenRouter para el asistente y la generación de fichas con IA.
+- `OPENROUTER_MODELS` / `OPENROUTER_BASE_URL`: cadena de modelos y endpoint (opcional; hay valores por defecto).
 - `ADMIN_PASSWORD`: contraseña del **panel de administración** (`/admin`). Sin ella, se usa
   `pescaplus-admin` en desarrollo (con aviso). **Defínela antes de desplegar.**
 
@@ -63,10 +62,10 @@ Variables (todas **opcionales** — la app funciona sin ellas):
 2. Crea una nueva aplicación
 3. Obtén tus credenciales (app key, app secret)
 
-### 5. Configurar NVIDIA API
+### 5. Configurar OpenRouter
 
-1. Regístrate en [NVIDIA API Catalog](https://build.nvidia.com/)
-2. Obtén una API key para los modelos que quieras usar
+1. Regístrate en [OpenRouter](https://openrouter.ai/)
+2. Genera una API key (empieza por `sk-or-`) y añade crédito si vas a usar modelos de pago
 
 ### 6. Inicializar base de datos
 
@@ -121,7 +120,7 @@ pescaplus/
 │   ├── catalog.ts         # catálogo local (fuente de la verdad)
 │   ├── prisma.ts          # DB opcional
 │   ├── aliexpress.ts      # API opcional (firmada)
-│   └── nvidia-ai.ts       # IA con fallback offline
+│   └── openrouter-ai.ts   # IA con fallback offline
 ├── prisma/
 │   └── schema.prisma
 ├── types/
@@ -151,9 +150,9 @@ Backend intuitivo protegido por contraseña (`ADMIN_PASSWORD`) para gestionar la
   tabla para **crear, editar y eliminar** productos.
 - **Creación manual**: formulario completo (título, modalidad, precio, moneda, valoración,
   reseñas, imagen, enlace de afiliado, descripción, stock) con vista previa de imagen.
-- **Creación con IA** ✨: describe el producto en una frase y la IA (NVIDIA, con *fallback*
+- **Creación con IA** ✨: describe el producto en una frase y la IA (OpenRouter, con *fallback*
   offline) rellena toda la ficha; luego la revisas y ajustas antes de guardar.
-- **Configuración**: estado de las integraciones (DB, AliExpress, NVIDIA, contraseña), valores
+- **Configuración**: estado de las integraciones (DB, AliExpress, OpenRouter, contraseña), valores
   por defecto (moneda, modalidad, nº por página) y mantenimiento del catálogo (exportar a JSON,
   restablecer al catálogo original).
 - **Persistencia**: usa la base de datos cuando `DATABASE_URL` está configurada; si no, un store
