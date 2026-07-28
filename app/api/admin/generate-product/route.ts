@@ -4,6 +4,8 @@ import { isRequestAuthenticated } from '@/lib/admin-auth'
 import { generateProductDraft } from '@/lib/nvidia-ai'
 import { getSettings } from '@/lib/settings-store'
 
+export const maxDuration = 90
+
 const schema = z.object({
   prompt: z.string().min(2).max(400),
   typeFishing: z.string().min(1).max(40).optional(),

@@ -5,6 +5,8 @@ import { isRequestAuthenticated } from '@/lib/admin-auth'
 import { generateSeoListing } from '@/lib/nvidia-ai'
 import { createProduct, updateProduct, listProducts } from '@/lib/products-store'
 
+export const maxDuration = 90
+
 const schema = z.object({
   id: z.string().min(1).max(120),
   title: z.string().min(1).max(300),

@@ -26,6 +26,23 @@ const NVIDIA_MODELS: string[] = (() => {
   return DEFAULT_NVIDIA_MODELS
 })()
 
+/**
+ * Chain para tareas que exigen un JSON corto y exacto (fichas, reescrituras).
+ * Excluye `nemotron-3-super-120b-a12b` y `nemotron-3-nano-30b-a3b`: medido en
+ * pruebas reales, ambos son "razonadores" que gastan TODO su presupuesto de
+ * tokens pensando en voz alta (finish_reason: "length") y no llegan a escribir
+ * ni una llave de JSON — cada intento con ellos es un fallo garantizado que solo
+ * añade latencia antes de llegar a un modelo que sí responde. El 49b encabeza
+ * la lista por calidad de español (igual que en `generateZoneGuide`); el resto
+ * son rápidos y fiables como red de seguridad.
+ */
+const JSON_MODELS = [
+  'nvidia/llama-3.3-nemotron-super-49b-v1.5',
+  'nvidia/nvidia-nemotron-nano-9b-v2',
+  'nvidia/nemotron-mini-4b-instruct',
+  'nvidia/llama-3.1-nemotron-nano-8b-v1',
+]
+
 interface NvidiaOptions {
   maxTokens?: number
   temperature?: number
@@ -455,6 +472,24 @@ function extractJson(text: string): Record<string, unknown> | null {
 }
 
 /**
+ * `extractJson` + logging de diagnóstico por qué falla, para que un fallo nunca
+ * sea silencioso (antes solo `generateZoneGuide` avisaba; el resto de fichas
+ * caían al offline sin dejar rastro en los logs).
+ */
+function parseNvidiaJson(label: string, content: string | null): Record<string, unknown> | null {
+  if (!content) {
+    console.warn(`${label}: sin contenido de ningún modelo NVIDIA`)
+    return null
+  }
+  const parsed = extractJson(content)
+  if (!parsed) {
+    console.warn(`${label}: JSON no parseable · inicio: ${content.slice(0, 160).replace(/\n/g, ' ')}`)
+    return null
+  }
+  return parsed
+}
+
+/**
  * Draft a full product from a short prompt. Uses NVIDIA when configured (asking
  * for strict JSON), otherwise returns a deterministic offline draft. Never throws.
  */
@@ -478,9 +513,9 @@ Responde ÚNICAMENTE con un objeto JSON válido, sin texto adicional, con esta f
       { role: 'system', content: 'Eres un generador de fichas de producto que responde solo con JSON válido.' },
       { role: 'user', content: instruction },
     ],
-    { maxTokens: 700, temperature: 0.8 },
+    { maxTokens: 900, temperature: 0.8, timeoutMs: 30000, models: JSON_MODELS },
   )
-  const parsed = content ? extractJson(content) : null
+  const parsed = parseNvidiaJson('generate-product-draft', content)
   if (!parsed) return offlineProductDraft(prompt, typeFishing, currency)
   return coerceDraft(parsed, prompt, typeFishing, currency)
 }
@@ -560,10 +595,10 @@ Devuelve SOLO JSON válido:
       { role: 'system', content: 'Redactas fichas de producto SEO en español y respondes solo con JSON válido.' },
       { role: 'user', content: instruction },
     ],
-    { maxTokens: 700, temperature: 0.7, topP: 0.9 },
+    { maxTokens: 900, temperature: 0.7, topP: 0.9, timeoutMs: 30000, models: JSON_MODELS },
   )
   const fallback = offlineSeoListing(originalTitle, typeFishing, price, currency)
-  const parsed = content ? extractJson(content) : null
+  const parsed = parseNvidiaJson('generate-seo-listing', content)
   if (!parsed) return fallback
 
   const str = (v: unknown, f: string) => (typeof v === 'string' && v.trim() ? v.trim() : f)
@@ -695,9 +730,9 @@ Devuelve SOLO JSON válido: {"title": string (máx 90 caracteres), "description"
       { role: 'system', content: 'Reescribes fichas de producto en español y respondes solo con JSON válido.' },
       { role: 'user', content: prompt },
     ],
-    { maxTokens: 900, temperature: 0.7 },
+    { maxTokens: 1000, temperature: 0.7, timeoutMs: 30000, models: JSON_MODELS },
   )
-  const parsed = content ? extractJson(content) : null
+  const parsed = parseNvidiaJson('rewrite-product-copy', content)
   if (!parsed) return { ...current, generatedBy: 'offline' }
   return {
     title: asString(parsed.title, current.title).slice(0, 140),
@@ -749,9 +784,9 @@ Devuelve SOLO JSON válido: {"title": string, "excerpt": string (1-2 frases), "c
       { role: 'system', content: 'Reescribes artículos de blog de pesca en español y respondes solo con JSON válido.' },
       { role: 'user', content: prompt },
     ],
-    { maxTokens: 2200, temperature: 0.7 },
+    { maxTokens: 2200, temperature: 0.7, timeoutMs: 40000, models: JSON_MODELS },
   )
-  const parsed = content ? extractJson(content) : null
+  const parsed = parseNvidiaJson('rewrite-guide-copy', content)
   if (!parsed) return { ...current, generatedBy: 'offline' }
   return {
     title: asString(parsed.title, current.title).slice(0, 140),
@@ -825,9 +860,9 @@ Devuelve SOLO JSON válido: {"title": string, "seoTitle": string, "description":
       { role: 'system', content: 'Eres un experto SEO que pule fichas de producto en español y responde solo con JSON válido.' },
       { role: 'user', content: prompt },
     ],
-    { maxTokens: 1300, temperature: 0.6 },
+    { maxTokens: 1500, temperature: 0.6, timeoutMs: 30000, models: JSON_MODELS },
   )
-  const parsed = content ? extractJson(content) : null
+  const parsed = parseNvidiaJson('polish-product-seo', content)
   if (!parsed) return { ...current, generatedBy: 'offline' }
   const title = asString(parsed.title, current.title).slice(0, 140)
   return {

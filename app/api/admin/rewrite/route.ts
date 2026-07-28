@@ -3,6 +3,8 @@ import { z } from 'zod'
 import { isRequestAuthenticated } from '@/lib/admin-auth'
 import { rewriteProductCopy, rewriteGuideCopy, polishProductSeo } from '@/lib/nvidia-ai'
 
+export const maxDuration = 120
+
 const schema = z.discriminatedUnion('kind', [
   z.object({
     kind: z.literal('product'),
