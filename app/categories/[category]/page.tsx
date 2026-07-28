@@ -13,6 +13,17 @@ type Params = { params: Promise<{ category: string }> }
 // ISR: pre-render every category, refresh hourly (+ on-demand on admin edits).
 export const revalidate = 3600
 
+/**
+ * Las modalidades son una lista fija del código (`FISHING_TYPES`), así que
+ * una categoría que no salga de `generateStaticParams` no existe.
+ *
+ * Sin esto, `/categories/loquesea` respondía HTTP 200 con una página completa
+ * y sin productos — un "soft 404" que Google puede indexar como página real
+ * de la tienda. Esta página nunca ha llamado a `notFound()`; `dynamicParams:
+ * false` lo resuelve en la capa de rutas, que es donde corresponde.
+ */
+export const dynamicParams = false
+
 export function generateStaticParams() {
   return FISHING_TYPES.map((t) => ({ category: t.id }))
 }

@@ -8,6 +8,17 @@ export interface SpeciesProfile {
   id: string
   name: string
   emoji: string
+  /**
+   * Artículo determinado del nombre, para poder redactar "pesca DEL mero" y
+   * "pesca DE LA lubina" sin equivocar el género ni el número.
+   *
+   * Se DECLARA en vez de deducirse de la terminación: en castellano la
+   * terminación miente a menudo (el pargo / la brótola / el pez ballesta) y
+   * además hay dos nombres en plural (las potas, los calamares). Deducirlo
+   * daría "pesca de la mero" en la mitad del catálogo, que es justo el fallo
+   * que este campo existe para impedir.
+   */
+  article: 'el' | 'la' | 'los' | 'las'
   /** Fotos reales en public/imagenesPeces — la primera es la de portada. */
   images: string[]
   tagline: string
@@ -36,6 +47,7 @@ export interface SpeciesProfile {
 export const GENERAL: SpeciesProfile = {
   id: 'general',
   name: 'General',
+  article: 'la',
   emoji: '🎣',
   images: [],
   tagline: 'Puntuación general para cualquier especie',
@@ -62,6 +74,7 @@ export const SEA_SPECIES: SpeciesProfile[] = [
   {
     id: 'lubina',
     name: 'Lubina',
+    article: 'la',
     emoji: '🐟',
     images: ['/imagenesPeces/pez_lubina.jpg'],
     tagline: 'Rompiente, viento y poca luz',
@@ -79,6 +92,7 @@ export const SEA_SPECIES: SpeciesProfile[] = [
   {
     id: 'dorada',
     name: 'Dorada',
+    article: 'la',
     emoji: '🐟',
     images: ['/imagenesPeces/pez_dorada.jpg'],
     tagline: 'Aguas templadas y calmadas',
@@ -96,6 +110,7 @@ export const SEA_SPECIES: SpeciesProfile[] = [
   {
     id: 'sargo',
     name: 'Sargo',
+    article: 'el',
     emoji: '🐟',
     images: ['/imagenesPeces/pez_sargo.jpg'],
     tagline: 'Roca con algo de marejada',
@@ -113,6 +128,7 @@ export const SEA_SPECIES: SpeciesProfile[] = [
   {
     id: 'corvina',
     name: 'Corvina',
+    article: 'la',
     emoji: '🐟',
     images: ['/imagenesPeces/pez_corvina.jpg'],
     tagline: 'Noche y agua removida',
@@ -130,6 +146,7 @@ export const SEA_SPECIES: SpeciesProfile[] = [
   {
     id: 'denton',
     name: 'Dentón',
+    article: 'el',
     emoji: '🐟',
     images: ['/imagenesPeces/pez_denton.jpg'],
     tagline: 'Agua clara y corriente, a barco',
@@ -147,6 +164,7 @@ export const SEA_SPECIES: SpeciesProfile[] = [
   {
     id: 'atun',
     name: 'Atún',
+    article: 'el',
     emoji: '🐟',
     images: ['/imagenesPeces/pez_atun.jpg'],
     tagline: 'El gigante: corrientes, comidas y barco',
@@ -164,6 +182,7 @@ export const SEA_SPECIES: SpeciesProfile[] = [
   {
     id: 'gallo-pedro',
     name: 'Gallo de San Pedro',
+    article: 'el',
     emoji: '🐟',
     images: ['/imagenesPeces/pez_gallo_san_pedro.jpg'],
     tagline: 'Fondos mixtos y calma, a barco',
@@ -181,6 +200,7 @@ export const SEA_SPECIES: SpeciesProfile[] = [
   {
     id: 'gallineta',
     name: 'Gallineta',
+    article: 'la',
     emoji: '🐟',
     images: ['/imagenesPeces/pez_gallineta.jpg'],
     tagline: 'Profundidad y paciencia',
@@ -198,6 +218,7 @@ export const SEA_SPECIES: SpeciesProfile[] = [
   {
     id: 'potas',
     name: 'Potas',
+    article: 'las',
     emoji: '🦑',
     images: ['/imagenesPeces/potas.jpg'],
     tagline: 'Noche, luz y profundidad',
@@ -215,6 +236,7 @@ export const SEA_SPECIES: SpeciesProfile[] = [
   {
     id: 'calamares',
     name: 'Calamares',
+    article: 'los',
     emoji: '🦑',
     images: ['/imagenesPeces/calamares.jpg'],
     tagline: 'Atardeceres calmados de otoño-invierno',
@@ -232,6 +254,7 @@ export const SEA_SPECIES: SpeciesProfile[] = [
   {
     id: 'galanes',
     name: 'Galán (raor)',
+    article: 'el',
     emoji: '🐟',
     images: ['/imagenesPeces/pez_galan.jpg'],
     tagline: 'El manjar del arenal balear',
@@ -249,6 +272,7 @@ export const SEA_SPECIES: SpeciesProfile[] = [
   {
     id: 'pargos',
     name: 'Pargo',
+    article: 'el',
     emoji: '🐟',
     images: ['/imagenesPeces/pez_pargo.jpg'],
     tagline: 'Roca brava y cebos grandes',
@@ -266,6 +290,7 @@ export const SEA_SPECIES: SpeciesProfile[] = [
   {
     id: 'brecas',
     name: 'Breca',
+    article: 'la',
     emoji: '🐟',
     images: ['/imagenesPeces/pez_breca.jpg'],
     tagline: 'El clásico del fondo ligero',
@@ -283,6 +308,7 @@ export const SEA_SPECIES: SpeciesProfile[] = [
   {
     id: 'meros',
     name: 'Mero',
+    article: 'el',
     emoji: '🐟',
     images: ['/imagenesPeces/pez_mero.jpg'],
     tagline: 'El rey de la roca — muy protegido',
@@ -300,6 +326,7 @@ export const SEA_SPECIES: SpeciesProfile[] = [
   {
     id: 'lechas',
     name: 'Lecha (pez limón)',
+    article: 'la',
     emoji: '🐟',
     images: ['/imagenesPeces/pez_lecha_pez_limon.jpg'],
     tagline: 'El torpedo de finales de verano',
@@ -317,6 +344,7 @@ export const SEA_SPECIES: SpeciesProfile[] = [
   {
     id: 'sepia',
     name: 'Sepia',
+    article: 'la',
     emoji: '🦑',
     images: ['/imagenesPeces/sepia.jpg'],
     tagline: 'Fondo somero y agua clara en invierno-primavera',
@@ -334,6 +362,7 @@ export const SEA_SPECIES: SpeciesProfile[] = [
   {
     id: 'jurel',
     name: 'Jurel (chicharro)',
+    article: 'el',
     emoji: '🐟',
     images: ['/imagenesPeces/pez_jurel.jpg'],
     tagline: 'El incansable de puertos y luces',
@@ -351,6 +380,7 @@ export const SEA_SPECIES: SpeciesProfile[] = [
   {
     id: 'caballa',
     name: 'Caballa',
+    article: 'la',
     emoji: '🐟',
     images: ['/imagenesPeces/pez_caballa.jpg'],
     tagline: 'La entrada de la primavera',
@@ -368,6 +398,7 @@ export const SEA_SPECIES: SpeciesProfile[] = [
   {
     id: 'palometon',
     name: 'Palometón',
+    article: 'el',
     emoji: '🐟',
     images: ['/imagenesPeces/pez_palometon.jpg'],
     tagline: 'El trofeo del spinning en desembocaduras',
@@ -385,6 +416,7 @@ export const SEA_SPECIES: SpeciesProfile[] = [
   {
     id: 'anjova',
     name: 'Anjova (chova)',
+    article: 'la',
     emoji: '🐟',
     images: ['/imagenesPeces/pez_anjova.jpg'],
     tagline: 'Dientes y peleas en estuarios del sur',
@@ -402,6 +434,7 @@ export const SEA_SPECIES: SpeciesProfile[] = [
   {
     id: 'congrio',
     name: 'Congrio',
+    article: 'el',
     emoji: '🐟',
     images: ['/imagenesPeces/pez_congrio.jpg'],
     tagline: 'La serpiente de la noche',
@@ -419,6 +452,7 @@ export const SEA_SPECIES: SpeciesProfile[] = [
   {
     id: 'pulpo',
     name: 'Pulpo',
+    article: 'el',
     emoji: '🐙',
     images: ['/imagenesPeces/pulpo.jpg'],
     tagline: 'La roca somera — normativa muy variable',
@@ -436,6 +470,7 @@ export const SEA_SPECIES: SpeciesProfile[] = [
   {
     id: 'lenguado',
     name: 'Lenguado',
+    article: 'el',
     emoji: '🐟',
     images: ['/imagenesPeces/pez_lenguado.jpg'],
     tagline: 'Arenas finas y noches de invierno',
@@ -453,6 +488,7 @@ export const SEA_SPECIES: SpeciesProfile[] = [
   {
     id: 'herrera',
     name: 'Herrera',
+    article: 'la',
     emoji: '🐟',
     images: ['/imagenesPeces/pez_herrera.jpg'],
     tagline: 'El surfcasting elegante del invierno',
@@ -470,6 +506,7 @@ export const SEA_SPECIES: SpeciesProfile[] = [
   {
     id: 'espeton',
     name: 'Espetón (barracuda)',
+    article: 'el',
     emoji: '🐟',
     images: ['/imagenesPeces/pez_espeton_barracuda.jpg'],
     tagline: 'El torpedo mediterráneo de superficie',
@@ -487,6 +524,7 @@ export const SEA_SPECIES: SpeciesProfile[] = [
   {
     id: 'bonito',
     name: 'Bonito',
+    article: 'el',
     emoji: '🐟',
     images: ['/imagenesPeces/pez_bonito.jpg'],
     tagline: 'El rayado veloz de las corrientes',
@@ -504,6 +542,7 @@ export const SEA_SPECIES: SpeciesProfile[] = [
   {
     id: 'llampuga',
     name: 'Llampuga (dorado)',
+    article: 'la',
     emoji: '🐟',
     images: ['/imagenesPeces/pez_llampuga.jpg'],
     tagline: 'El color del Mediterráneo en otoño',
@@ -521,6 +560,7 @@ export const SEA_SPECIES: SpeciesProfile[] = [
   {
     id: 'ballesta',
     name: 'Pez ballesta',
+    article: 'el',
     emoji: '🐟',
     images: ['/imagenesPeces/pez_ballesta.jpg'],
     tagline: 'Agua cálida y roca — cada vez más presente',
@@ -538,6 +578,7 @@ export const SEA_SPECIES: SpeciesProfile[] = [
   {
     id: 'brotola',
     name: 'Brótola',
+    article: 'la',
     emoji: '🐟',
     images: ['/imagenesPeces/pez_brotola.jpg'],
     tagline: 'Roca profunda y horas de poca luz',
@@ -556,6 +597,21 @@ export const SEA_SPECIES: SpeciesProfile[] = [
 
 export function getSpecies(id?: string | null): SpeciesProfile {
   return SEA_SPECIES.find((s) => s.id === id) ?? GENERAL
+}
+
+/**
+ * El nombre de la especie precedido de "de", con la contracción y la
+ * concordancia correctas: "del mero", "de la lubina", "de los calamares",
+ * "de las potas". Para titulares del tipo `Pesca ${deSpecies(sp)}`.
+ */
+export function deSpecies(sp: SpeciesProfile): string {
+  const n = sp.name.toLowerCase()
+  switch (sp.article) {
+    case 'el': return `del ${n}`
+    case 'los': return `de los ${n}`
+    case 'las': return `de las ${n}`
+    default: return `de la ${n}`
+  }
 }
 
 export const MONTHS_SHORT = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']

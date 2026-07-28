@@ -3,7 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import Layout from '@/components/Layout'
-import { SEA_SPECIES, MONTHS_SHORT } from '@/lib/fishing-species'
+import { SEA_SPECIES, MONTHS_SHORT, deSpecies } from '@/lib/fishing-species'
 import { zonesForSpecies } from '@/lib/species-zones'
 import { getTaxonomy, categoryName } from '@/lib/taxonomy-store'
 import { NATIONAL_SIZES_URL } from '@/lib/fishing-regulations'
@@ -12,6 +12,17 @@ import { safeJsonLd } from '@/lib/json-ld'
 import Icon, { type IconName } from '@/components/icons/Icon'
 
 export const revalidate = 86400
+
+/**
+ * Las especies son una lista fija del código, así que cualquier slug que no
+ * salga de `generateStaticParams` no existe y debe dar 404 de verdad.
+ *
+ * Sin esto (el valor por defecto es `true`), Next generaba bajo demanda
+ * CUALQUIER slug inventado: la página mostraba "Especie no encontrada" pero
+ * respondía HTTP 200, así que para Google era una página viva y vacía —
+ * candidata a indexarse. Con `false` el 404 es real.
+ */
+export const dynamicParams = false
 
 type Params = { params: Promise<{ slug: string }> }
 
@@ -25,7 +36,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const sp = SEA_SPECIES.find((s) => s.id === slug)
   if (!sp) return { title: 'Especie no encontrada' }
   return {
-    title: `Pesca de la ${sp.name.toLowerCase()}: temporada, técnicas, cebos y zonas`,
+    title: `Pesca ${deSpecies(sp)}: temporada, técnicas, cebos y zonas`,
     description: `Cómo pescar ${sp.name.toLowerCase()} en España: mejores meses, horas, hábitat, profundidad, técnicas, cebos y señuelos, y las zonas donde se captura. Con previsión de actividad por localidad.`,
     alternates: { canonical: `/especies/${sp.id}` },
   }
@@ -82,7 +93,7 @@ export default async function SpeciesPage({ params }: Params) {
             )}
           </div>
           <h1 className="font-display uppercase text-4xl sm:text-5xl md:text-6xl leading-[1.02] text-ink">
-            Pesca de la {sp.name.toLowerCase()}
+            Pesca {deSpecies(sp)}
           </h1>
           <p className="text-ink/60 text-sm max-w-2xl mt-3">{sp.tagline}. Temporada, horas, técnicas, cebos y las zonas de España donde se busca.</p>
         </div>
