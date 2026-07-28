@@ -13,10 +13,10 @@ const OUT = join(__dirname, '..', 'lib', 'guides-data.ts')
 const KEY = process.env.OPENROUTER_API_KEY
 const URL = process.env.OPENROUTER_BASE_URL ?? 'https://openrouter.ai/api/v1'
 const MODELS = (process.env.OPENROUTER_MODELS?.split(',').map((s) => s.trim()).filter(Boolean)) || [
-  'openai/gpt-4o-mini',
-  'google/gemini-2.5-flash',
-  'meta-llama/llama-3.3-70b-instruct',
-  'mistralai/mistral-small-3.1-24b-instruct',
+  'google/gemma-4-26b-a4b-it:free',
+  'nvidia/nemotron-nano-12b-v2-vl:free',
+  'google/gemma-4-31b-it:free',
+  'nvidia/nemotron-nano-9b-v2:free',
 ]
 const nvidiaOn = KEY && KEY !== 'your_openrouter_api_key'
 

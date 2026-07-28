@@ -8,16 +8,30 @@ const OPENROUTER_BASE_URL = process.env.OPENROUTER_BASE_URL ?? 'https://openrout
 /**
  * Ordered model fallback chain. Requests try each model in turn until one
  * answers, so a single rate-limited/unavailable model never breaks the
- * feature. Deliberately spread across four different upstream providers
- * (OpenAI, Google, Meta, Mistral): OpenRouter routes to each independently,
- * so one provider's outage doesn't take down the others too. Override with
- * the OPENROUTER_MODELS env var (comma-separated) or a single OPENROUTER_MODEL.
+ * feature. Override with the OPENROUTER_MODELS env var (comma-separated) or
+ * a single OPENROUTER_MODEL.
+ *
+ * SOLO MODELOS GRATUITOS (":free") — decisión explícita de Jorge para no
+ * gastar nada, aceptando el límite de OpenRouter de 20 peticiones/min y
+ * 50/día por cuenta sin créditos comprados (sube a 1000/día si algún día se
+ * compran 10$ de crédito, aunque se sigan usando modelos a coste 0).
+ *
+ * Probados uno a uno en vivo antes de elegir estos 4 (ver `proveedor-ia-openrouter`
+ * en la memoria del proyecto). De los ~18 modelos gratuitos que ofrecía
+ * OpenRouter en ese momento, la mayoría no sirven para JSON estricto:
+ * `openai/gpt-oss-20b:free`, `cohere/north-mini-code:free` y `poolside/*:free`
+ * dan timeout o "fetch failed" con regularidad; `inclusionai/ling-3.0-flash:free`,
+ * `openrouter/free` y los `nvidia/nemotron-3-*:free` (super-120b, nano-30b,
+ * omni-reasoning, ultra-550b) queman TODO el presupuesto de tokens
+ * "pensando" y nunca llegan a escribir el JSON — el mismo fallo que ya se
+ * vio con los razonadores grandes de NVIDIA. Estos 4 sí respondieron con
+ * JSON válido de forma consistente:
  */
 const DEFAULT_OPENROUTER_MODELS = [
-  'openai/gpt-4o-mini',
-  'google/gemini-2.5-flash',
-  'meta-llama/llama-3.3-70b-instruct',
-  'mistralai/mistral-small-3.1-24b-instruct',
+  'google/gemma-4-26b-a4b-it:free',
+  'nvidia/nemotron-nano-12b-v2-vl:free',
+  'google/gemma-4-31b-it:free',
+  'nvidia/nemotron-nano-9b-v2:free',
 ]
 const OPENROUTER_MODELS: string[] = (() => {
   const fromList = process.env.OPENROUTER_MODELS?.split(',').map((s) => s.trim()).filter(Boolean)
@@ -983,11 +997,11 @@ Devuelve SOLO JSON válido:
     {
       maxTokens: 3200,
       temperature: 0.6,
-      timeoutMs: 60000,
-      // Un único modelo (el más grande y con más contexto del listado) para que
-      // las cuatro secciones del artículo mantengan una voz consistente en vez
-      // de mezclar el estilo de varios modelos si hubiera que hacer fallback.
-      models: ['openai/gpt-4.1-mini'],
+      timeoutMs: 30000,
+      // Solo la familia Gemma (gratis): el 31b primero por calidad, el 26b
+      // como red si el 31b está saturado (pasa de vez en cuando en el nivel
+      // gratuito) — misma familia para no mezclar la voz entre secciones.
+      models: ['google/gemma-4-31b-it:free', 'google/gemma-4-26b-a4b-it:free'],
     },
   )
   if (!content) {
