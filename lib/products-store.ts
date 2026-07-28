@@ -22,8 +22,12 @@ const PRODUCTS_CACHE_TTL_S = 3600
  *    zero configuration. Changes live for the lifetime of the server process, so
  *    it's ideal for local development and demos.
  *
- * Every database call is wrapped so a misconfigured/unreachable DB degrades to the
- * in-memory store instead of taking the whole app down.
+ * OJO con el respaldo en memoria: contiene el catálogo SEMILLA, que es un
+ * conjunto de datos DISTINTO Y MÁS PEQUEÑO que la base de datos real. Sirve para
+ * arrancar en local sin configurar nada, pero en producción usarlo significa
+ * enseñar un catálogo incorrecto como si fuera el bueno. Por eso solo se usa
+ * cuando NO hay `DATABASE_URL` (y avisando por consola en producción): si la hay
+ * y la lectura falla, el error se propaga en vez de sustituir los datos.
  */
 
 export type ProductInput = {
@@ -260,8 +264,30 @@ const fetchAllFromDb = unstable_cache(
   { tags: [PRODUCTS_TAG], revalidate: PRODUCTS_CACHE_TTL_S },
 )
 
+/** Para no repetir el aviso en cada petición, pero sí una vez por instancia. */
+let avisadoSinBd = false
+
 async function allProducts(): Promise<Product[]> {
-  if (!isDatabaseConfigured()) return Array.from(memoryStore().values())
+  if (!isDatabaseConfigured()) {
+    /**
+     * En producción esto NO es un modo de funcionamiento válido, es una
+     * configuración rota: sin `DATABASE_URL` la tienda sirve el catálogo
+     * SEMILLA (84 productos fijos de `lib/catalog-data.ts`) en vez del real, y
+     * lo hace en silencio y de forma convincente — pasó de verdad, con la web
+     * publicada mostrando 84 productos mientras la base de datos tenía 183.
+     * En local sí es útil (permite arrancar sin configurar nada), así que se
+     * avisa en vez de fallar, pero se avisa FUERTE.
+     */
+    if (process.env.NODE_ENV === 'production' && !avisadoSinBd) {
+      avisadoSinBd = true
+      console.error(
+        '[CATÁLOGO] DATABASE_URL no está configurada en producción: se está sirviendo el catálogo semilla ' +
+        `(${memoryStore().size} productos fijos), NO la base de datos. Los productos añadidos desde el admin ` +
+        'no se verán y no persistirán. Define DATABASE_URL en las variables de entorno del proyecto.',
+      )
+    }
+    return Array.from(memoryStore().values())
+  }
 
   /**
    * OJO: aquí NO se cae al store en memoria. Parece defensivo, pero el store en
