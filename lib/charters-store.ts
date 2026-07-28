@@ -721,20 +721,55 @@ export async function adminCreateCharter(operatorId: string, input: CharterInput
   return assemble(stored, op, [])
 }
 
-/** Panel admin: todos los chárters, de cualquier operador y en cualquier estado. */
-export async function adminListCharters(limit = 300): Promise<Charter[]> {
+export interface AdminCharterListOpts {
+  /** Busca por zona, notas, nombre/empresa del operador. */
+  q?: string
+  limit?: number
+  offset?: number
+}
+
+export interface AdminCharterPage {
+  charters: Charter[]
+  total: number
+  hasMore: boolean
+}
+
+/** Panel admin: chárters de cualquier operador y estado, con búsqueda y paginación por offset. */
+export async function adminListCharters(opts: AdminCharterListOpts = {}): Promise<AdminCharterPage> {
+  const limit = Math.min(200, Math.max(1, opts.limit ?? 50))
+  const offset = Math.max(0, opts.offset ?? 0)
+  const q = (opts.q ?? '').trim().slice(0, 100)
+
   if (isDatabaseConfigured()) {
     try {
       const { prisma } = await import('@/lib/prisma')
-      const rows = await prisma.charter.findMany({
-        orderBy: [{ dateISO: 'desc' }, { timeStart: 'asc' }],
-        include: { bookings: true, operator: true },
-        take: limit,
-      })
-      return rows.map((r) => assemble(baseFromRow(r), r.operator ? rowOperatorToOperator(r.operator) : null, r.bookings.map(bookingFromRow)))
+      const where = q
+        ? {
+            OR: [
+              { spotSlug: { contains: q, mode: 'insensitive' as const } },
+              { notes: { contains: q, mode: 'insensitive' as const } },
+              { operator: { is: { OR: [
+                { name: { contains: q, mode: 'insensitive' as const } },
+                { businessName: { contains: q, mode: 'insensitive' as const } },
+              ] } } },
+            ],
+          }
+        : {}
+      const [rows, total] = await Promise.all([
+        prisma.charter.findMany({
+          where,
+          orderBy: [{ dateISO: 'desc' }, { timeStart: 'asc' }],
+          include: { bookings: true, operator: true },
+          take: limit,
+          skip: offset,
+        }),
+        prisma.charter.count({ where }),
+      ])
+      const charters = rows.map((r) => assemble(baseFromRow(r), r.operator ? rowOperatorToOperator(r.operator) : null, r.bookings.map(bookingFromRow)))
+      return { charters, total, hasMore: offset + charters.length < total }
     } catch (error) {
       console.warn('Admin charters read failed:', error)
-      return []
+      return { charters: [], total: 0, hasMore: false }
     }
   }
   const out: Charter[] = []
@@ -742,7 +777,18 @@ export async function adminListCharters(limit = 300): Promise<Charter[]> {
     const op = await getOperator(c.operatorId)
     out.push(assemble(c, op, memB().filter((b) => b.charterId === c.id)))
   }
-  return out.sort((a, b) => b.dateISO.localeCompare(a.dateISO) || a.timeStart.localeCompare(b.timeStart))
+  let all = out.sort((a, b) => b.dateISO.localeCompare(a.dateISO) || a.timeStart.localeCompare(b.timeStart))
+  if (q) {
+    const needle = q.toLowerCase()
+    all = all.filter((c) =>
+      c.spotSlug.toLowerCase().includes(needle) ||
+      c.notes.toLowerCase().includes(needle) ||
+      (c.operator?.name || '').toLowerCase().includes(needle) ||
+      (c.operator?.businessName || '').toLowerCase().includes(needle))
+  }
+  const total = all.length
+  const charters = all.slice(offset, offset + limit)
+  return { charters, total, hasMore: offset + charters.length < total }
 }
 
 /** Panel admin: edita los campos operativos de cualquier chárter, sin token. */

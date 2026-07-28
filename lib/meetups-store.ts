@@ -554,27 +554,66 @@ export interface AdminMeetupUpdate {
   status?: 'open' | 'confirmed' | 'cancelled'
 }
 
-/** Panel admin: todas las quedadas, pasadas o futuras, canceladas o no. */
-export async function adminListMeetups(limit = 300): Promise<Meetup[]> {
+export interface AdminMeetupListOpts {
+  /** Busca por zona, anfitrión o notas. */
+  q?: string
+  limit?: number
+  offset?: number
+}
+
+export interface AdminMeetupPage {
+  meetups: Meetup[]
+  total: number
+  hasMore: boolean
+}
+
+/** Panel admin: quedadas de cualquier zona/estado, con búsqueda y paginación por offset. */
+export async function adminListMeetups(opts: AdminMeetupListOpts = {}): Promise<AdminMeetupPage> {
+  const limit = Math.min(200, Math.max(1, opts.limit ?? 50))
+  const offset = Math.max(0, opts.offset ?? 0)
+  const q = (opts.q ?? '').trim().slice(0, 100)
+
   if (isDatabaseConfigured()) {
     try {
       const { prisma } = await import('@/lib/prisma')
-      const rows = await prisma.meetup.findMany({
-        orderBy: [{ dateISO: 'desc' }, { timeStart: 'asc' }],
-        include: { rsvps: true },
-        take: limit,
-      })
-      return rows.map((r) => assemble(rowToBase(r), r.rsvps.map(rowToRsvp)))
+      const where = q
+        ? {
+            OR: [
+              { spotSlug: { contains: q, mode: 'insensitive' as const } },
+              { hostName: { contains: q, mode: 'insensitive' as const } },
+              { notes: { contains: q, mode: 'insensitive' as const } },
+            ],
+          }
+        : {}
+      const [rows, total] = await Promise.all([
+        prisma.meetup.findMany({
+          where,
+          orderBy: [{ dateISO: 'desc' }, { timeStart: 'asc' }],
+          include: { rsvps: true },
+          take: limit,
+          skip: offset,
+        }),
+        prisma.meetup.count({ where }),
+      ])
+      const meetups = rows.map((r) => assemble(rowToBase(r), r.rsvps.map(rowToRsvp)))
+      return { meetups, total, hasMore: offset + meetups.length < total }
     } catch (error) {
       console.warn('Admin meetups read failed:', error)
-      return []
+      return { meetups: [], total: 0, hasMore: false }
     }
   }
   const rsvps = memRsvps()
-  return memMeetups()
+  let all = memMeetups()
     .slice()
     .sort((a, b) => b.dateISO.localeCompare(a.dateISO))
     .map((m) => assemble(m, rsvps.filter((r) => r.meetupId === m.id)))
+  if (q) {
+    const needle = q.toLowerCase()
+    all = all.filter((m) => m.spotSlug.toLowerCase().includes(needle) || m.hostName.toLowerCase().includes(needle) || m.notes.toLowerCase().includes(needle))
+  }
+  const total = all.length
+  const meetups = all.slice(offset, offset + limit)
+  return { meetups, total, hasMore: offset + meetups.length < total }
 }
 
 /** Panel admin: edita los campos operativos de cualquier quedada, sin token. */

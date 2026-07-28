@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import type { Meetup } from '@/lib/meetups-store'
 import { getSpot } from '@/lib/fishing-spots'
 import MeetupEditor from '@/components/admin/MeetupEditor'
@@ -8,6 +8,8 @@ import Icon from '@/components/icons/Icon'
 import { useConfirm, useToast } from '@/components/admin/AdminFeedback'
 
 export type AdminMeetup = Meetup
+
+const PAGE_SIZE = 50
 
 const STATUS_LABEL: Record<AdminMeetup['status'], string> = { open: 'Abierta', confirmed: 'Confirmada', cancelled: 'Cancelada' }
 const STATUS_CLASS: Record<AdminMeetup['status'], string> = {
@@ -18,33 +20,52 @@ const STATUS_CLASS: Record<AdminMeetup['status'], string> = {
 
 export default function AdminMeetupsPage() {
   const [meetups, setMeetups] = useState<AdminMeetup[]>([])
+  const [total, setTotal] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [editing, setEditing] = useState<AdminMeetup | null>(null)
   const [filter, setFilter] = useState<'todos' | AdminMeetup['status']>('todos')
+  const [q, setQ] = useState('')
   const confirm = useConfirm()
   const toast = useToast()
+  const searchDebounce = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const load = useCallback(async () => {
-    setLoading(true)
+  const loadPage = useCallback(async (query: string, offset: number, append: boolean) => {
+    if (append) setLoadingMore(true)
+    else setLoading(true)
     try {
-      const res = await fetch('/api/admin/quedadas')
+      const params = new URLSearchParams({ offset: String(offset), limit: String(PAGE_SIZE) })
+      if (query.trim()) params.set('q', query.trim())
+      const res = await fetch(`/api/admin/quedadas?${params}`)
       const data = await res.json()
-      if (data.success) setMeetups(data.meetups)
+      if (data.success) {
+        setMeetups((prev) => (append ? [...prev, ...data.meetups] : data.meetups))
+        setTotal(data.total)
+        setHasMore(data.hasMore)
+      }
     } finally {
-      setLoading(false)
+      if (append) setLoadingMore(false)
+      else setLoading(false)
     }
   }, [])
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    load()
-  }, [load])
+    loadPage('', 0, false)
+  }, [loadPage])
+
+  const onSearchChange = (value: string) => {
+    setQ(value)
+    if (searchDebounce.current) clearTimeout(searchDebounce.current)
+    searchDebounce.current = setTimeout(() => loadPage(value, 0, false), 300)
+  }
 
   const cancel = async (m: AdminMeetup) => {
     const ok = await confirm({ message: `¿Cancelar la quedada de ${m.hostName} (${m.dateISO})? Los apuntados verán que se ha cancelado.` })
     if (!ok) return
     const res = await fetch(`/api/admin/quedadas/${m.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'cancelled' }) })
-    if (res.ok) { load(); toast('Quedada cancelada.') }
+    if (res.ok) { loadPage(q, 0, false); toast('Quedada cancelada.') }
     else toast('No se pudo cancelar.', 'error')
   }
 
@@ -52,12 +73,12 @@ export default function AdminMeetupsPage() {
     const ok = await confirm({ title: 'Eliminar quedada', message: `¿Eliminar la quedada de ${m.hostName} (${m.dateISO})? Se borrarán también sus inscripciones.`, tone: 'danger' })
     if (!ok) return
     const res = await fetch(`/api/admin/quedadas/${m.id}`, { method: 'DELETE' })
-    if (res.ok) { setMeetups((prev) => prev.filter((x) => x.id !== m.id)); toast('Quedada eliminada.') }
+    if (res.ok) { setMeetups((prev) => prev.filter((x) => x.id !== m.id)); setTotal((t) => Math.max(0, t - 1)); toast('Quedada eliminada.') }
     else toast('No se pudo eliminar.', 'error')
   }
 
   const closeEditor = () => setEditing(null)
-  const onSaved = () => { closeEditor(); load() }
+  const onSaved = () => { closeEditor(); loadPage(q, 0, false); toast('Cambios guardados.') }
 
   const visible = filter === 'todos' ? meetups : meetups.filter((m) => m.status === filter)
 
@@ -68,7 +89,13 @@ export default function AdminMeetupsPage() {
           <h1 className="font-display uppercase text-3xl md:text-4xl text-ink leading-none">Quedadas</h1>
           <p className="text-ink/60 text-sm mt-1">Salidas gratuitas organizadas por la comunidad, de cualquier zona y estado.</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <input
+            value={q}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="Buscar por zona, anfitrión o notas…"
+            className="px-3 py-1.5 bg-paper border border-ink/25 rounded-lg text-ink placeholder-ink/60 focus:outline-none focus:border-accent text-sm w-full sm:w-56"
+          />
           {(['todos', 'open', 'confirmed', 'cancelled'] as const).map((f) => (
             <button
               key={f}
@@ -129,9 +156,20 @@ export default function AdminMeetupsPage() {
       )}
 
       {!loading && meetups.length > 0 && (
-        <p className="text-[11px] text-ink/60 inline-flex items-center gap-1.5">
-          <Icon name="users" className="w-3.5 h-3.5" strokeWidth={1.8} />{meetups.length} quedadas en total
-        </p>
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <p className="text-[11px] text-ink/60 inline-flex items-center gap-1.5">
+            <Icon name="users" className="w-3.5 h-3.5" strokeWidth={1.8} />{meetups.length} de {total} quedadas cargadas
+          </p>
+          {hasMore && (
+            <button
+              onClick={() => loadPage(q, meetups.length, true)}
+              disabled={loadingMore}
+              className="text-xs font-bold text-ink/80 hover:text-accent bg-ink/5 border border-ink/10 px-4 py-2 rounded-lg disabled:opacity-50"
+            >
+              {loadingMore ? 'Cargando…' : 'Cargar más'}
+            </button>
+          )}
+        </div>
       )}
 
       {editing && <MeetupEditor meetup={editing} onClose={closeEditor} onSaved={onSaved} />}

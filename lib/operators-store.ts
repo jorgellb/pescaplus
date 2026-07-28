@@ -511,3 +511,59 @@ export async function listOperators(opts: { verified?: boolean } = {}): Promise<
   }
   return mem().filter((o) => opts.verified === undefined || o.verified === opts.verified)
 }
+
+export interface AdminOperatorListOpts {
+  /** Busca por nombre, empresa, email o zona. */
+  q?: string
+  verified?: boolean
+  limit?: number
+  offset?: number
+}
+
+export interface AdminOperatorPage {
+  operators: Operator[]
+  total: number
+  hasMore: boolean
+}
+
+/** Panel admin: operadores con búsqueda y paginación por offset (para listas grandes). */
+export async function adminListOperatorsPage(opts: AdminOperatorListOpts = {}): Promise<AdminOperatorPage> {
+  const limit = Math.min(200, Math.max(1, opts.limit ?? 50))
+  const offset = Math.max(0, opts.offset ?? 0)
+  const q = (opts.q ?? '').trim().slice(0, 100)
+
+  if (isDatabaseConfigured()) {
+    try {
+      const { prisma } = await import('@/lib/prisma')
+      const textFilter = q
+        ? {
+            OR: [
+              { name: { contains: q, mode: 'insensitive' as const } },
+              { businessName: { contains: q, mode: 'insensitive' as const } },
+              { email: { contains: q, mode: 'insensitive' as const } },
+              { spotSlug: { contains: q, mode: 'insensitive' as const } },
+            ],
+          }
+        : {}
+      const where = opts.verified === undefined ? textFilter : { ...textFilter, verified: opts.verified }
+      const [rows, total] = await Promise.all([
+        prisma.operator.findMany({ where, orderBy: { createdAt: 'desc' }, take: limit, skip: offset }),
+        prisma.operator.count({ where }),
+      ])
+      const operators = rows.map(rowToOperator)
+      return { operators, total, hasMore: offset + operators.length < total }
+    } catch (error) {
+      console.warn('Admin operators page read failed:', error)
+      return { operators: [], total: 0, hasMore: false }
+    }
+  }
+  let all = mem().slice()
+  if (q) {
+    const needle = q.toLowerCase()
+    all = all.filter((o) => o.name.toLowerCase().includes(needle) || o.businessName.toLowerCase().includes(needle) || o.email.toLowerCase().includes(needle) || o.spotSlug.toLowerCase().includes(needle))
+  }
+  if (opts.verified !== undefined) all = all.filter((o) => o.verified === opts.verified)
+  const total = all.length
+  const operators = all.slice(offset, offset + limit)
+  return { operators, total, hasMore: offset + operators.length < total }
+}

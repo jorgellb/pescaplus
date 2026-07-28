@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import type { Charter } from '@/lib/charters-store'
 import { getSpot } from '@/lib/fishing-spots'
 import CharterEditor, { type OperatorOption } from '@/components/admin/CharterEditor'
@@ -8,6 +8,8 @@ import Icon from '@/components/icons/Icon'
 import { useConfirm, useToast } from '@/components/admin/AdminFeedback'
 
 export type AdminCharter = Charter
+
+const PAGE_SIZE = 50
 
 const STATUS_LABEL: Record<AdminCharter['status'], string> = { open: 'Abierto', confirmed: 'Confirmado', cancelled: 'Cancelado' }
 const STATUS_CLASS: Record<AdminCharter['status'], string> = {
@@ -18,31 +20,55 @@ const STATUS_CLASS: Record<AdminCharter['status'], string> = {
 
 export default function AdminChartersPage() {
   const [charters, setCharters] = useState<AdminCharter[]>([])
+  const [total, setTotal] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
   const [operators, setOperators] = useState<OperatorOption[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [editing, setEditing] = useState<AdminCharter | null>(null)
   const [creating, setCreating] = useState(false)
   const [filter, setFilter] = useState<'todos' | AdminCharter['status']>('todos')
+  const [q, setQ] = useState('')
   const confirm = useConfirm()
   const toast = useToast()
+  const searchDebounce = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const load = useCallback(async () => {
-    setLoading(true)
+  const loadPage = useCallback(async (query: string, offset: number, append: boolean) => {
+    if (append) setLoadingMore(true)
+    else setLoading(true)
     try {
-      const [cRes, oRes] = await Promise.all([fetch('/api/admin/charters'), fetch('/api/admin/operadores')])
-      const cData = await cRes.json()
-      if (cData.success) setCharters(cData.charters)
-      const oData = await oRes.json()
-      if (oData.success) setOperators(oData.operators.filter((o: { verified: boolean }) => o.verified))
+      const params = new URLSearchParams({ offset: String(offset), limit: String(PAGE_SIZE) })
+      if (query.trim()) params.set('q', query.trim())
+      const res = await fetch(`/api/admin/charters?${params}`)
+      const data = await res.json()
+      if (data.success) {
+        setCharters((prev) => (append ? [...prev, ...data.charters] : data.charters))
+        setTotal(data.total)
+        setHasMore(data.hasMore)
+      }
     } finally {
-      setLoading(false)
+      if (append) setLoadingMore(false)
+      else setLoading(false)
     }
+  }, [])
+
+  const loadOperators = useCallback(async () => {
+    const res = await fetch('/api/admin/operadores')
+    const data = await res.json()
+    if (data.success) setOperators(data.operators.filter((o: { verified: boolean }) => o.verified))
   }, [])
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    load()
-  }, [load])
+    loadPage('', 0, false)
+    loadOperators()
+  }, [loadPage, loadOperators])
+
+  const onSearchChange = (value: string) => {
+    setQ(value)
+    if (searchDebounce.current) clearTimeout(searchDebounce.current)
+    searchDebounce.current = setTimeout(() => loadPage(value, 0, false), 300)
+  }
 
   const remove = async (c: AdminCharter) => {
     const ok = await confirm({
@@ -52,12 +78,12 @@ export default function AdminChartersPage() {
     })
     if (!ok) return
     const res = await fetch(`/api/admin/charters/${c.id}`, { method: 'DELETE' })
-    if (res.ok) { setCharters((prev) => prev.filter((x) => x.id !== c.id)); toast('Chárter eliminado.') }
+    if (res.ok) { setCharters((prev) => prev.filter((x) => x.id !== c.id)); setTotal((t) => Math.max(0, t - 1)); toast('Chárter eliminado.') }
     else toast('No se pudo eliminar.', 'error')
   }
 
   const closeEditor = () => { setEditing(null); setCreating(false) }
-  const onSaved = () => { const wasCreating = creating; closeEditor(); load(); toast(wasCreating ? 'Chárter creado.' : 'Cambios guardados.') }
+  const onSaved = () => { const wasCreating = creating; closeEditor(); loadPage(q, 0, false); toast(wasCreating ? 'Chárter creado.' : 'Cambios guardados.') }
 
   const visible = filter === 'todos' ? charters : charters.filter((c) => c.status === filter)
 
@@ -69,6 +95,12 @@ export default function AdminChartersPage() {
           <p className="text-ink/60 text-sm mt-1">Todas las salidas publicadas por los patrones, de cualquier zona y estado.</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
+          <input
+            value={q}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="Buscar por zona, operador o notas…"
+            className="px-3 py-1.5 bg-paper border border-ink/25 rounded-lg text-ink placeholder-ink/60 focus:outline-none focus:border-accent text-sm w-full sm:w-56"
+          />
           {(['todos', 'open', 'confirmed', 'cancelled'] as const).map((f) => (
             <button
               key={f}
@@ -136,9 +168,20 @@ export default function AdminChartersPage() {
       )}
 
       {!loading && charters.length > 0 && (
-        <p className="text-[11px] text-ink/60 inline-flex items-center gap-1.5">
-          <Icon name="anchor" className="w-3.5 h-3.5" strokeWidth={1.8} />{charters.length} chárters en total
-        </p>
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <p className="text-[11px] text-ink/60 inline-flex items-center gap-1.5">
+            <Icon name="anchor" className="w-3.5 h-3.5" strokeWidth={1.8} />{charters.length} de {total} chárters cargados
+          </p>
+          {hasMore && (
+            <button
+              onClick={() => loadPage(q, charters.length, true)}
+              disabled={loadingMore}
+              className="text-xs font-bold text-ink/80 hover:text-accent bg-ink/5 border border-ink/10 px-4 py-2 rounded-lg disabled:opacity-50"
+            >
+              {loadingMore ? 'Cargando…' : 'Cargar más'}
+            </button>
+          )}
+        </div>
       )}
 
       {(editing || creating) && <CharterEditor charter={editing} operators={operators} onClose={closeEditor} onSaved={onSaved} />}

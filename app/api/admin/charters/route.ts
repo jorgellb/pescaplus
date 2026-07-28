@@ -8,8 +8,12 @@ import { logAdminAction } from '@/lib/admin-audit'
 
 export async function GET(request: NextRequest) {
   if (!isRequestAuthenticated(request)) return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
-  const charters = await adminListCharters()
-  return NextResponse.json({ success: true, charters })
+  const { searchParams } = request.nextUrl
+  const q = searchParams.get('q') ?? undefined
+  const offset = Number(searchParams.get('offset')) || 0
+  const limit = Number(searchParams.get('limit')) || undefined
+  const { charters, total, hasMore } = await adminListCharters({ q, offset, limit })
+  return NextResponse.json({ success: true, charters, total, hasMore })
 }
 
 const createSchema = z.object({

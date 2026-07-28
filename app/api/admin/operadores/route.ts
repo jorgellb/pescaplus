@@ -1,12 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { isRequestAuthenticated } from '@/lib/admin-auth'
-import { setOperatorVerified, listOperators, registerOperator, validateOperator, adminUpdateOperator } from '@/lib/operators-store'
+import { setOperatorVerified, listOperators, registerOperator, validateOperator, adminUpdateOperator, adminListOperatorsPage } from '@/lib/operators-store'
 import { rateLimit, clientIp, tooManyRequests } from '@/lib/rate-limit'
 import { logAdminAction } from '@/lib/admin-audit'
 
+/**
+ * Sin parámetros de paginación: devuelve el listado completo (compat con el
+ * selector de operadores del admin de chárters, que necesita verlos todos).
+ * Con q/limit/offset: pagina y busca (usado por la propia página de Operadores).
+ */
 export async function GET(request: NextRequest) {
   if (!isRequestAuthenticated(request)) return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
+  const { searchParams } = request.nextUrl
+  if (searchParams.has('q') || searchParams.has('limit') || searchParams.has('offset') || searchParams.has('verified')) {
+    const q = searchParams.get('q') ?? undefined
+    const offset = Number(searchParams.get('offset')) || 0
+    const limit = Number(searchParams.get('limit')) || undefined
+    const verifiedParam = searchParams.get('verified')
+    const verified = verifiedParam === null ? undefined : verifiedParam === 'true'
+    const { operators, total, hasMore } = await adminListOperatorsPage({ q, offset, limit, verified })
+    return NextResponse.json({ success: true, operators, total, hasMore })
+  }
   const operators = await listOperators()
   return NextResponse.json({ success: true, operators })
 }
