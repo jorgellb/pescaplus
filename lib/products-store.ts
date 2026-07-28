@@ -229,15 +229,32 @@ function toProduct(row: any): Product {
  * The whole catalog, fetched from the DB ONCE and cached under PRODUCTS_TAG.
  * Next's Data Cache is shared across serverless instances and survives cold
  * starts, so a healthy site issues ~one product query per hour instead of one
- * per request. A failed DB read throws (so it is never cached) and callers fall
- * back to memory. Filtering happens in memory on this snapshot — zero extra
- * egress regardless of the filter.
+ * per request. A failed DB read throws (so it is never cached) and the error
+ * propagates — ver el porqué en `allProducts`. Filtering happens in memory on
+ * this snapshot — zero extra egress regardless of the filter.
  */
 const fetchAllFromDb = unstable_cache(
   async (): Promise<Product[]> => {
     const { prisma } = await import('@/lib/prisma')
     await ensureSeeded(prisma)
-    return (await prisma.product.findMany({ orderBy: { title: 'asc' } })).map(toProduct)
+
+    /**
+     * Un reintento corto antes de rendirse. El fallo típico aquí no es "la base
+     * de datos está caída" sino un `TooManyConnections` puntual de Aiven
+     * (durante el build el prerender concurrente abre más conexiones que el
+     * límite del plan). Es transitorio y se resuelve en milisegundos, así que
+     * reintentar evita casi todos los catálogos truncados.
+     */
+    let ultimo: unknown
+    for (let intento = 0; intento < 3; intento++) {
+      try {
+        return (await prisma.product.findMany({ orderBy: { title: 'asc' } })).map(toProduct)
+      } catch (error) {
+        ultimo = error
+        if (intento < 2) await new Promise((r) => setTimeout(r, 150 * (intento + 1)))
+      }
+    }
+    throw ultimo
   },
   ['pescaplus-all-products'],
   { tags: [PRODUCTS_TAG], revalidate: PRODUCTS_CACHE_TTL_S },
@@ -245,12 +262,22 @@ const fetchAllFromDb = unstable_cache(
 
 async function allProducts(): Promise<Product[]> {
   if (!isDatabaseConfigured()) return Array.from(memoryStore().values())
-  try {
-    return await fetchAllFromDb()
-  } catch (error) {
-    console.warn('Cached product read failed, using in-memory store instead:', error)
-    return Array.from(memoryStore().values())
-  }
+
+  /**
+   * OJO: aquí NO se cae al store en memoria. Parece defensivo, pero el store en
+   * memoria contiene el CATÁLOGO SEMILLA (84 productos), no lo que hay en la
+   * base de datos (183 y subiendo). Devolverlo tras un fallo de lectura no era
+   * "degradar con elegancia": era servir un catálogo distinto y más pequeño
+   * como si fuera el bueno, haciendo desaparecer 99 productos sin más rastro
+   * que un console.warn — y, como las páginas son ISR, ese render truncado se
+   * quedaba cacheado hasta una hora. Era la causa de "a veces no veo todos los
+   * productos".
+   *
+   * Propagar el error es mejor: Next mantiene servida la última página buena en
+   * vez de cachear una mala. Es la misma regla que ya seguían las ESCRITURAS,
+   * que nunca caen a memoria cuando hay base de datos configurada.
+   */
+  return fetchAllFromDb()
 }
 
 export async function listProducts(filter: ProductFilter = {}): Promise<Product[]> {
