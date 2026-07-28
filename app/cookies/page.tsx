@@ -21,16 +21,17 @@ export default function CookiesPage() {
       <h2>1. Cookies técnicas (necesarias)</h2>
       <p>
         Son las estrictamente necesarias para el funcionamiento del sitio y, según la normativa, no requieren
-        consentimiento previo. En nuestro caso se limitan a la sesión del panel de administración (solo para el gestor
-        del sitio).
+        consentimiento previo. Usamos dos: la de tu sesión si tienes cuenta (para mantenerte identificado) y la del
+        panel de administración (solo para el gestor del sitio).
       </p>
 
       <h2>2. Almacenamiento local (localStorage)</h2>
       <p>
         Para mejorar tu experiencia guardamos algunas preferencias directamente en tu navegador mediante
         <strong> localStorage</strong> (no son cookies y no se envían a ningún servidor): por ejemplo, el historial de tu
-        conversación con el asesor de pesca y los productos que has visto recientemente. Puedes borrarlos vaciando los
-        datos del sitio en tu navegador.
+        conversación con el asesor de pesca, los productos que has visto recientemente, tus favoritos y la ruta de
+        navegación mientras la estás grabando (antes de guardarla). Puedes borrarlos vaciando los datos del sitio en
+        tu navegador.
       </p>
 
       <h2>3. Cómo gestionarlas</h2>
