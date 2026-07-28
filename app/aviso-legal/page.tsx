@@ -16,8 +16,8 @@ export default function AvisoLegalPage() {
       <p>
         En cumplimiento de la Ley 34/2002 de Servicios de la Sociedad de la Información y de Comercio Electrónico
         (LSSI-CE), se informa de que este sitio web (en adelante, «PescaPlus») es titularidad de{' '}
-        <strong>[Nombre y apellidos / razón social del titular]</strong>, con NIF{' '}
-        <strong>[NIF/DNI]</strong> y domicilio en <strong>[dirección]</strong>. Puedes contactar a través de nuestro{' '}
+        <strong>Jorge Luis López Barrio</strong>, con NIF{' '}
+        <strong>05298279E</strong> y domicilio en <strong>[dirección]</strong>. Puedes contactar a través de nuestro{' '}
         <Link href="/contacto">formulario de contacto</Link>.
       </p>
 

@@ -19,8 +19,8 @@ export default function PrivacidadPage() {
 
       <h2>1. Responsable del tratamiento</h2>
       <p>
-        <strong>[Nombre y apellidos / razón social del titular]</strong>, NIF <strong>[NIF/DNI]</strong>. Puedes
-        contactar a través de nuestro <Link href="/contacto">formulario de contacto</Link>.
+        <strong>Jorge Luis López Barrio</strong>, NIF <strong>05298279E</strong>. Puedes contactar a través de
+        nuestro <Link href="/contacto">formulario de contacto</Link>.
       </p>
 
       <h2>2. Qué datos recogemos y con qué finalidad</h2>
