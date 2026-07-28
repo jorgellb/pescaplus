@@ -10,7 +10,7 @@ import { SEA_SPECIES, getSpecies } from '@/lib/fishing-species'
 describe('lo que se deriva de las fichas', () => {
   it('TODAS las especies de mar dicen su profundidad de forma interpretable', () => {
     const sinRango = SEA_SPECIES
-      .filter((p) => p.id !== 'general' && p.id !== 'pelagicos')
+      .filter((p) => p.id !== 'general')
       .filter((p) => depthRange(p) === null)
       .map((p) => `${p.id}: "${p.depth}"`)
     expect(sinRango).toEqual([])

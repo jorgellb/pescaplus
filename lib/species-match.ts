@@ -74,7 +74,7 @@ const PISTAS: { clave: RegExp; sustrato: string }[] = [
  * ninguna palabra clave, porque "no encontré nada" y "no aplica" son cosas
  * distintas y solo una de las dos es una decisión.
  */
-export const PELAGICAS = new Set(['atun', 'potas', 'pelagicos'])
+export const PELAGICAS = new Set(['atun', 'potas', 'bonito', 'llampuga'])
 
 export function substratos(p: SpeciesProfile): string[] {
   if (PELAGICAS.has(p.id)) return []
@@ -91,7 +91,7 @@ export interface Punto {
 }
 
 function evaluar(p: SpeciesProfile, punto: Punto): Coincidencia | null {
-  if (p.id === 'general' || p.id === 'pelagicos') return null
+  if (p.id === 'general') return null
   const criterios: Criterio[] = []
 
   const rango = depthRange(p)
