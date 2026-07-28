@@ -26,6 +26,8 @@ import {
   nextExtremes, tideRisingAt, TIDE_DATUM_NOTE, TIDES_REVALIDATE_S,
 } from '@/lib/tides'
 import { getSpecies, GENERAL, SEA_SPECIES } from '@/lib/fishing-species'
+import { gearPicks } from '@/lib/gear-picks'
+import ProductImage from '@/components/ProductImage'
 import { douglasState, safetyAlerts, navigationWindows, outAndBack, dayVerdict, gearForConditions } from '@/lib/sea-state'
 import { seawardBearing, windRelation, windRelationLabel } from '@/lib/coast'
 import { getRegulation, REGULATIONS_REVIEWED, NATIONAL_SIZES_URL } from '@/lib/fishing-regulations'
@@ -307,6 +309,8 @@ export default async function SpotDashboard({
       ? windRelationLabel(windRelation(nowHour.windDir, seaward))
       : null
   const gearTips = gearForConditions(nowHour)
+  // Aparejos reales para lo que dicen esos consejos y para la especie elegida.
+  const picks = await gearPicks(species, gearTips.map((t) => t.href))
   const uvMaxToday = todayHours.length ? Math.max(...todayHours.map((h) => h.uv ?? 0)) : 0
 
   // Transparent score breakdown for the current hour (physical model data vs
@@ -954,6 +958,47 @@ export default async function SpotDashboard({
                 </div>
               ))}
             </div>
+
+            {/*
+              Hasta aquí se decía QUÉ hace falta y se mandaba al pescador a
+              buscarlo por su cuenta. Estos son ya los aparejos concretos para
+              estas condiciones y esta especie: el consejo y lo que lo resuelve,
+              en el mismo sitio.
+            */}
+            {picks.length > 0 && (
+              <div className="pt-2 space-y-3">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">
+                  De nuestra selección{species.id !== 'general' ? ` para ${species.article} ${species.name.toLowerCase()}` : ''}
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {picks.map(({ product, reason }) => (
+                    <Link
+                      key={product.id}
+                      href={`/products/${product.id}`}
+                      className="group border border-ink/[0.07] rounded-xl bg-paper overflow-hidden hover:border-accent/40 transition-colors flex flex-col"
+                    >
+                      <div className="relative aspect-square bg-ink/[0.05]">
+                        <ProductImage
+                          src={product.imageUrl}
+                          alt={product.title}
+                          sizes="(max-width: 640px) 100vw, 220px"
+                          className="absolute inset-0 w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="p-3 flex flex-col gap-1.5 flex-1">
+                        <p className="font-mono text-[10px] uppercase tracking-widest text-accent">{reason}</p>
+                        <p className="text-[13px] font-semibold text-ink leading-snug line-clamp-2 group-hover:text-accent transition-colors">
+                          {product.title}
+                        </p>
+                        <p className="mt-auto text-sm font-bold text-ink">
+                          {product.price.toFixed(2)} {product.currency}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
