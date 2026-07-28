@@ -194,6 +194,28 @@ export function validateCharter(input: CharterInput): string | null {
   return null
 }
 
+/**
+ * Si se puede COBRAR esta reserva. Devuelve el motivo en castellano, o null.
+ *
+ * Vive aquí y no suelto en la ruta porque es una regla de negocio, no de
+ * transporte: cobrar la plaza 9 de un barco de 8, o una salida de la semana
+ * pasada, solo se arregla devolviendo el dinero. La reserva SIN pago no pasa
+ * por aquí a propósito: ahí el patrón confirma a mano y pedir de más es solo
+ * lista de espera.
+ */
+export function validatePaidBooking(
+  charter: Pick<Charter, 'status' | 'dateISO' | 'maxPlaces' | 'placesTaken'>,
+  people: number,
+  todayISO: string,
+): string | null {
+  if (charter.status === 'cancelled') return 'Este chárter se ha cancelado.'
+  if (charter.dateISO < todayISO) return 'Esta salida ya ha pasado.'
+  const libres = Math.max(0, charter.maxPlaces - charter.placesTaken)
+  if (libres === 0) return 'Esta salida ya está completa.'
+  if (people > libres) return `Solo ${libres === 1 ? 'queda 1 plaza' : `quedan ${libres} plazas`} en esta salida.`
+  return null
+}
+
 // ---------------------------------------------------------------------------
 // Memory backend
 // ---------------------------------------------------------------------------
@@ -571,6 +593,24 @@ export async function createPaidBooking(
       // Idempotencia por la referencia de pago: Stripe puede repetir el evento.
       const existing = await prisma.charterBooking.findFirst({ where: { charterId, paymentRef } })
       if (existing) return
+
+      /**
+       * El aforo se comprueba ANTES de cobrar (en /api/charters/[id]/checkout).
+       * Aquí solo queda la carrera: dos personas pagando a la vez la última
+       * plaza. Llegados a este punto el dinero YA está cobrado, así que NO se
+       * descarta la reserva — perder el registro de un pago es mucho peor que
+       * una plaza de más, y deja al cliente sin rastro de lo que pagó. Se
+       * anota y se avisa a gritos para que alguien lo resuelva (reubicar o
+       * devolver), en vez de que pase inadvertido.
+       */
+      const before = await getCharter(charterId)
+      if (before && before.placesTaken + people > before.maxPlaces) {
+        console.error(
+          `[sobreventa] Chárter ${charterId}: pago ${paymentRef} de ${people} plaza(s) ` +
+          `deja ${before.placesTaken + people}/${before.maxPlaces}. Cobrado ya; requiere revisión manual.`,
+        )
+      }
+
       await prisma.charterBooking.create({ data: { charterId, userId, paymentRef, name, contact, people, message, status: 'paid' } })
       const after = await getCharter(charterId)
       if (after && after.placesTaken >= after.minToConfirm && after.status === 'open') {
