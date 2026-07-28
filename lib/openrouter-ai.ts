@@ -628,20 +628,32 @@ export async function generateSeoListing(input: {
     return offlineSeoListing(originalTitle, typeFishing, price, currency)
   }
 
-  const instruction = `Eres un copywriter SEO para una tienda de pesca. A partir de este producto de nuestra selección, redacta una ficha ORIGINAL en español (no copies el texto de nuestra selección).
+  const instruction = `Eres el redactor SEO de PescaPlus, una tienda de pesca española. A partir de este producto de nuestra selección, redacta una ficha ORIGINAL (no copies el texto de nuestra selección).
 Título original (solo como referencia): "${cleanTitle(originalTitle)}"
 Modalidad: ${fishingLabel(typeFishing)} (${typeFishing}). Precio aprox: ${price ?? '—'} ${currency}.
+
+${SPANISH_RULE}
+
+Conserva del título original los datos que el comprador busca (medida, material, ratio, capacidad, uso) y quita las marcas de vendedor de marketplace.
+
 Devuelve SOLO JSON válido:
-{"title": string (máx 70 caracteres, atractivo, incluye la modalidad y palabras clave de pesca),
- "description": string (3-4 frases, beneficios y usos, tono experto y persuasivo),
- "seoDescription": string (meta description de 140-160 caracteres con llamada a la acción)}`
+{"title": string (40-70 caracteres, describe el producto con su dato clave),
+ "description": string (3-4 frases, beneficios y usos, tono experto y cercano),
+ "seoDescription": string (meta descripción de 140-160 caracteres, NUNCA más de 160, con llamada a la acción)}`
 
   const content = await callAiModel(
     [
-      { role: 'system', content: 'Redactas fichas de producto SEO en español y respondes solo con JSON válido.' },
+      { role: 'system', content: 'Eres redactor SEO español de una tienda de pesca. Escribes en castellano de España impecable y respondes solo con JSON válido.' },
       { role: 'user', content: instruction },
     ],
-    { maxTokens: 900, temperature: 0.7, topP: 0.9, timeoutMs: 30000 },
+    {
+      maxTokens: 900,
+      temperature: 0.6,
+      topP: 0.9,
+      timeoutMs: 30000,
+      // Calidad por delante de velocidad: el 8b inventa gramática y anglicismos.
+      models: [groq('llama-3.3-70b-versatile'), ...DEFAULT_MODEL_CHAIN],
+    },
   )
   const fallback = offlineSeoListing(originalTitle, typeFishing, price, currency)
   const parsed = parseAiJson('generate-seo-listing', content)
@@ -651,7 +663,7 @@ Devuelve SOLO JSON válido:
   return {
     title: str(parsed.title, fallback.title).slice(0, 90),
     description: str(parsed.description, fallback.description).slice(0, 1200),
-    seoDescription: str(parsed.seoDescription, fallback.seoDescription).slice(0, 165),
+    seoDescription: recorteLimpio(str(parsed.seoDescription, fallback.seoDescription), 160),
     generatedBy: 'ai',
   }
 }
@@ -722,7 +734,7 @@ Tono experto, útil y ameno. Devuelve SOLO JSON válido:
     title: str(parsed.title, fallback.title).slice(0, 140),
     excerpt: str(parsed.excerpt, fallback.excerpt).slice(0, 300),
     content: str(parsed.content, fallback.content),
-    seoDescription: str(parsed.seoDescription, fallback.seoDescription).slice(0, 165),
+    seoDescription: recorteLimpio(str(parsed.seoDescription, fallback.seoDescription), 160),
     generatedBy: 'ai',
   }
 }
@@ -735,7 +747,38 @@ Tono experto, útil y ameno. Devuelve SOLO JSON válido:
 const BRAND_RULE =
   'Escribe como el equipo humano de la tienda PescaPlus. NUNCA menciones AliExpress ni ningún marketplace, ni que el texto lo genera una inteligencia artificial. Mantén la veracidad: no inventes datos, marcas ni precios que no aparezcan.'
 
+/**
+ * Reglas de idioma para TODO lo que se publica de cara al cliente.
+ *
+ * Están escritas porque los modelos pequeños fallaban justo en esto: llamaban
+ * "cazadores" a los pescadores, trataban de usted (el resto del sitio tutea) y
+ * colaban anglicismos. Se repiten en cada prompt en vez de confiar en el
+ * prompt de sistema: los modelos flojos se saltan las instrucciones lejanas.
+ */
+const SPANISH_RULE = `IDIOMA (INNEGOCIABLE):
+- Castellano de España, correcto y natural. Nada de inglés ("rod", "reel", "lure" → caña, carrete, señuelo).
+- TUTEA al lector: "compra", "descubre", "mejora tus jornadas". NUNCA de usted ("compre", "visite", "adquiera").
+- Son PESCADORES, jamás "cazadores"; se habla de CAPTURAS y especies, jamás de "presas".
+- Acentúa siempre correctamente (señuelo, caña, línea, nítida), aunque el texto original venga mal escrito.
+- Mayúsculas a la española: solo la primera palabra y los nombres propios. "Caña telescópica de carbono", NO "Caña Telescópica De Carbono".`
+
 const asString = (v: unknown, fallback: string) => (typeof v === 'string' && v.trim() ? v.trim() : fallback)
+
+/**
+ * Recorta a `max` caracteres SIN partir la última palabra.
+ *
+ * Un `slice(0, 165)` seco dejaba metas acabadas en "…y compra ahor", que es
+ * exactamente lo que se lee en el resultado de Google. Si hay un espacio
+ * razonablemente cerca del final se corta ahí y se limpia la puntuación
+ * huérfana.
+ */
+function recorteLimpio(text: string, max: number): string {
+  if (text.length <= max) return text
+  const cortado = text.slice(0, max)
+  const ultimoEspacio = cortado.lastIndexOf(' ')
+  const base = ultimoEspacio > max * 0.6 ? cortado.slice(0, ultimoEspacio) : cortado
+  return base.replace(/[\s,;:.¡!¿?-]+$/, '')
+}
 
 export interface RewrittenProduct {
   title: string
@@ -768,22 +811,29 @@ FICHA ACTUAL:
 - Meta descripción: ${current.seoDescription || '(vacía)'}
 ${input.typeFishing ? `Categoría: ${fishingLabel(input.typeFishing)}.` : ''}
 
+${SPANISH_RULE}
+
 ${BRAND_RULE}
 Devuelve SOLO JSON válido: {"title": string (máx 90 caracteres), "description": string (2-5 frases, admite **negrita** y listas con "- "), "seoDescription": string (meta descripción, máx 160 caracteres)}`
 
   const content = await callAiModel(
     [
-      { role: 'system', content: 'Reescribes fichas de producto en español y respondes solo con JSON válido.' },
+      { role: 'system', content: 'Reescribes fichas de producto en castellano de España impecable y respondes solo con JSON válido.' },
       { role: 'user', content: prompt },
     ],
-    { maxTokens: 1000, temperature: 0.7, timeoutMs: 30000 },
+    {
+      maxTokens: 1000,
+      temperature: 0.6,
+      timeoutMs: 30000,
+      models: [groq('llama-3.3-70b-versatile'), ...DEFAULT_MODEL_CHAIN],
+    },
   )
   const parsed = parseAiJson('rewrite-product-copy', content)
   if (!parsed) return { ...current, generatedBy: 'offline' }
   return {
     title: asString(parsed.title, current.title).slice(0, 140),
     description: asString(parsed.description, current.description).slice(0, 1200),
-    seoDescription: asString(parsed.seoDescription, current.seoDescription).slice(0, 165),
+    seoDescription: recorteLimpio(asString(parsed.seoDescription, current.seoDescription), 160),
     generatedBy: 'ai',
   }
 }
@@ -838,7 +888,7 @@ Devuelve SOLO JSON válido: {"title": string, "excerpt": string (1-2 frases), "c
     title: asString(parsed.title, current.title).slice(0, 140),
     excerpt: asString(parsed.excerpt, current.excerpt).slice(0, 300),
     content: asString(parsed.content, current.content),
-    seoDescription: asString(parsed.seoDescription, current.seoDescription).slice(0, 165),
+    seoDescription: recorteLimpio(asString(parsed.seoDescription, current.seoDescription), 160),
     generatedBy: 'ai',
   }
 }
@@ -855,6 +905,69 @@ export interface PolishedProduct {
 const asStringArray = (v: unknown, len: number): string[] => {
   if (!Array.isArray(v)) return []
   return v.slice(0, len).map((x) => (typeof x === 'string' ? x.trim().slice(0, 240) : ''))
+}
+
+/**
+ * Vocabulario que delata que el modelo se ha ido a otro deporte o a otro
+ * idioma. "Cazador"/"presa" salieron en fichas reales: el modelo arrastra
+ * vocabulario de caza al hablar de depredadores y acaba llamando "cazadores"
+ * a los pescadores.
+ */
+const SEO_BANNED = /\b(cazador|cazadores|caza|presa|presas|hunter|angler|fisherman|rod\b|reel\b|lure\b)\b/i
+
+/** Restos del propio prompt que algún modelo copia literalmente. */
+const SEO_PLACEHOLDER = /texto ancla|texto-ancla|\[nombre\]|\bstring\b|p\. ?ej\.|lorem/i
+
+/**
+ * Qué se considera un pulido ACEPTABLE. Devuelve la lista de motivos por los
+ * que no lo es (vacía = correcto).
+ *
+ * Existe porque sin esto el pulido publicaba tal cual "Carrete Spinning" como
+ * meta título (16 de los 60 caracteres útiles), metas de 107 caracteres,
+ * "¡Pescar ha nunca sido tan divertido!" y hasta el marcador `[texto ancla]`
+ * del propio prompt. Se prefiere no tocar la ficha antes que empeorarla.
+ */
+function seoProblems(
+  p: { title: string; seoTitle: string; description: string; seoDescription: string },
+  catLink: string,
+): string[] {
+  const malos: string[] = []
+  const todo = `${p.title} ${p.seoTitle} ${p.description} ${p.seoDescription}`
+
+  if (SEO_BANNED.test(todo)) malos.push('vocabulario impropio (caza/inglés)')
+  if (SEO_PLACEHOLDER.test(todo)) malos.push('ha copiado un marcador del prompt')
+
+  if (p.title.length < 15 || p.title.length > 70) malos.push(`título de ${p.title.length} car.`)
+  if (p.title === p.title.toLowerCase()) malos.push('título todo en minúsculas')
+  if (p.title === p.title.toUpperCase()) malos.push('título todo en mayúsculas')
+
+  // Mayúsculas a la inglesa ("Caña De Pescar Con Carrete"): en castellano los
+  // títulos van en minúscula salvo la primera palabra y los nombres propios.
+  // Se detecta por los conectores, que nunca se capitalizan en medio.
+  if (/ (De|Del|La|El|Los|Las|Y|O|Con|Para|Por|En|A|Al)\b/.test(`${p.title} ${p.seoTitle}`)) {
+    malos.push('mayúsculas a la inglesa en el título')
+  }
+
+  /**
+   * Las longitudes se juzgan con manga ancha A PROPÓSITO. Contar caracteres se
+   * le da fatal a un modelo de lenguaje, y rechazar por 8 caracteres de más
+   * dejaba la ficha SIN PULIR — el peor resultado posible, porque el original
+   * sin tocar es justo lo que se quería mejorar. Aquí solo se rechaza lo
+   * absurdo (un meta título de 12 caracteres, una meta de 300); el ajuste fino
+   * al tamaño exacto lo hace `recorteLimpio`, que es determinista y no falla.
+   * Lo que sí se rechaza sin piedad es lo que el código NO puede arreglar: el
+   * idioma, el vocabulario y el tono.
+   */
+  if (p.seoTitle.length < 25 || p.seoTitle.length > 75) malos.push(`meta título de ${p.seoTitle.length} car.`)
+  if (p.seoDescription.length < 100 || p.seoDescription.length > 200) malos.push(`meta descripción de ${p.seoDescription.length} car.`)
+  if (p.description.length < 180) malos.push(`descripción de ${p.description.length} car.`)
+
+  // Trato de usted: el resto del sitio tutea.
+  if (/\b(compre|visite|descubra|adquiera|disfrute|elija|consulte)\b/i.test(todo)) malos.push('trata de usted')
+
+  if (catLink && !p.description.includes(`](${catLink})`)) malos.push('falta el enlace interno a la categoría')
+
+  return malos
 }
 
 /**
@@ -885,40 +998,95 @@ export async function polishProductSeo(input: {
   const catLabel = catId ? fishingLabel(catId) : ''
   const catLink = catId ? `/categories/${catId}` : ''
 
-  const prompt = `Eres un especialista en SEO para una tienda de pesca online en España. Revisa y PULE esta ficha de producto.
+  const ancla = catLabel ? catLabel.toLowerCase() : ''
+  const prompt = `Eres el redactor SEO de PescaPlus, una tienda de pesca española. Pule esta ficha para que posicione en Google.es y la lea un pescador español.
 
 FICHA ACTUAL:
 - Título: ${input.title}
 - Descripción: ${input.description}
 ${catLabel ? `- Categoría: ${catLabel} (página: ${catLink})` : ''}
 
+${SPANISH_RULE}
+
 TAREAS:
-1. TÍTULO ("title"): ELIMINA nombres de marca o de vendedor propios de marketplaces (p. ej. DEUKIO, Sougayilang, Zukibo, Lixada, Noeby, DNDYUJU, Rooblinos, SEASIR, JOSBY, Proberos, Hirisi, Anatono…) y códigos internos raros. Deja un título limpio, natural y optimizado para SEO que describa el producto (tipo + característica/medida clave + uso), en español, MÁXIMO 65 caracteres, sin mayúsculas gritonas.
-2. DESCRIPCIÓN ("description"): reescribe una descripción PERFECTA para SEO: 3-5 frases con beneficios, usos y palabras clave naturales de pesca (sin repetir en exceso). Usa **negrita** para 1-2 conceptos clave.${catLink ? ` INCLUYE UNA sola vez un ENLACE INTERNO contextual a su categoría con esta sintaxis markdown EXACTA: [texto ancla natural](${catLink}). El texto ancla debe ser natural y descriptivo (p. ej. "${catLabel.toLowerCase()}"), integrado en una frase, NO al final suelto.` : ''}
-3. "seoTitle": meta título para Google de máximo 60 caracteres con la palabra clave principal al inicio; puedes añadir " | PescaPlus" si cabe.
-4. "seoDescription": meta descripción de 140-160 caracteres, atractiva y con llamada a la acción, con la palabra clave principal.${imageCount > 0 ? `\n5. "imageAlts": array de EXACTAMENTE ${imageCount} textos alternativos (alt) para las imágenes, todos DISTINTOS entre sí, en español, de 6 a 14 palabras, describiendo el producto y su uso con palabras clave; SIN "imagen de", SIN nombres de vendedor, SIN comillas.` : ''}
+1. "title" (40-65 caracteres): quita marcas de vendedor de marketplace (DEUKIO, Sougayilang, Zukibo, Lixada, Noeby, DNDYUJU, Rooblinos, SEASIR, JOSBY, Proberos, Hirisi, Anatono…) y códigos raros, pero CONSERVA los datos que el comprador busca: medida, material, ratio, capacidad, uso (p. ej. "3 m", "fibra de carbono", "5.2:1", "agua salada"). MAYÚSCULAS A LA ESPAÑOLA: solo la primera palabra y los nombres propios. Se escribe "Caña telescópica de fibra de carbono 3 m", NO "Caña Telescópica De Fibra De Carbono" (eso es el estilo inglés y en castellano está mal).
+2. "description" (3-5 frases, mínimo 200 caracteres): beneficios y usos reales, con las palabras clave integradas con naturalidad. Marca 2-3 conceptos clave con **negrita**.${catLink ? ` Incluye UNA sola vez, dentro de una frase, un enlace markdown a su categoría con esta forma EXACTA: [${ancla}](${catLink}). El texto del enlace debe ser palabras de verdad como "${ancla}" — NUNCA escribas literalmente "texto ancla".` : ''}
+3. "seoTitle" (50-60 caracteres, APROVÉCHALOS): la palabra clave principal al principio y " | PescaPlus" al final si cabe. Un meta título de 20 caracteres desperdicia el espacio donde caben las palabras que la gente busca. Escríbelo como una frase con sentido, no encadenando palabras clave con barras.
+4. "seoDescription" (entre 140 y 160 caracteres, NUNCA más de 160): resume el beneficio principal y termina con una llamada a la acción. Cuenta los caracteres y termina la frase — si te pasas de 160 se corta a media palabra en Google.${imageCount > 0 ? `\n5. "imageAlts": EXACTAMENTE ${imageCount} textos alternativos DISTINTOS entre sí, de 6 a 14 palabras, describiendo el producto y su uso; sin "imagen de", sin marcas de vendedor y sin comillas.` : ''}
 
 ${BRAND_RULE}
 Devuelve SOLO JSON válido: {"title": string, "seoTitle": string, "description": string, "seoDescription": string${imageCount > 0 ? ', "imageAlts": string[]' : ''}}`
 
-  const content = await callAiModel(
-    [
-      { role: 'system', content: 'Eres un experto SEO que pule fichas de producto en español y responde solo con JSON válido.' },
-      { role: 'user', content: prompt },
-    ],
-    { maxTokens: 1500, temperature: 0.6, timeoutMs: 30000 },
-  )
-  const parsed = parseAiJson('polish-product-seo', content)
-  if (!parsed) return { ...current, generatedBy: 'offline' }
-  const title = asString(parsed.title, current.title).slice(0, 140)
-  return {
-    title,
-    seoTitle: asString(parsed.seoTitle, title).slice(0, 90),
-    description: asString(parsed.description, current.description).slice(0, 1400),
-    seoDescription: asString(parsed.seoDescription, current.seoDescription).slice(0, 165),
-    imageAlts: imageCount > 0 ? asStringArray(parsed.imageAlts, imageCount) : [],
-    generatedBy: 'ai',
+  /**
+   * Se lee SIN recortar: recortar antes de revisar escondía el fallo — una
+   * meta descripción de 200 caracteres se convertía en uno de 165 cortado a
+   * media palabra y pasaba la revisión como si midiera bien. El recorte de
+   * seguridad se aplica solo al aceptar.
+   */
+  const leer = (parsed: Record<string, unknown>) => {
+    const title = asString(parsed.title, current.title)
+    return {
+      title,
+      seoTitle: asString(parsed.seoTitle, title),
+      description: asString(parsed.description, current.description),
+      seoDescription: asString(parsed.seoDescription, current.seoDescription),
+      imageAlts: imageCount > 0 ? asStringArray(parsed.imageAlts, imageCount) : [],
+    }
   }
+
+  const recortar = (p: ReturnType<typeof leer>) => ({
+    ...p,
+    title: p.title.slice(0, 140),
+    // 60 es lo que enseña Google antes de cortar con puntos suspensivos.
+    seoTitle: recorteLimpio(p.seoTitle, 60),
+    description: p.description.slice(0, 1400),
+    seoDescription: recorteLimpio(p.seoDescription, 160),
+  })
+
+  /**
+   * Dos pasadas: la primera con el modelo grande, y si el resultado no pasa la
+   * revisión se repite diciéndole exactamente qué ha hecho mal. Se prefiere
+   * dejar la ficha como estaba antes que publicar un pulido peor que el
+   * original — por eso el último recurso devuelve `current`, no el intento
+   * fallido.
+   */
+  let ultimo: ReturnType<typeof leer> | null = null
+  let ultimosFallos: string[] = []
+
+  for (let intento = 0; intento < 2; intento++) {
+    const correccion = intento === 0 || !ultimo
+      ? ''
+      : `\n\nTU INTENTO ANTERIOR NO VALE. Falla en: ${ultimosFallos.join('; ')}.\nCorrígelo exactamente y respeta las longitudes pedidas.`
+
+    const content = await callAiModel(
+      [
+        { role: 'system', content: 'Eres redactor SEO español de una tienda de pesca. Escribes en castellano de España impecable y respondes solo con JSON válido.' },
+        { role: 'user', content: prompt + correccion },
+      ],
+      {
+        maxTokens: 1600,
+        temperature: intento === 0 ? 0.5 : 0.3,
+        timeoutMs: 30000,
+        // El 8b es demasiado flojo para esto: inventa gramática ("¡Pescar ha
+        // nunca sido tan divertido!") y llegó a devolver JSON no parseable.
+        // Aquí manda calidad, no velocidad.
+        models: [groq('llama-3.3-70b-versatile'), openrouter('google/gemma-4-31b-it:free'), openrouter('google/gemma-4-26b-a4b-it:free')],
+      },
+    )
+    const parsed = parseAiJson('polish-product-seo', content)
+    if (!parsed) continue
+
+    const cand = leer(parsed)
+    const fallos = seoProblems(cand, catLink)
+    if (fallos.length === 0) return { ...recortar(cand), generatedBy: 'ai' }
+
+    ultimo = cand
+    ultimosFallos = fallos
+    console.warn(`polish-product-seo: intento ${intento + 1} rechazado (${fallos.join('; ')}) · "${input.title.slice(0, 60)}"`)
+  }
+
+  console.warn(`polish-product-seo: se deja la ficha sin tocar · "${input.title.slice(0, 60)}"`)
+  return { ...current, generatedBy: 'offline' }
 }
 
 /**
