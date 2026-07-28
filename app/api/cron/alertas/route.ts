@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { listAlerts, type AlertSubscription } from '@/lib/alerts-store'
 import { getSpot } from '@/lib/fishing-spots'
+import { getSpecies } from '@/lib/fishing-species'
 import { getMarineForecast, bestWindow, groupByDay } from '@/lib/marine-forecast'
 import { fmtWindowRange, fmtDayLabel, todayMadridISO } from '@/lib/solunar-format'
 import { SITE_URL } from '@/lib/seo'
@@ -25,21 +26,34 @@ export async function GET(request: NextRequest) {
   const dryRun = !resendKey || !from
 
   const subs = await listAlerts()
-  const bySpot = new Map<string, AlertSubscription[]>()
+
+  /**
+   * Se agrupa por ZONA + ESPECIE, no solo por zona.
+   *
+   * El formulario de alta deja elegir especie y se guardaba en
+   * `AlertSubscription.especie`, pero aquí se pedía la previsión con `null`:
+   * quien pedía "avísame cuando entre la lubina en Tarifa" recibía la
+   * puntuación genérica de la zona, que puntúa distinto. El aviso prometía una
+   * cosa y mandaba otra. La previsión está cacheada por zona+especie, así que
+   * agrupar más fino no dispara las llamadas.
+   */
+  const byGroup = new Map<string, { spotSlug: string; especie: string; subs: AlertSubscription[] }>()
   for (const s of subs) {
-    const list = bySpot.get(s.spotSlug)
-    if (list) list.push(s)
-    else bySpot.set(s.spotSlug, [s])
+    const key = `${s.spotSlug}::${s.especie || ''}`
+    const g = byGroup.get(key)
+    if (g) g.subs.push(s)
+    else byGroup.set(key, { spotSlug: s.spotSlug, especie: s.especie || '', subs: [s] })
   }
 
   let sent = 0
   let matched = 0
   const errors: string[] = []
 
-  for (const [slug, list] of bySpot) {
+  for (const { spotSlug: slug, especie, subs: list } of byGroup.values()) {
     const spot = getSpot(slug)
     if (!spot) continue
-    const forecast = await getMarineForecast(spot, null, 'tierra')
+    const sp = especie ? getSpecies(especie) : null
+    const forecast = await getMarineForecast(spot, especie || null, 'tierra')
     if (!forecast.available) continue
 
     const today = todayMadridISO()
@@ -56,9 +70,12 @@ export async function GET(request: NextRequest) {
 
       const dayName = hit.dateISO === today ? 'hoy' : fmtDayLabel(hit.dateISO)
       const range = fmtWindowRange(hit.win!.start, hit.win!.end, hit.dayStart)
-      const url = `${SITE_URL}/mejores-horas/${spot.slug}`
-      const planUrl = `${SITE_URL}/mejores-horas/${spot.slug}/plan?dia=${hit.dateISO}`
+      // Con especie elegida, el enlace lleva a la previsión de ESA especie.
+      const qs = especie ? `?especie=${encodeURIComponent(especie)}` : ''
+      const url = `${SITE_URL}/mejores-horas/${spot.slug}${qs}`
+      const planUrl = `${SITE_URL}/mejores-horas/${spot.slug}/plan?dia=${hit.dateISO}${especie ? `&especie=${encodeURIComponent(especie)}` : ''}`
       const unsubUrl = `${SITE_URL}/api/alertas/baja?id=${sub.id}`
+      const paraEspecie = sp && sp.id !== 'general' ? ` para ${sp.article} ${sp.name.toLowerCase()}` : ''
 
       try {
         const res = await fetch('https://api.resend.com/emails', {
@@ -67,9 +84,9 @@ export async function GET(request: NextRequest) {
           body: JSON.stringify({
             from,
             to: [sub.email],
-            subject: `🎣 Ventana buena ${dayName} en ${spot.name}: ${range} (${hit.win!.avg}/100)`,
+            subject: `🎣 Ventana buena ${dayName}${paraEspecie} en ${spot.name}: ${range} (${hit.win!.avg}/100)`,
             html: `<div style="font-family:system-ui;max-width:560px;margin:0 auto;color:#111">
-<h2 style="text-transform:uppercase">🎣 ${spot.name}: ventana de pesca ${dayName}</h2>
+<h2 style="text-transform:uppercase">🎣 ${spot.name}: ventana de pesca ${dayName}${paraEspecie}</h2>
 <p style="font-size:18px"><strong>${range}</strong> · puntuación <strong>${hit.win!.avg}/100</strong></p>
 <p>Solunar, viento, mar y mareas apuntan a un buen tramo. Revisa el detalle y el estado del mar antes de salir.</p>
 <p><a href="${planUrl}" style="background:#0a7d72;color:#fff;padding:12px 20px;text-decoration:none;border-radius:10px;display:inline-block">Generar mi plan de pesca</a></p>
