@@ -53,17 +53,17 @@ export function updateSettings(patch: Partial<AdminSettings>): AdminSettings {
 export interface IntegrationStatus {
   database: { configured: boolean; backend: 'database' | 'memory' }
   aliexpress: { configured: boolean }
-  nvidia: { configured: boolean }
+  openrouter: { configured: boolean }
   adminPassword: { usingDefault: boolean }
 }
 
 /** Read-only view of which optional integrations are wired up. */
 export function getIntegrationStatus(): IntegrationStatus {
-  const nvidiaKey = process.env.NVIDIA_API_KEY
+  const openrouterKey = process.env.OPENROUTER_API_KEY
   return {
     database: { configured: isDatabaseConfigured(), backend: activeBackend() },
     aliexpress: { configured: isAliExpressConfigured() },
-    nvidia: { configured: Boolean(nvidiaKey && nvidiaKey !== 'your_nvidia_api_key') },
+    openrouter: { configured: Boolean(openrouterKey && openrouterKey !== 'your_openrouter_api_key') },
     adminPassword: { usingDefault: isUsingDefaultPassword() },
   }
 }

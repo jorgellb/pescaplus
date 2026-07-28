@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { isRequestAuthenticated } from '@/lib/admin-auth'
-import { generateSeoListing } from '@/lib/nvidia-ai'
+import { generateSeoListing } from '@/lib/openrouter-ai'
 import { createProduct, updateProduct, listProducts } from '@/lib/products-store'
 
 export const maxDuration = 90
@@ -22,7 +22,7 @@ const schema = z.object({
 })
 
 /**
- * Import an AliExpress product: the NVIDIA agent rewrites the title/description
+ * Import an AliExpress product: the AI agent rewrites the title/description
  * for SEO (original copy, not the marketplace text), and we persist it with its
  * gallery images and video. Re-importing the same AliExpress id updates in place.
  */
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     title: seo.title,
     description: seo.description,
     seoDescription: seo.seoDescription,
-    aiOptimized: seo.generatedBy === 'nvidia',
+    aiOptimized: seo.generatedBy === 'openrouter',
     imageUrl: p.imageUrl || p.images[0] || '',
     images: p.images,
     videoUrl: p.videoUrl,

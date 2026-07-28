@@ -1,5 +1,5 @@
 import { unstable_cache } from 'next/cache'
-import { generatePlanAdvice } from '@/lib/nvidia-ai'
+import { generatePlanAdvice } from '@/lib/openrouter-ai'
 
 /**
  * "El resumen del asesor" on the zone dashboard: a 2-3 sentence daily briefing

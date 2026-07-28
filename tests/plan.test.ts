@@ -16,7 +16,7 @@ describe('buildTimeline', () => {
 
 describe('sanitizeSpanishProse (anti chain-of-thought leak)', () => {
   it('discards English reasoning leaks and keeps Spanish prose', async () => {
-    const { sanitizeSpanishProse } = await import('@/lib/nvidia-ai')
+    const { sanitizeSpanishProse } = await import('@/lib/openrouter-ai')
     const leak = 'We need to produce a brief tactical advice, 2 paragraphs, max 110 words total. Must be in Spanish, as PescaPlus advisor, human tone, no mention of AI.'
     expect(sanitizeSpanishProse(leak)).toBe('')
     const ok = 'Con la mar en calma y el agua a 23°C, trabaja la orilla con bajos finos a primera hora. Aprovecha el periodo solunar de la tarde para insistir con la subiente de la marea.'

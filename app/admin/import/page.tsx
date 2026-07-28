@@ -134,7 +134,7 @@ export default function AdminImportPage() {
       <div>
         <h1 className="text-2xl font-extrabold text-ink tracking-tight">Importar de AliExpress con IA</h1>
         <p className="text-sm text-ink/60 mt-1">
-          Busca por modalidad y el agente NVIDIA generará una ficha SEO original (título y descripción propios),
+          Busca por modalidad y el agente de IA generará una ficha SEO original (título y descripción propios),
           trayendo imágenes y vídeo del producto.
         </p>
       </div>

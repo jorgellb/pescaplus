@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { chatWithFishingExpert, streamFishingExpert } from '@/lib/nvidia-ai'
+import { chatWithFishingExpert, streamFishingExpert } from '@/lib/openrouter-ai'
 import type { ChatApiResponse, ChatMessage, ChatProductRef, Product } from '@/types'
 import { fishingLabel } from '@/lib/fishing'
 import { retrieveProducts } from '@/lib/retrieval'

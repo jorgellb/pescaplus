@@ -2,89 +2,74 @@ import type { ChatMessage } from '@/types'
 import type { ProductInput } from '@/lib/products-store'
 import { fishingLabel, getFishingType, FISHING_TYPES } from '@/lib/fishing'
 
-const NVIDIA_API_KEY = process.env.NVIDIA_API_KEY
-const NVIDIA_BASE_URL = process.env.NVIDIA_BASE_URL ?? 'https://integrate.api.nvidia.com/v1'
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY
+const OPENROUTER_BASE_URL = process.env.OPENROUTER_BASE_URL ?? 'https://openrouter.ai/api/v1'
 
 /**
  * Ordered model fallback chain. Requests try each model in turn until one
- * answers, so a single rate-limited/unavailable model never breaks the feature.
- * Override with the NVIDIA_MODELS env var (comma-separated) or a single
- * NVIDIA_MODEL. Defaults to NVIDIA's Nemotron family (validated to respond fast).
+ * answers, so a single rate-limited/unavailable model never breaks the
+ * feature. Deliberately spread across four different upstream providers
+ * (OpenAI, Google, Meta, Mistral): OpenRouter routes to each independently,
+ * so one provider's outage doesn't take down the others too. Override with
+ * the OPENROUTER_MODELS env var (comma-separated) or a single OPENROUTER_MODEL.
  */
-const DEFAULT_NVIDIA_MODELS = [
-  'nvidia/nemotron-3-super-120b-a12b',
-  'nvidia/llama-3.3-nemotron-super-49b-v1.5',
-  'nvidia/nemotron-3-nano-30b-a3b',
-  'nvidia/nvidia-nemotron-nano-9b-v2',
-  'nvidia/nemotron-mini-4b-instruct',
-  'nvidia/llama-3.1-nemotron-nano-8b-v1',
+const DEFAULT_OPENROUTER_MODELS = [
+  'openai/gpt-4o-mini',
+  'google/gemini-2.5-flash',
+  'meta-llama/llama-3.3-70b-instruct',
+  'mistralai/mistral-small-3.1-24b-instruct',
 ]
-const NVIDIA_MODELS: string[] = (() => {
-  const fromList = process.env.NVIDIA_MODELS?.split(',').map((s) => s.trim()).filter(Boolean)
+const OPENROUTER_MODELS: string[] = (() => {
+  const fromList = process.env.OPENROUTER_MODELS?.split(',').map((s) => s.trim()).filter(Boolean)
   if (fromList?.length) return fromList
-  if (process.env.NVIDIA_MODEL) return [process.env.NVIDIA_MODEL, ...DEFAULT_NVIDIA_MODELS]
-  return DEFAULT_NVIDIA_MODELS
+  if (process.env.OPENROUTER_MODEL) return [process.env.OPENROUTER_MODEL, ...DEFAULT_OPENROUTER_MODELS]
+  return DEFAULT_OPENROUTER_MODELS
 })()
 
-/**
- * Chain para tareas que exigen un JSON corto y exacto (fichas, reescrituras).
- * Excluye `nemotron-3-super-120b-a12b` y `nemotron-3-nano-30b-a3b`: medido en
- * pruebas reales, ambos son "razonadores" que gastan TODO su presupuesto de
- * tokens pensando en voz alta (finish_reason: "length") y no llegan a escribir
- * ni una llave de JSON — cada intento con ellos es un fallo garantizado que solo
- * añade latencia antes de llegar a un modelo que sí responde. El 49b encabeza
- * la lista por calidad de español (igual que en `generateZoneGuide`); el resto
- * son rápidos y fiables como red de seguridad.
- */
-const JSON_MODELS = [
-  'nvidia/llama-3.3-nemotron-super-49b-v1.5',
-  'nvidia/nvidia-nemotron-nano-9b-v2',
-  'nvidia/nemotron-mini-4b-instruct',
-  'nvidia/llama-3.1-nemotron-nano-8b-v1',
-]
-
-interface NvidiaOptions {
+interface OpenRouterOptions {
   maxTokens?: number
   temperature?: number
   topP?: number
   timeoutMs?: number
   /** Abort if the stream stalls (no bytes) for this long. Streaming only. */
   idleMs?: number
-  /** Per-call model chain override (some tasks need non-reasoning-first order). */
+  /** Per-call model chain override (e.g. a single stronger model for long-form content). */
   models?: string[]
 }
 
 /**
- * Call the NVIDIA chat API, trying each model in the fallback chain until one
- * returns content. Returns null only if every model fails.
+ * Call the OpenRouter chat API, trying each model in the fallback chain until
+ * one returns content. Returns null only if every model fails.
  */
-async function callNvidia(
+async function callOpenRouter(
   messages: ChatMessage[],
-  { maxTokens = 1024, temperature = 0.7, topP = 0.95, timeoutMs = 20000, models }: NvidiaOptions = {},
+  { maxTokens = 1024, temperature = 0.7, topP = 0.95, timeoutMs = 20000, models }: OpenRouterOptions = {},
 ): Promise<string | null> {
-  for (const model of models ?? NVIDIA_MODELS) {
+  for (const model of models ?? OPENROUTER_MODELS) {
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), timeoutMs)
     try {
-      const response = await fetch(`${NVIDIA_BASE_URL}/chat/completions`, {
+      const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
         method: 'POST',
         signal: controller.signal,
         headers: {
-          Authorization: `Bearer ${NVIDIA_API_KEY}`,
+          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
           Accept: 'application/json',
           'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://pescaplus.es',
+          'X-Title': 'PescaPlus',
         },
         body: JSON.stringify({ model, messages, max_tokens: maxTokens, temperature, top_p: topP }),
       })
       if (!response.ok) {
-        console.warn(`NVIDIA model ${model} -> HTTP ${response.status}, trying next`)
+        console.warn(`OpenRouter model ${model} -> HTTP ${response.status}, trying next`)
         continue
       }
       const data = await response.json()
       const content: string | undefined = data.choices?.[0]?.message?.content
       if (content?.trim()) return content.trim()
     } catch (error) {
-      console.warn(`NVIDIA model ${model} failed (${(error as Error).message}), trying next`)
+      console.warn(`OpenRouter model ${model} failed (${(error as Error).message}), trying next`)
     } finally {
       clearTimeout(timer)
     }
@@ -127,9 +112,10 @@ Cuando recomiendes material, orienta a la categoría relevante con ESTE formato 
 ${FISHING_TYPES.map((t) => `- ${t.name} → /categories/${t.id}`).join('\n')}`
 
 /**
- * High-quality offline expert responses. Used when no NVIDIA key is configured
- * and as a graceful fallback if the API call fails, so the assistant is always
- * useful during the demo. Topics are matched in order against the last user query.
+ * High-quality offline expert responses. Used when no OpenRouter key is
+ * configured and as a graceful fallback if the API call fails, so the
+ * assistant is always useful during the demo. Topics are matched in order
+ * against the last user query.
  */
 const EXPERT_TOPICS: ReadonlyArray<{ keywords: string[]; response: string }> = [
   {
@@ -226,7 +212,7 @@ function getLocalExpertResponse(messages: ChatMessage[]): string {
 }
 
 function isApiConfigured(): boolean {
-  return Boolean(NVIDIA_API_KEY) && NVIDIA_API_KEY !== 'your_nvidia_api_key'
+  return Boolean(OPENROUTER_API_KEY) && OPENROUTER_API_KEY !== 'your_openrouter_api_key'
 }
 
 /** Build a retrieval-augmented context block from relevant catalog products. */
@@ -248,7 +234,7 @@ interface RetrievedProduct {
 }
 
 /**
- * Chat with the fishing expert. Uses the NVIDIA API when a key is configured and
+ * Chat with the fishing expert. Uses OpenRouter when a key is configured and
  * falls back to a curated offline expert on any failure. When `relevantProducts`
  * are supplied they are injected into the context (RAG) so the assistant can
  * recommend real products with direct links.
@@ -269,38 +255,41 @@ export async function chatWithFishingExpert(
     : [{ role: 'system' as const, content: systemContent }, ...messages]
 
   // Lower temperature for more reliable, accurate advice; room for thorough answers.
-  const content = await callNvidia(formattedMessages, { maxTokens: 1200, temperature: 0.55, topP: 0.9 })
+  const content = await callOpenRouter(formattedMessages, { maxTokens: 1200, temperature: 0.55, topP: 0.9 })
   return content || getLocalExpertResponse(messages)
 }
 
 /**
- * Stream the NVIDIA chat API token by token (SSE). Walks the same fallback chain
- * as `callNvidia`: if a model fails before yielding anything, the next is tried;
- * once a model starts emitting, its stream is committed. Yields nothing if every
- * model fails (the caller then falls back to the offline expert).
+ * Stream the OpenRouter chat API token by token (SSE). Walks the same fallback
+ * chain as `callOpenRouter`: if a model fails before yielding anything, the
+ * next is tried; once a model starts emitting, its stream is committed.
+ * Yields nothing if every model fails (the caller then falls back to the
+ * offline expert).
  */
-async function* streamNvidia(
+async function* streamOpenRouter(
   messages: ChatMessage[],
-  { maxTokens = 1024, temperature = 0.7, topP = 0.95, idleMs = 20000 }: NvidiaOptions = {},
+  { maxTokens = 1024, temperature = 0.7, topP = 0.95, idleMs = 20000 }: OpenRouterOptions = {},
 ): AsyncGenerator<string> {
-  for (const model of NVIDIA_MODELS) {
+  for (const model of OPENROUTER_MODELS) {
     const controller = new AbortController()
     let timer = setTimeout(() => controller.abort(), idleMs)
     let yielded = false
     let reader: ReadableStreamDefaultReader<Uint8Array> | undefined
     try {
-      const response = await fetch(`${NVIDIA_BASE_URL}/chat/completions`, {
+      const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
         method: 'POST',
         signal: controller.signal,
         headers: {
-          Authorization: `Bearer ${NVIDIA_API_KEY}`,
+          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
           Accept: 'text/event-stream',
           'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://pescaplus.es',
+          'X-Title': 'PescaPlus',
         },
         body: JSON.stringify({ model, messages, max_tokens: maxTokens, temperature, top_p: topP, stream: true }),
       })
       if (!response.ok || !response.body) {
-        console.warn(`NVIDIA stream ${model} -> HTTP ${response.status}, trying next`)
+        console.warn(`OpenRouter stream ${model} -> HTTP ${response.status}, trying next`)
         continue
       }
       reader = response.body.getReader()
@@ -335,7 +324,7 @@ async function* streamNvidia(
       if (yielded) return
     } catch (error) {
       if (yielded) return
-      console.warn(`NVIDIA stream ${model} failed (${(error as Error).message}), trying next`)
+      console.warn(`OpenRouter stream ${model} failed (${(error as Error).message}), trying next`)
     } finally {
       clearTimeout(timer)
       reader?.cancel().catch(() => {})
@@ -353,8 +342,8 @@ async function* simulateStream(text: string): AsyncGenerator<string> {
 
 /**
  * Streaming counterpart of `chatWithFishingExpert`. Yields the answer token by
- * token from NVIDIA, or a simulated stream of the offline expert when the API is
- * not configured or every model fails.
+ * token from OpenRouter, or a simulated stream of the offline expert when the
+ * API is not configured or every model fails.
  */
 export async function* streamFishingExpert(
   messages: ChatMessage[],
@@ -373,7 +362,7 @@ export async function* streamFishingExpert(
     : [{ role: 'system' as const, content: systemContent }, ...messages]
 
   let any = false
-  for await (const chunk of streamNvidia(formattedMessages, { maxTokens: 1200, temperature: 0.55, topP: 0.9 })) {
+  for await (const chunk of streamOpenRouter(formattedMessages, { maxTokens: 1200, temperature: 0.55, topP: 0.9 })) {
     any = true
     yield chunk
   }
@@ -386,7 +375,7 @@ export async function* streamFishingExpert(
 
 export interface ProductDraft extends ProductInput {
   /** How the draft was produced, surfaced in the admin UI. */
-  generatedBy: 'nvidia' | 'offline'
+  generatedBy: 'openrouter' | 'offline'
 }
 
 function affiliateSearchUrl(keyword: string): string {
@@ -455,7 +444,7 @@ function coerceDraft(
     rating: Math.min(Math.max(asNumber(raw.rating, base.rating), 0), 5),
     reviews: Math.max(Math.round(asNumber(raw.reviews, base.reviews)), 0),
     inStock: true,
-    generatedBy: 'nvidia',
+    generatedBy: 'openrouter',
   }
 }
 
@@ -473,12 +462,11 @@ function extractJson(text: string): Record<string, unknown> | null {
 
 /**
  * `extractJson` + logging de diagnóstico por qué falla, para que un fallo nunca
- * sea silencioso (antes solo `generateZoneGuide` avisaba; el resto de fichas
- * caían al offline sin dejar rastro en los logs).
+ * sea silencioso.
  */
-function parseNvidiaJson(label: string, content: string | null): Record<string, unknown> | null {
+function parseOpenRouterJson(label: string, content: string | null): Record<string, unknown> | null {
   if (!content) {
-    console.warn(`${label}: sin contenido de ningún modelo NVIDIA`)
+    console.warn(`${label}: sin contenido de ningún modelo de OpenRouter`)
     return null
   }
   const parsed = extractJson(content)
@@ -490,8 +478,9 @@ function parseNvidiaJson(label: string, content: string | null): Record<string, 
 }
 
 /**
- * Draft a full product from a short prompt. Uses NVIDIA when configured (asking
- * for strict JSON), otherwise returns a deterministic offline draft. Never throws.
+ * Draft a full product from a short prompt. Uses OpenRouter when configured
+ * (asking for strict JSON), otherwise returns a deterministic offline draft.
+ * Never throws.
  */
 export async function generateProductDraft(
   prompt: string,
@@ -508,14 +497,14 @@ Idea del usuario: "${prompt}".
 Responde ÚNICAMENTE con un objeto JSON válido, sin texto adicional, con esta forma exacta:
 {"title": string, "description": string (2-4 frases en español), "price": number (EUR), "currency": "${currency}", "category": "fishing", "typeFishing": "${typeFishing}", "rating": number (4.0-5.0), "reviews": number entero, "affiliateUrl": string, "imageUrl": string (deja "" si no tienes una fiable)}`
 
-  const content = await callNvidia(
+  const content = await callOpenRouter(
     [
       { role: 'system', content: 'Eres un generador de fichas de producto que responde solo con JSON válido.' },
       { role: 'user', content: instruction },
     ],
-    { maxTokens: 900, temperature: 0.8, timeoutMs: 30000, models: JSON_MODELS },
+    { maxTokens: 900, temperature: 0.8, timeoutMs: 30000 },
   )
-  const parsed = parseNvidiaJson('generate-product-draft', content)
+  const parsed = parseOpenRouterJson('generate-product-draft', content)
   if (!parsed) return offlineProductDraft(prompt, typeFishing, currency)
   return coerceDraft(parsed, prompt, typeFishing, currency)
 }
@@ -531,7 +520,7 @@ export interface SeoListing {
   description: string
   /** Meta description (~155 chars). */
   seoDescription: string
-  generatedBy: 'nvidia' | 'offline'
+  generatedBy: 'openrouter' | 'offline'
 }
 
 /** Strip AliExpress promo noise from a raw title so we never reuse their copy verbatim. */
@@ -568,7 +557,7 @@ function offlineSeoListing(
 
 /**
  * Rewrite an AliExpress product into original, SEO-optimized Spanish copy.
- * Never reuses the marketplace text verbatim. Uses NVIDIA when configured,
+ * Never reuses the marketplace text verbatim. Uses OpenRouter when configured,
  * otherwise a deterministic offline rewrite. Never throws.
  */
 export async function generateSeoListing(input: {
@@ -590,15 +579,15 @@ Devuelve SOLO JSON válido:
  "description": string (3-4 frases, beneficios y usos, tono experto y persuasivo),
  "seoDescription": string (meta description de 140-160 caracteres con llamada a la acción)}`
 
-  const content = await callNvidia(
+  const content = await callOpenRouter(
     [
       { role: 'system', content: 'Redactas fichas de producto SEO en español y respondes solo con JSON válido.' },
       { role: 'user', content: instruction },
     ],
-    { maxTokens: 900, temperature: 0.7, topP: 0.9, timeoutMs: 30000, models: JSON_MODELS },
+    { maxTokens: 900, temperature: 0.7, topP: 0.9, timeoutMs: 30000 },
   )
   const fallback = offlineSeoListing(originalTitle, typeFishing, price, currency)
-  const parsed = parseNvidiaJson('generate-seo-listing', content)
+  const parsed = parseOpenRouterJson('generate-seo-listing', content)
   if (!parsed) return fallback
 
   const str = (v: unknown, f: string) => (typeof v === 'string' && v.trim() ? v.trim() : f)
@@ -606,7 +595,7 @@ Devuelve SOLO JSON válido:
     title: str(parsed.title, fallback.title).slice(0, 90),
     description: str(parsed.description, fallback.description).slice(0, 1200),
     seoDescription: str(parsed.seoDescription, fallback.seoDescription).slice(0, 165),
-    generatedBy: 'nvidia',
+    generatedBy: 'openrouter',
   }
 }
 
@@ -619,7 +608,7 @@ export interface GuideDraft {
   excerpt: string
   content: string
   seoDescription: string
-  generatedBy: 'nvidia' | 'offline'
+  generatedBy: 'openrouter' | 'offline'
 }
 
 function offlineGuide(topic: string, label: string): GuideDraft {
@@ -661,14 +650,14 @@ Tono experto, útil y ameno. Devuelve SOLO JSON válido:
  "content": string (400-700 palabras en markdown LIGERO: usa **negrita** para los títulos de sección y "- " para listas; NO uses HTML ni #),
  "seoDescription": string (meta descripción de 140-160 caracteres)}`
 
-  const content = await callNvidia(
+  const content = await callOpenRouter(
     [
       { role: 'system', content: 'Eres un redactor experto en pesca. Respondes solo con JSON válido.' },
       { role: 'user', content: instruction },
     ],
-    { maxTokens: 1800, temperature: 0.75 },
+    { maxTokens: 1800, temperature: 0.75, timeoutMs: 30000 },
   )
-  const parsed = content ? extractJson(content) : null
+  const parsed = parseOpenRouterJson('generate-guide', content)
   if (!parsed) return fallback
 
   const str = (v: unknown, f: string) => (typeof v === 'string' && v.trim() ? v.trim() : f)
@@ -677,7 +666,7 @@ Tono experto, útil y ameno. Devuelve SOLO JSON válido:
     excerpt: str(parsed.excerpt, fallback.excerpt).slice(0, 300),
     content: str(parsed.content, fallback.content),
     seoDescription: str(parsed.seoDescription, fallback.seoDescription).slice(0, 165),
-    generatedBy: 'nvidia',
+    generatedBy: 'openrouter',
   }
 }
 
@@ -695,7 +684,7 @@ export interface RewrittenProduct {
   title: string
   description: string
   seoDescription: string
-  generatedBy: 'nvidia' | 'offline'
+  generatedBy: 'openrouter' | 'offline'
 }
 
 /** Rewrite a product's copy following a free-form instruction. Never throws. */
@@ -725,20 +714,20 @@ ${input.typeFishing ? `Categoría: ${fishingLabel(input.typeFishing)}.` : ''}
 ${BRAND_RULE}
 Devuelve SOLO JSON válido: {"title": string (máx 90 caracteres), "description": string (2-5 frases, admite **negrita** y listas con "- "), "seoDescription": string (meta descripción, máx 160 caracteres)}`
 
-  const content = await callNvidia(
+  const content = await callOpenRouter(
     [
       { role: 'system', content: 'Reescribes fichas de producto en español y respondes solo con JSON válido.' },
       { role: 'user', content: prompt },
     ],
-    { maxTokens: 1000, temperature: 0.7, timeoutMs: 30000, models: JSON_MODELS },
+    { maxTokens: 1000, temperature: 0.7, timeoutMs: 30000 },
   )
-  const parsed = parseNvidiaJson('rewrite-product-copy', content)
+  const parsed = parseOpenRouterJson('rewrite-product-copy', content)
   if (!parsed) return { ...current, generatedBy: 'offline' }
   return {
     title: asString(parsed.title, current.title).slice(0, 140),
     description: asString(parsed.description, current.description).slice(0, 1200),
     seoDescription: asString(parsed.seoDescription, current.seoDescription).slice(0, 165),
-    generatedBy: 'nvidia',
+    generatedBy: 'openrouter',
   }
 }
 
@@ -747,7 +736,7 @@ export interface RewrittenGuide {
   excerpt: string
   content: string
   seoDescription: string
-  generatedBy: 'nvidia' | 'offline'
+  generatedBy: 'openrouter' | 'offline'
 }
 
 /** Rewrite a blog guide following a free-form instruction. Never throws. */
@@ -779,21 +768,21 @@ ${BRAND_RULE}
 Usa markdown LIGERO en el contenido (**negrita** para los títulos de sección y "- " para listas; NO uses HTML ni #).
 Devuelve SOLO JSON válido: {"title": string, "excerpt": string (1-2 frases), "content": string (markdown ligero), "seoDescription": string (140-160 caracteres)}`
 
-  const content = await callNvidia(
+  const content = await callOpenRouter(
     [
       { role: 'system', content: 'Reescribes artículos de blog de pesca en español y respondes solo con JSON válido.' },
       { role: 'user', content: prompt },
     ],
-    { maxTokens: 2200, temperature: 0.7, timeoutMs: 40000, models: JSON_MODELS },
+    { maxTokens: 2200, temperature: 0.7, timeoutMs: 40000 },
   )
-  const parsed = parseNvidiaJson('rewrite-guide-copy', content)
+  const parsed = parseOpenRouterJson('rewrite-guide-copy', content)
   if (!parsed) return { ...current, generatedBy: 'offline' }
   return {
     title: asString(parsed.title, current.title).slice(0, 140),
     excerpt: asString(parsed.excerpt, current.excerpt).slice(0, 300),
     content: asString(parsed.content, current.content),
     seoDescription: asString(parsed.seoDescription, current.seoDescription).slice(0, 165),
-    generatedBy: 'nvidia',
+    generatedBy: 'openrouter',
   }
 }
 
@@ -803,7 +792,7 @@ export interface PolishedProduct {
   description: string
   seoDescription: string
   imageAlts: string[]
-  generatedBy: 'nvidia' | 'offline'
+  generatedBy: 'openrouter' | 'offline'
 }
 
 const asStringArray = (v: unknown, len: number): string[] => {
@@ -855,14 +844,14 @@ TAREAS:
 ${BRAND_RULE}
 Devuelve SOLO JSON válido: {"title": string, "seoTitle": string, "description": string, "seoDescription": string${imageCount > 0 ? ', "imageAlts": string[]' : ''}}`
 
-  const content = await callNvidia(
+  const content = await callOpenRouter(
     [
       { role: 'system', content: 'Eres un experto SEO que pule fichas de producto en español y responde solo con JSON válido.' },
       { role: 'user', content: prompt },
     ],
-    { maxTokens: 1500, temperature: 0.6, timeoutMs: 30000, models: JSON_MODELS },
+    { maxTokens: 1500, temperature: 0.6, timeoutMs: 30000 },
   )
-  const parsed = parseNvidiaJson('polish-product-seo', content)
+  const parsed = parseOpenRouterJson('polish-product-seo', content)
   if (!parsed) return { ...current, generatedBy: 'offline' }
   const title = asString(parsed.title, current.title).slice(0, 140)
   return {
@@ -871,7 +860,7 @@ Devuelve SOLO JSON válido: {"title": string, "seoTitle": string, "description":
     description: asString(parsed.description, current.description).slice(0, 1400),
     seoDescription: asString(parsed.seoDescription, current.seoDescription).slice(0, 165),
     imageAlts: imageCount > 0 ? asStringArray(parsed.imageAlts, imageCount) : [],
-    generatedBy: 'nvidia',
+    generatedBy: 'openrouter',
   }
 }
 
@@ -898,7 +887,7 @@ ${input.facts.map((f) => `- ${f}`).join('\n')}
 ${BRAND_RULE}
 Tono: pescador veterano, cercano y concreto. Nada de listas: prosa. Empieza DIRECTAMENTE con el consejo, sin títulos, sin notas y sin mostrar tu razonamiento. Todo en español.`
 
-  const content = await callNvidia(
+  const content = await callOpenRouter(
     [
       { role: 'system', content: 'Eres un pescador experto español. Respondes solo en español, breve y concreto, sin mostrar razonamiento.' },
       { role: 'user', content: prompt },
@@ -909,10 +898,10 @@ Tono: pescador veterano, cercano y concreto. Nada de listas: prosa. Empieza DIRE
 }
 
 /**
- * Reasoning models sometimes leak chain-of-thought (often in English) instead
- * of the answer. Strip <think> blocks and discard anything that reads as
- * English planning text — the plan is complete without the narrative, and a
- * leak would break the human-advisor identity.
+ * Algunos modelos filtran razonamiento en voz alta (a menudo en inglés) en vez
+ * de la respuesta. Quita bloques <think> y descarta lo que suene a texto de
+ * planificación en inglés — el plan queda completo sin la narrativa, y una
+ * fuga rompería la identidad de asesor humano.
  */
 export function sanitizeSpanishProse(text: string): string {
   let t = text.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/^[\s\S]*?<\/think>/i, '').trim()
@@ -936,7 +925,7 @@ const GUIDE_BANNED = /\b(AI|IA|inteligencia artificial|prompt|modelo de lenguaje
 function validGuideField(t: string, min: number, max: number): boolean {
   if (t.length < min || t.length > max) return false
   if (GUIDE_BANNED.test(t)) return false
-  // English chain-of-thought leak check.
+  // Fuga de razonamiento en inglés.
   const english = (t.match(/\b(the|we|let's|must|should|paragraph|words)\b/gi) ?? []).length
   const spanish = (t.match(/\b(el|la|los|las|de|con|para|que|una)\b/gi) ?? []).length
   return !(english > 2 && english >= spanish)
@@ -986,7 +975,7 @@ Devuelve SOLO JSON válido:
 "seasons": string (80-120 palabras: mejor época del año, momento del día y ${facts.waterType === 'mar' ? 'el papel de la marea' : 'el papel del nivel y la presión'}),
 "tips": [4 strings (15-30 palabras cada uno): consejos prácticos de la zona, incluyendo uno de seguridad y uno de normativa/respeto]}`
 
-  const content = await callNvidia(
+  const content = await callOpenRouter(
     [
       { role: 'system', content: 'Eres redactor experto de pesca deportiva española. Respondes SOLO con JSON válido en español, sin mostrar razonamiento.' },
       { role: 'user', content: prompt },
@@ -994,11 +983,11 @@ Devuelve SOLO JSON válido:
     {
       maxTokens: 3200,
       temperature: 0.6,
-      timeoutMs: 100000,
-      // Only the 49b: it writes the JSON directly with the best Spanish. The
-      // reasoning 120b burns its tokens thinking and the nano leaks/short-writes,
-      // so falling back to them just wastes a driver retry.
-      models: ['nvidia/llama-3.3-nemotron-super-49b-v1.5'],
+      timeoutMs: 60000,
+      // Un único modelo (el más grande y con más contexto del listado) para que
+      // las cuatro secciones del artículo mantengan una voz consistente en vez
+      // de mezclar el estilo de varios modelos si hubiera que hacer fallback.
+      models: ['openai/gpt-4.1-mini'],
     },
   )
   if (!content) {

@@ -111,7 +111,7 @@ export default function AdminProductsPage() {
           }),
         })
         const data = await res.json()
-        if (data.success && data.draft?.generatedBy === 'nvidia') {
+        if (data.success && data.draft?.generatedBy === 'openrouter') {
           const d = data.draft
           const imageAlts = (p.images ?? []).map((_, idx) => d.imageAlts?.[idx] || p.imageAlts?.[idx] || '')
           const patch = await fetch(`/api/products/${p.id}`, {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { isRequestAuthenticated } from '@/lib/admin-auth'
-import { generateGuide } from '@/lib/nvidia-ai'
+import { generateGuide } from '@/lib/openrouter-ai'
 
 export const maxDuration = 60
 

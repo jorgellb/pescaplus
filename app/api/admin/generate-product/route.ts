@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { isRequestAuthenticated } from '@/lib/admin-auth'
-import { generateProductDraft } from '@/lib/nvidia-ai'
+import { generateProductDraft } from '@/lib/openrouter-ai'
 import { getSettings } from '@/lib/settings-store'
 
 export const maxDuration = 90

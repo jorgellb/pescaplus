@@ -18,7 +18,7 @@ import Icon, { type IconName } from '@/components/icons/Icon'
 const MOD_ICON: Record<string, IconName> = { tierra: 'umbrella', kayak: 'kayak', barco: 'boat' }
 import { getAemetBulletin, type AemetBulletin } from '@/lib/aemet'
 import { aemetZoneFor } from '@/lib/aemet-zones'
-import { generatePlanAdvice } from '@/lib/nvidia-ai'
+import { generatePlanAdvice } from '@/lib/openrouter-ai'
 import { scoreHex, windWord } from '@/lib/forecast-format'
 import { fmtTime, fmtDateLong, fmtDayLabel, fmtWindowRange, todayMadridISO, addDaysISO } from '@/lib/solunar-format'
 

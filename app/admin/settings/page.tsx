@@ -8,7 +8,7 @@ import { useConfirm } from '@/components/admin/AdminFeedback'
 interface Integrations {
   database: { configured: boolean; backend: 'database' | 'memory' }
   aliexpress: { configured: boolean }
-  nvidia: { configured: boolean }
+  openrouter: { configured: boolean }
   adminPassword: { usingDefault: boolean }
 }
 
@@ -152,9 +152,9 @@ export default function AdminSettingsPage() {
             detail={integrations.aliexpress.configured ? 'API firmada activa' : 'Catálogo local (opcional)'}
           />
           <IntegrationRow
-            title="Asistente IA (NVIDIA)"
-            ok={integrations.nvidia.configured}
-            detail={integrations.nvidia.configured ? 'Modelo remoto activo' : 'Fallback experto offline'}
+            title="Asistente IA (OpenRouter)"
+            ok={integrations.openrouter.configured}
+            detail={integrations.openrouter.configured ? 'Modelo remoto activo' : 'Fallback experto offline'}
           />
           <IntegrationRow
             title="Contraseña de admin"

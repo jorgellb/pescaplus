@@ -1,5 +1,5 @@
 import guides from '@/content/zone-guides.json'
-import type { ZoneGuideContent } from '@/lib/nvidia-ai'
+import type { ZoneGuideContent } from '@/lib/openrouter-ai'
 
 /**
  * Local zone guides, generated in batch (scripts + admin route) and shipped as

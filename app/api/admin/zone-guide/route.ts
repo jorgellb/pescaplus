@@ -5,7 +5,7 @@ import path from 'path'
 import { isRequestAuthenticated } from '@/lib/admin-auth'
 import { getSpot } from '@/lib/fishing-spots'
 import { buildZoneFacts } from '@/lib/zone-facts'
-import { generateZoneGuide } from '@/lib/nvidia-ai'
+import { generateZoneGuide } from '@/lib/openrouter-ai'
 
 export const maxDuration = 120
 

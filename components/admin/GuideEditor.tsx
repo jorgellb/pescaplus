@@ -92,7 +92,7 @@ export default function GuideEditor({ initial, onClose, onSaved }: GuideEditorPr
           content: d.content ?? f.content,
           seoDescription: d.seoDescription ?? f.seoDescription,
         }))
-        setAiNote(d.generatedBy === 'nvidia' ? '✨ Guía generada con IA. Revisa antes de publicar.' : '✨ Generada offline (configura NVIDIA para IA real).')
+        setAiNote(d.generatedBy === 'openrouter' ? '✨ Guía generada con IA. Revisa antes de publicar.' : '✨ Generada offline (configura OpenRouter para IA real).')
       } else setError(data.error || 'No se pudo generar la guía')
     } catch {
       setError('Error de red al generar con IA')
@@ -130,9 +130,9 @@ export default function GuideEditor({ initial, onClose, onSaved }: GuideEditorPr
           seoDescription: d.seoDescription ?? f.seoDescription,
         }))
         setAiNote(
-          d.generatedBy === 'nvidia'
+          d.generatedBy === 'openrouter'
             ? '✨ Artículo reescrito según tu indicación. Revisa antes de publicar.'
-            : 'Configura NVIDIA para reescribir con IA (no se ha cambiado nada).',
+            : 'Configura OpenRouter para reescribir con IA (no se ha cambiado nada).',
         )
       } else setError(data.error || 'No se pudo reescribir')
     } catch {
