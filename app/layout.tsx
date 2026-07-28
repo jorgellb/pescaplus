@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Space_Mono } from "next/font/google";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import CapacitorBridge from "@/components/CapacitorBridge";
 import "./globals.css";
 import { safeJsonLd } from '@/lib/json-ld'
 
@@ -91,6 +92,7 @@ export default function RootLayout({
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(orgJsonLd) }} />
         {children}
         <ServiceWorkerRegister />
+        <CapacitorBridge />
       </body>
     </html>
   );
