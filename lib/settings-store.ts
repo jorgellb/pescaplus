@@ -53,17 +53,20 @@ export function updateSettings(patch: Partial<AdminSettings>): AdminSettings {
 export interface IntegrationStatus {
   database: { configured: boolean; backend: 'database' | 'memory' }
   aliexpress: { configured: boolean }
-  openrouter: { configured: boolean }
+  /** IA (asistente + generación de fichas): Groq y/o OpenRouter, cualquiera de los dos basta. */
+  ai: { configured: boolean }
   adminPassword: { usingDefault: boolean }
 }
 
 /** Read-only view of which optional integrations are wired up. */
 export function getIntegrationStatus(): IntegrationStatus {
   const openrouterKey = process.env.OPENROUTER_API_KEY
+  const hasOpenRouter = Boolean(openrouterKey && openrouterKey !== 'your_openrouter_api_key')
+  const hasGroq = Boolean(process.env.GROQ_API_KEY)
   return {
     database: { configured: isDatabaseConfigured(), backend: activeBackend() },
     aliexpress: { configured: isAliExpressConfigured() },
-    openrouter: { configured: Boolean(openrouterKey && openrouterKey !== 'your_openrouter_api_key') },
+    ai: { configured: hasGroq || hasOpenRouter },
     adminPassword: { usingDefault: isUsingDefaultPassword() },
   }
 }

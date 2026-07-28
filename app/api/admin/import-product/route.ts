@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     title: seo.title,
     description: seo.description,
     seoDescription: seo.seoDescription,
-    aiOptimized: seo.generatedBy === 'openrouter',
+    aiOptimized: seo.generatedBy === 'ai',
     imageUrl: p.imageUrl || p.images[0] || '',
     images: p.images,
     videoUrl: p.videoUrl,

@@ -192,9 +192,9 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
           images: d.imageUrl ? [{ url: d.imageUrl, alt: '' }, ...f.images.filter((r) => r.url)] : f.images,
         }))
         setAiNote(
-          d.generatedBy === 'openrouter'
+          d.generatedBy === 'ai'
             ? '✨ Ficha generada con IA. Revisa y ajusta antes de guardar.'
-            : '✨ Generada con el asistente offline (configura OpenRouter para IA real).',
+            : '✨ Generada con el asistente offline (configura Groq u OpenRouter para IA real).',
         )
       } else setError(data.error || 'No se pudo generar la ficha')
     } catch {
@@ -232,9 +232,9 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
           seoDescription: d.seoDescription ?? f.seoDescription,
         }))
         setAiNote(
-          d.generatedBy === 'openrouter'
+          d.generatedBy === 'ai'
             ? '✨ Ficha reescrita según tu indicación. Revisa antes de guardar.'
-            : 'Configura OpenRouter para reescribir con IA (no se ha cambiado nada).',
+            : 'Configura Groq u OpenRouter para reescribir con IA (no se ha cambiado nada).',
         )
       } else setError(data.error || 'No se pudo reescribir')
     } catch {
@@ -283,13 +283,13 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
             description: d.description ?? f.description,
             seoDescription: d.seoDescription ?? f.seoDescription,
             images,
-            aiOptimized: d.generatedBy === 'openrouter' ? true : f.aiOptimized,
+            aiOptimized: d.generatedBy === 'ai' ? true : f.aiOptimized,
           }
         })
         setAiNote(
-          d.generatedBy === 'openrouter'
+          d.generatedBy === 'ai'
             ? '✨ Ficha pulida para SEO: título limpio, descripción con enlace interno a su categoría, metadatos y alt de imágenes optimizados. Revisa antes de guardar.'
-            : 'Configura OpenRouter para pulir con IA (no se ha cambiado nada).',
+            : 'Configura Groq u OpenRouter para pulir con IA (no se ha cambiado nada).',
         )
       } else setError(data.error || 'No se pudo pulir la ficha')
     } catch {

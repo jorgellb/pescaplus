@@ -8,7 +8,7 @@ import { useConfirm } from '@/components/admin/AdminFeedback'
 interface Integrations {
   database: { configured: boolean; backend: 'database' | 'memory' }
   aliexpress: { configured: boolean }
-  openrouter: { configured: boolean }
+  ai: { configured: boolean }
   adminPassword: { usingDefault: boolean }
 }
 
@@ -152,9 +152,9 @@ export default function AdminSettingsPage() {
             detail={integrations.aliexpress.configured ? 'API firmada activa' : 'Catálogo local (opcional)'}
           />
           <IntegrationRow
-            title="Asistente IA (OpenRouter)"
-            ok={integrations.openrouter.configured}
-            detail={integrations.openrouter.configured ? 'Modelo remoto activo' : 'Fallback experto offline'}
+            title="Asistente IA (Groq / OpenRouter)"
+            ok={integrations.ai.configured}
+            detail={integrations.ai.configured ? 'Modelo remoto activo' : 'Fallback experto offline'}
           />
           <IntegrationRow
             title="Contraseña de admin"

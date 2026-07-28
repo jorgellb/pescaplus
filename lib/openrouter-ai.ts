@@ -4,17 +4,42 @@ import { fishingLabel, getFishingType, FISHING_TYPES } from '@/lib/fishing'
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY
 const OPENROUTER_BASE_URL = process.env.OPENROUTER_BASE_URL ?? 'https://openrouter.ai/api/v1'
+const GROQ_API_KEY = process.env.GROQ_API_KEY
+const GROQ_BASE_URL = process.env.GROQ_BASE_URL ?? 'https://api.groq.com/openai/v1'
+
+interface ModelRef {
+  provider: 'groq' | 'openrouter'
+  model: string
+}
+const groq = (model: string): ModelRef => ({ provider: 'groq', model })
+const openrouter = (model: string): ModelRef => ({ provider: 'openrouter', model })
 
 /**
- * Ordered model fallback chain. Requests try each model in turn until one
- * answers, so a single rate-limited/unavailable model never breaks the
- * feature. Override with the OPENROUTER_MODELS env var (comma-separated) or
- * a single OPENROUTER_MODEL.
+ * Groq (gratis, sin coste ni con crédito comprado) da un límite MUCHO más
+ * generoso que el nivel gratuito de OpenRouter — documentación oficial,
+ * 2026-07-28: 30 peticiones/min POR MODELO, con tope diario de 14.400 en
+ * `llama-3.1-8b-instant` y 1.000 en `llama-3.3-70b-versatile` (frente a las
+ * 50/día COMPARTIDAS entre todos los modelos gratuitos de OpenRouter). Se
+ * ponen primero en la cadena por eso. Probados en vivo: ambos responden JSON
+ * válido en menos de 1,3 s, sin gastar tokens en razonar.
  *
+ * `openai/gpt-oss-120b` de Groq tiene el MISMO fallo que los razonadores
+ * grandes ya vistos con NVIDIA y con OpenRouter gratis: quema TODO el
+ * presupuesto de tokens "pensando" (898 de 900 en la prueba) y no llega a
+ * escribir el JSON. `gpt-oss-20b` funciona pero gasta la mayoría de tokens
+ * razonando (724 de 883) — se deja fuera por el mismo motivo de cautela que
+ * `nemotron-nano-9b-v2:free`. Ninguno de los dos se usa aquí.
+ */
+const GROQ_MODELS: ModelRef[] = [
+  groq('llama-3.1-8b-instant'),
+  groq('llama-3.3-70b-versatile'),
+]
+
+/**
  * SOLO MODELOS GRATUITOS (":free") — decisión explícita de Jorge para no
- * gastar nada, aceptando el límite de OpenRouter de 20 peticiones/min y
- * 50/día por cuenta sin créditos comprados (sube a 1000/día si algún día se
- * compran 10$ de crédito, aunque se sigan usando modelos a coste 0).
+ * gastar nada. Quedan como red de seguridad DETRÁS de Groq: si Groq entero
+ * fallara (cuenta distinta, infraestructura distinta), esta cadena sigue
+ * funcionando de forma independiente.
  *
  * Probados uno a uno en vivo antes de elegir estos 4 (ver `proveedor-ia-openrouter`
  * en la memoria del proyecto). De los ~18 modelos gratuitos que ofrecía
@@ -23,9 +48,9 @@ const OPENROUTER_BASE_URL = process.env.OPENROUTER_BASE_URL ?? 'https://openrout
  * dan timeout o "fetch failed" con regularidad; `inclusionai/ling-3.0-flash:free`,
  * `openrouter/free` y los `nvidia/nemotron-3-*:free` (super-120b, nano-30b,
  * omni-reasoning, ultra-550b) queman TODO el presupuesto de tokens
- * "pensando" y nunca llegan a escribir el JSON — el mismo fallo que ya se
- * vio con los razonadores grandes de NVIDIA. Estos 4 sí respondieron con
- * JSON válido de forma consistente:
+ * "pensando" y nunca llegan a escribir el JSON. Estos 4 sí respondieron con
+ * JSON válido de forma consistente. Override con la env var OPENROUTER_MODELS
+ * (coma-separada) o una sola OPENROUTER_MODEL.
  */
 const DEFAULT_OPENROUTER_MODELS = [
   'google/gemma-4-26b-a4b-it:free',
@@ -40,7 +65,10 @@ const OPENROUTER_MODELS: string[] = (() => {
   return DEFAULT_OPENROUTER_MODELS
 })()
 
-interface OpenRouterOptions {
+/** Cadena por defecto: Groq primero (más rápido y con más cuota gratis diaria), OpenRouter como red detrás. */
+const DEFAULT_MODEL_CHAIN: ModelRef[] = [...GROQ_MODELS, ...OPENROUTER_MODELS.map(openrouter)]
+
+interface AiCallOptions {
   maxTokens?: number
   temperature?: number
   topP?: number
@@ -48,42 +76,49 @@ interface OpenRouterOptions {
   /** Abort if the stream stalls (no bytes) for this long. Streaming only. */
   idleMs?: number
   /** Per-call model chain override (e.g. a single stronger model for long-form content). */
-  models?: string[]
+  models?: ModelRef[]
 }
 
 /**
- * Call the OpenRouter chat API, trying each model in the fallback chain until
- * one returns content. Returns null only if every model fails.
+ * Call the chat API (Groq and/or OpenRouter), trying each model in the
+ * fallback chain until one returns content. Returns null only if every model
+ * fails.
  */
-async function callOpenRouter(
+async function callAiModel(
   messages: ChatMessage[],
-  { maxTokens = 1024, temperature = 0.7, topP = 0.95, timeoutMs = 20000, models }: OpenRouterOptions = {},
+  { maxTokens = 1024, temperature = 0.7, topP = 0.95, timeoutMs = 20000, models }: AiCallOptions = {},
 ): Promise<string | null> {
-  for (const model of models ?? OPENROUTER_MODELS) {
+  for (const ref of models ?? DEFAULT_MODEL_CHAIN) {
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), timeoutMs)
     try {
-      const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
+      const isGroq = ref.provider === 'groq'
+      const baseUrl = isGroq ? GROQ_BASE_URL : OPENROUTER_BASE_URL
+      const apiKey = isGroq ? GROQ_API_KEY : OPENROUTER_API_KEY
+      const headers: Record<string, string> = {
+        Authorization: `Bearer ${apiKey}`,
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      }
+      if (!isGroq) {
+        headers['HTTP-Referer'] = 'https://pescaplus.es'
+        headers['X-Title'] = 'PescaPlus'
+      }
+      const response = await fetch(`${baseUrl}/chat/completions`, {
         method: 'POST',
         signal: controller.signal,
-        headers: {
-          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          'HTTP-Referer': 'https://pescaplus.es',
-          'X-Title': 'PescaPlus',
-        },
-        body: JSON.stringify({ model, messages, max_tokens: maxTokens, temperature, top_p: topP }),
+        headers,
+        body: JSON.stringify({ model: ref.model, messages, max_tokens: maxTokens, temperature, top_p: topP }),
       })
       if (!response.ok) {
-        console.warn(`OpenRouter model ${model} -> HTTP ${response.status}, trying next`)
+        console.warn(`${ref.provider} model ${ref.model} -> HTTP ${response.status}, trying next`)
         continue
       }
       const data = await response.json()
       const content: string | undefined = data.choices?.[0]?.message?.content
       if (content?.trim()) return content.trim()
     } catch (error) {
-      console.warn(`OpenRouter model ${model} failed (${(error as Error).message}), trying next`)
+      console.warn(`${ref.provider} model ${ref.model} failed (${(error as Error).message}), trying next`)
     } finally {
       clearTimeout(timer)
     }
@@ -226,7 +261,9 @@ function getLocalExpertResponse(messages: ChatMessage[]): string {
 }
 
 function isApiConfigured(): boolean {
-  return Boolean(OPENROUTER_API_KEY) && OPENROUTER_API_KEY !== 'your_openrouter_api_key'
+  const hasGroq = Boolean(GROQ_API_KEY)
+  const hasOpenRouter = Boolean(OPENROUTER_API_KEY) && OPENROUTER_API_KEY !== 'your_openrouter_api_key'
+  return hasGroq || hasOpenRouter
 }
 
 /** Build a retrieval-augmented context block from relevant catalog products. */
@@ -269,41 +306,47 @@ export async function chatWithFishingExpert(
     : [{ role: 'system' as const, content: systemContent }, ...messages]
 
   // Lower temperature for more reliable, accurate advice; room for thorough answers.
-  const content = await callOpenRouter(formattedMessages, { maxTokens: 1200, temperature: 0.55, topP: 0.9 })
+  const content = await callAiModel(formattedMessages, { maxTokens: 1200, temperature: 0.55, topP: 0.9 })
   return content || getLocalExpertResponse(messages)
 }
 
 /**
- * Stream the OpenRouter chat API token by token (SSE). Walks the same fallback
- * chain as `callOpenRouter`: if a model fails before yielding anything, the
- * next is tried; once a model starts emitting, its stream is committed.
- * Yields nothing if every model fails (the caller then falls back to the
- * offline expert).
+ * Stream the chat API token by token (SSE). Walks the same fallback chain as
+ * `callAiModel`: if a model fails before yielding anything, the next is
+ * tried; once a model starts emitting, its stream is committed. Yields
+ * nothing if every model fails (the caller then falls back to the offline
+ * expert).
  */
-async function* streamOpenRouter(
+async function* streamAiModel(
   messages: ChatMessage[],
-  { maxTokens = 1024, temperature = 0.7, topP = 0.95, idleMs = 20000 }: OpenRouterOptions = {},
+  { maxTokens = 1024, temperature = 0.7, topP = 0.95, idleMs = 20000 }: AiCallOptions = {},
 ): AsyncGenerator<string> {
-  for (const model of OPENROUTER_MODELS) {
+  for (const ref of DEFAULT_MODEL_CHAIN) {
     const controller = new AbortController()
     let timer = setTimeout(() => controller.abort(), idleMs)
     let yielded = false
     let reader: ReadableStreamDefaultReader<Uint8Array> | undefined
     try {
-      const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
+      const isGroq = ref.provider === 'groq'
+      const baseUrl = isGroq ? GROQ_BASE_URL : OPENROUTER_BASE_URL
+      const apiKey = isGroq ? GROQ_API_KEY : OPENROUTER_API_KEY
+      const headers: Record<string, string> = {
+        Authorization: `Bearer ${apiKey}`,
+        Accept: 'text/event-stream',
+        'Content-Type': 'application/json',
+      }
+      if (!isGroq) {
+        headers['HTTP-Referer'] = 'https://pescaplus.es'
+        headers['X-Title'] = 'PescaPlus'
+      }
+      const response = await fetch(`${baseUrl}/chat/completions`, {
         method: 'POST',
         signal: controller.signal,
-        headers: {
-          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-          Accept: 'text/event-stream',
-          'Content-Type': 'application/json',
-          'HTTP-Referer': 'https://pescaplus.es',
-          'X-Title': 'PescaPlus',
-        },
-        body: JSON.stringify({ model, messages, max_tokens: maxTokens, temperature, top_p: topP, stream: true }),
+        headers,
+        body: JSON.stringify({ model: ref.model, messages, max_tokens: maxTokens, temperature, top_p: topP, stream: true }),
       })
       if (!response.ok || !response.body) {
-        console.warn(`OpenRouter stream ${model} -> HTTP ${response.status}, trying next`)
+        console.warn(`${ref.provider} stream ${ref.model} -> HTTP ${response.status}, trying next`)
         continue
       }
       reader = response.body.getReader()
@@ -338,7 +381,7 @@ async function* streamOpenRouter(
       if (yielded) return
     } catch (error) {
       if (yielded) return
-      console.warn(`OpenRouter stream ${model} failed (${(error as Error).message}), trying next`)
+      console.warn(`${ref.provider} stream ${ref.model} failed (${(error as Error).message}), trying next`)
     } finally {
       clearTimeout(timer)
       reader?.cancel().catch(() => {})
@@ -356,8 +399,8 @@ async function* simulateStream(text: string): AsyncGenerator<string> {
 
 /**
  * Streaming counterpart of `chatWithFishingExpert`. Yields the answer token by
- * token from OpenRouter, or a simulated stream of the offline expert when the
- * API is not configured or every model fails.
+ * token from the AI provider chain, or a simulated stream of the offline
+ * expert when the API is not configured or every model fails.
  */
 export async function* streamFishingExpert(
   messages: ChatMessage[],
@@ -376,7 +419,7 @@ export async function* streamFishingExpert(
     : [{ role: 'system' as const, content: systemContent }, ...messages]
 
   let any = false
-  for await (const chunk of streamOpenRouter(formattedMessages, { maxTokens: 1200, temperature: 0.55, topP: 0.9 })) {
+  for await (const chunk of streamAiModel(formattedMessages, { maxTokens: 1200, temperature: 0.55, topP: 0.9 })) {
     any = true
     yield chunk
   }
@@ -389,7 +432,7 @@ export async function* streamFishingExpert(
 
 export interface ProductDraft extends ProductInput {
   /** How the draft was produced, surfaced in the admin UI. */
-  generatedBy: 'openrouter' | 'offline'
+  generatedBy: 'ai' | 'offline'
 }
 
 function affiliateSearchUrl(keyword: string): string {
@@ -458,7 +501,7 @@ function coerceDraft(
     rating: Math.min(Math.max(asNumber(raw.rating, base.rating), 0), 5),
     reviews: Math.max(Math.round(asNumber(raw.reviews, base.reviews)), 0),
     inStock: true,
-    generatedBy: 'openrouter',
+    generatedBy: 'ai',
   }
 }
 
@@ -478,7 +521,7 @@ function extractJson(text: string): Record<string, unknown> | null {
  * `extractJson` + logging de diagnóstico por qué falla, para que un fallo nunca
  * sea silencioso.
  */
-function parseOpenRouterJson(label: string, content: string | null): Record<string, unknown> | null {
+function parseAiJson(label: string, content: string | null): Record<string, unknown> | null {
   if (!content) {
     console.warn(`${label}: sin contenido de ningún modelo de OpenRouter`)
     return null
@@ -511,14 +554,14 @@ Idea del usuario: "${prompt}".
 Responde ÚNICAMENTE con un objeto JSON válido, sin texto adicional, con esta forma exacta:
 {"title": string, "description": string (2-4 frases en español), "price": number (EUR), "currency": "${currency}", "category": "fishing", "typeFishing": "${typeFishing}", "rating": number (4.0-5.0), "reviews": number entero, "affiliateUrl": string, "imageUrl": string (deja "" si no tienes una fiable)}`
 
-  const content = await callOpenRouter(
+  const content = await callAiModel(
     [
       { role: 'system', content: 'Eres un generador de fichas de producto que responde solo con JSON válido.' },
       { role: 'user', content: instruction },
     ],
     { maxTokens: 900, temperature: 0.8, timeoutMs: 30000 },
   )
-  const parsed = parseOpenRouterJson('generate-product-draft', content)
+  const parsed = parseAiJson('generate-product-draft', content)
   if (!parsed) return offlineProductDraft(prompt, typeFishing, currency)
   return coerceDraft(parsed, prompt, typeFishing, currency)
 }
@@ -534,7 +577,7 @@ export interface SeoListing {
   description: string
   /** Meta description (~155 chars). */
   seoDescription: string
-  generatedBy: 'openrouter' | 'offline'
+  generatedBy: 'ai' | 'offline'
 }
 
 /** Strip AliExpress promo noise from a raw title so we never reuse their copy verbatim. */
@@ -593,7 +636,7 @@ Devuelve SOLO JSON válido:
  "description": string (3-4 frases, beneficios y usos, tono experto y persuasivo),
  "seoDescription": string (meta description de 140-160 caracteres con llamada a la acción)}`
 
-  const content = await callOpenRouter(
+  const content = await callAiModel(
     [
       { role: 'system', content: 'Redactas fichas de producto SEO en español y respondes solo con JSON válido.' },
       { role: 'user', content: instruction },
@@ -601,7 +644,7 @@ Devuelve SOLO JSON válido:
     { maxTokens: 900, temperature: 0.7, topP: 0.9, timeoutMs: 30000 },
   )
   const fallback = offlineSeoListing(originalTitle, typeFishing, price, currency)
-  const parsed = parseOpenRouterJson('generate-seo-listing', content)
+  const parsed = parseAiJson('generate-seo-listing', content)
   if (!parsed) return fallback
 
   const str = (v: unknown, f: string) => (typeof v === 'string' && v.trim() ? v.trim() : f)
@@ -609,7 +652,7 @@ Devuelve SOLO JSON válido:
     title: str(parsed.title, fallback.title).slice(0, 90),
     description: str(parsed.description, fallback.description).slice(0, 1200),
     seoDescription: str(parsed.seoDescription, fallback.seoDescription).slice(0, 165),
-    generatedBy: 'openrouter',
+    generatedBy: 'ai',
   }
 }
 
@@ -622,7 +665,7 @@ export interface GuideDraft {
   excerpt: string
   content: string
   seoDescription: string
-  generatedBy: 'openrouter' | 'offline'
+  generatedBy: 'ai' | 'offline'
 }
 
 function offlineGuide(topic: string, label: string): GuideDraft {
@@ -664,14 +707,14 @@ Tono experto, útil y ameno. Devuelve SOLO JSON válido:
  "content": string (400-700 palabras en markdown LIGERO: usa **negrita** para los títulos de sección y "- " para listas; NO uses HTML ni #),
  "seoDescription": string (meta descripción de 140-160 caracteres)}`
 
-  const content = await callOpenRouter(
+  const content = await callAiModel(
     [
       { role: 'system', content: 'Eres un redactor experto en pesca. Respondes solo con JSON válido.' },
       { role: 'user', content: instruction },
     ],
     { maxTokens: 1800, temperature: 0.75, timeoutMs: 30000 },
   )
-  const parsed = parseOpenRouterJson('generate-guide', content)
+  const parsed = parseAiJson('generate-guide', content)
   if (!parsed) return fallback
 
   const str = (v: unknown, f: string) => (typeof v === 'string' && v.trim() ? v.trim() : f)
@@ -680,7 +723,7 @@ Tono experto, útil y ameno. Devuelve SOLO JSON válido:
     excerpt: str(parsed.excerpt, fallback.excerpt).slice(0, 300),
     content: str(parsed.content, fallback.content),
     seoDescription: str(parsed.seoDescription, fallback.seoDescription).slice(0, 165),
-    generatedBy: 'openrouter',
+    generatedBy: 'ai',
   }
 }
 
@@ -698,7 +741,7 @@ export interface RewrittenProduct {
   title: string
   description: string
   seoDescription: string
-  generatedBy: 'openrouter' | 'offline'
+  generatedBy: 'ai' | 'offline'
 }
 
 /** Rewrite a product's copy following a free-form instruction. Never throws. */
@@ -728,20 +771,20 @@ ${input.typeFishing ? `Categoría: ${fishingLabel(input.typeFishing)}.` : ''}
 ${BRAND_RULE}
 Devuelve SOLO JSON válido: {"title": string (máx 90 caracteres), "description": string (2-5 frases, admite **negrita** y listas con "- "), "seoDescription": string (meta descripción, máx 160 caracteres)}`
 
-  const content = await callOpenRouter(
+  const content = await callAiModel(
     [
       { role: 'system', content: 'Reescribes fichas de producto en español y respondes solo con JSON válido.' },
       { role: 'user', content: prompt },
     ],
     { maxTokens: 1000, temperature: 0.7, timeoutMs: 30000 },
   )
-  const parsed = parseOpenRouterJson('rewrite-product-copy', content)
+  const parsed = parseAiJson('rewrite-product-copy', content)
   if (!parsed) return { ...current, generatedBy: 'offline' }
   return {
     title: asString(parsed.title, current.title).slice(0, 140),
     description: asString(parsed.description, current.description).slice(0, 1200),
     seoDescription: asString(parsed.seoDescription, current.seoDescription).slice(0, 165),
-    generatedBy: 'openrouter',
+    generatedBy: 'ai',
   }
 }
 
@@ -750,7 +793,7 @@ export interface RewrittenGuide {
   excerpt: string
   content: string
   seoDescription: string
-  generatedBy: 'openrouter' | 'offline'
+  generatedBy: 'ai' | 'offline'
 }
 
 /** Rewrite a blog guide following a free-form instruction. Never throws. */
@@ -782,21 +825,21 @@ ${BRAND_RULE}
 Usa markdown LIGERO en el contenido (**negrita** para los títulos de sección y "- " para listas; NO uses HTML ni #).
 Devuelve SOLO JSON válido: {"title": string, "excerpt": string (1-2 frases), "content": string (markdown ligero), "seoDescription": string (140-160 caracteres)}`
 
-  const content = await callOpenRouter(
+  const content = await callAiModel(
     [
       { role: 'system', content: 'Reescribes artículos de blog de pesca en español y respondes solo con JSON válido.' },
       { role: 'user', content: prompt },
     ],
     { maxTokens: 2200, temperature: 0.7, timeoutMs: 40000 },
   )
-  const parsed = parseOpenRouterJson('rewrite-guide-copy', content)
+  const parsed = parseAiJson('rewrite-guide-copy', content)
   if (!parsed) return { ...current, generatedBy: 'offline' }
   return {
     title: asString(parsed.title, current.title).slice(0, 140),
     excerpt: asString(parsed.excerpt, current.excerpt).slice(0, 300),
     content: asString(parsed.content, current.content),
     seoDescription: asString(parsed.seoDescription, current.seoDescription).slice(0, 165),
-    generatedBy: 'openrouter',
+    generatedBy: 'ai',
   }
 }
 
@@ -806,7 +849,7 @@ export interface PolishedProduct {
   description: string
   seoDescription: string
   imageAlts: string[]
-  generatedBy: 'openrouter' | 'offline'
+  generatedBy: 'ai' | 'offline'
 }
 
 const asStringArray = (v: unknown, len: number): string[] => {
@@ -858,14 +901,14 @@ TAREAS:
 ${BRAND_RULE}
 Devuelve SOLO JSON válido: {"title": string, "seoTitle": string, "description": string, "seoDescription": string${imageCount > 0 ? ', "imageAlts": string[]' : ''}}`
 
-  const content = await callOpenRouter(
+  const content = await callAiModel(
     [
       { role: 'system', content: 'Eres un experto SEO que pule fichas de producto en español y responde solo con JSON válido.' },
       { role: 'user', content: prompt },
     ],
     { maxTokens: 1500, temperature: 0.6, timeoutMs: 30000 },
   )
-  const parsed = parseOpenRouterJson('polish-product-seo', content)
+  const parsed = parseAiJson('polish-product-seo', content)
   if (!parsed) return { ...current, generatedBy: 'offline' }
   const title = asString(parsed.title, current.title).slice(0, 140)
   return {
@@ -874,7 +917,7 @@ Devuelve SOLO JSON válido: {"title": string, "seoTitle": string, "description":
     description: asString(parsed.description, current.description).slice(0, 1400),
     seoDescription: asString(parsed.seoDescription, current.seoDescription).slice(0, 165),
     imageAlts: imageCount > 0 ? asStringArray(parsed.imageAlts, imageCount) : [],
-    generatedBy: 'openrouter',
+    generatedBy: 'ai',
   }
 }
 
@@ -901,7 +944,7 @@ ${input.facts.map((f) => `- ${f}`).join('\n')}
 ${BRAND_RULE}
 Tono: pescador veterano, cercano y concreto. Nada de listas: prosa. Empieza DIRECTAMENTE con el consejo, sin títulos, sin notas y sin mostrar tu razonamiento. Todo en español.`
 
-  const content = await callOpenRouter(
+  const content = await callAiModel(
     [
       { role: 'system', content: 'Eres un pescador experto español. Respondes solo en español, breve y concreto, sin mostrar razonamiento.' },
       { role: 'user', content: prompt },
@@ -989,7 +1032,7 @@ Devuelve SOLO JSON válido:
 "seasons": string (80-120 palabras: mejor época del año, momento del día y ${facts.waterType === 'mar' ? 'el papel de la marea' : 'el papel del nivel y la presión'}),
 "tips": [4 strings (15-30 palabras cada uno): consejos prácticos de la zona, incluyendo uno de seguridad y uno de normativa/respeto]}`
 
-  const content = await callOpenRouter(
+  const content = await callAiModel(
     [
       { role: 'system', content: 'Eres redactor experto de pesca deportiva española. Respondes SOLO con JSON válido en español, sin mostrar razonamiento.' },
       { role: 'user', content: prompt },
@@ -998,10 +1041,10 @@ Devuelve SOLO JSON válido:
       maxTokens: 3200,
       temperature: 0.6,
       timeoutMs: 30000,
-      // Solo la familia Gemma (gratis): el 31b primero por calidad, el 26b
-      // como red si el 31b está saturado (pasa de vez en cuando en el nivel
-      // gratuito) — misma familia para no mezclar la voz entre secciones.
-      models: ['google/gemma-4-31b-it:free', 'google/gemma-4-26b-a4b-it:free'],
+      // El Llama grande de Groq primero (rápido, sin razonar, 1.000/día de
+      // cuota — de sobra para una guía que se genera de vez en cuando); la
+      // pareja Gemma de OpenRouter como red si Groq fallara entero.
+      models: [groq('llama-3.3-70b-versatile'), openrouter('google/gemma-4-31b-it:free'), openrouter('google/gemma-4-26b-a4b-it:free')],
     },
   )
   if (!content) {
