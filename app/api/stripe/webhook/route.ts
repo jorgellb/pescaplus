@@ -10,9 +10,20 @@ export async function POST(request: NextRequest) {
   const sig = request.headers.get('stripe-signature')
   const body = await request.text()
 
+  // Sin STRIPE_WEBHOOK_SECRET no hay forma de verificar que el evento viene
+  // de verdad de Stripe: aceptar el JSON sin firma dejaría forjar un
+  // "checkout.session.completed" y colar una reserva como pagada gratis. Se
+  // rechaza en vez de confiar en el cuerpo — a diferencia del admin/cron, aquí
+  // no hay "modo desarrollo" razonable: sin secreto, no hay webhook.
+  if (!secret) {
+    console.error('STRIPE_WEBHOOK_SECRET no configurado: webhook rechazado.')
+    return NextResponse.json({ error: 'webhook not configured' }, { status: 500 })
+  }
+  if (!sig) return NextResponse.json({ error: 'missing signature' }, { status: 400 })
+
   let event
   try {
-    event = secret && sig ? stripe.webhooks.constructEvent(body, sig, secret) : JSON.parse(body)
+    event = stripe.webhooks.constructEvent(body, sig, secret)
   } catch (error) {
     console.error('Webhook signature verification failed:', error)
     return NextResponse.json({ error: 'bad signature' }, { status: 400 })
