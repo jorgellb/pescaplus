@@ -3,6 +3,8 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { isRequestAuthenticated } from '@/lib/admin-auth'
 import { adminListCharters, adminCreateCharter } from '@/lib/charters-store'
+import { rateLimit, clientIp, tooManyRequests } from '@/lib/rate-limit'
+import { logAdminAction } from '@/lib/admin-audit'
 
 export async function GET(request: NextRequest) {
   if (!isRequestAuthenticated(request)) return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
@@ -32,12 +34,16 @@ const createSchema = z.object({
 
 export async function POST(request: NextRequest) {
   if (!isRequestAuthenticated(request)) return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
+  const ip = clientIp(request)
+  const limit = rateLimit(`admin-mutate:${ip}`, 60, 60_000)
+  if (!limit.ok) return tooManyRequests(limit.retryAfter)
   const parsed = createSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return NextResponse.json({ success: false, error: 'Datos no válidos.' }, { status: 400 })
   const { operatorId, ...input } = parsed.data
   try {
     const charter = await adminCreateCharter(operatorId, input)
     revalidatePath('/charters')
+    await logAdminAction({ action: 'create', entity: 'charter', entityId: charter.id, summary: `Chárter de ${charter.operator?.businessName || charter.operator?.name || operatorId} (${charter.dateISO})`, ip })
     return NextResponse.json({ success: true, charter }, { status: 201 })
   } catch (error) {
     return NextResponse.json({ success: false, error: (error as Error).message }, { status: 500 })

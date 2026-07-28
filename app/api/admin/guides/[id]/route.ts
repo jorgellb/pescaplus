@@ -3,6 +3,8 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { isRequestAuthenticated } from '@/lib/admin-auth'
 import { updateGuide, deleteGuide, getGuide } from '@/lib/guides-store'
+import { rateLimit, clientIp, tooManyRequests } from '@/lib/rate-limit'
+import { logAdminAction } from '@/lib/admin-audit'
 
 const patchSchema = z.object({
   title: z.string().min(2).max(200).optional(),
@@ -21,6 +23,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   if (!isRequestAuthenticated(request)) {
     return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
   }
+  const ip = clientIp(request)
+  const limit = rateLimit(`admin-mutate:${ip}`, 60, 60_000)
+  if (!limit.ok) return tooManyRequests(limit.retryAfter)
   const { id } = await params
   const parsed = patchSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return NextResponse.json({ success: false, error: 'Datos inválidos' }, { status: 400 })
@@ -29,6 +34,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   if (!guide) return NextResponse.json({ success: false, error: 'Guía no encontrada' }, { status: 404 })
   revalidatePath('/guias')
   revalidatePath(`/guias/${id}`)
+  await logAdminAction({ action: 'update', entity: 'guide', entityId: id, summary: guide.title, ip })
   return NextResponse.json({ success: true, guide })
 }
 
@@ -36,11 +42,15 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
   if (!isRequestAuthenticated(request)) {
     return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
   }
+  const ip = clientIp(request)
+  const limit = rateLimit(`admin-mutate:${ip}`, 60, 60_000)
+  if (!limit.ok) return tooManyRequests(limit.retryAfter)
   const { id } = await params
   const existing = await getGuide(id)
   const removed = await deleteGuide(id)
   if (!removed) return NextResponse.json({ success: false, error: 'Guía no encontrada' }, { status: 404 })
   revalidatePath('/guias')
   if (existing) revalidatePath(`/guias/${id}`)
+  await logAdminAction({ action: 'delete', entity: 'guide', entityId: id, summary: existing?.title, ip })
   return NextResponse.json({ success: true })
 }

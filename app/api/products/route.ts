@@ -7,6 +7,8 @@ import { isFishingTypeId } from '@/lib/fishing'
 import { isRequestAuthenticated } from '@/lib/admin-auth'
 import { getSettings } from '@/lib/settings-store'
 import { proxyProductImages } from '@/lib/img-proxy'
+import { rateLimit, clientIp, tooManyRequests } from '@/lib/rate-limit'
+import { logAdminAction } from '@/lib/admin-audit'
 
 /**
  * Public storefront listing. Reads from the curated store (catalog + products
@@ -67,6 +69,9 @@ export async function POST(request: NextRequest) {
   if (!isRequestAuthenticated(request)) {
     return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
   }
+  const ip = clientIp(request)
+  const limit = rateLimit(`admin-mutate:${ip}`, 60, 60_000)
+  if (!limit.ok) return tooManyRequests(limit.retryAfter)
 
   const parsed = productInputSchema.safeParse(await request.json())
   if (!parsed.success) {
@@ -84,6 +89,7 @@ export async function POST(request: NextRequest) {
     })
     revalidatePath(`/categories/${product.typeFishing}`)
     revalidatePath('/')
+    await logAdminAction({ action: 'create', entity: 'product', entityId: product.id, summary: product.title, ip })
     return NextResponse.json({ success: true, product }, { status: 201 })
   } catch (error) {
     console.error('Error creating product:', error)

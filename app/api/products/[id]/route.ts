@@ -5,6 +5,8 @@ import type { ProductApiResponse } from '@/types'
 import { getProduct, updateProduct, deleteProduct } from '@/lib/products-store'
 import { isRequestAuthenticated } from '@/lib/admin-auth'
 import { isAliExpressConfigured, getAliExpressProductDetail } from '@/lib/aliexpress'
+import { rateLimit, clientIp, tooManyRequests } from '@/lib/rate-limit'
+import { logAdminAction } from '@/lib/admin-audit'
 
 export async function GET(
   _request: NextRequest,
@@ -63,6 +65,9 @@ export async function PATCH(
   if (!isRequestAuthenticated(request)) {
     return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
   }
+  const ip = clientIp(request)
+  const limit = rateLimit(`admin-mutate:${ip}`, 60, 60_000)
+  if (!limit.ok) return tooManyRequests(limit.retryAfter)
 
   const { id } = await params
   const parsed = productPatchSchema.safeParse(await request.json())
@@ -79,6 +84,7 @@ export async function PATCH(
     for (const cat of product.categories?.length ? product.categories : [product.typeFishing]) {
       revalidatePath(`/categories/${cat}`)
     }
+    await logAdminAction({ action: 'update', entity: 'product', entityId: id, summary: product.title, ip })
     return NextResponse.json({ success: true, product })
   } catch (error) {
     console.error('Error updating product:', error)
@@ -94,6 +100,9 @@ export async function DELETE(
   if (!isRequestAuthenticated(request)) {
     return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
   }
+  const ip = clientIp(request)
+  const limit = rateLimit(`admin-mutate:${ip}`, 60, 60_000)
+  if (!limit.ok) return tooManyRequests(limit.retryAfter)
 
   const { id } = await params
   try {
@@ -104,6 +113,7 @@ export async function DELETE(
     }
     revalidatePath(`/products/${id}`)
     if (existing) revalidatePath(`/categories/${existing.typeFishing}`)
+    await logAdminAction({ action: 'delete', entity: 'product', entityId: id, summary: existing?.title, ip })
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error deleting product:', error)

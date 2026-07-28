@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { isRequestAuthenticated } from '@/lib/admin-auth'
 import { setOperatorVerified, listOperators, registerOperator, validateOperator, adminUpdateOperator } from '@/lib/operators-store'
+import { rateLimit, clientIp, tooManyRequests } from '@/lib/rate-limit'
+import { logAdminAction } from '@/lib/admin-audit'
 
 export async function GET(request: NextRequest) {
   if (!isRequestAuthenticated(request)) return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
@@ -14,17 +16,22 @@ const verifySchema = z.object({ id: z.string().min(1).max(120), verified: z.bool
 /** Compat: alterna verificado/revocado (usado por el toggle rápido del listado). */
 export async function POST(request: NextRequest) {
   if (!isRequestAuthenticated(request)) return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
+  const ip = clientIp(request)
+  const limit = rateLimit(`admin-mutate:${ip}`, 60, 60_000)
+  if (!limit.ok) return tooManyRequests(limit.retryAfter)
   const body = await request.json().catch(() => null)
   const verifyParsed = verifySchema.safeParse(body)
   if (verifyParsed.success) {
     try {
       const ok = await setOperatorVerified(verifyParsed.data.id, verifyParsed.data.verified)
-      return ok ? NextResponse.json({ success: true }) : NextResponse.json({ success: false, error: 'Operador no encontrado.' }, { status: 404 })
+      if (!ok) return NextResponse.json({ success: false, error: 'Operador no encontrado.' }, { status: 404 })
+      await logAdminAction({ action: verifyParsed.data.verified ? 'verify' : 'unverify', entity: 'operator', entityId: verifyParsed.data.id, ip })
+      return NextResponse.json({ success: true })
     } catch (error) {
       return NextResponse.json({ success: false, error: (error as Error).message }, { status: 500 })
     }
   }
-  return createOperator(body)
+  return createOperator(body, ip)
 }
 
 const createSchema = z.object({
@@ -42,7 +49,7 @@ const createSchema = z.object({
   verified: z.boolean().optional(),
 })
 
-async function createOperator(body: unknown) {
+async function createOperator(body: unknown, ip: string) {
   const parsed = createSchema.safeParse(body)
   if (!parsed.success) return NextResponse.json({ success: false, error: 'Datos no válidos.' }, { status: 400 })
   const err = validateOperator(parsed.data)
@@ -50,6 +57,7 @@ async function createOperator(body: unknown) {
   try {
     const created = await registerOperator(parsed.data)
     const operator = parsed.data.verified ? await adminUpdateOperator(created.id, { verified: true }) : created
+    await logAdminAction({ action: 'create', entity: 'operator', entityId: created.id, summary: parsed.data.businessName || parsed.data.name, ip })
     return NextResponse.json({ success: true, operator }, { status: 201 })
   } catch (error) {
     return NextResponse.json({ success: false, error: (error as Error).message }, { status: 500 })

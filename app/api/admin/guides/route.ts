@@ -3,6 +3,8 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { isRequestAuthenticated } from '@/lib/admin-auth'
 import { listGuides, createGuide } from '@/lib/guides-store'
+import { rateLimit, clientIp, tooManyRequests } from '@/lib/rate-limit'
+import { logAdminAction } from '@/lib/admin-audit'
 
 export async function GET(request: NextRequest) {
   if (!isRequestAuthenticated(request)) {
@@ -29,6 +31,9 @@ export async function POST(request: NextRequest) {
   if (!isRequestAuthenticated(request)) {
     return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
   }
+  const ip = clientIp(request)
+  const limit = rateLimit(`admin-mutate:${ip}`, 60, 60_000)
+  if (!limit.ok) return tooManyRequests(limit.retryAfter)
   const parsed = guideSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) {
     return NextResponse.json({ success: false, error: 'Datos inválidos' }, { status: 400 })
@@ -36,5 +41,6 @@ export async function POST(request: NextRequest) {
   const guide = await createGuide(parsed.data)
   revalidatePath('/guias')
   revalidatePath(`/guias/${guide.id}`)
+  await logAdminAction({ action: 'create', entity: 'guide', entityId: guide.id, summary: guide.title, ip })
   return NextResponse.json({ success: true, guide }, { status: 201 })
 }

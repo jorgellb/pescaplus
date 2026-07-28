@@ -613,3 +613,27 @@ model CharterBooking {
   @@index([userId])
   @@index([paymentRef])
 }
+
+/**
+ * Rastro de qué se creó/editó/borró desde el panel de admin. La contraseña de
+ * admin es única y compartida (sin cuentas individuales), así que "quién" es
+ * la propia contraseña — pero "qué, cuándo y desde dónde" ya vale mucho para
+ * poder reconstruir un incidente ("¿quién borró este chárter el martes?").
+ * Nunca debe bloquear la mutación real: si escribir el log falla, se registra
+ * el error y se sigue — ver lib/admin-audit.ts.
+ */
+model AdminAuditLog {
+  id        String   @id @default(cuid())
+  /** create | update | delete | verify | unverify */
+  action    String
+  /** charter | operator | meetup | review | user | contactMessage | product | guide */
+  entity    String
+  entityId  String
+  /** Línea legible para el listado ("Chárter de TEST Charters (2026-09-15)"). */
+  summary   String   @default("")
+  ip        String   @default("")
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
