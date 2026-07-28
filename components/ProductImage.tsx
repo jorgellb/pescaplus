@@ -57,6 +57,22 @@ export default function ProductImage({
         priority={priority}
         onError={() => setFailed(true)}
         className={className}
+        /**
+         * SIN el optimizador de Vercel, a propósito.
+         *
+         * Estas imágenes ya vienen optimizadas por nuestro proxy `/img/`, que
+         * pide al CDN la variante ligera de 640×640 y la cachea un año como
+         * inmutable. Pasarlas ADEMÁS por el optimizador aportaba poco (AVIF y
+         * un srcset que apenas se aprovecha en tarjetas pequeñas) y costaba una
+         * transformación por cada imagen y cada ancho: con 1.089 imágenes de
+         * galería salían ~5.400 transformaciones, muy por encima del tope del
+         * plan, y Vercel empezó a responder 402 PAYMENT_REQUIRED a las
+         * imágenes — que se veían rotas en la tienda.
+         *
+         * Si algún día se amplía el plan y se quiere recuperar AVIF aquí, hay
+         * que hacer números antes: el gasto crece con el catálogo.
+         */
+        unoptimized
       />
     )
   }
