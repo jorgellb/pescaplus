@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 import Layout from '@/components/Layout'
 import { SEA_SPECIES, MONTHS_SHORT } from '@/lib/fishing-species'
 
@@ -29,34 +30,45 @@ export default function EspeciesHub() {
       </section>
 
       <section className="max-w-5xl mx-auto px-4 py-10 sm:px-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {SEA_SPECIES.map((sp) => {
             const inSeason = sp.bestMonths.includes(currentMonth)
             return (
               <Link
                 key={sp.id}
                 href={`/especies/${sp.id}`}
-                className="group border border-ink/10 rounded-2xl bg-paper shadow-hard hover-shift p-5 flex flex-col gap-3"
+                className="group flex flex-col bg-paper border border-ink/10 rounded-2xl shadow-hard hover-shift overflow-hidden"
               >
-                <div className="flex items-center justify-between gap-2">
-                  <h2 className="font-display uppercase text-2xl text-ink leading-none group-hover:text-accent transition-colors">{sp.name}</h2>
+                <div className="relative aspect-[4/3] overflow-hidden bg-ink/[0.05] border-b border-ink/[0.07]">
+                  {sp.images[0] && (
+                    <Image
+                      src={sp.images[0]}
+                      alt={`Foto de ${sp.name.toLowerCase()}`}
+                      fill
+                      sizes="(max-width: 640px) 100vw, 50vw"
+                      className="object-cover group-hover:scale-[1.03] transition-transform duration-300"
+                    />
+                  )}
                   {inSeason && (
-                    <span className="flex-shrink-0 inline-flex items-center gap-1 text-[10px] font-semibold st text-accent border border-accent/40 rounded-full px-2 py-0.5">
+                    <span className="absolute top-3 right-3 inline-flex items-center gap-1 text-[10px] font-semibold bg-paper/95 text-accent border border-accent/40 rounded-full px-2.5 py-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-accent" /> Temporada
                     </span>
                   )}
                 </div>
-                <p className="text-[13px] text-ink/60 leading-relaxed flex-1">{sp.tagline}.</p>
-                <div className="grid grid-cols-12 gap-[2px]">
-                  {MONTHS_SHORT.map((mo, idx) => (
-                    <span
-                      key={mo}
-                      title={mo}
-                      className={`h-1.5 rounded-sm ${sp.bestMonths.includes(idx + 1) ? 'bg-accent' : 'bg-ink/10'} ${idx + 1 === currentMonth ? 'ring-1 ring-ink/50' : ''}`}
-                    />
-                  ))}
+                <div className="p-5 flex flex-col gap-3 flex-1">
+                  <h2 className="font-display uppercase text-2xl text-ink leading-none group-hover:text-accent transition-colors">{sp.name}</h2>
+                  <p className="text-[13px] text-ink/60 leading-relaxed flex-1">{sp.tagline}.</p>
+                  <div className="grid grid-cols-12 gap-[2px]">
+                    {MONTHS_SHORT.map((mo, idx) => (
+                      <span
+                        key={mo}
+                        title={mo}
+                        className={`h-1.5 rounded-sm ${sp.bestMonths.includes(idx + 1) ? 'bg-accent' : 'bg-ink/10'} ${idx + 1 === currentMonth ? 'ring-1 ring-ink/50' : ''}`}
+                      />
+                    ))}
+                  </div>
+                  <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-accent">Ver ficha →</span>
                 </div>
-                <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-accent">Ver ficha →</span>
               </Link>
             )
           })}

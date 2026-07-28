@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import Layout from '@/components/Layout'
 import { SEA_SPECIES, MONTHS_SHORT } from '@/lib/fishing-species'
@@ -88,6 +89,23 @@ export default async function SpeciesPage({ params }: Params) {
       </section>
 
       <section className="max-w-5xl mx-auto px-4 py-10 sm:px-6 space-y-10">
+        {sp.images.length > 0 && (
+          <div className={`grid gap-3 ${sp.images.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+            {sp.images.map((src) => (
+              <div key={src} className="relative aspect-[16/10] rounded-2xl overflow-hidden border border-ink/[0.07] shadow-hard bg-ink/[0.05]">
+                <Image
+                  src={src}
+                  alt={`Foto de ${sp.name.toLowerCase()}`}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 800px"
+                  priority
+                  className="object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Season strip */}
         <div className="space-y-3">
           <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3">Mejores meses</h2>
