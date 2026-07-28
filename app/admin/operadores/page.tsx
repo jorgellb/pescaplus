@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import OperatorEditor, { type AdminOperator } from '@/components/admin/OperatorEditor'
 import Icon from '@/components/icons/Icon'
 import { useConfirm, useToast } from '@/components/admin/AdminFeedback'
+import { exportToCsv } from '@/lib/csv-export'
 
 const PAGE_SIZE = 50
 
@@ -81,6 +82,32 @@ export default function AdminOperatorsPage() {
   const closeEditor = () => { setEditing(null); setCreating(false) }
   const onSaved = () => { closeEditor(); loadPage(q, 0, false); toast('Cambios guardados.') }
 
+  const [exporting, setExporting] = useState(false)
+  const exportCsv = async () => {
+    setExporting(true)
+    try {
+      const params = new URLSearchParams({ offset: '0', limit: '1000' })
+      if (q.trim()) params.set('q', q.trim())
+      const res = await fetch(`/api/admin/operadores?${params}`)
+      const data = await res.json()
+      if (!data.success) return toast('No se pudo exportar.', 'error')
+      exportToCsv(`pescaplus-operadores-${new Date().toISOString().slice(0, 10)}.csv`, data.operators as AdminOperator[], [
+        { header: 'Nombre', value: (o) => o.name },
+        { header: 'Empresa', value: (o) => o.businessName },
+        { header: 'Email', value: (o) => o.email },
+        { header: 'Teléfono', value: (o) => o.phone },
+        { header: 'Zona', value: (o) => o.spotSlug },
+        { header: 'Barco', value: (o) => `${o.boatName} ${o.boatType}`.trim() },
+        { header: 'Licencia', value: (o) => o.licenseRef },
+        { header: 'Seguro', value: (o) => o.insuranceRef },
+        { header: 'Verificado', value: (o) => (o.verified ? 'Sí' : 'No') },
+      ])
+      if (data.operators.length < data.total) toast(`Exportados ${data.operators.length} de ${data.total} (límite de exportación).`)
+    } finally {
+      setExporting(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-ink/[0.07] pb-4">
@@ -96,6 +123,13 @@ export default function AdminOperatorsPage() {
             className="px-3 py-1.5 bg-paper border border-ink/25 rounded-lg text-ink placeholder-ink/60 focus:outline-none focus:border-accent text-sm w-full sm:w-56"
           />
           <span className="font-mono text-xs font-bold uppercase tracking-widest text-ink/60 whitespace-nowrap">{pending} pendientes</span>
+          <button
+            onClick={exportCsv}
+            disabled={exporting || total === 0}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-ink/80 hover:text-accent bg-ink/5 border border-ink/10 px-3 py-2 rounded-lg disabled:opacity-40"
+          >
+            <Icon name="download" className="w-3.5 h-3.5" strokeWidth={2} />{exporting ? '…' : 'CSV'}
+          </button>
           <button
             onClick={() => setCreating(true)}
             className="inline-flex items-center gap-2 bg-ink text-paper hover:bg-accent font-extrabold text-sm px-5 py-2.5 border border-ink/10 rounded-xl transition-colors"

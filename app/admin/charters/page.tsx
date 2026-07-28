@@ -6,6 +6,7 @@ import { getSpot } from '@/lib/fishing-spots'
 import CharterEditor, { type OperatorOption } from '@/components/admin/CharterEditor'
 import Icon from '@/components/icons/Icon'
 import { useConfirm, useToast } from '@/components/admin/AdminFeedback'
+import { exportToCsv } from '@/lib/csv-export'
 
 export type AdminCharter = Charter
 
@@ -85,6 +86,32 @@ export default function AdminChartersPage() {
   const closeEditor = () => { setEditing(null); setCreating(false) }
   const onSaved = () => { const wasCreating = creating; closeEditor(); loadPage(q, 0, false); toast(wasCreating ? 'Chárter creado.' : 'Cambios guardados.') }
 
+  const [exporting, setExporting] = useState(false)
+  const exportCsv = async () => {
+    setExporting(true)
+    try {
+      const params = new URLSearchParams({ offset: '0', limit: '1000' })
+      if (q.trim()) params.set('q', q.trim())
+      const res = await fetch(`/api/admin/charters?${params}`)
+      const data = await res.json()
+      if (!data.success) return toast('No se pudo exportar.', 'error')
+      exportToCsv(`pescaplus-charters-${new Date().toISOString().slice(0, 10)}.csv`, data.charters as AdminCharter[], [
+        { header: 'Fecha', value: (c) => c.dateISO },
+        { header: 'Hora', value: (c) => c.timeStart },
+        { header: 'Zona', value: (c) => getSpot(c.spotSlug)?.name || c.spotSlug },
+        { header: 'Operador', value: (c) => c.operator?.businessName || c.operator?.name || '' },
+        { header: 'Modalidad', value: (c) => c.modality },
+        { header: 'Plazas ocupadas', value: (c) => c.placesTaken },
+        { header: 'Plazas máx.', value: (c) => c.maxPlaces },
+        { header: 'Precio/persona', value: (c) => c.pricePerPerson },
+        { header: 'Estado', value: (c) => STATUS_LABEL[c.status] },
+      ])
+      if (data.charters.length < data.total) toast(`Exportados ${data.charters.length} de ${data.total} (límite de exportación).`)
+    } finally {
+      setExporting(false)
+    }
+  }
+
   const visible = filter === 'todos' ? charters : charters.filter((c) => c.status === filter)
 
   return (
@@ -110,6 +137,13 @@ export default function AdminChartersPage() {
               {f === 'todos' ? 'Todos' : STATUS_LABEL[f]}
             </button>
           ))}
+          <button
+            onClick={exportCsv}
+            disabled={exporting || total === 0}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-ink/80 hover:text-accent bg-ink/5 border border-ink/10 px-3 py-2 rounded-lg disabled:opacity-40"
+          >
+            <Icon name="download" className="w-3.5 h-3.5" strokeWidth={2} />{exporting ? '…' : 'CSV'}
+          </button>
           <button
             onClick={() => setCreating(true)}
             disabled={operators.length === 0}

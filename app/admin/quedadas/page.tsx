@@ -6,6 +6,7 @@ import { getSpot } from '@/lib/fishing-spots'
 import MeetupEditor from '@/components/admin/MeetupEditor'
 import Icon from '@/components/icons/Icon'
 import { useConfirm, useToast } from '@/components/admin/AdminFeedback'
+import { exportToCsv } from '@/lib/csv-export'
 
 export type AdminMeetup = Meetup
 
@@ -80,6 +81,31 @@ export default function AdminMeetupsPage() {
   const closeEditor = () => setEditing(null)
   const onSaved = () => { closeEditor(); loadPage(q, 0, false); toast('Cambios guardados.') }
 
+  const [exporting, setExporting] = useState(false)
+  const exportCsv = async () => {
+    setExporting(true)
+    try {
+      const params = new URLSearchParams({ offset: '0', limit: '1000' })
+      if (q.trim()) params.set('q', q.trim())
+      const res = await fetch(`/api/admin/quedadas?${params}`)
+      const data = await res.json()
+      if (!data.success) return toast('No se pudo exportar.', 'error')
+      exportToCsv(`pescaplus-quedadas-${new Date().toISOString().slice(0, 10)}.csv`, data.meetups as AdminMeetup[], [
+        { header: 'Fecha', value: (m) => m.dateISO },
+        { header: 'Hora', value: (m) => m.timeStart },
+        { header: 'Zona', value: (m) => getSpot(m.spotSlug)?.name || m.spotSlug },
+        { header: 'Anfitrión', value: (m) => m.hostName },
+        { header: 'Modalidad', value: (m) => m.modality },
+        { header: 'Plazas ocupadas', value: (m) => m.placesTaken },
+        { header: 'Plazas máx.', value: (m) => m.maxPlaces },
+        { header: 'Estado', value: (m) => STATUS_LABEL[m.status] },
+      ])
+      if (data.meetups.length < data.total) toast(`Exportadas ${data.meetups.length} de ${data.total} (límite de exportación).`)
+    } finally {
+      setExporting(false)
+    }
+  }
+
   const visible = filter === 'todos' ? meetups : meetups.filter((m) => m.status === filter)
 
   return (
@@ -105,6 +131,13 @@ export default function AdminMeetupsPage() {
               {f === 'todos' ? 'Todos' : STATUS_LABEL[f]}
             </button>
           ))}
+          <button
+            onClick={exportCsv}
+            disabled={exporting || total === 0}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-ink/80 hover:text-accent bg-ink/5 border border-ink/10 px-3 py-2 rounded-lg disabled:opacity-40"
+          >
+            <Icon name="download" className="w-3.5 h-3.5" strokeWidth={2} />{exporting ? '…' : 'CSV'}
+          </button>
         </div>
       </div>
 

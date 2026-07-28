@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import type { Review } from '@/lib/reviews-store'
 import Icon from '@/components/icons/Icon'
 import { useConfirm, useToast } from '@/components/admin/AdminFeedback'
+import { exportToCsv } from '@/lib/csv-export'
 
 type AdminReview = Review & { operatorName: string; subjectName: string }
 
@@ -44,6 +45,18 @@ export default function AdminReviewsPage() {
 
   const visible = filter === 'todas' ? reviews : reviews.filter((r) => r.direction === filter)
 
+  const exportCsv = () => {
+    exportToCsv(`pescaplus-resenas-${new Date().toISOString().slice(0, 10)}.csv`, visible, [
+      { header: 'Autor', value: (r) => r.authorName },
+      { header: 'Dirección', value: (r) => (r.direction === 'toOperator' ? 'A patrón' : 'A pescador') },
+      { header: 'Destinatario', value: (r) => (r.direction === 'toOperator' ? r.operatorName : r.subjectName) },
+      { header: 'Puntuación', value: (r) => r.rating },
+      { header: 'Texto', value: (r) => r.text },
+      { header: 'Estado', value: (r) => (r.pending ? 'Ciega' : 'Publicada') },
+      { header: 'Fecha', value: (r) => new Date(r.createdAt).toISOString() },
+    ])
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-ink/[0.07] pb-4">
@@ -61,6 +74,13 @@ export default function AdminReviewsPage() {
               {f === 'todas' ? 'Todas' : f === 'toOperator' ? 'A patrones' : 'A pescadores'}
             </button>
           ))}
+          <button
+            onClick={exportCsv}
+            disabled={visible.length === 0}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-ink/80 hover:text-accent bg-ink/5 border border-ink/10 px-3 py-2 rounded-lg disabled:opacity-40"
+          >
+            <Icon name="download" className="w-3.5 h-3.5" strokeWidth={2} />CSV
+          </button>
         </div>
       </div>
 
