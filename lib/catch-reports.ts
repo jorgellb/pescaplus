@@ -29,6 +29,10 @@ export interface CatchInput {
   lon?: number | null
   /** Hora local "HH:MM". Sin ella la marea de la captura es orientativa. */
   timeISO?: string | null
+  /** Con qué picó (señuelo, cebo). Texto libre corto, opcional. */
+  lure?: string | null
+  /** Cómo se pescaba (spinning, surfcasting…). Opcional. */
+  technique?: string | null
 }
 
 export interface SpeciesActivity {
@@ -115,11 +119,21 @@ export async function shareCatch(input: CatchInput, userId?: string | null): Pro
     }
   }
 
+  // Texto libre, pero acotado: es dato de comunidad, no un campo de notas.
+  const limpiar = (v: string | null | undefined, max: number) => {
+    const s = (v ?? '').trim().replace(/\s+/g, ' ').slice(0, max)
+    return s.length >= 2 ? s : null
+  }
+  const lure = limpiar(input.lure, 60)
+  const technique = limpiar(input.technique, 40)
+
   const row = {
     spotSlug: input.spotSlug, speciesId: input.speciesId, dateISO: input.dateISO, qty,
     userId: userId ?? null,
     ...(exacto ? { lat, lon } : {}),
     ...(timeISO ? { timeISO } : {}),
+    ...(lure ? { lure } : {}),
+    ...(technique ? { technique } : {}),
     ...(context ? { context } : {}),
   }
 
@@ -193,6 +207,75 @@ export async function getSpeciesActivity(spotSlug: string, speciesId: string, da
   // hay actividad suficiente, decir "y de estas 2 son lubinas" no identifica.
   if (!all.enough || !found) return { enough: false, reports: 0, fish: 0, lastDateISO: null }
   return { enough: true, reports: found.reports, fish: found.fish, lastDateISO: all.lastDateISO }
+}
+
+export interface LureTip {
+  /** Con qué picó, tal cual lo escribió quien lo compartió. */
+  lure: string
+  /** Cuántos partes lo mencionan. */
+  reports: number
+}
+
+/**
+ * Con qué está picando en una zona (y opcionalmente una especie).
+ *
+ * Es lo que convierte los partes en algo accionable: "en Tarifa entra la
+ * lubina" informa poco; "entra con vinilo de 10 cm" cambia la salida.
+ *
+ * Mismas reglas de privacidad que el resto de agregados: hace falta el mínimo
+ * de partes de la ZONA para enseñar nada, y además cada cebo concreto necesita
+ * al menos dos menciones. Un cebo mencionado una sola vez es, en la práctica,
+ * una persona identificable contando lo que llevaba.
+ */
+export async function getLureTips(
+  spotSlug: string,
+  speciesId?: string | null,
+  days = RECENT_DAYS,
+  max = 4,
+): Promise<LureTip[]> {
+  if (!isDatabaseConfigured()) return []
+  const all = await getSpotActivity(spotSlug, days)
+  if (!all.enough) return []
+
+  const from = addDaysISO(todayMadridISO(), -days)
+  try {
+    const { prisma } = await import('@/lib/prisma')
+    const rows = await prisma.catchReport.findMany({
+      where: {
+        spotSlug,
+        dateISO: { gte: from },
+        lure: { not: null },
+        ...(speciesId ? { speciesId } : {}),
+      },
+      select: { lure: true },
+    })
+
+    // Se agrupa sin distinguir mayúsculas ni acentos ("Vinilo" = "vinilo"),
+    // pero se enseña la forma más usada, que es como lo escribe la gente.
+    const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+    const byKey = new Map<string, { count: number; forms: Map<string, number> }>()
+    for (const r of rows) {
+      const raw = (r.lure ?? '').trim()
+      if (raw.length < 2) continue
+      const k = norm(raw)
+      const e = byKey.get(k) ?? { count: 0, forms: new Map() }
+      e.count += 1
+      e.forms.set(raw, (e.forms.get(raw) ?? 0) + 1)
+      byKey.set(k, e)
+    }
+
+    return [...byKey.values()]
+      .filter((e) => e.count >= 2)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, max)
+      .map((e) => ({
+        lure: [...e.forms.entries()].sort((a, b) => b[1] - a[1])[0][0],
+        reports: e.count,
+      }))
+  } catch (error) {
+    console.warn('No se han podido leer los cebos de la zona:', error)
+    return []
+  }
 }
 
 /**

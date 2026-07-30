@@ -306,6 +306,15 @@ model CatchReport {
   lon       Float?
   /** Hora local "HH:MM": sin ella no se puede casar con marea ni solunar. */
   timeISO   String?
+  /**
+   * CON QUÉ picó. Es el dato que convierte los partes en algo útil de verdad:
+   * saber que en octubre se pescaron 30 lubinas en Tarifa vale poco; saber que
+   * entraron con vinilo de 10 cm vale una salida. Texto libre corto y opcional
+   * — el pescador lo escribe como lo diga, no se le impone una lista.
+   */
+  lure      String?
+  /** Cómo se pescaba: spinning, surfcasting, curricán… También opcional. */
+  technique String?
   /** Foto de las condiciones. Ver lib/catch-context.ts. */
   context   Json?
   createdAt DateTime @default(now())

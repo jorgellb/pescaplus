@@ -14,6 +14,9 @@ const schema = z.object({
   lat: z.number().min(-90).max(90).nullable().optional(),
   lon: z.number().min(-180).max(180).nullable().optional(),
   timeISO: z.string().regex(/^\d{2}:\d{2}$/).nullable().optional(),
+  // Con qué picó y cómo se pescaba: lo que convierte el parte en un consejo.
+  lure: z.string().max(60).nullable().optional(),
+  technique: z.string().max(40).nullable().optional(),
 })
 
 /** Share one catch, anonymously. The diary keeps the note; it never travels. */

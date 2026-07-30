@@ -32,6 +32,13 @@ interface CatchEntry {
   spotSlug: string
   speciesId: string
   qty: number
+  /**
+   * Con qué picó. A diferencia de la nota, este SÍ viaja al compartir: es el
+   * dato que hace útil el agregado de la zona ("aquí entra con vinilo de
+   * 10 cm"). Por eso va en su propio campo y no dentro de la nota libre, donde
+   * se mezclaría con lo que nadie quiere publicar.
+   */
+  lure?: string
   note: string
 }
 
@@ -106,6 +113,7 @@ export default function DiaryClient() {
         body: JSON.stringify({
           spotSlug: e.spotSlug, speciesId: e.speciesId, dateISO: e.dateISO, qty: e.qty,
           ...(e.timeISO ? { timeISO: e.timeISO } : {}),
+          ...(e.lure ? { lure: e.lure } : {}),
         }),
       })
       const data = await res.json()
@@ -117,7 +125,7 @@ export default function DiaryClient() {
     } catch { /* sin red: se puede reintentar */ } finally { setSharing(null) }
   }
   const [ready, setReady] = useState(false)
-  const [form, setForm] = useState({ dateISO: '', timeISO: '', spotSlug: '', speciesId: 'lubina', qty: 1, note: '' })
+  const [form, setForm] = useState({ dateISO: '', timeISO: '', spotSlug: '', speciesId: 'lubina', qty: 1, lure: '', note: '' })
 
   useEffect(() => {
     const init = () => {
@@ -149,12 +157,13 @@ export default function DiaryClient() {
       spotSlug: form.spotSlug,
       speciesId: form.speciesId,
       qty: Math.max(1, Math.round(form.qty)),
+      ...(form.lure.trim() ? { lure: form.lure.trim().slice(0, 60) } : {}),
       note: form.note.trim().slice(0, 200),
     }
     const next = [entry, ...entries]
     setEntries(next)
     save(next)
-    setForm((f) => ({ ...f, note: '' }))
+    setForm((f) => ({ ...f, lure: '', note: '' }))
   }
 
   const remove = (id: string) => {
@@ -282,13 +291,34 @@ export default function DiaryClient() {
             />
           </label>
         </div>
+        {/*
+          El cebo sale de la nota y pasa a su propio campo: es lo ÚNICO de aquí
+          que viaja al compartir, y mezclarlo con texto libre obligaba a elegir
+          entre publicar la nota entera (donde la gente escribe el punto exacto)
+          o perder el dato. Separados, se puede compartir el cebo sin arrastrar
+          nada más.
+        */}
         <label className="block">
-          <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Nota (cebo, técnica, tamaño…)</span>
+          <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Con qué picó</span>
+          <input
+            type="text"
+            value={form.lure}
+            maxLength={60}
+            placeholder="p. ej. vinilo de 10 cm, gusana, jig de 60 g"
+            onChange={(ev) => setForm((f) => ({ ...f, lure: ev.target.value }))}
+            className="mt-1 w-full border border-ink/12 rounded-xl bg-paper px-3 py-2 text-sm"
+          />
+          <span className="block text-[11px] text-ink/60 mt-1">
+            Si compartes la captura, esto se suma al «con qué está picando» de la zona. Lo demás no sale de aquí.
+          </span>
+        </label>
+        <label className="block">
+          <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Nota privada (tamaño, detalles…)</span>
           <input
             type="text"
             value={form.note}
             maxLength={200}
-            placeholder="p. ej. sarda a la boya con coreano, amanecer"
+            placeholder="p. ej. 42 cm, al amanecer con marea subiendo"
             onChange={(ev) => setForm((f) => ({ ...f, note: ev.target.value }))}
             className="mt-1 w-full border border-ink/12 rounded-xl bg-paper px-3 py-2 text-sm"
           />

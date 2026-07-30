@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import SpotCatchActivity from './SpotCatchActivity'
-import { getSpotActivity, getUserSpotCatches } from '@/lib/catch-reports'
+import { getSpotActivity, getUserSpotCatches, getLureTips } from '@/lib/catch-reports'
 import Link from 'next/link'
 import Layout from '@/components/Layout'
 import FishRating from '@/components/FishRating'
@@ -806,7 +806,7 @@ export default async function SpotDashboard({
 
         {/* Lo que ninguna previsión sabe: qué está entrando de verdad aquí. */}
         <div className="print:hidden">
-          <SpotCatchActivity activity={await getSpotActivity(s.slug)} spotName={s.name} />
+          <SpotCatchActivity activity={await getSpotActivity(s.slug)} spotName={s.name} lures={await getLureTips(s.slug, especie)} />
         </div>
 
         {/* 7-day hourly forecast with day selector */}
