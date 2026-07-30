@@ -6,13 +6,25 @@ const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY
 const OPENROUTER_BASE_URL = process.env.OPENROUTER_BASE_URL ?? 'https://openrouter.ai/api/v1'
 const GROQ_API_KEY = process.env.GROQ_API_KEY
 const GROQ_BASE_URL = process.env.GROQ_BASE_URL ?? 'https://api.groq.com/openai/v1'
+/**
+ * NVIDIA vuelve, pero solo para el pulido SEO.
+ *
+ * Se había retirado en favor de OpenRouter, y con razón para el chat. Pero su
+ * cupo es INDEPENDIENTE del de Groq y del de OpenRouter, y el pulido de un
+ * catálogo de 183 fichas es justo lo que agota un cupo diario: medido, Groq da
+ * 100.000 tokens/día y cada ficha gasta ~2.500. Tener un tercer presupuesto
+ * separado es lo que permite pulir el catálogo entero sin pagar.
+ */
+const NVIDIA_API_KEY = process.env.NVIDIA_API_KEY
+const NVIDIA_BASE_URL = process.env.NVIDIA_BASE_URL ?? 'https://integrate.api.nvidia.com/v1'
 
 interface ModelRef {
-  provider: 'groq' | 'openrouter'
+  provider: 'groq' | 'openrouter' | 'nvidia'
   model: string
 }
 const groq = (model: string): ModelRef => ({ provider: 'groq', model })
 const openrouter = (model: string): ModelRef => ({ provider: 'openrouter', model })
+const nvidia = (model: string): ModelRef => ({ provider: 'nvidia', model })
 
 /**
  * Groq (gratis, sin coste ni con crédito comprado) da un límite MUCHO más
@@ -99,15 +111,21 @@ async function callAiModel(
   { maxTokens = 1024, temperature = 0.7, topP = 0.95, timeoutMs = 20000, models }: AiCallOptions = {},
 ): Promise<string | null> {
   for (const ref of models ?? DEFAULT_MODEL_CHAIN) {
-    const isGroq = ref.provider === 'groq'
-    const baseUrl = isGroq ? GROQ_BASE_URL : OPENROUTER_BASE_URL
-    const apiKey = isGroq ? GROQ_API_KEY : OPENROUTER_API_KEY
+    // Los tres hablan el mismo dialecto (chat completions de OpenAI), así que
+    // solo cambian la URL, la clave y un par de cabeceras.
+    const baseUrl = ref.provider === 'groq' ? GROQ_BASE_URL
+      : ref.provider === 'nvidia' ? NVIDIA_BASE_URL
+      : OPENROUTER_BASE_URL
+    const apiKey = ref.provider === 'groq' ? GROQ_API_KEY
+      : ref.provider === 'nvidia' ? NVIDIA_API_KEY
+      : OPENROUTER_API_KEY
+    if (!apiKey) continue // proveedor sin configurar: se salta sin ruido
     const headers: Record<string, string> = {
       Authorization: `Bearer ${apiKey}`,
       Accept: 'application/json',
       'Content-Type': 'application/json',
     }
-    if (!isGroq) {
+    if (ref.provider === 'openrouter') {
       headers['HTTP-Referer'] = 'https://pescaplus.es'
       headers['X-Title'] = 'PescaPlus'
     }
@@ -304,7 +322,8 @@ function getLocalExpertResponse(messages: ChatMessage[]): string {
 function isApiConfigured(): boolean {
   const hasGroq = Boolean(GROQ_API_KEY)
   const hasOpenRouter = Boolean(OPENROUTER_API_KEY) && OPENROUTER_API_KEY !== 'your_openrouter_api_key'
-  return hasGroq || hasOpenRouter
+  const hasNvidia = Boolean(NVIDIA_API_KEY)
+  return hasGroq || hasOpenRouter || hasNvidia
 }
 
 /** Build a retrieval-augmented context block from relevant catalog products. */
@@ -1125,10 +1144,24 @@ Devuelve SOLO JSON válido: {"title": string, "seoTitle": string, "description":
         maxTokens: 900,
         temperature: intento === 0 ? 0.5 : 0.3,
         timeoutMs: 30000,
-        // El 8b es demasiado flojo para esto: inventa gramática ("¡Pescar ha
-        // nunca sido tan divertido!") y llegó a devolver JSON no parseable.
-        // Aquí manda calidad, no velocidad.
-        models: [groq('llama-3.3-70b-versatile'), openrouter('google/gemma-4-31b-it:free'), openrouter('google/gemma-4-26b-a4b-it:free')],
+        /*
+         * Tres PRESUPUESTOS distintos, no tres modelos cualesquiera. Pulir 183
+         * fichas agota cualquier cupo diario individual, así que la cadena está
+         * pensada para que al acabarse uno siga habiendo otro:
+         *   1. Groq llama-3.3-70b — el más rápido (~4 s).
+         *   2. NVIDIA llama-3.3-70b — cupo independiente, más lento (~19 s)
+         *      pero mismo modelo y misma calidad de castellano.
+         *   3. Los Gemma gratis de OpenRouter, como último recurso.
+         * El 8b de Groq queda fuera a propósito: inventa gramática ("¡Pescar ha
+         * nunca sido tan divertido!") y llegó a devolver JSON no parseable.
+         * El nemotron-49b de NVIDIA también: 54 s y JSON roto.
+         */
+        models: [
+          groq('llama-3.3-70b-versatile'),
+          nvidia('meta/llama-3.3-70b-instruct'),
+          openrouter('google/gemma-4-31b-it:free'),
+          openrouter('google/gemma-4-26b-a4b-it:free'),
+        ],
       },
     )
     const parsed = parseAiJson('polish-product-seo', content)
