@@ -53,8 +53,21 @@ export function updateSettings(patch: Partial<AdminSettings>): AdminSettings {
 export interface IntegrationStatus {
   database: { configured: boolean; backend: 'database' | 'memory' }
   aliexpress: { configured: boolean }
-  /** IA (asistente + generación de fichas): Groq y/o OpenRouter, cualquiera de los dos basta. */
-  ai: { configured: boolean }
+  /**
+   * IA. Se detalla PROVEEDOR A PROVEEDOR, no solo "sí/no".
+   *
+   * Cada uno tiene su propio cupo diario, y el pulido de un catálogo grande
+   * agota cualquiera por separado — así que saber cuáles están configurados es
+   * la diferencia entre "el pulido aguanta el catálogo entero" y "se planta a
+   * las 40 fichas". Con un "configurado: sí" genérico no había forma de ver
+   * desde el panel si faltaba una clave en producción.
+   */
+  ai: {
+    configured: boolean
+    groq: boolean
+    nvidia: boolean
+    openrouter: boolean
+  }
   adminPassword: { usingDefault: boolean }
 }
 
@@ -63,10 +76,16 @@ export function getIntegrationStatus(): IntegrationStatus {
   const openrouterKey = process.env.OPENROUTER_API_KEY
   const hasOpenRouter = Boolean(openrouterKey && openrouterKey !== 'your_openrouter_api_key')
   const hasGroq = Boolean(process.env.GROQ_API_KEY)
+  const hasNvidia = Boolean(process.env.NVIDIA_API_KEY)
   return {
     database: { configured: isDatabaseConfigured(), backend: activeBackend() },
     aliexpress: { configured: isAliExpressConfigured() },
-    ai: { configured: hasGroq || hasOpenRouter },
+    ai: {
+      configured: hasGroq || hasOpenRouter || hasNvidia,
+      groq: hasGroq,
+      nvidia: hasNvidia,
+      openrouter: hasOpenRouter,
+    },
     adminPassword: { usingDefault: isUsingDefaultPassword() },
   }
 }

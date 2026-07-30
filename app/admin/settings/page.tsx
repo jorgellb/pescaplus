@@ -8,7 +8,7 @@ import { useConfirm } from '@/components/admin/AdminFeedback'
 interface Integrations {
   database: { configured: boolean; backend: 'database' | 'memory' }
   aliexpress: { configured: boolean }
-  ai: { configured: boolean }
+  ai: { configured: boolean; groq: boolean; nvidia: boolean; openrouter: boolean }
   adminPassword: { usingDefault: boolean }
 }
 
@@ -152,10 +152,34 @@ export default function AdminSettingsPage() {
             detail={integrations.aliexpress.configured ? 'API firmada activa' : 'Catálogo local (opcional)'}
           />
           <IntegrationRow
-            title="Asistente IA (Groq / OpenRouter)"
+            title="Asistente IA"
             ok={integrations.ai.configured}
-            detail={integrations.ai.configured ? 'Modelo remoto activo' : 'Fallback experto offline'}
+            detail={
+              integrations.ai.configured
+                ? `Activa · ${[
+                    integrations.ai.groq && 'Groq',
+                    integrations.ai.nvidia && 'NVIDIA',
+                    integrations.ai.openrouter && 'OpenRouter',
+                  ].filter(Boolean).join(' + ')}`
+                : 'Fallback experto offline'
+            }
           />
+          {/*
+            Cada proveedor tiene su propio cupo diario y el pulido de todo el
+            catálogo agota cualquiera por separado, así que conviene ver de un
+            vistazo si falta alguno en producción.
+          */}
+          {integrations.ai.configured && !(integrations.ai.groq && integrations.ai.nvidia && integrations.ai.openrouter) && (
+            <p className="text-[12.5px] text-ink/70 px-1 -mt-1">
+              Falta{' '}
+              {[
+                !integrations.ai.groq && 'GROQ_API_KEY',
+                !integrations.ai.nvidia && 'NVIDIA_API_KEY',
+                !integrations.ai.openrouter && 'OPENROUTER_API_KEY',
+              ].filter(Boolean).join(', ')}
+              . Con los tres, el pulido SEO puede recorrer el catálogo completo sin agotar el cupo de ninguno.
+            </p>
+          )}
           <IntegrationRow
             title="Contraseña de admin"
             ok={!integrations.adminPassword.usingDefault}
