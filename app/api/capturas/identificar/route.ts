@@ -17,6 +17,9 @@ const MAX_CHARS = 400_000
 
 const schema = z.object({
   image: z.string().min(64).max(MAX_CHARS),
+  // Contexto opcional: desempata entre especies parecidas, nunca filtra.
+  spotSlug: z.string().max(80).optional(),
+  month: z.number().int().min(1).max(12).optional(),
 })
 
 /**
@@ -45,12 +48,35 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const guess = await identifySpecies(parsed.data.image)
-    if (!guess) {
-      // No es un error: el modelo puede no reconocerla, y decirlo es correcto.
-      return NextResponse.json({ success: true, guess: null })
+    // La zona da el mar, que es el contexto útil ("Cantábrico" pesa distinto
+    // que "Canarias"). Si el slug no existe, se ignora sin más.
+    let seaName: string | null = null
+    if (parsed.data.spotSlug) {
+      const { getSpot } = await import('@/lib/fishing-spots')
+      const { seaName: nombreDelMar } = await import('@/lib/zone-facts')
+      const spot = getSpot(parsed.data.spotSlug)
+      if (spot) seaName = nombreDelMar(spot)
     }
-    return NextResponse.json({ success: true, guess })
+
+    const result = await identifySpecies(parsed.data.image, { seaName, month: parsed.data.month })
+
+    /*
+     * Se distinguen DOS cosas que antes se confundían:
+     *  - `null`: ningún modelo contestó (cuota agotada, red). Decirle al
+     *    pescador "no la reconozco" sería mentira: no se ha llegado a mirar.
+     *  - lista vacía: los modelos SÍ miraron y no ven nada de la guía. Eso sí
+     *    es "no la reconozco", y es una respuesta correcta.
+     */
+    if (!result) {
+      return NextResponse.json(
+        { success: false, error: 'El identificador no está disponible ahora mismo. Inténtalo en un minuto.' },
+        { status: 503 },
+      )
+    }
+    if (result.candidates.length === 0) {
+      return NextResponse.json({ success: true, result: null })
+    }
+    return NextResponse.json({ success: true, result })
   } catch (error) {
     console.error('Error identificando la especie:', error)
     return NextResponse.json({ success: false, error: 'No se ha podido identificar.' }, { status: 500 })

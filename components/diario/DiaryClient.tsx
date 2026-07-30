@@ -99,6 +99,8 @@ export default function DiaryClient() {
   const [sharing, setSharing] = useState<string | null>(null)
   const [identifying, setIdentifying] = useState(false)
   const [idNote, setIdNote] = useState('')
+  /** Candidatos alternativos: si el primero no es, se elige con un toque. */
+  const [idAlts, setIdAlts] = useState<{ speciesId: string; name: string; evidence: string }[]>([])
 
   /**
    * Identificar la especie desde una foto.
@@ -114,6 +116,7 @@ export default function DiaryClient() {
   const identify = async (file: File) => {
     setIdentifying(true)
     setIdNote('')
+    setIdAlts([])
     try {
       const dataUrl = await new Promise<string>((resolve, reject) => {
         const img = new Image()
@@ -137,22 +140,31 @@ export default function DiaryClient() {
       const res = await fetch('/api/capturas/identificar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: dataUrl }),
+        // La zona y el mes ayudan a desempatar entre especies parecidas.
+        body: JSON.stringify({
+          image: dataUrl,
+          ...(form.spotSlug ? { spotSlug: form.spotSlug } : {}),
+          ...(/^\d{4}-\d{2}-\d{2}$/.test(form.dateISO) ? { month: Number(form.dateISO.slice(5, 7)) } : {}),
+        }),
       })
       const data = await res.json()
       if (!res.ok || !data.success) {
         setIdNote(data.error ?? 'No se ha podido identificar.')
         return
       }
-      if (!data.guess) {
-        setIdNote('No la reconozco con seguridad. Elígela a mano.')
+      const cands = data.result?.candidates ?? []
+      if (cands.length === 0) {
+        setIdNote('No la reconozco. Elígela a mano.')
         return
       }
-      setForm((f) => ({ ...f, speciesId: data.guess.speciesId }))
+      const [mejor, ...resto] = cands
+      setForm((f) => ({ ...f, speciesId: mejor.speciesId }))
+      setIdAlts(resto)
+      // Se distingue si los dos modelos coincidieron: es la diferencia entre
+      // "esto es" y "esto se parece a", y el pescador merece saberlo.
+      const seguro = data.result.agreement && mejor.score >= 70
       setIdNote(
-        data.guess.confidence === 'alta'
-          ? `Parece ${data.guess.name}. Confírmalo.`
-          : `Quizá ${data.guess.name} (poca seguridad). Confírmalo.`,
+        `${seguro ? 'Es' : 'Quizá'} ${mejor.name}${mejor.evidence ? ` (${mejor.evidence})` : ''}. Confírmalo.`,
       )
     } catch {
       setIdNote('No se ha podido leer la foto.')
@@ -364,6 +376,27 @@ export default function DiaryClient() {
               </label>
               {idNote && <span className="text-[12px] text-ink/70">{idNote}</span>}
             </span>
+            {/* Si no acertó a la primera, cambiar es un toque en vez de buscar
+                otra vez entre 29 especies. */}
+            {idAlts.length > 0 && (
+              <span className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                <span className="text-[11px] text-ink/60">¿No es? Quizá:</span>
+                {idAlts.map((c) => (
+                  <button
+                    key={c.speciesId}
+                    type="button"
+                    onClick={() => {
+                      setForm((f) => ({ ...f, speciesId: c.speciesId }))
+                      setIdNote(`${c.name}${c.evidence ? ` (${c.evidence})` : ''}.`)
+                      setIdAlts((prev) => prev.filter((x) => x.speciesId !== c.speciesId))
+                    }}
+                    className="text-[11.5px] font-semibold border border-ink/12 rounded-full px-2.5 py-1 hover:border-accent hover:text-accent transition-colors"
+                  >
+                    {c.name}
+                  </button>
+                ))}
+              </span>
+            )}
           </label>
           <label className="block">
             <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Piezas</span>

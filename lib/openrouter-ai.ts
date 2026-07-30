@@ -1253,46 +1253,48 @@ Devuelve SOLO JSON válido:
   return g
 }
 
+
 // ---------------------------------------------------------------------------
 // Identificación de especie a partir de una foto
 // ---------------------------------------------------------------------------
 
-export interface SpeciesGuess {
-  /** Id de SEA_SPECIES, ya validado contra el catálogo. */
+export interface SpeciesCandidate {
   speciesId: string
   name: string
-  confidence: 'alta' | 'media' | 'baja'
+  /** 0-100. Es la seguridad que declara el modelo, no una probabilidad medida. */
+  score: number
+  /** Qué ha visto para decirlo ("banda dorada entre los ojos"). */
+  evidence: string
 }
 
-/**
- * Qué especie hay en una foto, eligiendo SOLO del catálogo del sitio.
- *
- * Se le da la lista cerrada de especies en vez de dejarle contestar libremente
- * por dos razones: acierta mucho más, y lo que devuelve encaja directamente con
- * un `speciesId` real en vez de un nombre suelto que habría que adivinar. Si
- * dice algo que no está en la lista, se descarta — antes devolver nada que una
- * especie inventada.
- *
- * Medido con las 29 fotos etiquetadas de `public/imagenesPeces`: 11 de 11 en la
- * muestra probada con `google/gemma-4-26b-a4b-it:free`. El modelo con visión de
- * NVIDIA (`nemotron-nano-12b-v2-vl`) falla bastante (confundió una lubina con
- * un pez espada), así que NO se usa aquí.
- *
- * ES UNA SUGERENCIA, y quien llama debe tratarla como tal: la confirma el
- * pescador. En particular NO sirve para decidir nada legal (talla mínima,
- * especie protegida) — eso se consulta en la fuente oficial, por lo mismo que
- * `lib/fishing-regulations.ts` no fija tallas.
- *
- * `imageDataUrl` debe venir ya reducida por el cliente (~640 px). Con la foto
- * original de 200 KB el proveedor gratuito devolvía 429; con 40 KB responde
- * bien y en un par de segundos.
- */
-export async function identifySpecies(imageDataUrl: string): Promise<SpeciesGuess | null> {
-  if (!isApiConfigured()) return null
-  if (!/^data:image\/(jpe?g|png|webp);base64,/i.test(imageDataUrl)) return null
+export interface SpeciesIdResult {
+  /** Candidatos de más a menos probable, ya validados contra el catálogo. */
+  candidates: SpeciesCandidate[]
+  /** Los dos modelos coincidieron en el primero. Sube mucho la fiabilidad. */
+  agreement: boolean
+}
 
-  const { SEA_SPECIES } = await import('@/lib/fishing-species')
-  const lista = SEA_SPECIES.map((s) => `${s.id} = ${s.name}`).join('\n')
+/** Contexto opcional: pesa en el desempate, NUNCA descarta un candidato. */
+export interface SpeciesIdContext {
+  /** Nombre del mar/zona ("Mediterráneo", "Cantábrico", "aguas de Canarias"). */
+  seaName?: string | null
+  /** Mes 1-12 de la captura. */
+  month?: number | null
+}
+
+/** Una pasada de identificación contra un modelo con visión. */
+async function askVision(
+  imageDataUrl: string,
+  guide: string,
+  ctx: SpeciesIdContext,
+  model: ModelRef,
+): Promise<{ id: string; score: number; evidence: string }[] | null> {
+  const donde = ctx.seaName ? `\nDÓNDE se ha pescado: ${ctx.seaName}.` : ''
+  const cuando = ctx.month ? `\nMES: ${ctx.month} (1=enero, 12=diciembre).` : ''
+  const contexto = donde || cuando
+    ? `${donde}${cuando}
+Usa esto SOLO para desempatar entre candidatos que se parezcan: si dos encajan visualmente igual, prefiere la más propia de esa zona y esa época. Si lo que ves es claramente otra especie, dilo IGUALMENTE — el contexto no manda sobre la foto.`
+    : ''
 
   const content = await callAiModel(
     [
@@ -1301,37 +1303,133 @@ export async function identifySpecies(imageDataUrl: string): Promise<SpeciesGues
         content: [
           {
             type: 'text',
-            text: `Eres un biólogo marino español. Identifica la especie de la foto eligiendo SOLO de esta lista:
-${lista}
+            text: `Eres un ictiólogo identificando una captura de pesca en España a partir de una foto.
 
-Si no estás seguro, o si en la foto no hay ninguna de estas especies, devuelve id "" y confianza "baja". No inventes.
-Devuelve SOLO JSON: {"id": "<id de la lista o vacío>", "confianza": "alta"|"media"|"baja"}`,
+GUÍA DE CAMPO (rasgos que separan cada especie de sus parecidas):
+${guide}
+${contexto}
+
+CÓMO TRABAJAR:
+1. Fíjate primero en la FORMA del cuerpo y el tipo de animal (pez alargado, pez alto y comprimido, pez plano, cefalópodo, anguiliforme).
+2. Después busca las marcas concretas de la guía: barras verticales, banda dorada entre los ojos, número de aletas dorsales, dientes, escudetes en la línea lateral, líneas onduladas del dorso.
+3. Si la foto no permite ver la marca que decide entre dos especies parecidas, dilo bajando la seguridad — no adivines.
+
+Devuelve los 3 candidatos más probables, de mayor a menor, SOLO con ids de la guía.
+Devuelve SOLO JSON válido:
+{"candidatos": [{"id": "<id>", "seguridad": <0-100>, "evidencia": "<qué has visto, máximo 12 palabras>"}]}
+
+Si en la foto no hay ningún animal de la guía, devuelve {"candidatos": []}.`,
           },
           { type: 'image_url', image_url: { url: imageDataUrl } },
         ],
       } as unknown as ChatMessage,
     ],
-    {
-      maxTokens: 200,
-      temperature: 0.1,
-      timeoutMs: 30000,
-      // Solo los que aceptan imagen Y aciertan. El 31b va primero por calidad,
-      // pero su cupo gratuito se satura a menudo, así que el 26b lo respalda.
-      models: [openrouter('google/gemma-4-31b-it:free'), openrouter('google/gemma-4-26b-a4b-it:free')],
-    },
+    { maxTokens: 700, temperature: 0.1, timeoutMs: 40000, models: [model] },
   )
 
-  const parsed = parseAiJson('identify-species', content)
+  const parsed = parseAiJson(`identify-species:${model.model}`, content)
   if (!parsed) return null
+  const raw = Array.isArray(parsed.candidatos) ? parsed.candidatos : []
+  return raw
+    .map((c) => {
+      const o = (c ?? {}) as Record<string, unknown>
+      return {
+        id: typeof o.id === 'string' ? o.id.trim() : '',
+        score: Math.max(0, Math.min(100, Number(o.seguridad) || 0)),
+        evidence: typeof o.evidencia === 'string' ? o.evidencia.trim().slice(0, 90) : '',
+      }
+    })
+    .filter((c) => c.id)
+}
 
-  const id = typeof parsed.id === 'string' ? parsed.id.trim() : ''
-  const sp = SEA_SPECIES.find((s) => s.id === id)
-  if (!sp) return null
+/**
+ * Qué especie hay en una foto de captura.
+ *
+ * Tres cosas la hacen bastante más fiable que preguntar "¿qué pez es?":
+ *
+ *  1. GUÍA DE CAMPO. Se le pasan los `idTraits` de cada especie, redactados
+ *     para separar las que se confunden. Medido con fotos degradadas, dar solo
+ *     la lista de nombres acertaba el 69% y TODOS los fallos eran confusiones
+ *     de familia (breca→dorada, herrera→sargo, corvina→lubina).
+ *  2. DOS MODELOS. Se pregunta a dos y se suman sus puntuaciones. Cuando
+ *     coinciden en el primero (`agreement`), la respuesta es mucho más
+ *     fiable, y eso se le puede decir al pescador.
+ *  3. CONTEXTO COMO PESO, NO COMO FILTRO. La zona y el mes desempatan entre
+ *     parecidas, pero jamás descartan un candidato: el catálogo de especies
+ *     por zona está limitado a 6 y curado para páginas de destino, así que
+ *     usarlo para filtrar impediría reconocer una captura legítima que no
+ *     estuviera en esa lista.
+ *
+ * SIGUE SIENDO UNA SUGERENCIA que confirma el pescador, y no decide nada legal
+ * (talla mínima, especie protegida): eso se consulta en la fuente oficial.
+ *
+ * `imageDataUrl` debe venir ya reducida (~640 px): con la foto original el
+ * proveedor gratuito devuelve 429.
+ */
+export async function identifySpecies(
+  imageDataUrl: string,
+  ctx: SpeciesIdContext = {},
+): Promise<SpeciesIdResult | null> {
+  if (!isApiConfigured()) return null
+  if (!/^data:image\/(jpe?g|png|webp);base64,/i.test(imageDataUrl)) return null
 
-  const conf = String(parsed.confianza ?? '').toLowerCase()
-  return {
-    speciesId: sp.id,
-    name: sp.name,
-    confidence: conf === 'alta' || conf === 'media' ? conf : 'baja',
+  const { SEA_SPECIES } = await import('@/lib/fishing-species')
+  const guide = SEA_SPECIES.map((s) => `${s.id} (${s.name}): ${s.idTraits}`).join('\n')
+
+  /*
+   * SEGUNDA OPINIÓN SOLO CUANDO HACE FALTA.
+   *
+   * Los dos Gemma son los únicos gratuitos que aceptan imagen y aciertan (el
+   * `nemotron-nano-12b-v2-vl` confundió una lubina con un pez espada). La
+   * tentación es preguntar a los dos siempre y sumar, pero eso DUPLICA el
+   * consumo y el pool gratuito devuelve 429 con facilidad — medido: 60
+   * llamadas seguidas lo agotan. Así que se pregunta al segundo solo si el
+   * primero duda, que es justo cuando una segunda opinión aporta algo. Con una
+   * foto clara se resuelve con una sola llamada.
+   */
+  const SEGURO = 80
+  const a = await askVision(imageDataUrl, guide, ctx, openrouter('google/gemma-4-31b-it:free'))
+  const dudaA = !a || a.length === 0 || (a[0]?.score ?? 0) < SEGURO
+  const b = dudaA
+    ? await askVision(imageDataUrl, guide, ctx, openrouter('google/gemma-4-26b-a4b-it:free'))
+    : null
+
+  // Ningún modelo contestó: es un fallo técnico (cuota, red), NO "no la
+  // reconozco". Quien llama debe poder distinguirlo para no mentir al usuario.
+  if (!a && !b) return null
+
+  // Se suman las puntuaciones de ambos; un id que solo conoce uno sigue
+  // contando, pero pesa la mitad que uno en el que coinciden los dos.
+  const pool = new Map<string, { score: number; votos: number; evidence: string }>()
+  for (const lista of [a, b]) {
+    for (const c of lista ?? []) {
+      const sp = SEA_SPECIES.find((s) => s.id === c.id)
+      if (!sp) continue // id inventado: fuera
+      const e = pool.get(sp.id) ?? { score: 0, votos: 0, evidence: '' }
+      e.score += c.score
+      e.votos += 1
+      if (!e.evidence && c.evidence) e.evidence = c.evidence
+      pool.set(sp.id, e)
+    }
   }
+  if (pool.size === 0) return { candidates: [], agreement: false }
+
+  const candidates = [...pool.entries()]
+    .sort((x, y) => y[1].score - x[1].score)
+    .slice(0, 3)
+    .map(([id, e]) => {
+      const sp = SEA_SPECIES.find((s) => s.id === id)!
+      return {
+        speciesId: id,
+        name: sp.name,
+        score: Math.round(e.score / Math.max(1, e.votos)),
+        evidence: e.evidence,
+      }
+    })
+
+  const primeroA = (a ?? [])[0]?.id
+  const primeroB = (b ?? [])[0]?.id
+  const agreement = Boolean(primeroA && primeroB && primeroA === primeroB)
+
+  return { candidates, agreement }
 }
