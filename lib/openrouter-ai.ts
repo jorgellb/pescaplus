@@ -1115,7 +1115,14 @@ Devuelve SOLO JSON válido: {"title": string, "seoTitle": string, "description":
         { role: 'user', content: prompt + correccion },
       ],
       {
-        maxTokens: 1600,
+        /*
+         * 900 y no 1600. Los proveedores cuentan los tokens PEDIDOS contra el
+         * cupo, no los consumidos: reservar 1600 para una salida que ocupa unos
+         * 600 gastaba el presupuesto diario al triple de velocidad. El tope de
+         * Groq son 100.000 tokens/día, así que la diferencia es entre ~40
+         * fichas al día y bastantes más.
+         */
+        maxTokens: 900,
         temperature: intento === 0 ? 0.5 : 0.3,
         timeoutMs: 30000,
         // El 8b es demasiado flojo para esto: inventa gramática ("¡Pescar ha
