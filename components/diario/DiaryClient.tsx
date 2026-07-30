@@ -97,6 +97,69 @@ export default function DiaryClient() {
   const [entries, setEntries] = useState<CatchEntry[]>([])
   const [shared, setShared] = useState<string[]>([])
   const [sharing, setSharing] = useState<string | null>(null)
+  const [identifying, setIdentifying] = useState(false)
+  const [idNote, setIdNote] = useState('')
+
+  /**
+   * Identificar la especie desde una foto.
+   *
+   * La foto se REDUCE en el navegador antes de enviarla, y no es un detalle de
+   * rendimiento: con la original (200 KB y más) el proveedor devolvía 429 y no
+   * identificaba nada; a 640 px responde en un par de segundos. Además así no
+   * se sube por la red una foto de 12 MP para acabar preguntando "¿qué pez es?".
+   *
+   * Lo que vuelve es una SUGERENCIA: rellena el selector y quien apunta la
+   * captura la confirma. Nunca se guarda sola.
+   */
+  const identify = async (file: File) => {
+    setIdentifying(true)
+    setIdNote('')
+    try {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const img = new Image()
+        const url = URL.createObjectURL(file)
+        img.onload = () => {
+          URL.revokeObjectURL(url)
+          const lado = 640
+          const escala = Math.min(1, lado / Math.max(img.width, img.height))
+          const c = document.createElement('canvas')
+          c.width = Math.round(img.width * escala)
+          c.height = Math.round(img.height * escala)
+          const ctx = c.getContext('2d')
+          if (!ctx) { reject(new Error('sin canvas')); return }
+          ctx.drawImage(img, 0, 0, c.width, c.height)
+          resolve(c.toDataURL('image/jpeg', 0.8))
+        }
+        img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('no es una imagen')) }
+        img.src = url
+      })
+
+      const res = await fetch('/api/capturas/identificar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: dataUrl }),
+      })
+      const data = await res.json()
+      if (!res.ok || !data.success) {
+        setIdNote(data.error ?? 'No se ha podido identificar.')
+        return
+      }
+      if (!data.guess) {
+        setIdNote('No la reconozco con seguridad. Elígela a mano.')
+        return
+      }
+      setForm((f) => ({ ...f, speciesId: data.guess.speciesId }))
+      setIdNote(
+        data.guess.confidence === 'alta'
+          ? `Parece ${data.guess.name}. Confírmalo.`
+          : `Quizá ${data.guess.name} (poca seguridad). Confírmalo.`,
+      )
+    } catch {
+      setIdNote('No se ha podido leer la foto.')
+    } finally {
+      setIdentifying(false)
+    }
+  }
 
   /**
    * Compartir una captura: viajan solo zona, especie, día y cantidad. La nota
@@ -278,6 +341,29 @@ export default function DiaryClient() {
               ))}
               <option value="otra">Otra</option>
             </select>
+            {/*
+              Atajo: en vez de buscar entre 29 especies, haz una foto. Es una
+              SUGERENCIA — rellena el selector y la confirmas tú. La foto no se
+              guarda en ningún sitio: se usa para preguntar y se descarta.
+            */}
+            <span className="mt-2 flex flex-wrap items-center gap-2">
+              <label className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-accent cursor-pointer hover:underline">
+                <Icon name="image" className="w-3.5 h-3.5" strokeWidth={1.8} />
+                {identifying ? 'Identificando…' : 'Identificar con una foto'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  disabled={identifying}
+                  onChange={(ev) => {
+                    const file = ev.target.files?.[0]
+                    ev.target.value = ''
+                    if (file) identify(file)
+                  }}
+                />
+              </label>
+              {idNote && <span className="text-[12px] text-ink/70">{idNote}</span>}
+            </span>
           </label>
           <label className="block">
             <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Piezas</span>

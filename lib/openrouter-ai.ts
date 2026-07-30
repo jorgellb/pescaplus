@@ -1252,3 +1252,86 @@ Devuelve SOLO JSON válido:
   }
   return g
 }
+
+// ---------------------------------------------------------------------------
+// Identificación de especie a partir de una foto
+// ---------------------------------------------------------------------------
+
+export interface SpeciesGuess {
+  /** Id de SEA_SPECIES, ya validado contra el catálogo. */
+  speciesId: string
+  name: string
+  confidence: 'alta' | 'media' | 'baja'
+}
+
+/**
+ * Qué especie hay en una foto, eligiendo SOLO del catálogo del sitio.
+ *
+ * Se le da la lista cerrada de especies en vez de dejarle contestar libremente
+ * por dos razones: acierta mucho más, y lo que devuelve encaja directamente con
+ * un `speciesId` real en vez de un nombre suelto que habría que adivinar. Si
+ * dice algo que no está en la lista, se descarta — antes devolver nada que una
+ * especie inventada.
+ *
+ * Medido con las 29 fotos etiquetadas de `public/imagenesPeces`: 11 de 11 en la
+ * muestra probada con `google/gemma-4-26b-a4b-it:free`. El modelo con visión de
+ * NVIDIA (`nemotron-nano-12b-v2-vl`) falla bastante (confundió una lubina con
+ * un pez espada), así que NO se usa aquí.
+ *
+ * ES UNA SUGERENCIA, y quien llama debe tratarla como tal: la confirma el
+ * pescador. En particular NO sirve para decidir nada legal (talla mínima,
+ * especie protegida) — eso se consulta en la fuente oficial, por lo mismo que
+ * `lib/fishing-regulations.ts` no fija tallas.
+ *
+ * `imageDataUrl` debe venir ya reducida por el cliente (~640 px). Con la foto
+ * original de 200 KB el proveedor gratuito devolvía 429; con 40 KB responde
+ * bien y en un par de segundos.
+ */
+export async function identifySpecies(imageDataUrl: string): Promise<SpeciesGuess | null> {
+  if (!isApiConfigured()) return null
+  if (!/^data:image\/(jpe?g|png|webp);base64,/i.test(imageDataUrl)) return null
+
+  const { SEA_SPECIES } = await import('@/lib/fishing-species')
+  const lista = SEA_SPECIES.map((s) => `${s.id} = ${s.name}`).join('\n')
+
+  const content = await callAiModel(
+    [
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'text',
+            text: `Eres un biólogo marino español. Identifica la especie de la foto eligiendo SOLO de esta lista:
+${lista}
+
+Si no estás seguro, o si en la foto no hay ninguna de estas especies, devuelve id "" y confianza "baja". No inventes.
+Devuelve SOLO JSON: {"id": "<id de la lista o vacío>", "confianza": "alta"|"media"|"baja"}`,
+          },
+          { type: 'image_url', image_url: { url: imageDataUrl } },
+        ],
+      } as unknown as ChatMessage,
+    ],
+    {
+      maxTokens: 200,
+      temperature: 0.1,
+      timeoutMs: 30000,
+      // Solo los que aceptan imagen Y aciertan. El 31b va primero por calidad,
+      // pero su cupo gratuito se satura a menudo, así que el 26b lo respalda.
+      models: [openrouter('google/gemma-4-31b-it:free'), openrouter('google/gemma-4-26b-a4b-it:free')],
+    },
+  )
+
+  const parsed = parseAiJson('identify-species', content)
+  if (!parsed) return null
+
+  const id = typeof parsed.id === 'string' ? parsed.id.trim() : ''
+  const sp = SEA_SPECIES.find((s) => s.id === id)
+  if (!sp) return null
+
+  const conf = String(parsed.confianza ?? '').toLowerCase()
+  return {
+    speciesId: sp.id,
+    name: sp.name,
+    confidence: conf === 'alta' || conf === 'media' ? conf : 'baja',
+  }
+}
