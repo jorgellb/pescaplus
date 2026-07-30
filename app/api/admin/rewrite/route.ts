@@ -51,6 +51,14 @@ export async function POST(request: NextRequest) {
     }
     if (parsed.data.kind === 'product-seo') {
       const draft = await polishProductSeo(parsed.data)
+      // Saturación de la IA: 503 para que quien llama espere y reintente, en
+      // vez de anotar la ficha como fallida.
+      if (draft.unavailable) {
+        return NextResponse.json(
+          { success: false, error: 'La IA está saturada ahora mismo. Reintentando…' },
+          { status: 503 },
+        )
+      }
       return NextResponse.json({ success: true, draft })
     }
     const draft = await rewriteGuideCopy({ ...parsed.data, excerpt: parsed.data.excerpt ?? '' })

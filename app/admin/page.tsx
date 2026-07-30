@@ -16,7 +16,7 @@ export default function AdminProductsPage() {
   const [creating, setCreating] = useState(false)
   const [backend, setBackend] = useState<string>('')
   const [selected, setSelected] = useState<Set<string>>(new Set())
-  const [bulk, setBulk] = useState<{ done: number; total: number; ok: number; fail: number } | null>(null)
+  const [bulk, setBulk] = useState<{ done: number; total: number; ok: number; fail: number; esperando?: boolean } | null>(null)
   const [optFilter, setOptFilter] = useState<'all' | 'yes' | 'no'>('all')
   const confirm = useConfirm()
   const toast = useToast()
@@ -111,6 +111,17 @@ export default function AdminProductsPage() {
           }),
         })
         const data = await res.json()
+        /*
+         * Un 503 es "la IA está saturada ahora mismo", no "esta ficha no se
+         * puede pulir". Contarlo como fallo hacía creer que el pulido estaba
+         * roto cuando solo había que ir más despacio.
+         */
+        if (res.status === 503) {
+          setBulk({ done: i, total: targets.length, ok, fail, esperando: true })
+          await new Promise((r) => setTimeout(r, 30000))
+          i-- // se reintenta esta misma ficha
+          continue
+        }
         if (data.success && data.draft?.generatedBy === 'ai') {
           const d = data.draft
           const imageAlts = (p.images ?? []).map((_, idx) => d.imageAlts?.[idx] || p.imageAlts?.[idx] || '')
@@ -135,6 +146,14 @@ export default function AdminProductsPage() {
         fail++
       }
       setBulk({ done: i + 1, total: targets.length, ok, fail })
+
+      /*
+       * Pausa entre fichas. El tope de Groq son 12.000 tokens POR MINUTO y cada
+       * pulido gasta unos 2.500, así que sin frenar salta el 429 al tercero.
+       * Con ~14 s de separación caben 4 por minuto y el proceso entero termina
+       * sin tocar el límite: tarda más, pero acaba en vez de fallar.
+       */
+      if (i < targets.length - 1) await new Promise((r) => setTimeout(r, 14000))
     }
     await load()
     setSelected(new Set())
@@ -233,7 +252,7 @@ export default function AdminProductsPage() {
             <span className="font-bold text-ink">{selected.size} seleccionado{selected.size === 1 ? '' : 's'}</span>
             {bulk && (
               <span className="font-mono text-xs text-ink/60">
-                Pulido {bulk.done}/{bulk.total} · {bulk.ok} ok{bulk.fail ? ` · ${bulk.fail} fallo(s)` : ''}
+                Pulido {bulk.done}/{bulk.total} · {bulk.ok} ok{bulk.fail ? ` · ${bulk.fail} fallo(s)` : ''}{bulk.esperando ? ' · esperando a la IA…' : ''}
               </span>
             )}
           </div>

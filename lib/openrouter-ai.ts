@@ -68,6 +68,16 @@ const OPENROUTER_MODELS: string[] = (() => {
 /** Cadena por defecto: Groq primero (más rápido y con más cuota gratis diaria), OpenRouter como red detrás. */
 const DEFAULT_MODEL_CHAIN: ModelRef[] = [...GROQ_MODELS, ...OPENROUTER_MODELS.map(openrouter)]
 
+/**
+ * Reintentos del MISMO modelo ante un 429 antes de pasar al siguiente.
+ *
+ * Uno, no dos: con tres modelos en cadena y dos reintentos cada uno la llamada
+ * llegaba a 125 s, y la ruta de reescritura tiene `maxDuration = 120` — en
+ * producción se habría cortado justo cuando iba a contestar. Con uno, el peor
+ * caso queda holgado y sigue absorbiendo el 429 típico del límite por minuto.
+ */
+const REINTENTOS_429 = 1
+
 interface AiCallOptions {
   maxTokens?: number
   temperature?: number
@@ -89,38 +99,69 @@ async function callAiModel(
   { maxTokens = 1024, temperature = 0.7, topP = 0.95, timeoutMs = 20000, models }: AiCallOptions = {},
 ): Promise<string | null> {
   for (const ref of models ?? DEFAULT_MODEL_CHAIN) {
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), timeoutMs)
-    try {
-      const isGroq = ref.provider === 'groq'
-      const baseUrl = isGroq ? GROQ_BASE_URL : OPENROUTER_BASE_URL
-      const apiKey = isGroq ? GROQ_API_KEY : OPENROUTER_API_KEY
-      const headers: Record<string, string> = {
-        Authorization: `Bearer ${apiKey}`,
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
+    const isGroq = ref.provider === 'groq'
+    const baseUrl = isGroq ? GROQ_BASE_URL : OPENROUTER_BASE_URL
+    const apiKey = isGroq ? GROQ_API_KEY : OPENROUTER_API_KEY
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${apiKey}`,
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    }
+    if (!isGroq) {
+      headers['HTTP-Referer'] = 'https://pescaplus.es'
+      headers['X-Title'] = 'PescaPlus'
+    }
+
+    for (let intento = 0; intento <= REINTENTOS_429; intento++) {
+      const controller = new AbortController()
+      const timer = setTimeout(() => controller.abort(), timeoutMs)
+      try {
+        const response = await fetch(`${baseUrl}/chat/completions`, {
+          method: 'POST',
+          signal: controller.signal,
+          headers,
+          body: JSON.stringify({ model: ref.model, messages, max_tokens: maxTokens, temperature, top_p: topP }),
+        })
+
+        /**
+         * Un 429 NO significa "este modelo no sirve": significa "espera un
+         * momento". Antes se saltaba al siguiente modelo, así que un límite POR
+         * MINUTO quemaba los tres de la cadena en dos segundos y la función
+         * devolvía null.
+         *
+         * Es lo que rompía el pulido SEO en bloque: el tope de Groq son 12.000
+         * tokens por minuto y cada pulido gasta ~2.500, así que al tercer
+         * producto seguido salta — con la cuota DIARIA intacta (999 de 1.000
+         * peticiones disponibles cuando se diagnosticó).
+         *
+         * Se espera lo que pida el proveedor (`retry-after`) o un margen
+         * creciente, y se reintenta el MISMO modelo. Solo al agotar los
+         * reintentos se pasa al siguiente.
+         */
+        if (response.status === 429 && intento < REINTENTOS_429) {
+          const retryAfter = Number(response.headers.get('retry-after'))
+          const esperaS = Number.isFinite(retryAfter) && retryAfter > 0
+            ? Math.min(retryAfter, 20)
+            : 3 * (intento + 1)
+          console.warn(`${ref.provider} ${ref.model} -> 429, esperando ${esperaS}s y reintentando`)
+          await new Promise((r) => setTimeout(r, esperaS * 1000))
+          continue
+        }
+
+        if (!response.ok) {
+          console.warn(`${ref.provider} model ${ref.model} -> HTTP ${response.status}, trying next`)
+          break
+        }
+        const data = await response.json()
+        const content: string | undefined = data.choices?.[0]?.message?.content
+        if (content?.trim()) return content.trim()
+        break
+      } catch (error) {
+        console.warn(`${ref.provider} model ${ref.model} failed (${(error as Error).message}), trying next`)
+        break
+      } finally {
+        clearTimeout(timer)
       }
-      if (!isGroq) {
-        headers['HTTP-Referer'] = 'https://pescaplus.es'
-        headers['X-Title'] = 'PescaPlus'
-      }
-      const response = await fetch(`${baseUrl}/chat/completions`, {
-        method: 'POST',
-        signal: controller.signal,
-        headers,
-        body: JSON.stringify({ model: ref.model, messages, max_tokens: maxTokens, temperature, top_p: topP }),
-      })
-      if (!response.ok) {
-        console.warn(`${ref.provider} model ${ref.model} -> HTTP ${response.status}, trying next`)
-        continue
-      }
-      const data = await response.json()
-      const content: string | undefined = data.choices?.[0]?.message?.content
-      if (content?.trim()) return content.trim()
-    } catch (error) {
-      console.warn(`${ref.provider} model ${ref.model} failed (${(error as Error).message}), trying next`)
-    } finally {
-      clearTimeout(timer)
     }
   }
   return null
@@ -900,6 +941,14 @@ export interface PolishedProduct {
   seoDescription: string
   imageAlts: string[]
   generatedBy: 'ai' | 'offline'
+  /**
+   * `true` cuando NINGÚN modelo contestó (cuota por minuto, red). No es lo
+   * mismo que "ha contestado y no pasaba la revisión": en el primer caso hay
+   * que esperar y reintentar, en el segundo insistir no arregla nada. Sin esta
+   * distinción, el pulido en bloque contaba los 429 como fichas fallidas y
+   * parecía que la función estaba rota.
+   */
+  unavailable?: boolean
 }
 
 const asStringArray = (v: unknown, len: number): string[] => {
@@ -1052,6 +1101,8 @@ Devuelve SOLO JSON válido: {"title": string, "seoTitle": string, "description":
    */
   let ultimo: ReturnType<typeof leer> | null = null
   let ultimosFallos: string[] = []
+  /** ¿Contestó alguna vez algún modelo? Si no, es cuota, no mala redacción. */
+  let hubeRespuesta = false
 
   for (let intento = 0; intento < 2; intento++) {
     const correccion = intento === 0 || !ultimo
@@ -1075,6 +1126,7 @@ Devuelve SOLO JSON válido: {"title": string, "seoTitle": string, "description":
     )
     const parsed = parseAiJson('polish-product-seo', content)
     if (!parsed) continue
+    hubeRespuesta = true
 
     const cand = leer(parsed)
     const fallos = seoProblems(cand, catLink)
@@ -1085,6 +1137,10 @@ Devuelve SOLO JSON válido: {"title": string, "seoTitle": string, "description":
     console.warn(`polish-product-seo: intento ${intento + 1} rechazado (${fallos.join('; ')}) · "${input.title.slice(0, 60)}"`)
   }
 
+  if (!hubeRespuesta) {
+    console.warn(`polish-product-seo: ningún modelo disponible · "${input.title.slice(0, 60)}"`)
+    return { ...current, generatedBy: 'offline', unavailable: true }
+  }
   console.warn(`polish-product-seo: se deja la ficha sin tocar · "${input.title.slice(0, 60)}"`)
   return { ...current, generatedBy: 'offline' }
 }
