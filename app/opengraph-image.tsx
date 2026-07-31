@@ -3,6 +3,12 @@ import { ImageResponse } from 'next/og'
 export const alt = 'PescaPlus — Tienda especializada de pesca'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
+/**
+ * Cacheada un día. Generar una imagen OG es renderizar con satori, que es de
+ * lo más caro en CPU de todo el sitio; siendo dinámica, cada visita de un bot
+ * social la recalculaba. Solo cambia si cambia la ficha.
+ */
+export const revalidate = 86400
 
 const PAPER = '#ffffff'
 const INK = '#0f1417'

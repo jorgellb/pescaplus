@@ -3,7 +3,18 @@ import { notFound } from 'next/navigation'
 import SpotDashboard from '@/components/forecast/SpotDashboard'
 import { FEATURED_SPOT_SLUGS, getSpot } from '@/lib/fishing-spots'
 
-export const revalidate = 1800
+/**
+ * Una hora, no media.
+ *
+ * Con 30 minutos y 195 zonas, un rastreo completo del sitemap generaba unas
+ * 280.000 regeneraciones al mes, y cada una ejecuta 14 fuentes de datos y el
+ * cálculo solunar de 7 días: ~12 horas de CPU real al mes, tres veces el cupo
+ * del plan, que es lo que acabó tumbando el despliegue.
+ *
+ * No se pierde frescura: Open-Meteo publica la previsión cada hora, así que
+ * regenerar cada 30 minutos devolvía dos veces los mismos datos.
+ */
+export const revalidate = 3600
 
 type Params = { params: Promise<{ spot: string }>; searchParams: Promise<{ especie?: string; modo?: string }> }
 
