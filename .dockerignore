@@ -1,0 +1,38 @@
+# Lo que NO debe entrar en el contexto de build.
+# Sin esto, Docker sube el proyecto entero (incluidos android/ y .next/) al
+# daemon en cada build: minutos de espera y una imagen con cosas que no pinta.
+
+node_modules
+.next
+out
+dist
+
+# Secretos: JAMÁS dentro de la imagen. Las variables las inyecta Coolify en
+# tiempo de ejecución.
+.env
+.env.*
+!.env.example
+android/keystore.properties
+
+# App nativa: no tiene nada que hacer en el servidor web (y android/ pesa
+# cientos de MB con los artefactos de Gradle).
+android
+ios
+resources
+
+.git
+.github
+.gitignore
+*.md
+!README.md
+
+# Pruebas y herramientas de desarrollo.
+tests
+vitest.config.*
+eslint.config.*
+.vscode
+.idea
+
+# APK publicada: se sirve desde public/descargas, pero pesa 3,4 MB y se puede
+# regenerar; si se quiere en la web, dejar este renglón comentado.
+# public/descargas

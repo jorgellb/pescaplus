@@ -39,6 +39,19 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   // Don't advertise the framework/version.
   poweredByHeader: false,
+  /**
+   * Salida autocontenida, para poder empaquetar el sitio en un contenedor.
+   *
+   * Next copia en `.next/standalone` solo el servidor y las dependencias que
+   * realmente usa, así que la imagen no arrastra los `node_modules` enteros
+   * (cientos de MB). Necesario para desplegar fuera de Vercel — en nuestro caso
+   * OCI con Coolify, después de que el cupo de CPU medida de Vercel tumbara el
+   * despliegue.
+   *
+   * OJO: `public/` y `.next/static` NO entran en standalone; hay que copiarlos
+   * a mano en el Dockerfile o el sitio arranca sin estilos ni imágenes.
+   */
+  output: "standalone",
   // Pin the workspace root to this app so the extra lockfile in the parent
   // directory doesn't confuse Turbopack's root inference during build.
   turbopack: {
