@@ -38,6 +38,19 @@ sudo sysctl -w vm.swappiness=10 && echo 'vm.swappiness=10' | sudo tee -a /etc/sy
    sudo netfilter-persistent save
    ```
    Sin esto la web no responde y todo parece roto sin motivo.
+3. **Y 443 también por UDP**, que es lo que casi nadie abre. Traefik anuncia
+   HTTP/3 con `alt-svc: h3=":443"` y escucha en UDP, pero las reglas de OCI se
+   crean por protocolo y lo normal es abrir solo TCP. El resultado no es un
+   error claro: el navegador intenta QUIC, no le contesta nadie, espera y acaba
+   cayendo a TCP. Funciona, pero perdiendo tiempo en cada visita.
+
+   Se comprueba en un segundo:
+   ```bash
+   curl --http3-only -s -o /dev/null -w "%{http_code} %{http_version}\n" https://pescaplus.es/
+   ```
+   `200 3` es correcto; `000` significa que UDP 443 está cerrado. Entonces, o se
+   abre en la Security List, o hay que quitar `--entrypoints.https.http3` del
+   proxy para dejar de anunciar algo que no funciona.
 
 ## 2. Coolify
 
@@ -149,6 +162,19 @@ base de datos no está llegando** y se está sirviendo el catálogo semilla — 
 
 En `/admin/ajustes` la fila «Asistente IA» dice qué proveedores hay
 configurados. Deben aparecer los tres.
+
+**Y el service worker: hay que subirle el número de versión.** Al cambiar de
+alojamiento el sitio se reconstruye entero y *todos* los ficheros de
+`/_next/static` cambian de nombre, así que quien ya había visitado la web se
+queda con una copia guardada que pide ficheros inexistentes: **salen los menús y
+no sale ni el cuerpo ni las imágenes**. Y no da ningún error — la web parece
+rota solo para quien ya la conocía, que son justo los clientes que vuelven.
+
+Se arregla subiendo `VERSION` y `PAGES` en `public/sw.js`: el evento `activate`
+borra las cachés viejas en la siguiente visita, sin que nadie tenga que vaciar
+nada a mano. **`TILES` y `SEABED` no se tocan**: son teselas del mapa y sondas
+del fondo, que no dependen del alojamiento, y borrarlas deja sin carta náutica a
+quien la lleve descargada para salir al mar.
 
 ## Por qué nos fuimos de Vercel
 
