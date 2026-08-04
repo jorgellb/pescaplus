@@ -29,12 +29,27 @@ COPY . .
 # Telemetría de Next fuera: no queremos llamadas de salida desde el build.
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# El build hace `prisma generate`, así que el cliente queda dentro de la imagen.
+# La base de datos SÍ hace falta durante el build, y esto no es opcional.
 #
-# NO se pasa DATABASE_URL a propósito: durante el prerender, este proyecto ya ha
-# tropezado con el límite de conexiones de Aiven al abrir muchas en paralelo. Sin
-# la variable, las páginas que consultan datos se generan bajo demanda al
-# arrancar, que es lo que queremos en un servidor propio (no se paga por render).
+# Sin ella, `isDatabaseConfigured()` da false y las páginas de catálogo se
+# hornean con el CATÁLOGO SEMILLA (84 productos de lib/catalog-data.ts) en lugar
+# de los reales. Y como son ISR, ese HTML con el catálogo equivocado se sirve
+# hasta que revalide — hasta una hora después de cada despliegue. Es exactamente
+# el fallo que tuvo el sitio en Vercel durante días.
+#
+# Se pasa como ARG para que Coolify pueda inyectarla marcando la variable como
+# "Build Variable". OJO: un ARG queda en el historial de la imagen, así que esta
+# imagen NO debe publicarse en un registro público.
+ARG DATABASE_URL
+ARG DATABASE_CA_CERT
+ENV DATABASE_URL=$DATABASE_URL
+ENV DATABASE_CA_CERT=$DATABASE_CA_CERT
+
+# Pool pequeño durante el build: el prerender abre páginas en paralelo y el plan
+# de Aiven corta en 20 conexiones. Con 2 por worker no se llega al límite —
+# `TooManyConnections` a mitad de build deja páginas horneadas con datos vacíos.
+ENV DATABASE_POOL_MAX=2
+
 RUN npm run build
 
 # ---------------------------------------------------------------------------

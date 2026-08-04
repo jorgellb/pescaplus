@@ -47,7 +47,16 @@ Entra en `http://IP:8000`, crea la cuenta y añade el repositorio de GitHub.
 ## 3. Variables de entorno
 
 Todas en Coolify (pestaña *Environment Variables*). La lista completa y
-comentada está en `.env.example`. Las que **no pueden faltar**:
+comentada está en `.env.example`.
+
+> ⚠️ **`DATABASE_URL` y `DATABASE_CA_CERT` hay que marcarlas también como
+> «Build Variable»** en Coolify, no solo de ejecución. Sin ellas durante el
+> build, las páginas de catálogo se hornean con el catálogo semilla (84
+> productos) y se sirven así hasta que revaliden — hasta una hora después de
+> cada despliegue. Comprobado en el servidor: sin la variable salían 9 señuelos;
+> con ella, los 67 reales.
+
+Las que **no pueden faltar**:
 
 | Variable | Por qué |
 |---|---|
