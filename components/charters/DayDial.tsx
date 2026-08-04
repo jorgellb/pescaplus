@@ -62,7 +62,7 @@ export default function DayDial({
       fill="none"
       className={className}
       role="img"
-      aria-label={`Actividad prevista: ${w.label.toLowerCase()}${w.best ? `, mejor tramo de ${w.best.replace('–', ' a ')}` : ''}. Luna ${w.moonPhaseName.toLowerCase()}.`}
+      aria-label={`Actividad prevista: ${w.label.toLowerCase()}${w.best ? `, mejor tramo de ${w.best.replace('–', ' a ')}` : ''}. ${w.moonPhaseName}.`}
     >
       {/* Carril del día */}
       <path d={arco(0, 1)} className="stroke-ink/[0.07]" strokeWidth={GROSOR} strokeLinecap="round" />

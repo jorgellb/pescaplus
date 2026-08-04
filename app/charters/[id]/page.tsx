@@ -19,6 +19,8 @@ import { getMarineForecast, groupByDay, bestWindow, getModality } from '@/lib/ma
 import { dayVerdict, navigationWindows, safetyAlerts } from '@/lib/sea-state'
 import { fmtDateLong, fmtWindowRange, todayMadridISO, addDaysISO } from '@/lib/solunar-format'
 import Icon, { type IconName } from '@/components/icons/Icon'
+import DayDial from '@/components/charters/DayDial'
+import { charterWindow } from '@/lib/charter-window'
 import Stars from '@/components/Stars'
 
 export const metadata: Metadata = { title: 'Chárter de pesca', robots: { index: false, follow: true } }
@@ -57,6 +59,19 @@ export default async function CharterPage({ params, searchParams }: { params: Pr
   const cancelled = charter.status === 'cancelled'
 
   const today = todayMadridISO()
+
+  /**
+   * La ventana solunar del día de la salida. Se calcula SIEMPRE, para cualquier
+   * fecha, porque es astronomía y no previsión: sol, luna y periodos de
+   * actividad salen igual de bien dentro de tres semanas que mañana.
+   *
+   * Importa porque `outlook` —viento y estado del mar— solo existe dentro del
+   * horizonte de 6 días de la API marina, y un chárter se reserva casi siempre
+   * con más antelación que eso. Sin esto, la ficha de una salida a tres semanas
+   * no enseñaba NADA del día, que es justo lo que nos distingue.
+   */
+  const ventana = charterWindow(charter.spotSlug, charter.dateISO)
+
   let outlook: { verdict: string; window: string | null; navSafe: boolean | null; danger: boolean } | null = null
   if (spot && spot.type === 'mar' && charter.dateISO >= today && charter.dateISO <= addDaysISO(today, 6)) {
     try {
@@ -105,6 +120,64 @@ export default async function CharterPage({ params, searchParams }: { params: Pr
       </section>
 
       <section className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+        {/* EL DÍA DE LA SALIDA, arriba del todo.
+            Estaba a media página, por debajo de las especificaciones del barco,
+            y es lo que decide la reserva: un buen barco un mal día sigue siendo
+            un mal día. Va antes que las fotos a propósito. */}
+        {(ventana || outlook) && (
+          <div className={`border rounded-2xl overflow-hidden ${outlook?.danger ? 'border-red-700/40 bg-red-700/[0.06]' : 'border-ink/[0.07] bg-paper shadow-hard'}`}>
+            <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto] gap-4 items-center p-5">
+              <div>
+                <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">
+                  <Icon name="wave" className="w-3.5 h-3.5 inline -mt-0.5" strokeWidth={2} /> El día de la salida en {spot?.name ?? charter.spotSlug}
+                </p>
+
+                {ventana && (
+                  <p className="font-display text-2xl sm:text-3xl text-ink leading-none mt-2">
+                    {ventana.label}
+                    {ventana.best && <span className="text-ink/60 text-lg"> · mejor {ventana.best}</span>}
+                  </p>
+                )}
+
+                {/* Viento y estado del mar: solo dentro del horizonte de la API. */}
+                {outlook ? (
+                  outlook.danger ? (
+                    <p className="text-[14px] text-red-900 mt-2 inline-flex items-start gap-1.5">
+                      <Icon name="warning" className="w-4 h-4 shrink-0 mt-0.5" strokeWidth={2} />
+                      Condiciones exigentes o no navegables ese día. El patrón decide si la salida es segura.
+                    </p>
+                  ) : (
+                    <p className="text-[14px] text-ink/80 mt-2">
+                      {outlook.verdict}
+                      {outlook.navSafe && <> · navegación apta <Icon name="checkCircle" className="w-3 h-3 inline -mt-0.5 text-accent" strokeWidth={2.2} /></>}
+                    </p>
+                  )
+                ) : (
+                  <p className="text-[13px] text-ink/55 mt-2">
+                    Actividad solunar y luna de esa fecha. El viento y el estado del mar se publican
+                    cuando la salida entra en los próximos 7 días.
+                  </p>
+                )}
+
+                {ventana && (
+                  <p className="text-[12px] text-ink/55 mt-2">
+                    {ventana.moonPhaseName}, {Math.round(ventana.moonIllumination * 100)} % iluminada
+                  </p>
+                )}
+
+                <Link
+                  href={`/mejores-horas/${charter.spotSlug}?modo=barco${charter.targetSpecies ? `&especie=${charter.targetSpecies}` : ''}`}
+                  className="inline-block text-[12px] font-bold uppercase tracking-wide text-accent hover:underline mt-3"
+                >
+                  Ver la previsión completa →
+                </Link>
+              </div>
+
+              {ventana && <DayDial window={ventana} className="w-full sm:w-[220px] shrink-0" />}
+            </div>
+          </div>
+        )}
+
         <PhotoGallery photos={charter.operator.photos} alt={`${charter.operator.boatName || 'Barco'} — ${charter.highlights || 'chárter de pesca'}`} />
 
         {/* Operador verificado */}

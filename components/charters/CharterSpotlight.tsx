@@ -104,7 +104,7 @@ export default function CharterSpotlight() {
                     )}
                   </div>
                   <p className="text-[12px] text-ink/60 text-right shrink-0">
-                    Luna {mejor.window.moonPhaseName.toLowerCase()}
+                    {mejor.window.moonPhaseName}
                     <br />
                     {Math.round(mejor.window.moonIllumination * 100)} % iluminada
                   </p>

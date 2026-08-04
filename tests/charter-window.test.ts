@@ -58,6 +58,20 @@ describe('ventana de pesca de una salida', () => {
     }
   })
 
+  /**
+   * El solunar reparte periodos por las 24 h, así que el mayor de un día puede
+   * caer de madrugada. Anunciar «mejor 01:04–03:04» en una salida que zarpa a
+   * las siete es dato correcto e inútil, así que se prefiere el tramo con luz.
+   */
+  it('el mejor tramo cae de día siempre que haya alguno con luz', () => {
+    for (const fecha of ['2026-08-07', '2026-08-28', '2026-09-15', '2026-10-02']) {
+      const w = charterWindow('vera', fecha)!
+      const [h] = w.best!.split(':').map(Number)
+      expect(h, `${fecha} propone ${w.best}, que es de noche`).toBeGreaterThanOrEqual(6)
+      expect(h).toBeLessThanOrEqual(21)
+    }
+  })
+
   it('la luna va de 0 a 1 y tiene nombre', () => {
     const w = charterWindow('tarifa', '2026-08-10')!
     expect(w.moonIllumination).toBeGreaterThanOrEqual(0)

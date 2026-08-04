@@ -74,8 +74,23 @@ export function charterWindow(spotSlug: string, dateISO: string): CharterWindow 
     return null
   }
 
+  /**
+   * El mejor tramo del día, prefiriendo los que caen DE DÍA.
+   *
+   * El solunar reparte periodos por las 24 h, así que el mayor de un día puede
+   * caer a las 01:00. Es dato correcto, pero anunciarle «mejor 01:04–03:04» a
+   * quien mira una salida que zarpa a las siete no ayuda a nadie y encima queda
+   * ridículo. Se coge el que más solape con la franja de luz; si no hay
+   * ninguno con luz, se cae al primer mayor y, en último caso, al primero.
+   */
+  const solape = (p: SolunarDay['periods'][number]) => {
+    if (!dia.sunrise || !dia.sunset) return 0
+    return Math.max(0, Math.min(p.end, dia.sunset) - Math.max(p.start, dia.sunrise))
+  }
   const mayores = dia.periods.filter((p) => p.kind === 'mayor')
-  const mejor = mayores[0] ?? dia.periods[0] ?? null
+  const conLuz = [...mayores].sort((a, b) => solape(b) - solape(a))
+  const mejor = (solape(conLuz[0] ?? mayores[0] ?? dia.periods[0]) > 0 ? conLuz[0] : null)
+    ?? mayores[0] ?? dia.periods[0] ?? null
 
   return {
     rating: dia.rating,
