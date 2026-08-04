@@ -66,6 +66,33 @@ comentada está en `.env.example`.
 > productos) y se sirven así hasta que revaliden — hasta una hora después de
 > cada despliegue. Comprobado en el servidor: sin la variable salían 9 señuelos;
 > con ella, los 67 reales.
+>
+> ⚠️ **Y `DATABASE_CA_CERT` en base64, no con `\n`.** Coolify inyecta las
+> variables de construcción **reescribiendo el Dockerfile** (se nota en el log:
+> el fichero pasa de 3,5 kB a 12,23 kB), y el parser de Dockerfile **se come las
+> barras invertidas**:
+>
+> ```
+> ENV X=inicio\nfinal      →      X vale "inicionfinal"
+> ```
+>
+> Los 24 `\n` del certificado se convierten en una `n` pegada al base64, el PEM
+> deja de ser válido, Node lo descarta **en silencio** y verifica contra el
+> almacén del sistema — que no conoce a Aiven. El build muere con
+> `Error opening a TLS connection: self-signed certificate in certificate chain`
+> (`P1011`) al recoger los datos de `/categories/[category]/[subcategory]`, sin
+> ninguna pista de que el problema sea el formato de una variable.
+>
+> Genera el valor así y pégalo tal cual:
+>
+> ```bash
+> base64 -w0 ca.pem
+> ```
+>
+> La app entiende las dos formas e incluso reconstruye el PEM destrozado
+> (`lib/db-ca.ts`, con pruebas en `tests/db-ca.test.ts`), pero **el base64 es la
+> forma que no puede romperse**, así que es la que hay que usar en cualquier
+> panel de despliegue.
 
 Las que **no pueden faltar**:
 

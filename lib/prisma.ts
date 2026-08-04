@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { Pool, type PoolConfig } from 'pg'
+import { normalizeCaCert } from './db-ca'
 
 const connectionString = process.env.DATABASE_URL
 
@@ -12,12 +13,16 @@ const connectionString = process.env.DATABASE_URL
  *   - Set DATABASE_CA_CERT to the Aiven CA (PEM) → we verify properly (secure).
  *   - Leave it unset → we connect over TLS without verifying the cert (simple).
  * Local Postgres (localhost) needs no SSL.
+ *
+ * The value goes through `normalizeCaCert` because how it survives the trip
+ * depends on who injects it — a Dockerfile parser eats the backslashes and
+ * turns the PEM into something Node silently ignores. See lib/db-ca.ts.
  */
 const isLocal = !!connectionString && /@(localhost|127\.0\.0\.1)/.test(connectionString)
 
 function sslConfig(): PoolConfig['ssl'] {
   if (!connectionString || isLocal) return undefined
-  const ca = process.env.DATABASE_CA_CERT?.replace(/\\n/g, '\n')
+  const ca = normalizeCaCert(process.env.DATABASE_CA_CERT)
   return ca ? { ca } : { rejectUnauthorized: false }
 }
 

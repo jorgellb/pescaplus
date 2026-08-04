@@ -10,6 +10,7 @@
  */
 import 'dotenv/config'
 import pg from 'pg'
+import { pgConfig } from './pg-config.mjs'
 
 const url = process.env.DATABASE_URL
 if (!url) {
@@ -17,16 +18,14 @@ if (!url) {
   process.exit(1)
 }
 
-const ca = process.env.DATABASE_CA_CERT?.replace(/\\n/g, '\n')
-const isLocal = /@(localhost|127\.0\.0\.1)/.test(url)
-const ssl = isLocal ? undefined : ca ? { ca } : { rejectUnauthorized: false }
-// Strip sslmode so our explicit `ssl` object wins (see lib/prisma.ts).
-const cleanUrl = url.replace(/([?&])ssl(mode)?=[^&]*/gi, '$1').replace(/[?&]$/, '')
+// La configuración de TLS sale de pg-config.mjs para que no haya dos copias:
+// era una de las tres que había, y de las tres solo se actualizaba una.
+const config = pgConfig(url)
 
 const host = (url.match(/@([^/:]+)/) || [])[1] || '—'
-console.log(`⏳ Conectando a ${host} ${ca ? '(CA verificada)' : '(TLS sin verificar)'}…`)
+console.log(`⏳ Conectando a ${host} ${config.ssl?.ca ? '(CA verificada)' : '(TLS sin verificar)'}…`)
 
-const pool = new pg.Pool({ connectionString: cleanUrl, ssl, connectionTimeoutMillis: 15000 })
+const pool = new pg.Pool(config)
 try {
   const { rows: tables } = await pool.query(
     `SELECT table_name FROM information_schema.tables
