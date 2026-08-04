@@ -123,3 +123,54 @@ describe('filtros aplicados al listado público (memoria)', () => {
     expect(conDesdeViejo).toHaveLength(2)
   })
 })
+
+/**
+ * La ventana de pesca como criterio de búsqueda.
+ *
+ * No se resuelve en `matches()` ni en SQL a propósito: no es un atributo de la
+ * salida sino algo derivado de (zona, fecha). Si estuviera en `matches()`, la
+ * vía con base de datos —que lo salta cuando puede resolver en la consulta— y la
+ * vía en memoria filtrarían distinto, y esa clase de divergencia no da la cara
+ * hasta producción.
+ */
+describe('filtros de chárter — la ventana del día', () => {
+  it('lee de la URL el día mínimo y el orden, descartando lo que no vale', () => {
+    expect(parseCharterFilter({ dia: '4', orden: 'ventana' })).toMatchObject({ minRating: 4, sort: 'ventana' })
+    expect(parseCharterFilter({ dia: '9' }).minRating).toBeNull()
+    expect(parseCharterFilter({ dia: 'muchas' }).minRating).toBeNull()
+    expect(parseCharterFilter({ orden: 'precio' }).sort).toBe('')
+  })
+
+  it('el día mínimo cuenta como filtro activo, y el orden no', () => {
+    // Ordenar no reduce resultados: marcarlo como "filtrado" pondría un noindex
+    // y un aviso de "resultados" en una página que enseña lo mismo.
+    expect(isFiltered(parseCharterFilter({ dia: '4' }))).toBe(true)
+    expect(isFiltered(parseCharterFilter({ orden: 'ventana' }))).toBe(false)
+  })
+
+  it('los dos viajan en la URL, para que la vista sea compartible', () => {
+    const f = parseCharterFilter({ dia: '5', orden: 'ventana', zona: 'tarifa' })
+    const q = filterToQuery(f)
+    expect(q).toContain('dia=5')
+    expect(q).toContain('orden=ventana')
+    expect(parseCharterFilter(Object.fromEntries(new URLSearchParams(q.slice(1))))).toMatchObject({
+      minRating: 5, sort: 'ventana', spotSlug: 'tarifa',
+    })
+  })
+
+  it('se explica en el encabezado de resultados', () => {
+    expect(describeFilter(parseCharterFilter({ dia: '4' }))).toContain('solo días buenos')
+    expect(describeFilter(parseCharterFilter({ dia: '5' }))).toContain('solo grandes días')
+  })
+
+  it('matches() NO lo aplica: se resuelve aparte, en el store', () => {
+    const f = parseCharterFilter({ dia: '5' })
+    const c = {
+      spotSlug: 'tarifa', dateISO: '2026-08-10', pricePerPerson: 100, tripType: 'compartida',
+      techniques: [], species: [], areas: [], highlights: '', operator: null,
+    }
+    // Aunque el día sea flojo, el predicado deja pasar la salida: filtrar por
+    // ventana es responsabilidad de porVentana() en lib/charters-store.ts.
+    expect(matches(c, f)).toBe(true)
+  })
+})

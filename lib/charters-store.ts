@@ -5,6 +5,7 @@ import {
   INCLUDED, EXCLUDED, POLICIES, SEASONS,
 } from '@/lib/charter-options'
 import { expandSeriesDates, type Repeat } from '@/lib/charter-recurrence'
+import { charterWindow } from '@/lib/charter-window'
 import { matches, EMPTY_FILTER, type CharterFilter } from '@/lib/charter-filters'
 
 /**
@@ -432,6 +433,35 @@ export async function getCharter(id: string): Promise<Charter | null> {
 }
 
 /** Public upcoming charters — verified operators only. */
+/**
+ * Filtra y ordena por la ventana de pesca del día de cada salida.
+ *
+ * Va aparte de `matches()` a propósito. `matches()` decide sobre atributos de la
+ * salida y la vía SQL lo salta cuando puede resolver en la consulta; la ventana,
+ * en cambio, no es un atributo sino algo derivado de (zona, fecha), y meterla
+ * ahí haría que el filtro se aplicara con base de datos y sin ella de forma
+ * distinta. Aplicándolo aquí, las dos vías se comportan igual.
+ *
+ * Es cálculo local y memoizado, así que ordenar doscientas salidas no cuesta red
+ * ni consultas (ver lib/charter-window.ts).
+ */
+function porVentana(list: Charter[], f: CharterFilter): Charter[] {
+  if (!f.minRating && f.sort !== 'ventana') return list
+
+  const rating = new Map(list.map((c) => [c.id, charterWindow(c.spotSlug, c.dateISO)?.rating ?? 0]))
+  const salida = f.minRating ? list.filter((c) => (rating.get(c.id) ?? 0) >= f.minRating!) : [...list]
+
+  if (f.sort === 'ventana') {
+    // A igual valoración, la más cercana primero: entre dos días igual de
+    // buenos, el pescador quiere el que puede reservar ya.
+    salida.sort((a, b) =>
+      (rating.get(b.id) ?? 0) - (rating.get(a.id) ?? 0) ||
+      a.dateISO.localeCompare(b.dateISO) ||
+      a.timeStart.localeCompare(b.timeStart))
+  }
+  return salida
+}
+
 export async function listPublicCharters(
   fromDateISO: string,
   spotSlugOrFilter?: string | CharterFilter,
@@ -466,7 +496,7 @@ export async function listPublicCharters(
       const list = rows.map((r) => assemble(baseFromRow(r), r.operator ? rowOperatorToOperator(r.operator) : null, r.bookings.map(bookingFromRow)))
       // El texto libre se resuelve aquí: acentos y varios campos a la vez son
       // más simples (y más correctos) en JS que en un LIKE.
-      return f.q ? list.filter((c) => matches(c, f)) : list
+      return porVentana(f.q ? list.filter((c) => matches(c, f)) : list, f)
     } catch (error) {
       console.warn('Charters read failed, using memory:', error)
     }
@@ -480,7 +510,7 @@ export async function listPublicCharters(
     if (!matches(full, f)) continue
     out.push(full)
   }
-  return out.sort((a, b) => a.dateISO.localeCompare(b.dateISO) || a.timeStart.localeCompare(b.timeStart))
+  return porVentana(out.sort((a, b) => a.dateISO.localeCompare(b.dateISO) || a.timeStart.localeCompare(b.timeStart)), f)
 }
 
 /** All of an operator's charters (their private dashboard). */

@@ -53,6 +53,25 @@ export default function CharterFilters({ initial, spots, resultCount }: {
           <input type="date" value={f.untilISO} onChange={(e) => set('untilISO', e.target.value)} className={I} /></label>
       </div>
 
+      {/* La ventana de pesca como criterio de búsqueda. Es lo único de este
+          formulario que no tiene ninguna otra web de chárters, así que va
+          visible y no escondido dentro de «Más filtros». */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60 mr-1">Según el día</span>
+        <button type="button" aria-pressed={f.sort === 'ventana'}
+          onClick={() => apply({ ...f, sort: f.sort === 'ventana' ? '' : 'ventana' })}
+          className={`px-3 py-1.5 text-[13px] font-semibold rounded-full border transition-colors ${f.sort === 'ventana' ? 'bg-accent text-paper border-accent' : 'border-ink/15 text-ink/70 hover:border-accent hover:text-accent'}`}>
+          Mejores días primero
+        </button>
+        {[{ v: 4, label: 'Solo días buenos' }, { v: 5, label: 'Solo grandes días' }].map((o) => (
+          <button key={o.v} type="button" aria-pressed={f.minRating === o.v}
+            onClick={() => apply({ ...f, minRating: f.minRating === o.v ? null : o.v })}
+            className={`px-3 py-1.5 text-[13px] font-semibold rounded-full border transition-colors ${f.minRating === o.v ? 'bg-accent text-paper border-accent' : 'border-ink/15 text-ink/70 hover:border-accent hover:text-accent'}`}>
+            {o.label}
+          </button>
+        ))}
+      </div>
+
       <div className="flex flex-wrap items-center gap-3">
         <button type="submit"
           className="bg-accent text-paper px-5 py-2.5 text-sm font-semibold rounded-full hover:brightness-110 transition-all">

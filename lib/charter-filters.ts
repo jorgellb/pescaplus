@@ -21,11 +21,20 @@ export interface CharterFilter {
   maxPrice: number | null
   /** Free text over title, boat and operator name. */
   q: string
+  /**
+   * Valoración mínima del día (1..5) según la ventana solunar. No es un atributo
+   * de la salida sino algo derivado de (zona, fecha), así que NO se resuelve en
+   * `matches()` ni en SQL: se aplica aparte, en `listPublicCharters`, igual en
+   * las dos vías. Ver lib/charter-window.ts.
+   */
+  minRating: number | null
+  /** Orden del listado. Por defecto, por fecha. */
+  sort: '' | 'ventana'
 }
 
 export const EMPTY_FILTER: CharterFilter = {
   spotSlug: '', fromISO: '', untilISO: '', techniques: [], species: [], areas: [],
-  tripType: '', maxPrice: null, q: '',
+  tripType: '', maxPrice: null, q: '', minRating: null, sort: '',
 }
 
 const ISO = /^\d{4}-\d{2}-\d{2}$/
@@ -55,13 +64,15 @@ export function parseCharterFilter(sp: Record<string, string | string[] | undefi
     tripType: tipo === 'privada' || tipo === 'compartida' ? tipo : '',
     maxPrice: Number.isFinite(maxPriceRaw) && maxPriceRaw > 0 ? Math.min(5000, Math.round(maxPriceRaw)) : null,
     q: one('q').slice(0, 80),
+    minRating: [3, 4, 5].includes(Number(one('dia'))) ? Number(one('dia')) : null,
+    sort: one('orden') === 'ventana' ? 'ventana' : '',
   }
 }
 
 /** True when any filter is actually narrowing the results. */
 export function isFiltered(f: CharterFilter): boolean {
   return !!(f.spotSlug || f.fromISO || f.untilISO || f.tripType || f.maxPrice || f.q
-    || f.techniques.length || f.species.length || f.areas.length)
+    || f.techniques.length || f.species.length || f.areas.length || f.minRating)
 }
 
 /** Rebuild a query string, dropping empties so URLs stay clean. */
@@ -76,6 +87,8 @@ export function filterToQuery(f: CharterFilter): string {
   if (f.tripType) p.set('tipo', f.tripType)
   if (f.maxPrice) p.set('precio', String(f.maxPrice))
   if (f.q) p.set('q', f.q)
+  if (f.minRating) p.set('dia', String(f.minRating))
+  if (f.sort) p.set('orden', f.sort)
   const s = p.toString()
   return s ? `?${s}` : ''
 }
@@ -131,5 +144,6 @@ export function describeFilter(f: CharterFilter): string {
   if (s.length) bits.push(`a por ${s.join(' o ')}`)
   if (f.maxPrice) bits.push(`hasta ${f.maxPrice} €`)
   if (f.q) bits.push(`«${f.q}»`)
+  if (f.minRating) bits.push(f.minRating >= 5 ? 'solo grandes días' : f.minRating >= 4 ? 'solo días buenos' : 'días correctos o mejores')
   return bits.join(' · ')
 }
