@@ -119,9 +119,29 @@ Las que **no pueden faltar**:
 | `CRON_SECRET` | Protege `/api/cron/*`. Sin ella esas rutas devuelven 401. |
 | `GROQ_API_KEY` · `NVIDIA_API_KEY` · `OPENROUTER_API_KEY` | Tres cupos diarios independientes. Con los tres, el pulido SEO recorre el catálogo entero; con uno solo se planta. |
 
-`BLOB_READ_WRITE_TOKEN` es la única atadura que queda a Vercel (subida de fotos
-de los patrones). Funciona desde cualquier sitio con el token, y sin él la
-subida se desactiva sola y se pueden pegar URLs.
+## 3 bis. El volumen de las fotos (si falta, se pierden)
+
+Las fotos de los barcos ya **no** van a Vercel Blob: se guardan en el disco de la
+máquina. Con eso desaparece la última atadura con Vercel.
+
+En Coolify → *Storages*, monta un volumen persistente en:
+
+```
+/app/datos/fotos
+```
+
+**Si no lo montas, las fotos se escriben dentro del contenedor y el siguiente
+despliegue se las lleva por delante — sin dar ningún error.** Por eso
+`/api/salud` publica el estado del almacenamiento:
+
+| Valor | Qué significa |
+|---|---|
+| `"fotos":"ok"` | volumen montado, las fotos sobreviven |
+| `"fotos":"efimero"` | **se puede escribir, pero se perderá en el próximo despliegue** |
+| `"fotos":"no-escribible"` | no hay dónde guardar; la subida se desactiva sola y el patrón puede pegar una URL |
+
+Se detecta comparando el dispositivo de la carpeta con el de la raíz: un volumen
+montado siempre es otro dispositivo.
 
 ## 4. Los crons (esto NO se migra solo)
 

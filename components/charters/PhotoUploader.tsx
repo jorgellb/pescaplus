@@ -50,7 +50,7 @@ export default function PhotoUploader({ operatorId, manageToken, photos: initial
   useEffect(() => {
     fetch('/api/charters/operador/fotos')
       .then((r) => r.json())
-      .then((d) => { setUploadsOn(!!d.blobConfigured); setMax(d.max ?? 8) })
+      .then((d) => { setUploadsOn(!!d.uploadsEnabled); setMax(d.max ?? 8) })
       .catch(() => setUploadsOn(false))
   }, [])
 

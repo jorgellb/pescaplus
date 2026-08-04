@@ -1,39 +1,76 @@
 /**
- * Boat photo storage on Vercel Blob.
+ * Fotos de los barcos, guardadas en el disco del propio servidor.
  *
- * Like Resend and Stripe elsewhere in this app, the feature degrades instead of
- * breaking: without BLOB_READ_WRITE_TOKEN uploads are refused with a clear
- * message and the patrón can still paste an image URL, so listings can have
- * photos from day one and gain real uploads the moment the token is set.
+ * Antes esto iba a Vercel Blob, que era la última atadura que quedaba con
+ * Vercel. Ya no: el sitio corre en una máquina propia con 86 GB libres, así que
+ * las fotos se guardan ahí y se sirven desde `/fotos/...`.
  *
- * Files are resized client-side before they get here (long edge ≤ 1600 px,
- * JPEG), so the payload stays well under Vercel's 4.5 MB request body limit and
- * we don't pay to store 8 MP phone originals.
+ * Como en Resend o Stripe, la función se degrada en vez de romperse: si la
+ * carpeta no se puede escribir, la subida se rechaza con un mensaje claro y el
+ * patrón puede seguir pegando la dirección de una imagen.
+ *
+ * Las imágenes se redimensionan en el navegador antes de llegar aquí (lado
+ * largo <= 1600 px, JPEG), así que no almacenamos originales de 8 megapíxeles.
+ *
+ * OJO CON EL VOLUMEN: dentro de un contenedor, escribir en una carpeta que no
+ * esté montada como volumen funciona... hasta el siguiente despliegue, que se
+ * lleva las fotos por delante sin dar ningún error. `photosStorageState()` lo
+ * detecta comparando el dispositivo de la carpeta con el de la raíz, y
+ * /api/salud lo publica para que se vea antes de perder nada.
  */
+import { join, resolve, sep } from 'node:path'
+import { mkdirSync, accessSync, statSync, constants } from 'node:fs'
+
 export const MAX_PHOTOS = 8
 const MAX_BYTES = 3 * 1024 * 1024
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
-/**
- * Find the Blob read-write token.
- *
- * The SDK defaults to `BLOB_READ_WRITE_TOKEN`, but Vercel lets you pick an
- * environment-variable PREFIX when connecting a store to a project, in which
- * case the var is `<PREFIX>_READ_WRITE_TOKEN` and nothing works with no clue as
- * to why. So: use the standard name if present, otherwise accept any variable
- * that looks like a Blob token (`vercel_blob_rw_…`). Values are never logged.
- */
-export function blobToken(): string | undefined {
-  const std = process.env.BLOB_READ_WRITE_TOKEN
-  if (std) return std
-  for (const [name, value] of Object.entries(process.env)) {
-    if (name.endsWith('_READ_WRITE_TOKEN') && value?.startsWith('vercel_blob_rw_')) return value
-  }
-  return undefined
+/** Extensiones que servimos, y su tipo. Lista blanca: nada de SVG ni HTML. */
+export const PHOTO_TYPES: Record<string, string> = {
+  jpg: 'image/jpeg',
+  png: 'image/png',
+  webp: 'image/webp',
 }
 
-export function blobConfigured(): boolean {
-  return !!blobToken()
+/** Prefijo público. Lo sirve app/fotos/[...ruta]/route.ts. */
+export const PHOTOS_URL_PREFIX = '/fotos'
+
+/**
+ * Carpeta donde viven las fotos. En el contenedor la fija el Dockerfile a
+ * /app/datos/fotos, que es el punto de montaje del volumen; en desarrollo cae
+ * en .datos/fotos, dentro del proyecto y fuera de git.
+ */
+export function photosDir(): string {
+  return resolve(process.env.PHOTOS_DIR || join(process.cwd(), '.datos', 'fotos'))
+}
+
+export type PhotosStorageState = 'ok' | 'efimero' | 'no-escribible'
+
+/**
+ * Estado del almacenamiento, para /api/salud.
+ *
+ * - `ok`: se puede escribir y está en un dispositivo distinto de la raíz, es
+ *   decir, en un volumen de verdad.
+ * - `efimero`: se puede escribir, pero está en el sistema de ficheros del
+ *   contenedor. **Las fotos se perderán en el próximo despliegue.**
+ * - `no-escribible`: no hay dónde guardar; la subida queda desactivada.
+ */
+export function photosStorageState(): PhotosStorageState {
+  try {
+    const dir = photosDir()
+    mkdirSync(dir, { recursive: true })
+    accessSync(dir, constants.W_OK)
+    // Un volumen montado es otro dispositivo. Si coincide con el de la raíz,
+    // estamos escribiendo dentro del contenedor y esto no sobrevive al deploy.
+    if (process.env.NODE_ENV === 'production' && statSync(dir).dev === statSync('/').dev) return 'efimero'
+    return 'ok'
+  } catch {
+    return 'no-escribible'
+  }
+}
+
+export function uploadsEnabled(): boolean {
+  return photosStorageState() !== 'no-escribible'
 }
 
 export interface UploadResult {
@@ -42,9 +79,14 @@ export interface UploadResult {
   error?: string
 }
 
+/** Solo lo que podemos poner nosotros en un nombre de fichero. */
+function safeSegment(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 64)
+}
+
 export async function uploadPhoto(file: File, operatorId: string): Promise<UploadResult> {
-  if (!blobConfigured()) {
-    return { ok: false, error: 'La subida de fotos aún no está activada. Pega la dirección de una imagen mientras tanto.' }
+  if (!uploadsEnabled()) {
+    return { ok: false, error: 'La subida de fotos no está disponible ahora mismo. Pega la dirección de una imagen mientras tanto.' }
   }
   if (!ALLOWED_TYPES.includes(file.type)) {
     return { ok: false, error: 'Formato no admitido. Usa JPG, PNG o WebP.' }
@@ -52,48 +94,64 @@ export async function uploadPhoto(file: File, operatorId: string): Promise<Uploa
   if (file.size > MAX_BYTES) {
     return { ok: false, error: 'La imagen pesa demasiado (máx. 3 MB).' }
   }
+  const carpeta = safeSegment(operatorId)
+  if (!carpeta) return { ok: false, error: 'Operador no válido.' }
+
   try {
-    const { put } = await import('@vercel/blob')
+    const { mkdir, writeFile } = await import('node:fs/promises')
     const ext = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg'
-    const blob = await put(`charters/${operatorId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`, file, {
-      access: 'public',
-      contentType: file.type,
-      // Blob adds its own random suffix; ours already is unique.
-      addRandomSuffix: false,
-      token: blobToken(),
-    })
-    return { ok: true, url: blob.url }
+    const nombre = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
+    const destino = join(photosDir(), carpeta)
+    await mkdir(destino, { recursive: true })
+    await writeFile(join(destino, nombre), Buffer.from(await file.arrayBuffer()))
+    return { ok: true, url: `${PHOTOS_URL_PREFIX}/${carpeta}/${nombre}` }
   } catch (error) {
     console.error('Photo upload failed:', error)
     return { ok: false, error: 'No se pudo subir la foto. Inténtalo de nuevo.' }
   }
 }
 
-/** Remove a blob we own. Never throws: a stale URL shouldn't block the edit. */
+/** Borra una foto nuestra. Nunca lanza: una URL huérfana no debe bloquear la edición. */
 export async function deletePhoto(url: string): Promise<void> {
-  if (!blobConfigured() || !isBlobUrl(url)) return
+  const rel = ownPhotoPath(url)
+  if (!rel) return
   try {
-    const { del } = await import('@vercel/blob')
-    await del(url, { token: blobToken() })
+    const { unlink } = await import('node:fs/promises')
+    await unlink(join(photosDir(), rel))
   } catch (error) {
     console.warn('Photo delete failed:', error)
   }
 }
 
-/** True for URLs we host ourselves (so we know what we may delete). */
-export function isBlobUrl(url: string): boolean {
-  try {
-    return /\.public\.blob\.vercel-storage\.com$/i.test(new URL(url).hostname)
-  } catch {
-    return false
-  }
+/**
+ * Convierte una URL nuestra en su ruta dentro de la carpeta de fotos, o
+ * devuelve null si no es nuestra.
+ *
+ * Es la única puerta por la que se traduce una entrada del usuario a una ruta
+ * de disco, así que aquí se es estricto: dos segmentos, con la forma que
+ * generamos nosotros y una extensión de la lista blanca. Sin `..`, sin
+ * subcarpetas y sin barras extra, no hay forma de salirse de la carpeta.
+ */
+export function ownPhotoPath(url: string): string | null {
+  const m = /^\/fotos\/([a-z0-9-]{1,64})\/(\d{10,}-[a-z0-9]{1,12}\.(?:jpg|png|webp))$/.exec(url)
+  if (!m) return null
+  const rel = `${m[1]}${sep}${m[2]}`
+  // Cinturón y tirantes: el resultado tiene que seguir dentro de la carpeta.
+  const abs = resolve(photosDir(), rel)
+  return abs.startsWith(photosDir() + sep) ? rel : null
+}
+
+/** True si la foto la alojamos nosotros (o sea, si podemos borrarla). */
+export function isOwnPhotoUrl(url: string): boolean {
+  return ownPhotoPath(url) !== null
 }
 
 /**
- * Accept a photo URL typed by the patrón. Only https images, and never a
- * `javascript:`/`data:` payload dressed up as a link.
+ * Acepta la dirección de una foto: o una nuestra, o una https escrita por el
+ * patrón. Nunca un `javascript:` ni un `data:` disfrazado de enlace.
  */
 export function isValidPhotoUrl(url: string): boolean {
+  if (isOwnPhotoUrl(url)) return true
   try {
     const u = new URL(url)
     return u.protocol === 'https:' && u.hostname.length > 3

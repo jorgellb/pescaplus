@@ -75,6 +75,17 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
+# Fotos de los barcos que suben los patrones. Van al disco del servidor desde
+# que dejamos Vercel Blob.
+#
+# ESTA CARPETA TIENE QUE SER UN VOLUMEN. Se crea aquí para que exista y sea del
+# usuario sin privilegios, pero si Coolify no monta un volumen encima, las fotos
+# se escriben en el sistema de ficheros del contenedor y el siguiente despliegue
+# se las lleva por delante SIN dar ningún error. /api/salud lo publica como
+# `"fotos":"efimero"` precisamente para que se vea antes de perder nada.
+ENV PHOTOS_DIR=/app/datos/fotos
+RUN mkdir -p /app/datos/fotos && chown -R nextjs:nodejs /app/datos
+
 USER nextjs
 EXPOSE 3000
 

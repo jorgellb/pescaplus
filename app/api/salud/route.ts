@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { photosStorageState } from '@/lib/photos'
 
 /** Siempre en vivo: un estado cacheado no dice nada de si el servidor responde. */
 export const dynamic = 'force-dynamic'
@@ -36,6 +37,12 @@ export async function GET() {
   return NextResponse.json({
     ok: true,
     bd,
+    // Almacenamiento de las fotos de los barcos. «efimero» significa que la
+    // carpeta NO está en un volumen: se puede escribir, pero el próximo
+    // despliegue se lleva las fotos por delante sin dar ningún error. Tampoco
+    // tumba el health check — el sitio funciona igual — pero así se ve antes de
+    // perder nada. Ver lib/photos.ts.
+    fotos: photosStorageState(),
     ms: Date.now() - inicio,
     hora: new Date().toISOString(),
   })

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getOperatorByToken, updateOperatorProfile } from '@/lib/operators-store'
-import { uploadPhoto, deletePhoto, blobConfigured, isBlobUrl, isValidPhotoUrl, MAX_PHOTOS } from '@/lib/photos'
+import { uploadPhoto, deletePhoto, uploadsEnabled, isOwnPhotoUrl, isValidPhotoUrl, MAX_PHOTOS } from '@/lib/photos'
 import { rateLimit, clientIp } from '@/lib/rate-limit'
 
 /** Upload a photo (multipart) or attach one by URL. Owner-scoped by token. */
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-/** Remove a photo (and the stored blob, if it's one of ours). */
+/** Quita una foto (y borra el fichero del disco, si es nuestra). */
 export async function DELETE(request: NextRequest) {
   const body = await request.json().catch(() => null)
   const operatorId = String(body?.operatorId ?? '')
@@ -55,8 +55,8 @@ export async function DELETE(request: NextRequest) {
   try {
     const photos = op.photos.filter((p) => p !== url)
     const updated = await updateOperatorProfile(op.id, manageToken, { photos })
-    // El blob se borra después: si falla, la ficha ya está correcta.
-    if (isBlobUrl(url)) await deletePhoto(url)
+    // El fichero se borra después: si falla, la ficha ya está correcta.
+    if (isOwnPhotoUrl(url)) await deletePhoto(url)
     return NextResponse.json({ success: true, photos: updated?.photos ?? [] })
   } catch (error) {
     return NextResponse.json({ success: false, error: (error as Error).message }, { status: 500 })
@@ -82,5 +82,5 @@ export async function PUT(request: NextRequest) {
 }
 
 export async function GET() {
-  return NextResponse.json({ blobConfigured: blobConfigured(), max: MAX_PHOTOS })
+  return NextResponse.json({ uploadsEnabled: uploadsEnabled(), max: MAX_PHOTOS })
 }
