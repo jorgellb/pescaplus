@@ -1,3 +1,4 @@
+import { secureToken, tokensEqual } from '@/lib/tokens'
 import { isDatabaseConfigured } from '@/lib/products-store'
 import { sanitizeIds, TECHNIQUES, TARGET_SPECIES, MEETUP_BRING } from '@/lib/charter-options'
 
@@ -93,7 +94,7 @@ const MODALITIES = new Set(['tierra', 'kayak', 'barco'])
 const LEVELS = new Set(['principiante', 'medio', 'experto', 'cualquiera'])
 
 function token(): string {
-  return `mt_${Math.random().toString(36).slice(2)}${Math.random().toString(36).slice(2)}`
+  return secureToken('mt_')
 }
 
 type MeetupData = {
@@ -341,14 +342,14 @@ export async function getMeetupByToken(id: string, manageToken: string): Promise
     try {
       const { prisma } = await import('@/lib/prisma')
       const row = await prisma.meetup.findUnique({ where: { id }, include: { rsvps: true } })
-      if (!row || row.manageToken !== manageToken) return null
+      if (!row || !tokensEqual(row.manageToken, manageToken)) return null
       return assemble(rowToBase(row), row.rsvps.map(rowToRsvp))
     } catch (error) {
       console.warn('Meetup token read failed, using memory:', error)
     }
   }
   const m = memMeetups().find((x) => x.id === id)
-  if (!m || m.manageToken !== manageToken) return null
+  if (!m || !tokensEqual(m.manageToken, manageToken)) return null
   return assemble(m, memRsvps().filter((r) => r.meetupId === id))
 }
 

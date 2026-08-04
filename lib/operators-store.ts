@@ -1,3 +1,4 @@
+import { secureToken, tokensEqual } from '@/lib/tokens'
 import { isDatabaseConfigured } from '@/lib/products-store'
 import { sanitizeIds, NAVIGATION, SAFETY, BOAT_AMENITIES, FISHING_GEAR } from '@/lib/charter-options'
 import { sanitizePhotos } from '@/lib/photos'
@@ -74,7 +75,7 @@ export interface OperatorWithToken extends Operator {
 const WRITE_FAIL = 'La base de datos no está disponible ahora mismo; el cambio no se ha guardado. Inténtalo de nuevo en unos minutos.'
 
 function token(): string {
-  return `op_${Math.random().toString(36).slice(2)}${Math.random().toString(36).slice(2)}`
+  return secureToken('op_')
 }
 
 function clean(input: OperatorInput) {
@@ -382,13 +383,13 @@ export async function getOperatorByToken(id: string, manageToken: string): Promi
     try {
       const { prisma } = await import('@/lib/prisma')
       const row = await prisma.operator.findUnique({ where: { id } })
-      return row && row.manageToken === manageToken ? rowToOperator(row) : null
+      return row && tokensEqual(row.manageToken, manageToken) ? rowToOperator(row) : null
     } catch (error) {
       console.warn('Operator token read failed, using memory:', error)
     }
   }
   const o = mem().find((x) => x.id === id)
-  return o && o.manageToken === manageToken ? o : null
+  return o && tokensEqual(o.manageToken, manageToken) ? o : null
 }
 
 /** Admin action: mark an operator verified (or revoke). */

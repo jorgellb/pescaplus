@@ -1,4 +1,5 @@
 import crypto from 'crypto'
+import { secureToken } from '@/lib/tokens'
 import { cache } from 'react'
 import { cookies } from 'next/headers'
 import { isDatabaseConfigured } from '@/lib/products-store'
@@ -20,8 +21,9 @@ export const SESSION_COOKIE = 'pp_session'
 const SESSION_TTL_MS = 60 * 24 * 60 * 60 * 1000 // 60 días
 const TOKEN_TTL_MS = 15 * 60 * 1000 // 15 minutos
 
-function randomId(bytes = 32): string {
-  return crypto.randomBytes(bytes).toString('base64url')
+/** Igual que antes; ahora desde lib/tokens.ts, la fuente única del proyecto. */
+function randomId(): string {
+  return secureToken()
 }
 
 // ---- Memory fallback stores (dev / tests, no DB) --------------------------
