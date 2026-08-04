@@ -5,6 +5,7 @@ import Marquee from '@/components/Marquee'
 import ProductCard from '@/components/ProductCard'
 import ProductImage from '@/components/ProductImage'
 import CategoryIcon from '@/components/graphics/CategoryIcon'
+import CharterSpotlight from '@/components/charters/CharterSpotlight'
 import { FISHING_TYPES } from '@/lib/fishing'
 import { listProducts } from '@/lib/products-store'
 import { listGuides } from '@/lib/guides-store'
@@ -171,6 +172,10 @@ export default async function Home() {
           'Quedadas de pesca',
         ]}
       />
+
+      {/* CHÁRTERS — protagonismo alto: es lo único del sitio que no se puede
+          copiar con un catálogo de afiliados. */}
+      <CharterSpotlight />
 
       {/* CATEGORIES */}
       <section className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">

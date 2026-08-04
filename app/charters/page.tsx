@@ -8,6 +8,9 @@ import { FISHING_SPOTS, getSpot } from '@/lib/fishing-spots'
 import { getSpecies } from '@/lib/fishing-species'
 import { todayMadridISO, fmtDayLabel } from '@/lib/solunar-format'
 import Icon, { type IconName } from '@/components/icons/Icon'
+import DayDial from '@/components/charters/DayDial'
+import FishingWindow, { FishingWindowSummary } from '@/components/charters/FishingWindow'
+import { charterWindow, bestSpotToday } from '@/lib/charter-window'
 
 export const dynamic = 'force-dynamic'
 
@@ -40,8 +43,22 @@ type Params = { searchParams: Promise<Record<string, string | string[] | undefin
 export default async function ChartersHub({ searchParams }: Params) {
   const filter = parseCharterFilter(await searchParams)
   const filtered = isFiltered(filter)
-  const charters = await listPublicCharters(todayMadridISO(), filter)
+  const hoy = todayMadridISO()
+  const charters = await listPublicCharters(hoy, filter)
   const spots = FISHING_SPOTS.map((s) => ({ slug: s.slug, name: s.name }))
+
+  // Ventana de pesca por salida. Es cálculo astronómico local y memoizado (ver
+  // lib/charter-window.ts), así que sale gratis aunque el listado sea largo.
+  const ventanas = new Map(
+    charters.flatMap((c) => {
+      const w = charterWindow(c.spotSlug, c.dateISO)
+      return w ? [[c.id, w] as const] : []
+    }),
+  )
+
+  // Solo para el estado vacío: la mejor zona de hoy, para no enseñar un hueco.
+  const destacada = charters.length === 0 && !filtered ? bestSpotToday(hoy) : null
+  const destacadaSpot = destacada ? getSpot(destacada.slug) : null
   return (
     <Layout>
       <section className="bg-paper border-b border-ink/[0.07]">
@@ -70,19 +87,54 @@ export default async function ChartersHub({ searchParams }: Params) {
         </div>
 
         {charters.length === 0 ? (
-          <div className="border border-ink/[0.07] rounded-2xl bg-paper p-6 text-center text-ink/70">
-            {filtered ? (
-              <>
-                Ninguna salida coincide con esos filtros.{' '}
-                <Link href="/charters" className="text-accent font-semibold underline">Ver todos los chárters</Link>.
-              </>
-            ) : (
-              <>
-                Aún no hay chárters publicados. ¿Eres patrón profesional?{' '}
-                <Link href="/charters/operador" className="text-accent underline">Regístrate y ofrece tus salidas</Link>.
-              </>
-            )}
-          </div>
+          filtered ? (
+            <div className="border border-ink/[0.07] rounded-2xl bg-paper p-6 text-center text-ink/70">
+              Ninguna salida coincide con esos filtros.{' '}
+              <Link href="/charters" className="text-accent font-semibold underline">Ver todos los chárters</Link>.
+            </div>
+          ) : (
+            /* Sin salidas publicadas todavía. En vez de una caja gris pidiendo
+               perdón, se enseña lo que SÍ tenemos —la ventana de pesca de hoy—
+               y se le da al patrón un motivo concreto para publicar aquí. */
+            <div className="border border-ink/[0.07] rounded-2xl bg-paper shadow-hard overflow-hidden">
+              <div className="grid grid-cols-1 md:grid-cols-2">
+                <div className="p-6 sm:p-8">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">
+                    Todavía no hay salidas publicadas
+                  </p>
+                  <h3 className="font-display uppercase text-3xl sm:text-4xl leading-[1.02] text-ink mt-3">
+                    Sé el primer patrón<br />de tu zona
+                  </h3>
+                  <p className="text-[14px] text-ink/70 leading-relaxed mt-4">
+                    Publicar es gratis y no cobramos por adelantado. Comprobamos tu titulación y tu
+                    seguro a mano, y tu salida sale acompañada de la previsión real de ese día — que
+                    es lo que convierte a un curioso en una reserva.
+                  </p>
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    <Link href="/charters/operador"
+                      className="inline-flex items-center gap-2 bg-ink text-paper px-5 py-2.5 text-sm font-semibold rounded-full shadow-hard hover-shift hover:bg-accent">
+                      <Icon name="anchor" className="w-4 h-4" strokeWidth={2} /> Publicar mi salida
+                    </Link>
+                    <Link href="/quedadas"
+                      className="inline-flex items-center gap-2 border border-ink/15 text-ink px-5 py-2.5 text-sm font-semibold rounded-full hover:border-accent hover:text-accent">
+                      <Icon name="users" className="w-4 h-4" strokeWidth={2} /> Ver quedadas
+                    </Link>
+                  </div>
+                </div>
+                {destacada && (
+                  <div className="border-t md:border-t-0 md:border-l border-ink/[0.07] bg-ink/[0.02] p-6 flex flex-col justify-center">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60 text-center">
+                      Hoy, la mejor ventana está en {destacadaSpot?.name}
+                    </p>
+                    <DayDial window={destacada.window} className="w-full max-w-[320px] mx-auto" />
+                    <p className="text-center -mt-2">
+                      <FishingWindowSummary window={destacada.window} />
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )
         ) : (
           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {charters.map((c) => {
@@ -111,6 +163,14 @@ export default async function ChartersHub({ searchParams }: Params) {
                         {c.pricePerPerson} €<span className="font-normal text-ink/60">/persona</span>
                         {c.durationH ? <span className="font-normal text-ink/60"> · {c.durationH} h</span> : null}
                       </p>
+                      {/* La ventana de pesca de ESE día en ESA zona. Cálculo
+                          local, así que ponerla en cada tarjeta no cuesta red. */}
+                      {ventanas.get(c.id) && (
+                        <div className="mt-3 pt-3 border-t border-ink/[0.07]">
+                          <FishingWindow window={ventanas.get(c.id)!} />
+                          <p className="mt-1.5"><FishingWindowSummary window={ventanas.get(c.id)!} /></p>
+                        </div>
+                      )}
                     </div>
                   </Link>
                 </li>
