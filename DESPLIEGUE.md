@@ -6,17 +6,28 @@ explica qué medir después.
 
 ## 1. La máquina en Oracle Cloud
 
-Tramo **Always Free**, forma **VM.Standard.A1.Flex** (ARM Ampere):
-**4 OCPU y 24 GB de RAM**, más 200 GB de disco y 10 TB de salida al mes.
+**La que está en marcha:** Ubuntu 24.04, **x86_64, 2 núcleos, 11 GB de RAM**,
+96 GB de disco. Sobra para este sitio: construye la imagen completa en unos
+minutos y sirve sin despeinarse.
 
-- **Imagen:** Ubuntu 22.04 o 24.04 (ARM).
-- **Aviso realista:** la capacidad ARM gratuita de OCI se agota a menudo y la
-  consola responde *«Out of capacity»*. No es un error tuyo. Se resuelve
-  reintentando en otra zona de disponibilidad o a otra hora; hay quien tarda
-  días. **Compruébalo ANTES de dar por hecha la migración.**
-- Si no hay ARM, el plan B son las 2 VM AMD gratuitas (1/8 OCPU y 1 GB cada
-  una), pero **1 GB de RAM no basta** para construir Next: habría que
-  construir la imagen fuera y desplegar solo el contenedor.
+- La idea inicial era ARM (VM.Standard.A1.Flex), pero **la capacidad gratuita de
+  ARM en OCI se agota constantemente** — la consola responde *«Out of capacity»*
+  una y otra vez. No es un error del usuario. Si se quiere ARM, hay que insistir
+  cambiando de dominio de disponibilidad o probar a otras horas; x86 se consigue
+  al primer intento y para esta carga da igual.
+- **Ojo con el tramo Always Free de ARM:** en junio de 2026 Oracle lo recortó de
+  4 OCPU/24 GB a **2 OCPU/12 GB**.
+
+**Swap: obligatorio.** La máquina viene con 0 B y `next build` con 2 núcleos
+tiene picos de memoria; sin swap el kernel mata el proceso y el fallo aparece
+como un error críptico a mitad de build:
+
+```bash
+sudo fallocate -l 4G /swapfile && sudo chmod 600 /swapfile
+sudo mkswap /swapfile && sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+sudo sysctl -w vm.swappiness=10 && echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf
+```
 
 **Red — el error clásico:** OCI bloquea por partida doble.
 1. En la consola: VCN → Security List → abrir 80 y 443 de entrada.
@@ -129,5 +140,6 @@ cientos de miles de regeneraciones al mes.
 En un servidor propio ese trabajo **ya no se factura**, que es justo el motivo
 del cambio. Pero sigue costando CPU real, y ahora la CPU es finita y es tuya:
 los recortes que se hicieron antes de migrar (revalidate a 1 hora, imágenes
-OpenGraph cacheadas 24 h) siguen siendo buena idea. Con 4 núcleos ARM hay
-margen de sobra, pero conviene mirar `htop` la primera semana.
+OpenGraph cacheadas 24 h) siguen siendo buena idea. Con 2 núcleos hay margen,
+pero conviene mirar `htop` la primera semana: el mismo trabajo que costaba 12 h
+de CPU al mes en Vercel sigue ejecutándose, solo que ahora no se factura.
