@@ -17,8 +17,20 @@
    - El parte del mar se guarda, pero se sirve de red primero: una previsión de
      ayer es mejor que nada, pero solo si lo de hoy no llega. */
 
-const VERSION = 'pescaplus-v4'
-const PAGES = 'pescaplus-pages-v4'
+/* Al cambiar de alojamiento (Vercel → servidor propio) el sitio se reconstruyó
+   entero, así que TODOS los ficheros de /_next/static cambiaron de nombre. Quien
+   ya había visitado la web se quedaba con la copia vieja guardada, y esa copia
+   pide ficheros que en el servidor nuevo no existen: salen los menús y no sale
+   ni el cuerpo ni las imágenes. Subir el número de estas dos cachés hace que el
+   evento `activate` borre las viejas en la siguiente visita, sin que el usuario
+   tenga que hacer nada.
+
+   TILES y SEABED se quedan en v4 A PROPÓSITO: son teselas del mapa y sondas del
+   fondo, datos que no dependen de dónde esté alojada la web. Borrarlas dejaría
+   sin carta náutica a quien la tuviera descargada para salir al mar, que es
+   justamente el caso que este service worker existe para cubrir. */
+const VERSION = 'pescaplus-v5'
+const PAGES = 'pescaplus-pages-v5'
 const TILES = 'pescaplus-tiles-v4'
 const SEABED = 'pescaplus-seabed-v4'
 const VIGENTES = [VERSION, PAGES, TILES, SEABED]
