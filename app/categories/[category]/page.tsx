@@ -14,16 +14,28 @@ type Params = { params: Promise<{ category: string }> }
 export const revalidate = 3600
 
 /**
- * Las modalidades son una lista fija del código (`FISHING_TYPES`), así que
- * una categoría que no salga de `generateStaticParams` no existe.
+ * Las modalidades son una lista fija del código (`FISHING_TYPES`), así que una
+ * categoría que no salga de `generateStaticParams` no existe y debe dar un 404
+ * de verdad.
  *
- * Sin esto, `/categories/loquesea` respondía HTTP 200 con una página completa
- * y sin productos — un "soft 404" que Google puede indexar como página real
- * de la tienda. Esta página nunca ha llamado a `notFound()`; `dynamicParams:
- * false` lo resuelve en la capa de rutas, que es donde corresponde.
+ * Tiene que ser `dynamicParams = false` y NO un `notFound()` en la página. Se
+ * probaron las dos: con `notFound()`, Next PRERENDERIZA Y CACHEA la respuesta
+ * como una entrada normal de 200. O sea, un "soft 404" que Google puede indexar
+ * como página real de la tienda, y además un rastreador que pida URLs
+ * inventadas va llenando el disco con una entrada por cada una.
+ *
+ * OJO AL EFECTO SECUNDARIO, que tumbó la tienda entera en producción: esta
+ * bandera significa «fuera de esta lista no hay nada que servir», así que
+ * cuando la copia prerenderizada CADUCA, Next no encuentra ningún respaldo que
+ * mostrar mientras regenera y responde `NoFallbackError` — un 404 para TODAS
+ * las categorías, incluidas las buenas. Pasó al poner `expireTime` igual al
+ * `revalidate` (3600), con lo que la entrada caducaba en el mismo instante en
+ * que quedaba obsoleta, sin margen ninguno.
+ *
+ * Regla, vigilada por tests/routing.test.ts: una página con esta bandera NUNCA
+ * puede tener `expireTime` <= su `revalidate`.
  */
 export const dynamicParams = false
-
 export function generateStaticParams() {
   return FISHING_TYPES.map((t) => ({ category: t.id }))
 }

@@ -15,12 +15,21 @@ export const revalidate = 86400
 
 /**
  * Las especies son una lista fija del código, así que cualquier slug que no
- * salga de `generateStaticParams` no existe y debe dar 404 de verdad.
+ * salga de `generateStaticParams` no existe y debe dar 404 de verdad. De eso se
+ * encarga el `notFound()` de más abajo: sin él la página mostraba "Especie no
+ * encontrada" pero respondía HTTP 200, un "soft 404" que Google puede indexar
+ * como página viva y vacía.
  *
- * Sin esto (el valor por defecto es `true`), Next generaba bajo demanda
- * CUALQUIER slug inventado: la página mostraba "Especie no encontrada" pero
- * respondía HTTP 200, así que para Google era una página viva y vacía —
- * candidata a indexarse. Con `false` el 404 es real.
+ * El `notFound()` de abajo no basta por sí solo: Next prerenderiza y cachea esa
+ * respuesta como una entrada de 200, así que el 404 no sería real. Hace falta
+ * también `dynamicParams = false`.
+ *
+ * Y esa bandera trae una trampa que tumbó `/categories` en producción: si la
+ * copia prerenderizada caduca, Next se queda sin respaldo que servir mientras
+ * regenera y devuelve 404 hasta para los slugs buenos. Esta página se libró
+ * solo porque su `revalidate` de 24 h no coincidía con el `expireTime`. La
+ * regla está en app/categories/[category]/page.tsx y la vigila
+ * tests/routing.test.ts.
  */
 export const dynamicParams = false
 

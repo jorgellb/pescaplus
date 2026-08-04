@@ -52,28 +52,6 @@ const nextConfig: NextConfig = {
    * a mano en el Dockerfile o el sitio arranca sin estilos ni imágenes.
    */
   output: "standalone",
-  /**
-   * Cuánto puede servirse una página ISR ya caducada mientras se refresca.
-   *
-   * El valor por defecto de Next es UN AÑO, pensado para que se lo coma un CDN.
-   * Sirviendo nosotros directamente al navegador, esa cabecera
-   * (`s-maxage=3600, stale-while-revalidate=31532400`, sin `max-age`) hace que
-   * Chrome se guarde el HTML en disco y lo reutilice sin pisar la red. Medido:
-   * en la segunda visita el documento venía de la caché de disco.
-   *
-   * Eso rompió la web al migrar de Vercel: el HTML guardado pedía ficheros de
-   * `/_next/static` que en el servidor nuevo ya no existen, y quedaba una página
-   * sin estilos, sin imágenes y con los menús muertos. Recargar no lo arreglaba.
-   *
-   * Next omite `stale-while-revalidate` por completo cuando `revalidate` no es
-   * menor que este valor (ver `getCacheControlHeader` en
-   * node_modules/next/dist/server/lib/cache-control.js). Sin esa ventana, el
-   * navegador revalida y basta un 304 barato.
-   *
-   * REGLA: este valor tiene que seguir siendo <= al `revalidate` más corto de la
-   * aplicación, o la ventana vuelve a aparecer. Lo vigila tests/cache-headers.test.ts.
-   */
-  expireTime: 3600,
   // Pin the workspace root to this app so the extra lockfile in the parent
   // directory doesn't confuse Turbopack's root inference during build.
   turbopack: {
