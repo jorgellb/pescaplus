@@ -59,6 +59,7 @@ export const NAV_SECTIONS: NavSection[] = [
     href: '/donde-pescar',
     tagline: 'Mapa de zonas y fichas de especies con sus mejores momentos.',
     links: [
+        { href: '/aqui', label: 'Aquí y ahora', hint: 'Sonda, fondo y normativa de tu punto exacto', emoji: '🎯' },
       { href: '/donde-pescar', label: 'Mapa del día', hint: 'Dónde pica mejor hoy en España', emoji: '🗺️' },
       { href: '/carta', label: 'Carta náutica', hint: 'Balizamiento y profundidad del litoral', emoji: '🧭' },
       { href: '/pesca', label: 'Qué pescar y dónde', hint: 'Guía por especie y zona del litoral', emoji: '🎯' },
