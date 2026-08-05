@@ -37,5 +37,44 @@
       "Marca los buenos puntos con su sonda y su tipo de fondo, y respeta la talla mínima devolviendo lo que no llegue."
     ],
     "generatedAt": "2026-08-05T00:00:00.000Z"
+  },
+  "sargo": {
+    "intro": "El sargo es el pez de las rocas y la espuma, y tiene fama de listo con razón. Vive donde el agua rompe contra la piedra, en apenas uno o dos metros, y se pasa el día picoteando lo que la ola arranca del roquedo. Tiene la boca dura y los dientes salidos, hechos para arrancar mejillón y romper erizo, así que no traga: mordisquea. Esa forma de comer es la que desespera al que no lo conoce, porque el flotador se hunde a medias, sube, vuelve a bajar y cuando uno clava ya no hay nada. Es pesca de estar atento y de mano rápida, y se hace mejor con marejada que con el mar como un plato: cuanta más espuma, más confiado sale de la piedra.",
+    "where": "Roca batida, espigones y bocanas de puerto, entre uno y ocho metros. Busca la franja de espuma que se forma al pie de la piedra y el remolino que queda justo detrás de una roca grande, donde el agua se calma un momento: ahí es donde se pone a comer lo que arrastra la ola. Los cantiles con mejillón y las paredes con erizo son su despensa. En los espigones, la cara que recibe el mar suele dar más que la cara abrigada, aunque sea más incómoda de pescar. Si el agua está completamente clara y quieta, muévete: ese día está pegado al fondo y no sale.",
+    "techniques": "Corcheo a media agua, que es la forma clásica y la más divertida, o pesca a fondo ligera entre rocas cuando la mar aprieta. Bajo fino —0,20 a 0,25— y anzuelo pequeño y fuerte, del 8 al 6: fino porque te ve, y fuerte porque tira hacia la piedra en cuanto se siente enganchado. Camarón vivo y mejillón son los cebos de referencia; el erizo es el que menos falla cuando está muy desconfiado, y la gusana de roca funciona bien en días revueltos. Gradúa el flotador para que el cebo baile a media agua, no arrastrando por el fondo. Clava en cuanto el corcho se vaya del todo, no antes.",
+    "seasons": "De octubre a marzo, con el agua entre 12 y 19 grados. Es de los pocos que come bien de día, y prefiere la mar movida y la marea subiendo. Los días de viento que ensucian el agua junto a la roca suelen ser los buenos; el mar plano y el agua cristalina, los peores. Con la subiente entra a comer a la zona de rompiente, así que planifica la sesión sobre la tabla de mareas y no sobre la hora.",
+    "tips": [
+      "Gradúa el flotador para que el cebo baile a media agua: arrastrando por el fondo solo pescas la piedra.",
+      "Clava cuando el corcho desaparezca del todo. Los tirones cortos son él mordisqueando, todavía no lo tienes.",
+      "Si el agua está clara y en calma, cambia de sitio: ese día no sale de la roca.",
+      "Es de talla mínima pequeña, y por eso conviene ser más exigente uno mismo: devuelve los justos y llévate solo lo que vayas a comer."
+    ],
+    "generatedAt": "2026-08-05T00:00:00.000Z"
+  },
+  "corvina": {
+    "intro": "La corvina es pesca de noche cerrada y de paciencia larga. De día prácticamente no existe; en cuanto se va la luz sale a cazar a la desembocadura o a la playa profunda, y lo hace en agua sucia y removida, que es donde tiene ventaja. Es un pez grande, de boca ancha y ataque contundente, capaz de tragar de una vez una sardina entera o un vinilo del tamaño de una mano. Y tiene una particularidad que ayuda a encontrarla: emite un ronquido grave que se oye desde la orilla en las noches tranquilas. El que ha pescado corvina de verdad recuerda el sonido antes que la picada.",
+    "where": "Desembocaduras, esteros y playas profundas, entre dos y doce metros. Busca la mezcla de agua dulce y salada, el canal por donde sale la corriente, la fosa que se forma delante de una barra de arena. El agua turbia no es un problema, es la condición: si la desembocadura viene sucia después de unos días de lluvia o de levante, ese es el momento. En playa, localiza de día las fosas y los canales aprovechando la bajamar, porque de noche no vas a verlos y hay que lanzar de memoria.",
+    "techniques": "Surfcasting nocturno con sardina entera o cangrejo, con montajes de un solo anzuelo grande y bajo resistente, dejando que el cebo trabaje con la corriente. La otra vía es el spinning con vinilos grandes y paseantes recuperados muy despacio, casi arrastrando: la corvina no persigue, embosca, y un señuelo rápido le pasa de largo. Da tiempo a la picada antes de clavar, porque suele coger el cebo y girar. Y lleva el freno algo suelto: el primer arranque de una corvina grande, en la oscuridad y sin verla venir, rompe bajos que parecían de sobra.",
+    "seasons": "De mayo a septiembre, con el agua entre 18 y 26 grados. Noche cerrada, y mejor sin luna: las noches oscuras son claramente superiores a las de luna llena. Los días siguientes a un temporal de verano o a una crecida, cuando la desembocadura baja turbia, concentran la mejor pesca del año. Amanecer y atardecer pueden dar algo, pero el grueso está en la madrugada.",
+    "tips": [
+      "Localiza de día las fosas y los canales con la bajamar: de noche lanzarás a ciegas y hay que saber dónde caer.",
+      "Recupera muy despacio con vinilo. La corvina embosca, no persigue: un señuelo rápido le pasa de largo.",
+      "Da tiempo antes de clavar, porque coge el cebo y gira. Y afloja algo el freno: el primer arranque sorprende.",
+      "Es de talla mínima alta, alrededor de 45 cm. Confírmala en tu comunidad y devuelve lo que no llegue."
+    ],
+    "generatedAt": "2026-08-05T00:00:00.000Z"
+  },
+  "bonito": {
+    "intro": "Al bonito no se le busca por el fondo, se le busca por la superficie. Es un túnido rápido y de recorrido, que se mueve en bancos siguiendo la comida y que delata su posición cuando ataca: el agua hierve, saltan las agujas y aparecen las gaviotas trabajando encima. Eso es lo que hay que localizar, y a veces significa horas de navegación mirando el horizonte hasta que se ve la primera comida. Cuando la encuentras, la pesca es frenética y corta: unos minutos de actividad y el banco se hunde y desaparece. Por eso premia al que llega bien preparado, con las cañas montadas y el señuelo listo antes de acercarse.",
+    "where": "Aguas abiertas, líneas de corriente y bancos de cebo, entre la superficie y unos veinticinco metros. Las señales son las que mandan: pájaros trabajando, agua que hierve, manchas de cebo en la sonda. También las líneas donde se juntan dos aguas de distinto color o temperatura, porque ahí se acumula la comida. Acércate a la comida por un lado y en paralelo, nunca por encima: si le pasas el barco por el medio, el banco se hunde y se acabó la fiesta antes de empezar.",
+    "techniques": "Curricán costero con plumillas y jets a buena velocidad, que es la forma de peinar agua mientras se busca, y spinning con jigs lanzables en cuanto se localiza una comida. Para lanzar, el jig pequeño y compacto que llegue lejos es lo que resuelve, recuperado rápido y con tirones: el bonito quiere velocidad, no sutileza. Bajo de fluorocarbono, porque tiene buena vista y con agua clara nota el hilo. Y anzuelos afilados y fuertes: son carreras largas y violentas, y ningún bonito se rinde a la primera.",
+    "seasons": "De junio a octubre, con el agua entre 18 y 25 grados. A diferencia de casi todo lo demás, come a pleno día, que es cuando se ven las comidas en superficie. La primera hora de la mañana suele concentrar la actividad, pero un banco puede aparecer a cualquier hora si la comida está ahí. El verano y el principio del otoño son su temporada; luego se marchan.",
+    "tips": [
+      "Acércate a la comida en paralelo y por un lado. Pasar el barco por encima la hunde y se acabó.",
+      "Ten todo montado antes de llegar: la actividad dura minutos y no da tiempo a preparar nada.",
+      "Usa bajo de fluorocarbono. Con agua clara nota el hilo y deja de entrar.",
+      "Sángralo y enfríalo nada más subirlo: es un pescado que se estropea rápido y así se aprovecha de verdad."
+    ],
+    "generatedAt": "2026-08-05T00:00:00.000Z"
   }
 }
