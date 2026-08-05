@@ -317,6 +317,14 @@ export default function AquiYAhora() {
             >
               Previsión completa de {datos.spot.name} →
             </Link>
+                {/* El fondo que acabas de leer, en el mapa: es el gesto
+                    siguiente cuando ves que tienes 23 m de roca debajo. */}
+                <Link
+                  href={`/carta?zona=${datos.spot.slug}`}
+                  className="inline-block text-[12px] font-bold uppercase tracking-wide text-accent hover:underline mt-1 ml-0 sm:ml-4"
+                >
+                  Ver el fondo en la carta →
+                </Link>
           </div>
 
           {/* — Qué entra aquí este mes — */}

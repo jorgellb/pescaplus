@@ -53,7 +53,34 @@ export default async function CartaPage({ searchParams }: Params) {
             Carta náutica{spot ? ` · ${spot.name}` : ''}
           </h1>
           <p className="text-[14px] text-ink/70 mt-1.5 max-w-3xl">
-            Balizamiento y profundidad sobre el litoral, para preparar la salida.
+            <strong className="text-ink">Sonda, tipo de fondo, isóbatas y balizamiento</strong> de la costa
+            española, para preparar la salida — y para llevártela al agua.
+          </p>
+
+          {/* LO QUE NADIE MÁS TIENE, dicho donde se ve.
+              El service worker ya guarda teselas, sondas y fondos de lo que
+              miras, pero eso no se contaba en ninguna parte: quien entra ve
+              "otro mapa" y no sabe que es el único que le va a funcionar a tres
+              millas de la costa, que es justo donde hace falta. */}
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-4xl">
+            {[
+              { icon: 'download' as const, t: 'Funciona sin cobertura', d: 'Lo que miras se guarda solo. A tres millas, sin 4G, la carta sigue ahí.' },
+              { icon: 'ruler' as const, t: 'Sonda con su fuente', d: 'Profundidad real del levantamiento batimétrico, con la referencia a pie de dato.' },
+              { icon: 'rock' as const, t: 'Tipo de fondo', d: 'Roca, arena o fango, y la pendiente. Para saber dónde presentar antes de salir.' },
+            ].map((c) => (
+              <div key={c.t} className="flex gap-2.5">
+                <Icon name={c.icon} className="w-4 h-4 text-accent shrink-0 mt-0.5" strokeWidth={1.8} />
+                <div>
+                  <p className="text-[13px] font-semibold text-ink leading-snug">{c.t}</p>
+                  <p className="text-[12px] text-ink/60 leading-snug mt-0.5">{c.d}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-[11px] text-ink/50 mt-3 max-w-3xl">
+            Datos de referencia para preparar la pesca. <strong className="text-ink/70">No sustituye a la
+            cartografía oficial para navegar</strong> ni a la sonda del barco.
           </p>
           {/* Con zona, la carta era un callejón sin salida: enseñaba el fondo y
               ahí terminaba. La previsión de esa misma zona es lo siguiente que

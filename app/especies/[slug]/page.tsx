@@ -223,6 +223,11 @@ export default async function SpeciesPage({ params }: Params) {
         {spots.length > 0 && (
           <div className="space-y-3">
             <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3">Dónde se busca</h2>
+            {/* La carta enseña el fondo, que es lo que decide dónde presentar. */}
+            <p className="text-[13px] text-ink/60">
+              Mira el tipo de fondo y la sonda de cada zona en la{' '}
+              <Link href="/carta" className="text-accent font-semibold hover:underline">carta náutica</Link>.
+            </p>
             <p className="text-sm text-ink/60">Guías de cómo pescar {sp.name.toLowerCase()} zona a zona — temporada, técnica y mejores horas de cada localidad:</p>
             <div className="flex flex-wrap gap-2">
               {spots.map((s) => (
