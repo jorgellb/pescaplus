@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { getZoneGuide } from '@/lib/zone-guides'
 import Layout from '@/components/Layout'
 import { getSpot } from '@/lib/fishing-spots'
 import { SEA_SPECIES, MONTHS_SHORT, deSpecies, elSpecies } from '@/lib/fishing-species'
@@ -76,6 +77,20 @@ export default async function SpeciesZonePage({ params }: Params) {
       : null
 
   const otherSpecies = speciesForZone(spot).filter((x) => x.id !== sp.id)
+  /**
+   * La guía de la zona: prosa escrita POR ZONA, no por combinación.
+   *
+   * Es lo que hace que estas 1.123 páginas dejen de parecerse entre sí. Medido
+   * antes de tocarlas: dos zonas distintas de la MISMA especie compartían el
+   * 76 % de su contenido propio, porque casi todo salía de la ficha de la
+   * especie y de la zona solo llegaban fragmentos sueltos. Las guías de zona,
+   * en cambio, comparten apenas un 23 % de vocabulario entre ellas.
+   *
+   * Ya estaban escritas y solo las usaba el panel de previsión. Aquí no cuestan
+   * nada: son contenido estático versionado en el repo, sin consulta ni red.
+   */
+  const guide = getZoneGuide(spot.slug)
+
   const otherZones = zonesForSpecies(sp.id, spot, 9).filter((z) => z.slug !== spot.slug).slice(0, 8)
 
   const waveWord = sp.wavePref === 'rough' ? 'con mar movida y algo de rompiente' : sp.wavePref === 'calm' ? 'con mar tranquila y poca ola' : 'con mar moderada'
@@ -242,6 +257,31 @@ export default async function SpeciesZonePage({ params }: Params) {
 <Icon name="chartUp" className="w-4 h-4" strokeWidth={1.8} />Previsión hora a hora para {n} en {spot.name}
           </Link>
         </div>
+
+        {/* LA ZONA — prosa propia de este sitio, no de la especie */}
+        {guide && (
+          <div className="space-y-3">
+            <h2 className="font-display uppercase text-2xl md:text-3xl text-ink border-b border-ink/[0.07] pb-3">
+              Cómo es {spot.name} para pescar
+            </h2>
+            <p className="text-[15px] text-ink/80 leading-relaxed">{guide.intro}</p>
+            {guide.techniques && <p className="text-[15px] text-ink/80 leading-relaxed">{guide.techniques}</p>}
+            {guide.seasons && <p className="text-[15px] text-ink/80 leading-relaxed">{guide.seasons}</p>}
+            {Array.isArray(guide.tips) && guide.tips.length > 0 && (
+              <ul className="space-y-1.5 pt-1">
+                {guide.tips.slice(0, 4).map((tip, i) => (
+                  <li key={i} className="flex gap-2 text-[14px] text-ink/75 leading-snug">
+                    <Icon name="check" className="w-4 h-4 text-accent shrink-0 mt-0.5" strokeWidth={2} />
+                    <span>{tip}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <Link href={`/mejores-horas/${spot.slug}`} className="inline-block text-[12px] font-bold uppercase tracking-wide text-accent hover:underline pt-1">
+              Todo sobre {spot.name} →
+            </Link>
+          </div>
+        )}
 
         {/* NORMATIVA */}
         <div className="space-y-3">
