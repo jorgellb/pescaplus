@@ -24,7 +24,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params
   const roundup = await getRoundup(slug)
-  if (!roundup) return {}
+  if (!roundup) return { robots: { index: false, follow: false } }
   const url = `/mejores/${slug}`
   return {
     title: roundup.h1,

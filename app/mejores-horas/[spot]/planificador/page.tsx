@@ -43,7 +43,7 @@ interface PlannerDay {
 export async function generateMetadata({ params }: { params: Promise<{ spot: string }> }): Promise<Metadata> {
   const { spot } = await params
   const s = getSpot(spot)
-  if (!s) return { title: 'Planificador no disponible' }
+  if (!s) return { title: 'Planificador no disponible', robots: { index: false, follow: false } }
   return {
     title: `Mejores días para pescar en ${s.name}: calendario de 12 meses`,
     description: `Planifica tu viaje de pesca a ${s.name}: actividad solunar y mareas vivas de los próximos 12 meses, más la climatología real de cada mes (${CLIMATE_YEARS}).`,

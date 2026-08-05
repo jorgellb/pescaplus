@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const tax = await getTaxonomy()
   const cat = categoryName(tax, category)
   const sub = subcategoriesOf(tax, category).find((s) => s.id === subcategory)
-  if (!getFishingType(category) || !sub) return {}
+  if (!getFishingType(category) || !sub) return { robots: { index: false, follow: false } }
   const url = `/categories/${category}/${subcategory}`
   return {
     title: `${sub.name} · ${cat}`,

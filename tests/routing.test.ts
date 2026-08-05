@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { readFileSync, readdirSync, statSync } from 'node:fs'
-import { join, relative } from 'node:path'
+import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs'
+import { join, relative, dirname } from 'node:path'
 
 /**
  * `dynamicParams = false` NO se puede usar en este proyecto.
@@ -51,12 +51,34 @@ noindex en generateMetadata. Ficheros:\n${culpables.join('\n')}`,
     ).toEqual([])
   })
 
-  it('las rutas con lista fija marcan noindex lo que no existe', () => {
-    // Sin esto, una URL inventada responde 200 con la página de "no encontrado"
-    // y Google puede indexarla como página real.
-    const cat = readFileSync(join(process.cwd(), 'app/categories/[category]/layout.tsx'), 'utf8')
-    expect(cat).toMatch(/robots:\s*\{\s*index:\s*false/)
-    const esp = readFileSync(join(process.cwd(), 'app/especies/[slug]/page.tsx'), 'utf8')
-    expect(esp).toMatch(/robots:\s*\{\s*index:\s*false/)
+  /**
+   * Toda página que pueda llamar a `notFound()` tiene que marcar `noindex` en
+   * sus metadatos.
+   *
+   * Motivo: `notFound()` responde 200, no 404 (medido). Sin el noindex, una URL
+   * inventada es una página viva y vacía para Google. Y no es un caso raro: la
+   * malla /pesca/[especie]/[zona] admite 30 especies x 195 zonas = 5.850
+   * combinaciones y solo 1.123 existen, así que había 4.727 páginas fantasma
+   * respondiendo "index, follow" — más cualquier slug que alguien se inventara.
+   */
+  it('toda página con notFound() marca noindex en sus metadatos', () => {
+    const app = join(process.cwd(), 'app')
+    const sinNoindex = paginas(app)
+      .filter((f) => readFileSync(f, 'utf8').includes('notFound()'))
+      .filter((f) => {
+        // Los metadatos pueden estar en la propia página o en su layout.
+        const layout = join(dirname(f), 'layout.tsx')
+        const fuentes = [readFileSync(f, 'utf8')]
+        if (existsSync(layout)) fuentes.push(readFileSync(layout, 'utf8'))
+        return !fuentes.some((s) => /robots:\s*\{\s*index:\s*false/.test(s))
+      })
+      .map((f) => relative(process.cwd(), f))
+
+    expect(
+      sinNoindex,
+      `Estas páginas pueden responder 200 con la página de "no encontrado" y
+dejar que Google la indexe. Añade robots: { index: false, follow: false } al
+return del caso que no existe, en generateMetadata:\n${sinNoindex.join('\n')}`,
+    ).toEqual([])
   })
 })

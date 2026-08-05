@@ -25,7 +25,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ spot: string }> }): Promise<Metadata> {
   const { spot } = await params
   const s = getSpot(spot)
-  if (!s) return { title: 'Localidad no encontrada' }
+  if (!s) return { title: 'Localidad no encontrada', robots: { index: false, follow: false } }
   const extra = s.type === 'mar' ? 'mareas, viento, oleaje, ' : 'viento, '
   const title = s.type === 'mar' ? `Pesca en ${s.name}: mareas, viento, oleaje y mejores horas` : `Pesca en ${s.name}: viento y mejores horas`
   const description = `Previsión profesional de pesca en ${s.name} (${s.region}): ${extra}presión, temperatura del agua, periodos solunares y las mejores horas hora a hora${s.type === 'mar' ? ', con puntuación por especie' : ''}. Ideal para ${s.known}.`

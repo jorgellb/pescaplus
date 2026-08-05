@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { especie, zona } = await params
   const sp = SEA_SPECIES.find((s) => s.id === especie)
   const spot = getSpot(zona)
-  if (!sp || !spot || !isSpeciesZone(especie, zona)) return { title: 'Página no encontrada' }
+  if (!sp || !spot || !isSpeciesZone(especie, zona)) return { title: 'Página no encontrada', robots: { index: false, follow: false } }
   const n = sp.name.toLowerCase()
   return {
     title: `Cómo pescar ${n} en ${spot.name}: temporada, cebo y mejores horas`,
