@@ -1350,6 +1350,122 @@ Devuelve SOLO JSON válido:
 }
 
 
+export interface SpeciesGuideContent {
+  intro: string
+  where: string
+  techniques: string
+  seasons: string
+  tips: string[]
+}
+
+/**
+ * Guía editorial de una especie — la prosa que a las fichas les faltaba.
+ *
+ * Las fichas ya eran ricas en DATOS (hábitat, profundidad, temperatura, meses,
+ * técnicas, cebos, talla) pero tenían 63 palabras de texto propio, y todas eran
+ * fragmentos sueltos: "Gusana americana, cangrejo ermitaño, mejillón". Cero
+ * prosa. Esto la escribe, anclada EXCLUSIVAMENTE en esos datos.
+ *
+ * Mismo patrón que `generateZoneGuide`, que funcionó: en las 195 guías de zona
+ * salió contenido de verdad —327 palabras de mediana y solo un 23 % de
+ * vocabulario compartido entre zonas—, así que el molde está probado. Se valida
+ * campo a campo y se rechaza entera a la mínima, porque una guía mala publicada
+ * es peor que ninguna: es justo el contenido fino que acabamos de limpiar.
+ */
+export async function generateSpeciesGuide(facts: {
+  name: string
+  article: string
+  habitat: string
+  depth: string
+  hours: string
+  technique: string
+  baits: string
+  minSizeNote: string
+  seaTempC: [number, number]
+  monthsPhrase: string
+  zones: string[]
+}): Promise<SpeciesGuideContent | null> {
+  if (!isApiConfigured()) return null
+
+  const prompt = `Escribe la guía de pesca deportiva de ${facts.article} ${facts.name} en España para la web PescaPlus.
+
+DATOS REALES DE LA ESPECIE (tu ÚNICA fuente; no añadas nada que no esté aquí):
+- Hábitat: ${facts.habitat}
+- Profundidad habitual: ${facts.depth}
+- Mejores horas: ${facts.hours}
+- Técnica principal: ${facts.technique}
+- Cebos y señuelos: ${facts.baits}
+- Temperatura del agua: ${facts.seaTempC[0]}–${facts.seaTempC[1]} °C
+- Mejores meses: ${facts.monthsPhrase}
+- Talla de referencia: ${facts.minSizeNote}
+- Zonas de España donde se busca: ${facts.zones.join(', ') || 'toda la costa'}
+
+REGLAS ESTRICTAS:
+1. PROHIBIDO inventar: nada de récords, cifras, marcas, nombres de playas o puertos que no estén en los datos.
+2. No menciones otras especies salvo para distinguirlas si el dato lo dice.
+3. Español de España impecable, tono de pescador veterano, concreto y útil. Sin relleno ni frases comodín ("sin duda", "paraíso de la pesca").
+4. Cada afirmación debe apoyarse en los datos (hábitat, profundidad, horas, temperatura, meses).
+5. Escribe DIRECTAMENTE el JSON, sin razonamiento previo.
+6. LONGITUD OBLIGATORIA: cada sección DEBE alcanzar su mínimo; si te quedas corto, desarrolla el detalle práctico (montajes, lectura del agua, presentación del cebo).
+
+Devuelve SOLO JSON válido:
+{"intro": string (130-170 palabras: cómo es esta especie para el pescador, dónde vive y qué la hace exigente o agradecida),
+"where": string (120-160 palabras: dónde buscarla según hábitat y profundidad, y cómo leer el agua para localizarla),
+"techniques": string (120-160 palabras: cómo se pesca, montajes concretos y presentación del cebo o señuelo),
+"seasons": string (80-120 palabras: mejor época del año, momento del día y el papel de la temperatura del agua),
+"tips": [4 strings (15-30 palabras cada uno): consejos prácticos, incluyendo uno sobre respetar la talla mínima y devolver lo que no llegue]}`
+
+  const content = await callAiModel(
+    [
+      { role: 'system', content: 'Eres redactor experto de pesca deportiva española. Respondes SOLO con JSON válido en español, sin mostrar razonamiento.' },
+      { role: 'user', content: prompt },
+    ],
+    {
+      maxTokens: 3200,
+      temperature: 0.6,
+      timeoutMs: 30000,
+      models: [groq('llama-3.3-70b-versatile'), openrouter('google/gemma-4-31b-it:free'), openrouter('google/gemma-4-26b-a4b-it:free')],
+    },
+  )
+  if (!content) {
+    console.warn(`species-guide ${facts.name}: sin contenido de ningún modelo`)
+    return null
+  }
+  const parsed = extractJson(content)
+  if (!parsed) {
+    console.warn(`species-guide ${facts.name}: JSON no parseable · inicio: ${content.slice(0, 160).replace(/\n/g, ' ')}`)
+    return null
+  }
+
+  const g: SpeciesGuideContent = {
+    intro: sanitizeSpanishProse(asString(parsed.intro, '')),
+    where: sanitizeSpanishProse(asString(parsed.where, '')),
+    techniques: sanitizeSpanishProse(asString(parsed.techniques, '')),
+    seasons: sanitizeSpanishProse(asString(parsed.seasons, '')),
+    tips: Array.isArray(parsed.tips)
+      ? parsed.tips.filter((t): t is string => typeof t === 'string').map((t) => sanitizeSpanishProse(t)).filter(Boolean).slice(0, 5)
+      : [],
+  }
+
+  const checks: [string, boolean][] = [
+    ['intro', validGuideField(g.intro, 420, 1600)],
+    ['where', validGuideField(g.where, 380, 1500)],
+    ['techniques', validGuideField(g.techniques, 380, 1500)],
+    ['seasons', validGuideField(g.seasons, 250, 1100)],
+    ['tips', g.tips.length >= 3 && g.tips.every((t) => validGuideField(t, 40, 320))],
+  ]
+  const failed = checks.filter(([, ok]) => !ok).map(([k]) => k)
+  if (failed.length) {
+    console.warn(`species-guide ${facts.name}: validación fallida en [${failed.join(', ')}]`, {
+      intro: g.intro.length, where: g.where.length, techniques: g.techniques.length,
+      seasons: g.seasons.length, tips: g.tips.map((t) => t.length),
+    })
+    return null
+  }
+  return g
+}
+
+
 // ---------------------------------------------------------------------------
 // Identificación de especie a partir de una foto
 // ---------------------------------------------------------------------------
