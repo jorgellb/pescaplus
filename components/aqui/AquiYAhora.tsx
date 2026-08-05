@@ -58,6 +58,8 @@ export default function AquiYAhora() {
   const [guardado, setGuardado] = useState<'no' | 'guardando' | 'ok' | 'sin-sesion' | 'error'>('no')
   const [cacheado, setCacheado] = useState(false)
   const [pantallaOn, setPantallaOn] = useState(false)
+  const [coords, setCoords] = useState('')
+  const [compartido, setCompartido] = useState(false)
   const wakeRef = useRef<WakeLockSentinel | null>(null)
 
   // Última lectura, para no enseñar una pantalla vacía sin cobertura. Se hace
@@ -95,6 +97,48 @@ export default function AquiYAhora() {
 
   useEffect(() => () => { wakeRef.current?.release().catch(() => {}) }, [])
 
+  /**
+   * Consulta un punto CONCRETO, venga del GPS o de la URL.
+   *
+   * Separarlo del botón es lo que permite dos cosas nuevas: mirar un punto sin
+   * estar en él (pegando sus coordenadas) y compartirlo con alguien, que recibe
+   * exactamente la misma lectura.
+   */
+  const consultarPunto = useCallback(async (lat: number, lon: number) => {
+    setPos({ lat, lon })
+    setGuardado('no')
+    setEstado('consultando')
+    try {
+      const res = await fetch(`/api/aqui?lat=${lat}&lon=${lon}`)
+      const json: Respuesta = await res.json()
+      if (!json.success) throw new Error('respuesta no válida')
+      setDatos(json)
+      setCacheado(false)
+      setEstado('listo')
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify(json)) } catch { /* lleno */ }
+    } catch {
+      setEstado('error')
+      setError('No he podido consultar ese punto. Si estás sin cobertura, esto es lo último que sabía.')
+    }
+  }, [])
+
+  /**
+   * Un punto en la URL (`/aqui?lat=..&lon=..`) manda sobre el GPS: si alguien te
+   * comparte un caladero, quieres VER ESE, no dónde estás tú.
+   */
+  useEffect(() => {
+    const cargarDeLaUrl = () => {
+      const q = new URLSearchParams(window.location.search)
+      const lat = Number(q.get('lat'))
+      const lon = Number(q.get('lon'))
+      if (!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) return
+      if (!q.get('lat') || !q.get('lon')) return
+      setEstado('consultando')
+      void consultarPunto(lat, lon)
+    }
+    cargarDeLaUrl()
+  }, [consultarPunto])
+
   const consultar = useCallback(() => {
     if (!('geolocation' in navigator)) {
       setEstado('error')
@@ -104,23 +148,9 @@ export default function AquiYAhora() {
     setEstado('localizando')
     setError('')
     navigator.geolocation.getCurrentPosition(
-      async (pos) => {
+      (pos) => {
         setPrecision(Math.round(pos.coords.accuracy))
-        setPos({ lat: pos.coords.latitude, lon: pos.coords.longitude })
-        setGuardado('no')
-        setEstado('consultando')
-        try {
-          const res = await fetch(`/api/aqui?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`)
-          const json: Respuesta = await res.json()
-          if (!json.success) throw new Error('respuesta no válida')
-          setDatos(json)
-          setCacheado(false)
-          setEstado('listo')
-          try { localStorage.setItem(CACHE_KEY, JSON.stringify(json)) } catch { /* lleno */ }
-        } catch {
-          setEstado(datos ? 'listo' : 'error')
-          setError('No he podido consultar. Si estás sin cobertura, esto es lo último que sabía.')
-        }
+        void consultarPunto(pos.coords.latitude, pos.coords.longitude)
       },
       (err) => {
         setEstado('error')
@@ -132,7 +162,7 @@ export default function AquiYAhora() {
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 },
     )
-  }, [datos])
+  }, [consultarPunto])
 
   /**
    * Guarda el punto como marca, con la sonda y el fondo YA RELLENOS.
@@ -175,6 +205,44 @@ export default function AquiYAhora() {
     }
   }, [pos, datos])
 
+  /**
+   * Comparte el punto con sus datos.
+   *
+   * El enlace lleva las coordenadas, así que quien lo recibe ve EXACTAMENTE la
+   * misma lectura —sonda, fondo, espacio protegido y ventana— sin tener que
+   * estar allí. Usa la hoja nativa del móvil si existe; si no, al portapapeles.
+   */
+  const compartir = useCallback(async () => {
+    if (!pos || !datos) return
+    const url = `${window.location.origin}/aqui?lat=${pos.lat.toFixed(5)}&lon=${pos.lon.toFixed(5)}`
+    const texto = [
+      datos.sonda?.depthM != null ? `${datos.sonda.depthM.toLocaleString('es-ES', { maximumFractionDigits: 1 })} m` : null,
+      datos.fondo?.label,
+      `cerca de ${datos.spot.name}`,
+    ].filter(Boolean).join(' · ')
+    try {
+      if (navigator.share) await navigator.share({ title: 'Un punto en PescaPlus', text: texto, url })
+      else await navigator.clipboard.writeText(`${texto}\n${url}`)
+      setCompartido(true)
+      setTimeout(() => setCompartido(false), 2500)
+    } catch { /* el usuario canceló: no es un error */ }
+  }, [pos, datos])
+
+  /** Acepta "36.01, -5.62" y también "36,01 -5,62" (coma decimal española). */
+  const irACoordenadas = useCallback(() => {
+    const n = coords.trim().replace(/;/g, ',')
+    const m = /^\s*(-?\d+(?:[.,]\d+)?)\s*[,\s]\s*(-?\d+(?:[.,]\d+)?)\s*$/.exec(n)
+    if (!m) { setError('Escribe las coordenadas así: 36.01, -5.62'); return }
+    const lat = Number(m[1].replace(',', '.'))
+    const lon = Number(m[2].replace(',', '.'))
+    if (!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) {
+      setError('Esas coordenadas no son válidas.'); return
+    }
+    setError('')
+    setPrecision(null)
+    void consultarPunto(lat, lon)
+  }, [coords, consultarPunto])
+
   const cargando = estado === 'localizando' || estado === 'consultando'
 
   return (
@@ -216,6 +284,15 @@ export default function AquiYAhora() {
             <Icon name="pin" className="w-4 h-4" strokeWidth={2} />
             {guardado === 'guardando' ? 'Guardando…' : guardado === 'ok' ? 'Punto guardado' : 'Guardar este punto'}
           </button>
+          {/* Compartir el punto CON sus datos: el enlace lleva las coordenadas,
+              así que quien lo reciba ve la misma lectura sin estar allí. */}
+          <button
+            onClick={compartir}
+            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-full border border-ink/15 text-ink/80 hover:border-accent hover:text-accent"
+          >
+            <Icon name="link" className="w-4 h-4" strokeWidth={2} />
+            {compartido ? '¡Copiado!' : 'Compartir este punto'}
+          </button>
           {guardado === 'ok' && (
             <Link href="/carta" className="text-[13px] font-bold uppercase tracking-wide text-accent hover:underline">
               Ver en la carta →
@@ -229,6 +306,25 @@ export default function AquiYAhora() {
           {guardado === 'error' && <span className="text-[13px] text-ink/70">No se pudo guardar. Inténtalo otra vez.</span>}
         </div>
       )}
+
+      {/* Consultar un punto SIN estar en él: pegando sus coordenadas. Es lo que
+          convierte esto en una herramienta de preparación y no solo de campo. */}
+      <div className="flex flex-wrap items-center gap-2">
+        <input
+          value={coords}
+          onChange={(e) => setCoords(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') irACoordenadas() }}
+          placeholder="…o pega unas coordenadas: 36.01, -5.62"
+          className="flex-1 min-w-[220px] px-4 py-2.5 bg-paper border border-ink/12 rounded-full text-ink placeholder-ink/50 text-sm focus:outline-none focus:border-accent"
+        />
+        <button
+          onClick={irACoordenadas}
+          disabled={!coords.trim() || cargando}
+          className="px-4 py-2.5 text-sm font-semibold rounded-full border border-ink/15 text-ink/80 hover:border-accent hover:text-accent disabled:opacity-50"
+        >
+          Consultar
+        </button>
+      </div>
 
       {error && (
         <p className="text-[14px] text-ink/70 border border-ink/[0.07] rounded-xl bg-ink/[0.02] p-3">{error}</p>
