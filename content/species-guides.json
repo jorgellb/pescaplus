@@ -1,1 +1,41 @@
-{}
+{
+  "dorada": {
+    "intro": "La dorada es de esos peces que están mucho más cerca de lo que uno cree. No hace falta barco ni fondos profundos: come en dos metros de agua, a veces a diez pasos de la orilla, y lo hace justo cuando la marea empieza a subir y el arenal que estaba seco vuelve a cubrirse. Es un pez de boca dura y muy desconfiado, con unas placas dentales hechas para triturar concha, así que se acerca al cebo con calma, lo prueba y lo suelta si nota algo raro. Ahí se pierde la mayoría: en el bajo demasiado grueso, en el anzuelo demasiado grande, en la prisa por clavar. Cuando por fin se engancha, tira de lado y busca el fondo con una fuerza que no cuadra con su tamaño. Es pesca de paciencia y de detalle, no de fuerza.",
+    "where": "Búscala donde la arena se junta con algo duro: el borde de un bajo rocoso, una mata de alga, un canal que se vacía con la bajamar, la boca de un estero. Ese contraste es su despensa, porque es donde quedan atrapados los moluscos y los cangrejos que come. Trabaja entre dos y quince metros, y con la subiente entra de verdad a la orilla, a veces con el lomo casi fuera del agua. Lee el agua antes de montar: una franja más oscura recortada sobre la arena clara es un canal o una mata, y ahí es donde hay que dejar el cebo. Con la bajamar toma nota mental de esas piedras y esas depresiones que quedan al descubierto, porque son exactamente los puntos a los que tendrás que lanzar cuando el agua vuelva a cubrirlos.",
+    "techniques": "Surfcasting a fondo, pero fino. Bajo de 0,22 a 0,28 y anzuelo del 4 al 1, no más: con nailon grueso te la va a rechazar. Un aparejo de gambero o un simple bajo largo con una sola gamba trabajan bien, siempre con el plomo justo para aguantar y nada más, porque cuanto menos peso note al chupar, más rato se queda. La gusana americana es el cebo de referencia, pero cuando hay muchas mojarras molestando, el cangrejo ermitaño y el mejillón filtran y aguantan mejor. No claves a la primera picada: la dorada da un par de golpes secos y luego se va con el cebo, y es en ese segundo movimiento cuando hay que apretar. También entra al currican ligero muy pegado a la costa, en los mismos arenales, sobre todo a primera hora.",
+    "seasons": "De mayo a octubre, con el agua entre 16 y 26 grados. Los mejores momentos son las primeras horas del día y, sobre todo, el cambio de marea: la subiente que empieza a cubrir el arenal es la ventana buena, y con la bajamar la actividad cae en picado. En verano, con calor fuerte, adelanta la salida al amanecer o pásate a la última hora de la tarde. El agua algo turbia tras unos días de viento suele venirle bien, porque se acerca más confiada.",
+    "tips": [
+      "Fíjate en la bajamar dónde quedan las matas y los canales: son los puntos a los que hay que lanzar cuando suba el agua.",
+      "No claves al primer golpe. Espera al segundo movimiento, cuando ya se va con el cebo.",
+      "Baja el diámetro del bajo antes que cambiar de cebo: casi siempre el problema es que te está viendo el hilo.",
+      "Respeta la talla mínima y devuelve al agua lo que no llegue, con las manos mojadas y sin tenerlo fuera más de unos segundos."
+    ],
+    "generatedAt": "2026-08-05T00:00:00.000Z"
+  },
+  "lubina": {
+    "intro": "La lubina es un pez de mal tiempo. Mientras el resto de la pesca se va al garete con la mar movida, ella se pone a comer justo ahí, en la espuma, en la rompiente, donde el agua revuelve la arena y arrastra todo lo que puede tragarse. Por eso los días que peor pinta tienen desde la playa suelen ser los mejores. Es un depredador puro, rápido y muy visual, capaz de entrar en apenas medio metro de agua para acorralar un banco de lanzones contra la orilla. Cuando ataca un señuelo lo hace sin dudarlo y la picada se nota en la mano. Y engancha muy cerca: se pierde mucha lubina por lanzar lejos cuando el pez estaba a diez metros, en la primera línea de espuma.",
+    "where": "Donde el agua se rompe y se mueve. Espigones, puntas de roca, desembocaduras y playas batidas; el borde de la rompiente, los canales que se forman entre bancos de arena, la corriente que sale de una ría con la bajamar. Trabaja entre cero y diez metros, y con mar movida se pega a la orilla de verdad. Busca la espuma blanca y el agua turbia y lechosa, no el agua clara: ahí es donde ella tiene ventaja y las presas no la ven llegar. En desembocaduras, el momento llega cuando el agua dulce empieza a salir con fuerza y arrastra comida al mar.",
+    "techniques": "Spinning con paseantes y jerkbaits de 9 a 14 centímetros, recuperando despacio y dejando que el señuelo trabaje con la propia ola. Recupera hasta el final: muchas atacan a los últimos metros, con el señuelo casi bajo la puntera. De noche, surfcasting con gusana, cangrejo o lanzón, con bajos largos y poco plomo para que el cebo baile con la corriente en vez de quedarse muerto en el fondo. Con mar plana y agua clara cambia la estrategia: baja el tamaño del señuelo, alarga el bajo y pásate a las horas sin luz, porque a plena luz y agua cristalina no se acerca.",
+    "seasons": "De septiembre a marzo, con el agua entre 11 y 20 grados; el frío no la para, más bien al contrario. Amanecer, atardecer y noche son sus horas, y con temporal o mar movida come también de día. Los dos o tres días siguientes a un temporal, cuando el mar aún está sucio pero ya se puede pescar, suelen ser los mejores del año.",
+    "tips": [
+      "Recupera hasta tener el señuelo bajo los pies: muchas picadas llegan en el último metro.",
+      "Con mar plana y sol, olvídate del mediodía. Es pesca de luces bajas y agua revuelta.",
+      "Pisa con cuidado las rocas mojadas y no des la espalda al mar: es pesca de rompiente y las olas no avisan.",
+      "La talla mínima ronda los 36 cm y varía por comunidad. Confírmala y devuelve lo que no llegue."
+    ],
+    "generatedAt": "2026-08-05T00:00:00.000Z"
+  },
+  "denton": {
+    "intro": "El dentón es un pez de veril, de corriente y de madrugón. No perdona un montaje mal hecho ni un descuido en el freno: pica con una violencia que sorprende incluso a quien lo espera, y lo primero que intenta es meterse en la piedra. Los primeros segundos deciden la pelea. Vive sobre fondos duros, en bajos y caídas, y se mueve con la corriente buscando bancos de calamar o de pescado pequeño. Es desconfiado con el barco y con el ruido, así que la aproximación importa tanto como el aparejo: motor fuera con tiempo, deriva limpia y silencio a bordo. Cuando todo cuadra, es una de las capturas más agradecidas que da nuestra costa.",
+    "where": "Bajos rocosos, caídas y veriles, entre diez y cincuenta metros sobre piedra. Busca el cambio brusco de profundidad en la sonda —el borde de la meseta, la pared que cae— y colócate para derivar sobre él con la corriente, no en contra. Sin corriente no suele haber pesca: el agua parada es mala señal. Los mejores puntos son los que juntan piedra, desnivel y paso de agua, y no cambian de un año para otro, así que cuando encuentres uno márcalo con sus coordenadas y su sonda.",
+    "techniques": "Curricán con vivo o jigging medio-pesado, según el día. Con vivo, el calamar y la caballa son lo primero; el montaje debe permitir que el cebo nade natural, con el mínimo plomo que aguante la deriva. Con jig, de 100 a 200 gramos según la corriente y la profundidad, trabajado a golpes cortos desde el fondo y sin dejar de vigilar la caída, porque muchas picadas llegan mientras baja. Freno bien ajustado antes de empezar y la mano cerca: si le dejas correr hacia la piedra, corta el bajo en dos segundos.",
+    "seasons": "Dos temporadas claras: de abril a junio y de septiembre a noviembre, con el agua entre 15 y 24 grados. El amanecer es su hora, y después las horas de corriente fuerte; es más importante coincidir con el agua en movimiento que madrugar por madrugar. En verano, con el agua muy caliente, se va a más profundidad y hay que buscarlo abajo.",
+    "tips": [
+      "Ajusta el freno antes de la primera deriva: la picada llega sin aviso y va derecha a la piedra.",
+      "Sin corriente no hay dentón. Si el agua está parada, cambia de punto o espera al cambio de marea.",
+      "Apaga el motor con tiempo y deriva sobre el veril: el ruido justo encima del bajo lo cierra.",
+      "Marca los buenos puntos con su sonda y su tipo de fondo, y respeta la talla mínima devolviendo lo que no llegue."
+    ],
+    "generatedAt": "2026-08-05T00:00:00.000Z"
+  }
+}
