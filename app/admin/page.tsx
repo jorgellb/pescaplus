@@ -18,12 +18,19 @@ export default function AdminProductsPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [bulk, setBulk] = useState<{ done: number; total: number; ok: number; fail: number; esperando?: boolean } | null>(null)
   const [optFilter, setOptFilter] = useState<'all' | 'yes' | 'no'>('all')
+  const [catFilter, setCatFilter] = useState('')
+  const [subFilter, setSubFilter] = useState('')
+  const [tax, setTax] = useState<{ id: string; name: string; subcategories: { id: string; name: string }[] }[]>([])
   const confirm = useConfirm()
   const toast = useToast()
 
   const load = useCallback(async () => {
     setLoading(true)
     try {
+      fetch('/api/admin/taxonomy')
+        .then((r) => r.json())
+        .then((d) => { if (d.success) setTax(d.taxonomy) })
+        .catch(() => {})
       const [prodRes, cfgRes] = await Promise.all([
         fetch('/api/products'),
         fetch('/api/admin/settings'),
@@ -62,9 +69,17 @@ export default function AdminProductsPage() {
       if (q && !p.title.toLowerCase().includes(q)) return false
       if (optFilter === 'yes' && !p.aiOptimized) return false
       if (optFilter === 'no' && p.aiOptimized) return false
+      if (catFilter && !p.categories.includes(catFilter)) return false
+      if (subFilter && !p.subcategories.includes(subFilter)) return false
       return true
     })
-  }, [products, query, optFilter])
+  }, [products, query, optFilter, catFilter, subFilter])
+
+  /** Subcategorías de la categoría elegida. Sin categoría, no hay lista que ofrecer. */
+  const subsDisponibles = useMemo(
+    () => tax.find((c) => c.id === catFilter)?.subcategories ?? [],
+    [tax, catFilter],
+  )
 
   const toggleSel = (id: string) =>
     setSelected((prev) => {
@@ -222,6 +237,26 @@ export default function AdminProductsPage() {
           placeholder="Filtrar por título…"
           className="w-full sm:max-w-xs px-4 py-2.5 bg-paper border border-ink/10 rounded-xl text-ink placeholder-ink/60 focus:outline-none focus:border-accent text-sm transition-all"
         />
+          {/* Al cambiar de categoría se limpia la subcategoría: si no, queda
+              filtrando por una que no existe ahí y el listado sale vacío sin
+              que se entienda por qué. */}
+          <select
+            value={catFilter}
+            onChange={(e) => { setCatFilter(e.target.value); setSubFilter('') }}
+            className="px-3 py-2.5 bg-paper border border-ink/10 rounded-xl text-ink text-sm focus:outline-none focus:border-accent"
+          >
+            <option value="">Todas las categorías</option>
+            {tax.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+          <select
+            value={subFilter}
+            onChange={(e) => setSubFilter(e.target.value)}
+            disabled={!catFilter || subsDisponibles.length === 0}
+            className="px-3 py-2.5 bg-paper border border-ink/10 rounded-xl text-ink text-sm focus:outline-none focus:border-accent disabled:opacity-50"
+          >
+            <option value="">{catFilter ? 'Todas las subcategorías' : 'Elige categoría'}</option>
+            {subsDisponibles.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+          </select>
         <div className="inline-flex rounded-xl border border-ink/10 overflow-hidden text-xs font-bold">
           {([
             ['all', 'Todos'],

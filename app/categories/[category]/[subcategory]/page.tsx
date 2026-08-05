@@ -7,7 +7,7 @@ import CategoryIcon from '@/components/graphics/CategoryIcon'
 import { getFishingType, isValidSubcategory } from '@/lib/fishing'
 import { listProducts } from '@/lib/products-store'
 import { getTrendingRanked } from '@/lib/trending'
-import { getTaxonomy, categoryName, subcategoriesOf } from '@/lib/taxonomy-store'
+import { getTaxonomy, categoryName, subcategoriesOf, seoText } from '@/lib/taxonomy-store'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
 import { safeJsonLd } from '@/lib/json-ld'
 import Icon from '@/components/icons/Icon'
@@ -64,6 +64,7 @@ export default async function SubcategoryPage({ params }: Params) {
 
   const products = ranked.filter((p) => p.subcategories.includes(subcategory))
   const description = `${sub.name} para ${catName.toLowerCase()}. ${fishingType.tagline} Encuentra el modelo ideal al mejor precio y con envío rápido.`
+  const texto = await seoText(category, subcategory)
 
   const breadcrumbLd = breadcrumbJsonLd([
     { name: 'Inicio', url: SITE_URL },
@@ -89,6 +90,14 @@ export default async function SubcategoryPage({ params }: Params) {
             <div className="min-w-0">
               <h1 className="font-display uppercase text-[1.7rem] sm:text-4xl md:text-5xl leading-[1.05] text-ink break-words">{sub.name}</h1>
               <p className="text-ink/60 text-sm md:text-base mt-2 max-w-2xl">{description}</p>
+              {/* Texto propio de la subcategoría, escrito desde el admin. */}
+              {texto && (
+                <div className="mt-4 max-w-2xl space-y-2">
+                  {texto.split('\n').filter(Boolean).map((parrafo, i) => (
+                    <p key={i} className="text-ink/75 text-[15px] leading-relaxed">{parrafo}</p>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
           <Link href={`/categories/${category}`} className="inline-block mt-5 text-xs font-semibold text-accent hover:underline">

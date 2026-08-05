@@ -5,7 +5,7 @@ import CategoryIcon from '@/components/graphics/CategoryIcon'
 import CategoryBrowser from './CategoryBrowser'
 import { FISHING_TYPES, getFishingType } from '@/lib/fishing'
 import { getTrendingRanked } from '@/lib/trending'
-import { getTaxonomy, categoryName, subcategoriesOf } from '@/lib/taxonomy-store'
+import { getTaxonomy, categoryName, subcategoriesOf, seoText } from '@/lib/taxonomy-store'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
 import { safeJsonLd } from '@/lib/json-ld'
 
@@ -49,6 +49,9 @@ export default async function CategoryPage({ params }: Params) {
   const catName = categoryName(taxonomy, category)
   const subcategories = subcategoriesOf(taxonomy, category)
   const categoryDescription = fishingType?.tagline ?? 'Los mejores aparejos para tus salidas de pesca.'
+  // Texto propio escrito desde el admin. Es lo que distingue esta página de las
+  // mil tiendas que listan el mismo catálogo de afiliados.
+  const texto = await seoText(category)
 
   const breadcrumbLd = breadcrumbJsonLd([
     { name: 'Inicio', url: SITE_URL },
@@ -73,6 +76,16 @@ export default async function CategoryPage({ params }: Params) {
             <div className="min-w-0">
               <h1 className="font-display uppercase text-[1.7rem] sm:text-4xl md:text-6xl leading-[1.05] text-ink break-words">{catName}</h1>
               <p className="text-ink/60 text-sm md:text-base mt-2 max-w-xl">{categoryDescription}</p>
+              {/* Texto propio de la categoría, escrito desde el admin. Va aquí,
+                  arriba y visible, y no escondido a pie de página: un texto que
+                  el usuario no lee tampoco lo valora Google. */}
+              {texto && (
+                <div className="mt-4 max-w-2xl space-y-2">
+                  {texto.split('\n').filter(Boolean).map((parrafo, i) => (
+                    <p key={i} className="text-ink/75 text-[15px] leading-relaxed">{parrafo}</p>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

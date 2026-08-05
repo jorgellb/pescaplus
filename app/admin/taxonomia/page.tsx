@@ -18,6 +18,8 @@ const field =
 
 export default function TaxonomyAdminPage() {
   const [cats, setCats] = useState<Cat[]>([])
+  /** Texto SEO por clave "categoria" o "categoria/subcategoria". */
+  const [seo, setSeo] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [note, setNote] = useState('')
@@ -78,7 +80,7 @@ export default function TaxonomyAdminPage() {
       const res = await fetch('/api/admin/taxonomy', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ names, subs }),
+        body: JSON.stringify({ names, subs, seo }),
       })
       const data = await res.json()
       if (data.success) {
@@ -126,6 +128,23 @@ export default function TaxonomyAdminPage() {
               <input value={c.name} onChange={(e) => setCatName(c.id, e.target.value)} className={`${field} font-bold`} />
             </div>
 
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-ink/60">
+                Texto de la categoría (SEO)
+              </label>
+              <textarea
+                value={seo[c.id] ?? ''}
+                onChange={(e) => setSeo((s) => ({ ...s, [c.id]: e.target.value }))}
+                rows={3}
+                maxLength={4000}
+                placeholder="Un par de párrafos propios: qué buscar, cómo elegir, para qué pesca sirve…"
+                className={`${field} text-xs`}
+              />
+              <p className="text-[10px] text-ink/50">
+                Sale en la página de la categoría, debajo del título. Un salto de línea separa párrafos.
+              </p>
+            </div>
+
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-ink/60">Subcategorías</span>
@@ -133,7 +152,8 @@ export default function TaxonomyAdminPage() {
               </div>
               {c.subcategories.length === 0 && <p className="text-xs text-ink/60">Sin subcategorías.</p>}
               {c.subcategories.map((s, i) => (
-                <div key={i} className="flex items-center gap-1.5">
+                <div key={i} className="space-y-1">
+                    <div className="flex items-center gap-1.5">
                   <input
                     value={s.name}
                     onChange={(e) => setSub(c.id, i, e.target.value)}
@@ -143,7 +163,24 @@ export default function TaxonomyAdminPage() {
                   <button onClick={() => moveSub(c.id, i, -1)} disabled={i === 0} className="w-6 h-7 flex-shrink-0 rounded bg-white border border-ink/10 text-ink/60 hover:text-ink disabled:opacity-30 text-xs">↑</button>
                   <button onClick={() => moveSub(c.id, i, 1)} disabled={i === c.subcategories.length - 1} className="w-6 h-7 flex-shrink-0 rounded bg-white border border-ink/10 text-ink/60 hover:text-ink disabled:opacity-30 text-xs">↓</button>
                   <button onClick={() => removeSub(c.id, i)} className="w-6 h-7 flex-shrink-0 rounded bg-white border border-red-200 text-red-500 hover:bg-red-50 flex items-center justify-center"><Icon name="close" className="w-3 h-3" strokeWidth={2.2} /></button>
-                </div>
+                    </div>
+                    {/* El texto se guarda con la clave "categoria/subcategoria",
+                        así que la subcategoría necesita id. Una recién añadida aún
+                        no lo tiene: se le asigna al guardar, y entonces aparece su
+                        campo. */}
+                    {s.id ? (
+                      <textarea
+                        value={seo[`${c.id}/${s.id}`] ?? ''}
+                        onChange={(e) => setSeo((x) => ({ ...x, [`${c.id}/${s.id}`]: e.target.value }))}
+                        rows={2}
+                        maxLength={4000}
+                        placeholder={`Texto de ${s.name || 'esta subcategoría'} para SEO…`}
+                        className={`${field} py-1.5 text-[11px]`}
+                      />
+                    ) : (
+                      <p className="text-[10px] text-ink/50 pl-1">Guarda para poder escribirle texto SEO.</p>
+                    )}
+                  </div>
               ))}
             </div>
           </div>
