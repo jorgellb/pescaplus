@@ -29,6 +29,16 @@ export interface TaxonomyOverride {
    * mismo catálogo de afiliados.
    */
   seo: Record<string, string>
+  /**
+   * Meta title y meta description propios, con las mismas claves que `seo`.
+   *
+   * Van en mapas aparte y no dentro de `seo` para no romper lo ya guardado: el
+   * blob de taxonomía vive en la base de datos y cambiarle la forma obligaría a
+   * migrarlo. Cuando están vacíos se usan los generados por código, así que
+   * rellenarlos es opcional categoría a categoría.
+   */
+  metaTitle: Record<string, string>
+  metaDescription: Record<string, string>
 }
 
 export interface ResolvedCategory {
@@ -41,7 +51,7 @@ export interface ResolvedCategory {
 
 export type ResolvedTaxonomy = ResolvedCategory[]
 
-const EMPTY: TaxonomyOverride = { names: {}, subs: {}, seo: {} }
+const EMPTY: TaxonomyOverride = { names: {}, subs: {}, seo: {}, metaTitle: {}, metaDescription: {} }
 
 const globalForTaxonomy = globalThis as unknown as { __pescaplusTaxonomy?: TaxonomyOverride }
 
@@ -56,6 +66,8 @@ export function sanitizeOverride(raw: unknown): TaxonomyOverride {
   const names: Record<string, string> = {}
   const subs: Record<string, Subcategory[]> = {}
   const seo: Record<string, string> = {}
+  const metaTitle: Record<string, string> = {}
+  const metaDescription: Record<string, string> = {}
   for (const id of FISHING_TYPE_IDS) {
     const name = input.names?.[id]
     if (typeof name === 'string' && name.trim() && name.trim() !== defaultName(id)) {
@@ -95,7 +107,26 @@ export function sanitizeOverride(raw: unknown): TaxonomyOverride {
     seo[clave] = texto
   }
 
-  return { names, subs, seo }
+  /**
+   * Meta title y description. Se recortan a la longitud que Google llega a
+   * mostrar: pasado eso lo corta con puntos suspensivos, así que guardar más
+   * solo sirve para que el editor crea que se ve algo que no se ve.
+   */
+  for (const [campo, destino, tope] of [
+    ['metaTitle', metaTitle, 70],
+    ['metaDescription', metaDescription, 180],
+  ] as const) {
+    for (const [clave, valor] of Object.entries((input as Record<string, unknown>)[campo] as Record<string, unknown> ?? {})) {
+      if (typeof valor !== 'string') continue
+      const limpio = valor.replace(/\s+/g, ' ').trim().slice(0, tope)
+      if (!limpio) continue
+      const [cat] = clave.split('/')
+      if (!validas.has(cat) || clave.split('/').length > 2) continue
+      destino[clave] = limpio
+    }
+  }
+
+  return { names, subs, seo, metaTitle, metaDescription }
 }
 
 function defaultName(id: string): string {
@@ -154,9 +185,24 @@ export function subcategoriesOf(tax: ResolvedTaxonomy, id: string): Subcategory[
   return tax.find((c) => c.id === id)?.subcategories ?? []
 }
 
-/** Todos los textos SEO guardados, para el editor del admin. */
+/** Todos los textos y metadatos guardados, para el editor del admin. */
 export async function allSeoTexts(): Promise<Record<string, string>> {
   return (await readOverride()).seo ?? {}
+}
+
+export async function allSeoMeta(): Promise<{
+  metaTitle: Record<string, string>
+  metaDescription: Record<string, string>
+}> {
+  const o = await readOverride()
+  return { metaTitle: o.metaTitle ?? {}, metaDescription: o.metaDescription ?? {} }
+}
+
+/** Meta title y description propios de una categoría o subcategoría, si los hay. */
+export async function seoMeta(categoryId: string, subId?: string): Promise<{ title?: string; description?: string }> {
+  const o = await readOverride()
+  const k = subId ? `${categoryId}/${subId}` : categoryId
+  return { title: o.metaTitle?.[k] || undefined, description: o.metaDescription?.[k] || undefined }
 }
 
 /** Texto de presentación de una categoría, o de una subcategoría si se pasa. */

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { isRequestAuthenticated } from '@/lib/admin-auth'
-import { getTaxonomy, saveTaxonomy, allSeoTexts } from '@/lib/taxonomy-store'
+import { getTaxonomy, saveTaxonomy, allSeoTexts, allSeoMeta } from '@/lib/taxonomy-store'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   if (!isRequestAuthenticated(request)) {
     return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
   }
-  return NextResponse.json({ success: true, taxonomy: await getTaxonomy(), seo: await allSeoTexts() })
+  return NextResponse.json({ success: true, taxonomy: await getTaxonomy(), seo: await allSeoTexts(), ...(await allSeoMeta()) })
 }
 
 /** Save taxonomy overrides (category renames + subcategory CRUD). Admin only. */

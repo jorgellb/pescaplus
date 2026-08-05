@@ -7,7 +7,7 @@ import CategoryIcon from '@/components/graphics/CategoryIcon'
 import { getFishingType, isValidSubcategory } from '@/lib/fishing'
 import { listProducts } from '@/lib/products-store'
 import { getTrendingRanked } from '@/lib/trending'
-import { getTaxonomy, categoryName, subcategoriesOf, seoText } from '@/lib/taxonomy-store'
+import { getTaxonomy, categoryName, subcategoriesOf, seoText, seoMeta } from '@/lib/taxonomy-store'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
 import { safeJsonLd } from '@/lib/json-ld'
 import Icon from '@/components/icons/Icon'
@@ -42,12 +42,16 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const sub = subcategoriesOf(tax, category).find((s) => s.id === subcategory)
   if (!getFishingType(category) || !sub) return { robots: { index: false, follow: false } }
   const url = `/categories/${category}/${subcategory}`
+  // Meta propios desde el admin; si no hay, los generados por código.
+  const propio = await seoMeta(category, subcategory)
+  const titulo = propio.title ?? `${sub.name} · ${cat}`
   return {
-    title: `${sub.name} · ${cat}`,
+    title: titulo,
     description:
+      propio.description ??
       `${sub.name} para ${cat.toLowerCase()}: los mejores modelos seleccionados al mejor precio, con envío rápido. Compra ${sub.name.toLowerCase()} en PescaPlus.`.slice(0, 160),
     alternates: { canonical: url },
-    openGraph: { title: `${sub.name} · ${cat}`, url, type: 'website' },
+    openGraph: { title: titulo, url, type: 'website' },
   }
 }
 

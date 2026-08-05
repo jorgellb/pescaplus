@@ -20,6 +20,8 @@ export default function TaxonomyAdminPage() {
   const [cats, setCats] = useState<Cat[]>([])
   /** Texto SEO por clave "categoria" o "categoria/subcategoria". */
   const [seo, setSeo] = useState<Record<string, string>>({})
+  const [metaTitle, setMetaTitle] = useState<Record<string, string>>({})
+  const [metaDescription, setMetaDescription] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [note, setNote] = useState('')
@@ -29,7 +31,13 @@ export default function TaxonomyAdminPage() {
     fetch('/api/admin/taxonomy')
       .then((r) => r.json())
       .then((d) => {
-        if (d.success) setCats(d.taxonomy)
+          if (d.success) {
+            setCats(d.taxonomy)
+            // Sin esto el editor abre en blanco y guardar BORRA lo que hubiera.
+            setSeo(d.seo ?? {})
+            setMetaTitle(d.metaTitle ?? {})
+            setMetaDescription(d.metaDescription ?? {})
+          }
         else setError(d.error || 'No se pudo cargar')
       })
       .catch(() => setError('Error de red al cargar'))
@@ -80,11 +88,14 @@ export default function TaxonomyAdminPage() {
       const res = await fetch('/api/admin/taxonomy', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ names, subs, seo }),
+        body: JSON.stringify({ names, subs, seo, metaTitle, metaDescription }),
       })
       const data = await res.json()
       if (data.success) {
         setCats(data.taxonomy)
+          if (data.seo) setSeo(data.seo)
+          if (data.metaTitle) setMetaTitle(data.metaTitle)
+          if (data.metaDescription) setMetaDescription(data.metaDescription)
         setNote('✓ Taxonomía guardada. Las páginas se actualizan en breve.')
       } else setError(data.error || 'No se pudo guardar')
     } catch {
@@ -143,6 +154,18 @@ export default function TaxonomyAdminPage() {
               <p className="text-[10px] text-ink/50">
                 Sale en la página de la categoría, debajo del título. Un salto de línea separa párrafos.
               </p>
+              <label className="block pt-1">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-ink/60">Meta title</span>
+                <input value={metaTitle[c.id] ?? ''} onChange={(e) => setMetaTitle((s) => ({ ...s, [c.id]: e.target.value }))}
+                  maxLength={70} placeholder="Vacío = el automático" className={`${field} text-xs`} />
+                <span className="text-[10px] text-ink/50">{(metaTitle[c.id] ?? '').length}/70</span>
+              </label>
+              <label className="block">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-ink/60">Meta description</span>
+                <textarea value={metaDescription[c.id] ?? ''} onChange={(e) => setMetaDescription((s) => ({ ...s, [c.id]: e.target.value }))}
+                  rows={2} maxLength={180} placeholder="Vacío = la automática" className={`${field} text-xs`} />
+                <span className="text-[10px] text-ink/50">{(metaDescription[c.id] ?? '').length}/180</span>
+              </label>
             </div>
 
             <div className="space-y-2">
@@ -169,6 +192,7 @@ export default function TaxonomyAdminPage() {
                         no lo tiene: se le asigna al guardar, y entonces aparece su
                         campo. */}
                     {s.id ? (
+                      <div className="space-y-1">
                       <textarea
                         value={seo[`${c.id}/${s.id}`] ?? ''}
                         onChange={(e) => setSeo((x) => ({ ...x, [`${c.id}/${s.id}`]: e.target.value }))}
@@ -177,6 +201,13 @@ export default function TaxonomyAdminPage() {
                         placeholder={`Texto de ${s.name || 'esta subcategoría'} para SEO…`}
                         className={`${field} py-1.5 text-[11px]`}
                       />
+                        <input value={metaTitle[`${c.id}/${s.id}`] ?? ''}
+                          onChange={(e) => setMetaTitle((x) => ({ ...x, [`${c.id}/${s.id}`]: e.target.value }))}
+                          maxLength={70} placeholder="Meta title (vacío = automático)" className={`${field} py-1 text-[11px]`} />
+                        <textarea value={metaDescription[`${c.id}/${s.id}`] ?? ''}
+                          onChange={(e) => setMetaDescription((x) => ({ ...x, [`${c.id}/${s.id}`]: e.target.value }))}
+                          rows={2} maxLength={180} placeholder="Meta description (vacío = automática)" className={`${field} py-1 text-[11px]`} />
+                      </div>
                     ) : (
                       <p className="text-[10px] text-ink/50 pl-1">Guarda para poder escribirle texto SEO.</p>
                     )}

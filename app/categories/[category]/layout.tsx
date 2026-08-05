@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { getFishingType } from '@/lib/fishing'
+import { seoMeta } from '@/lib/taxonomy-store'
 
 export async function generateMetadata({
   params,
@@ -23,11 +24,13 @@ export async function generateMetadata({
     return { title: 'Categoría no encontrada', robots: { index: false, follow: false } }
   }
 
+  // Meta propios desde el admin; si no hay, los generados por código.
+  const propio = await seoMeta(category)
   const name = type.name
   const description = type.tagline ?? `Los mejores productos de ${name} seleccionados por expertos en PescaPlus.`
   return {
-    title: name,
-    description,
+    title: propio.title ?? name,
+    description: propio.description ?? description,
     alternates: { canonical: `/categories/${category}` },
     openGraph: { title: `${name} · PescaPlus`, description },
   }
