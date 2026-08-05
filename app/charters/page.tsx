@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 import Layout from '@/components/Layout'
 import CharterFilters from '@/components/charters/CharterFilters'
 import { listPublicCharters } from '@/lib/charters-store'
@@ -61,13 +62,24 @@ export default async function ChartersHub({ searchParams }: Params) {
   const destacadaSpot = destacada ? getSpot(destacada.slug) : null
   return (
     <Layout>
-      <section className="bg-paper border-b border-ink/[0.07]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
-          <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3"><Icon name="anchor" className="w-3.5 h-3.5 inline -mt-0.5" strokeWidth={2} /> Chárters con patrón profesional</p>
-          <h1 className="font-display uppercase text-4xl sm:text-5xl md:text-6xl leading-[1.02] text-ink">Sal a pescar con un profesional</h1>
-          <p className="text-ink/60 text-sm max-w-2xl mt-3">Reserva plaza en salidas de pesca con <strong className="text-ink">patrón profesional verificado</strong> (licencia y seguro comprobados). Con la previsión y la seguridad del día al lado.</p>
+      {/* Cabecera con la foto del chárter de fondo. Mismo tratamiento que en la
+          portada: UN degradado, más cerrado por la izquierda —donde va el
+          texto— y abierto por la derecha. El contraste va medido, no a ojo. */}
+      <section className="relative isolate overflow-hidden border-b border-ink/[0.07]">
+        <Image
+          src="/imagenesHome/barco_pesca_web_charters.jpg"
+          alt=""
+          fill
+          sizes="100vw"
+          className="object-cover -z-20"
+        />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-ink/80 via-ink/60 to-ink/40" />
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-14 sm:py-16">
+          <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-[color-mix(in_srgb,var(--accent)_45%,white)] mb-3"><Icon name="anchor" className="w-3.5 h-3.5 inline -mt-0.5" strokeWidth={2} /> Chárters con patrón profesional</p>
+          <h1 className="font-display uppercase text-4xl sm:text-5xl md:text-6xl leading-[1.02] text-paper">Sal a pescar con un profesional</h1>
+          <p className="text-paper/80 text-[15px] max-w-2xl mt-3 leading-relaxed">Reserva plaza en salidas de pesca con <strong className="text-paper">patrón profesional verificado</strong> (licencia y seguro comprobados). Con la previsión y la seguridad del día al lado.</p>
           <div className="mt-6">
-            <Link href="/charters/operador" className="inline-flex items-center gap-2 bg-ink text-paper px-6 py-3 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift hover:bg-accent hover:border-accent">
+            <Link href="/charters/operador" className="inline-flex items-center gap-2 bg-paper text-ink px-6 py-3 text-sm font-semibold rounded-full shadow-hard hover-shift hover:bg-accent hover:text-paper">
               <Icon name="anchor" className="w-3.5 h-3.5 inline -mt-0.5" strokeWidth={2} /> ¿Eres patrón? Ofrece tus salidas
             </Link>
           </div>
