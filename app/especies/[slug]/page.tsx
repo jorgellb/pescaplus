@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import Layout from '@/components/Layout'
 import { SEA_SPECIES, MONTHS_SHORT, deSpecies } from '@/lib/fishing-species'
 import { zonesForSpecies } from '@/lib/species-zones'
+import { getSpeciesGuide } from '@/lib/species-guides'
 import { getTaxonomy, categoryName } from '@/lib/taxonomy-store'
 import { NATIONAL_SIZES_URL } from '@/lib/fishing-regulations'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
@@ -73,6 +74,16 @@ export default async function SpeciesPage({ params }: Params) {
   const inSeason = sp.bestMonths.includes(currentMonth)
   const spots = zonesForSpecies(sp.id).slice(0, 18)
 
+  /**
+   * La prosa de la especie. Las fichas eran ricas en DATOS y pobres en texto:
+   * 63 palabras propias, y todas fragmentos sueltos ("Gusana americana,
+   * cangrejo ermitaño, mejillón"). Esto lo completa.
+   *
+   * Puede no existir todavía —se generan en lote y la cuota de IA es limitada—
+   * y entonces la ficha se pinta igual, sin hueco ni aviso.
+   */
+  const guide = getSpeciesGuide(sp.id)
+
   const breadcrumbLd = breadcrumbJsonLd([
     { name: 'Inicio', url: SITE_URL },
     { name: 'Especies', url: `${SITE_URL}/especies` },
@@ -128,6 +139,28 @@ export default async function SpeciesPage({ params }: Params) {
         )}
 
         {/* Season strip */}
+        {guide && (
+          <div className="space-y-3">
+            <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3">
+              Pescar {deSpecies(sp)}
+            </h2>
+            <p className="text-[15px] text-ink/80 leading-relaxed">{guide.intro}</p>
+            {guide.where && <p className="text-[15px] text-ink/80 leading-relaxed">{guide.where}</p>}
+            {guide.techniques && <p className="text-[15px] text-ink/80 leading-relaxed">{guide.techniques}</p>}
+            {guide.seasons && <p className="text-[15px] text-ink/80 leading-relaxed">{guide.seasons}</p>}
+            {Array.isArray(guide.tips) && guide.tips.length > 0 && (
+              <ul className="space-y-1.5 pt-1">
+                {guide.tips.slice(0, 4).map((tip, i) => (
+                  <li key={i} className="flex gap-2 text-[14px] text-ink/75 leading-snug">
+                    <Icon name="check" className="w-4 h-4 text-accent shrink-0 mt-0.5" strokeWidth={2} />
+                    <span>{tip}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
         <div className="space-y-3">
           <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3">Mejores meses</h2>
           <div className="grid grid-cols-12 gap-1">
