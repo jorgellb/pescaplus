@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import DayDial from '@/components/charters/DayDial'
 import Icon, { type IconName } from '@/components/icons/Icon'
 import { bestSpotToday } from '@/lib/charter-window'
@@ -34,21 +35,38 @@ export default function CharterSpotlight() {
   const spot = mejor ? getSpot(mejor.slug) : null
 
   return (
-    <section className="border-t border-ink/[0.07] bg-paper">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
+    <section className="relative isolate overflow-hidden border-t border-ink/[0.07]">
+      {/* Foto de fondo.
+          La imagen ambienta; la que tiene que destacar es la información. De ahí
+          el velo: UN solo degradado, más cerrado por la izquierda —donde va el
+          texto— y más abierto por la derecha, donde el mar puede respirar. Al
+          principio puse dos capas superpuestas y sumaban un 96 % de opacidad: se
+          leía de maravilla y la foto no se veía, que es tirar la foto a la
+          basura. El contraste del titular está medido, no estimado. */}
+      <Image
+        src="/imagenesHome/barco_pesca_web_charters.jpg"
+        alt=""
+        fill
+        sizes="100vw"
+        quality={80}
+        className="object-cover -z-20"
+      />
+      <div className="absolute inset-0 -z-10 bg-gradient-to-r from-ink/80 via-ink/60 to-ink/40" />
+
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
           {/* — Argumento — */}
           <div>
-            <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent mb-4">
+            <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-[color-mix(in_srgb,var(--accent)_45%,white)] mb-4">
               <Icon name="anchor" className="w-3.5 h-3.5 inline -mt-0.5" strokeWidth={2} /> Salir con patrón
             </p>
-            <h2 className="font-display uppercase text-4xl sm:text-5xl leading-[0.98] text-ink">
+            <h2 className="font-display uppercase text-4xl sm:text-5xl leading-[0.98] text-paper drop-shadow-sm">
               El único sitio que te dice<br />
-              <span className="text-accent">si ese día pica</span>
+              <span className="text-[color-mix(in_srgb,var(--accent)_45%,white)]">si ese día pica</span>
             </h2>
-            <p className="text-ink/70 text-[15px] leading-relaxed mt-5 max-w-xl">
+            <p className="text-paper/80 text-[15px] leading-relaxed mt-5 max-w-xl">
               En cualquier web de chárters ves una foto del barco, una hora y un precio. Aquí ves
-              además <strong className="text-ink">la ventana de pesca de esa fecha y esa zona</strong>:
+              además <strong className="text-paper">la ventana de pesca de esa fecha y esa zona</strong>:
               actividad solunar, mareas, viento y si el mar estará navegable. Porque un buen barco un
               mal día sigue siendo un mal día.
             </p>
@@ -56,10 +74,10 @@ export default function CharterSpotlight() {
             <dl className="mt-8 space-y-4">
               {GARANTIAS.map((g) => (
                 <div key={g.title} className="flex gap-3">
-                  <Icon name={g.icon} className="w-5 h-5 text-accent shrink-0 mt-0.5" strokeWidth={1.8} />
+                  <Icon name={g.icon} className="w-5 h-5 text-[color-mix(in_srgb,var(--accent)_45%,white)] shrink-0 mt-0.5" strokeWidth={1.8} />
                   <div>
-                    <dt className="font-semibold text-[14px] text-ink">{g.title}</dt>
-                    <dd className="text-[13px] text-ink/60 leading-snug">{g.text}</dd>
+                    <dt className="font-semibold text-[14px] text-paper">{g.title}</dt>
+                    <dd className="text-[13px] text-paper/80 leading-snug">{g.text}</dd>
                   </div>
                 </div>
               ))}
@@ -68,13 +86,13 @@ export default function CharterSpotlight() {
             <div className="mt-9 flex flex-wrap gap-3">
               <Link
                 href="/charters"
-                className="inline-flex items-center gap-2 bg-ink text-paper px-6 py-3 text-sm font-semibold rounded-full shadow-hard hover-shift hover:bg-accent"
+                className="inline-flex items-center gap-2 bg-paper text-ink px-6 py-3 text-sm font-semibold rounded-full shadow-hard hover-shift hover:bg-accent hover:text-paper"
               >
                 <Icon name="boat" className="w-4 h-4" strokeWidth={2} /> Ver salidas
               </Link>
               <Link
                 href="/charters/operador"
-                className="inline-flex items-center gap-2 border border-ink/15 text-ink px-6 py-3 text-sm font-semibold rounded-full hover:border-accent hover:text-accent"
+                className="inline-flex items-center gap-2 border border-paper/35 text-paper px-6 py-3 text-sm font-semibold rounded-full hover:bg-paper/10 hover:border-paper"
               >
                 <Icon name="anchor" className="w-4 h-4" strokeWidth={2} /> Soy patrón: publicar gratis
               </Link>
