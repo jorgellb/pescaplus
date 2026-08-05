@@ -31,7 +31,6 @@ export const revalidate = 86400
  * regla está en app/categories/[category]/page.tsx y la vigila
  * tests/routing.test.ts.
  */
-export const dynamicParams = false
 
 type Params = { params: Promise<{ slug: string }> }
 
@@ -43,7 +42,9 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params
   const sp = SEA_SPECIES.find((s) => s.id === slug)
-  if (!sp) return { title: 'Especie no encontrada' }
+  // Slug inventado: noindex. La página llama a notFound() pero Next responde 200
+  // (ver el comentario de app/categories/[category]/layout.tsx).
+  if (!sp) return { title: 'Especie no encontrada', robots: { index: false, follow: false } }
   return {
     title: `Pesca ${deSpecies(sp)}: temporada, técnicas, cebos y zonas`,
     description: `Cómo pescar ${sp.name.toLowerCase()} en España: mejores meses, horas, hábitat, profundidad, técnicas, cebos y señuelos, y las zonas donde se captura. Con previsión de actividad por localidad.`,

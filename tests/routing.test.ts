@@ -1,34 +1,31 @@
 import { describe, it, expect } from 'vitest'
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
-import nextConfig from '@/next.config'
 
 /**
- * Vigila la combinación que tumbó la tienda entera en producción.
+ * `dynamicParams = false` NO se puede usar en este proyecto.
  *
- * `dynamicParams = false` significa «fuera de `generateStaticParams` no hay nada
- * que servir». Hace falta para que una URL inventada dé un 404 DE VERDAD: con un
- * simple `notFound()` en la página, Next prerenderiza y cachea esa respuesta
- * como una entrada normal de 200 — un "soft 404" indexable, y además un
- * rastreador pidiendo URLs inventadas va dejando una entrada en disco por cada
- * una. Comprobado con las dos formas.
+ * Le dice a Next que fuera de `generateStaticParams` no hay nada que servir. El
+ * problema no es la generación: es que cuando la copia prerenderizada se marca
+ * OBSOLETA, Next tiene que regenerarla y no encuentra respaldo que mostrar entre
+ * tanto, así que responde `NoFallbackError` y un 404 para TODAS las rutas del
+ * grupo, incluidas las buenas.
  *
- * El precio es que, cuando la copia prerenderizada CADUCA, Next no tiene
- * respaldo que servir mientras regenera: responde `NoFallbackError` y un 404
- * para TODAS las rutas del grupo, incluidas las buenas.
+ * Medido en producción, no deducido: se reinició el contenedor y se vigiló
+ * `/categories/senuelos` cada 60 s.
  *
- * Normalmente no pasa, porque `expire` es un año y `revalidate` una hora: la
- * entrada queda obsoleta mucho antes de caducar y se sirve tal cual mientras se
- * refresca. Se rompió al poner `expireTime: 3600`, igual al `revalidate` de las
- * categorías, con lo que quedaban obsoletas y caducadas en el mismo instante.
- * La correlación medida en producción fue exacta:
+ *     +  0 s  200      +183 s  200
+ *     + 61 s  200      +246 s  200
+ *     +122 s  200      +307 s  404   ← y ya no vuelve
  *
- *   /categories/senuelos   rev 3600 · exp 3600 · dynamicParams false  → 404
- *   /especies/dorada       rev 86400 · exp 3600 · dynamicParams false → 200
- *   /mejores-horas/tarifa  sin ISR   · dynamicParams true             → 200
- *   /                      rev 3600 · exp 3600 · dynamicParams true   → 200
+ * Se rompe a los ~300 s, que es exactamente el `x-nextjs-stale-time: 300` de las
+ * cabeceras. La tienda llevaba así desde el principio: viva cinco minutos
+ * después de cada despliegue y caída el resto del tiempo.
  *
- * Hacen falta las DOS condiciones. Esta prueba impide que vuelvan a juntarse.
+ * El precio de quitarla es que `notFound()` responde 200 en vez de 404 —medido
+ * en la primera petición, no es un efecto de la caché—, así que las URLs
+ * inventadas se marcan `noindex` en `generateMetadata`. Entre un soft 404 en
+ * direcciones que nadie enlaza y la tienda caída, no hay discusión.
  */
 function paginas(dir: string): string[] {
   const salida: string[] = []
@@ -40,43 +37,26 @@ function paginas(dir: string): string[] {
   return salida
 }
 
-/** Páginas con `dynamicParams = false`, con el `revalidate` que declaran. */
-function sinRespaldo(): { fichero: string; revalidate: number | null }[] {
-  return paginas(join(process.cwd(), 'app'))
-    .map((f) => ({ f, texto: readFileSync(f, 'utf8') }))
-    .filter(({ texto }) => /export const dynamicParams\s*=\s*false/.test(texto))
-    .map(({ f, texto }) => {
-      const m = /export const revalidate\s*=\s*(\d+)/.exec(texto)
-      return { fichero: relative(process.cwd(), f), revalidate: m ? Number(m[1]) : null }
-    })
-}
+describe('enrutado', () => {
+  it('ninguna página usa dynamicParams = false', () => {
+    const culpables = paginas(join(process.cwd(), 'app'))
+      .filter((f) => /export const dynamicParams\s*=\s*false/.test(readFileSync(f, 'utf8')))
+      .map((f) => relative(process.cwd(), f))
 
-describe('enrutado y caducidad de la caché', () => {
-  const paginasSinRespaldo = sinRespaldo()
-
-  it('las páginas que dependen de dynamicParams=false siguen ahí', () => {
-    // Si alguien las quita, el 404 real deja de serlo. Que salte para revisarlo.
-    expect(paginasSinRespaldo.map((p) => p.fichero).sort()).toEqual([
-      'app/categories/[category]/page.tsx',
-      'app/especies/[slug]/page.tsx',
-    ])
+    expect(
+      culpables,
+      `Con la caché obsoleta devuelve 404 tambien en las rutas buenas
+(NoFallbackError), a los ~300 s de cada despliegue. Usa notFound() y marca
+noindex en generateMetadata. Ficheros:\n${culpables.join('\n')}`,
+    ).toEqual([])
   })
 
-  it('ninguna de ellas puede caducar a la vez que queda obsoleta', () => {
-    const expire = nextConfig.expireTime
-    if (expire === undefined) return // el valor por defecto (un año) es seguro
-
-    for (const { fichero, revalidate } of paginasSinRespaldo) {
-      expect(
-        revalidate,
-        `${fichero} usa dynamicParams=false sin declarar revalidate: no se puede comprobar`,
-      ).not.toBeNull()
-      expect(
-        expire,
-        `${fichero}: expireTime (${expire}) debe ser MAYOR que su revalidate (${revalidate}).
-Si no, la entrada caduca en el mismo instante en que queda obsoleta y Next
-responde NoFallbackError → 404 en todas las rutas del grupo, también las buenas.`,
-      ).toBeGreaterThan(revalidate!)
-    }
+  it('las rutas con lista fija marcan noindex lo que no existe', () => {
+    // Sin esto, una URL inventada responde 200 con la página de "no encontrado"
+    // y Google puede indexarla como página real.
+    const cat = readFileSync(join(process.cwd(), 'app/categories/[category]/layout.tsx'), 'utf8')
+    expect(cat).toMatch(/robots:\s*\{\s*index:\s*false/)
+    const esp = readFileSync(join(process.cwd(), 'app/especies/[slug]/page.tsx'), 'utf8')
+    expect(esp).toMatch(/robots:\s*\{\s*index:\s*false/)
   })
 })

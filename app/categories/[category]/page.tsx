@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
 import Layout from '@/components/Layout'
 import CategoryIcon from '@/components/graphics/CategoryIcon'
 import CategoryBrowser from './CategoryBrowser'
@@ -35,7 +36,6 @@ export const revalidate = 3600
  * Regla, vigilada por tests/routing.test.ts: una página con esta bandera NUNCA
  * puede tener `expireTime` <= su `revalidate`.
  */
-export const dynamicParams = false
 export function generateStaticParams() {
   return FISHING_TYPES.map((t) => ({ category: t.id }))
 }
@@ -43,6 +43,8 @@ export function generateStaticParams() {
 export default async function CategoryPage({ params }: Params) {
   const { category } = await params
   const fishingType = getFishingType(category)
+  // Categoría inventada: 404 de verdad, antes de tocar la base de datos.
+  if (!fishingType) notFound()
   const [products, taxonomy] = await Promise.all([getTrendingRanked(category), getTaxonomy()])
   const catName = categoryName(taxonomy, category)
   const subcategories = subcategoriesOf(taxonomy, category)
