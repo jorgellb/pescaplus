@@ -54,6 +54,8 @@ export default function AquiYAhora() {
   const [error, setError] = useState('')
   const [datos, setDatos] = useState<Respuesta | null>(null)
   const [precision, setPrecision] = useState<number | null>(null)
+  const [pos, setPos] = useState<{ lat: number; lon: number } | null>(null)
+  const [guardado, setGuardado] = useState<'no' | 'guardando' | 'ok' | 'sin-sesion' | 'error'>('no')
   const [cacheado, setCacheado] = useState(false)
   const [pantallaOn, setPantallaOn] = useState(false)
   const wakeRef = useRef<WakeLockSentinel | null>(null)
@@ -104,6 +106,8 @@ export default function AquiYAhora() {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         setPrecision(Math.round(pos.coords.accuracy))
+        setPos({ lat: pos.coords.latitude, lon: pos.coords.longitude })
+        setGuardado('no')
         setEstado('consultando')
         try {
           const res = await fetch(`/api/aqui?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`)
@@ -129,6 +133,47 @@ export default function AquiYAhora() {
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 },
     )
   }, [datos])
+
+  /**
+   * Guarda el punto como marca, con la sonda y el fondo YA RELLENOS.
+   *
+   * Es la diferencia entre una marca útil y un par de coordenadas: dentro de
+   * seis meses, «Punto 36,5 m» con «Roca o fondo duro · levantamiento nº 291711»
+   * en las notas dice algo; un par de números, no. Todo eso ya lo acabamos de
+   * consultar, así que pedírselo al pescador otra vez sería absurdo.
+   */
+  const guardarPunto = useCallback(async () => {
+    if (!pos || !datos) return
+    setGuardado('guardando')
+    const prof = datos.sonda?.depthM ?? null
+    const notas = [
+      datos.fondo?.label,
+      datos.sonda?.relief?.label,
+      datos.sonda?.source,
+      datos.protegido?.coverage === 'inside' && datos.protegido.areas[0]
+        ? `Dentro de ${datos.protegido.areas[0].name} (${datos.protegido.areas[0].authority})`
+        : null,
+    ].filter(Boolean).join(' · ').slice(0, 500)
+
+    try {
+      const res = await fetch('/api/waypoints', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: `Punto ${prof != null ? `${prof.toLocaleString('es-ES', { maximumFractionDigits: 1 })} m` : datos.spot.name}`.slice(0, 80),
+          type: 'caladero',
+          lat: pos.lat,
+          lon: pos.lon,
+          depthM: prof,
+          notes: notas,
+        }),
+      })
+      if (res.status === 401) return setGuardado('sin-sesion')
+      setGuardado(res.ok ? 'ok' : 'error')
+    } catch {
+      setGuardado('error')
+    }
+  }, [pos, datos])
 
   const cargando = estado === 'localizando' || estado === 'consultando'
 
@@ -160,6 +205,30 @@ export default function AquiYAhora() {
           </button>
         )}
       </div>
+
+      {datos && pos && (
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            onClick={guardarPunto}
+            disabled={guardado === 'guardando' || guardado === 'ok'}
+            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-full border border-ink/15 text-ink/80 hover:border-accent hover:text-accent disabled:opacity-60"
+          >
+            <Icon name="pin" className="w-4 h-4" strokeWidth={2} />
+            {guardado === 'guardando' ? 'Guardando…' : guardado === 'ok' ? 'Punto guardado' : 'Guardar este punto'}
+          </button>
+          {guardado === 'ok' && (
+            <Link href="/carta" className="text-[13px] font-bold uppercase tracking-wide text-accent hover:underline">
+              Ver en la carta →
+            </Link>
+          )}
+          {guardado === 'sin-sesion' && (
+            <span className="text-[13px] text-ink/70">
+              <Link href="/entrar" className="text-accent font-semibold underline">Inicia sesión</Link> para guardar tus marcas.
+            </span>
+          )}
+          {guardado === 'error' && <span className="text-[13px] text-ink/70">No se pudo guardar. Inténtalo otra vez.</span>}
+        </div>
+      )}
 
       {error && (
         <p className="text-[14px] text-ink/70 border border-ink/[0.07] rounded-xl bg-ink/[0.02] p-3">{error}</p>
