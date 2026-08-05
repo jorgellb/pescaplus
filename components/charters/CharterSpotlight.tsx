@@ -48,7 +48,6 @@ export default function CharterSpotlight() {
         alt=""
         fill
         sizes="100vw"
-        quality={80}
         className="object-cover -z-20"
       />
       <div className="absolute inset-0 -z-10 bg-gradient-to-r from-ink/80 via-ink/60 to-ink/40" />

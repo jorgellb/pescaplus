@@ -101,8 +101,7 @@ export default async function Home() {
           fill
           priority
           sizes="100vw"
-          quality={82}
-          className="object-cover -z-20"
+            className="object-cover -z-20"
         />
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-ink/85 via-ink/65 to-ink/45" />
 

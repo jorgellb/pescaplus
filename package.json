@@ -17,7 +17,7 @@
     "typecheck": "tsc --noEmit",
     "maplibre:worker": "node scripts/copy-maplibre-worker.mjs",
     "cap:sync": "cap sync",
-    "cap:assets": "capacitor-assets generate",
+    "cap:assets": "npx --yes @capacitor/assets generate",
     "android:build": "cd android && ./gradlew assembleDebug",
     "android:open": "cap open android"
   },
@@ -30,7 +30,7 @@
     "@capacitor/splash-screen": "^8.0.2",
     "@capacitor/status-bar": "^8.0.3",
     "@prisma/adapter-pg": "^7.8.0",
-    "@prisma/client": "^7.8.0",
+    "@prisma/client": "^7.9.1",
     "dotenv": "^16.6.1",
     "maplibre-gl": "^6.0.0",
     "next": "^16.2.10",
@@ -42,7 +42,6 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@capacitor/assets": "^3.0.5",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/node": "^24.0.0",
     "@types/pg": "^8.20.0",
