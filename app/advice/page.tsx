@@ -229,7 +229,7 @@ export default function AdvicePage() {
                 key={type.id}
                 onClick={() => getInitialAdvice(type.id)}
                 disabled={loading}
-                className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold border border-ink/10 rounded-full transition-colors disabled:opacity-50${
+                className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold border border-ink/10 rounded-full transition-colors disabled:opacity-50 ${
                   selectedType === type.id ? 'bg-ink text-paper' : 'bg-paper text-ink hover:bg-ink hover:text-paper'
                 }`}
               >

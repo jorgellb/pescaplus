@@ -120,7 +120,7 @@ export default async function SubcategoryPage({ params }: Params) {
               <Link
                 key={s.id}
                 href={`/categories/${category}/${s.id}`}
-                className={`px-3.5 py-1.5 text-[11px] font-semibold border rounded-full transition-colors${
+                className={`px-3.5 py-1.5 text-[11px] font-semibold border rounded-full transition-colors ${
                   s.id === subcategory ? 'bg-ink text-paper border-ink' : 'border-ink/10 text-ink hover:bg-ink hover:text-paper'
                 }`}
               >

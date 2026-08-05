@@ -1185,7 +1185,7 @@ export default async function SpotDashboard({
               <h2 className="font-display uppercase text-2xl text-ink leading-none flex items-center gap-2">
                 <Icon name="building" className="w-5 h-5" strokeWidth={1.7} /> El parte oficial de AEMET
               </h2>
-              <span className={`text-[10px] font-semibold st px-2.5 py-1 rounded-full border inline-flex items-center gap-1${aemet.hasAviso ? 'border-red-700/40 text-red-800 bg-red-700/[0.06]' : 'border-accent/40 text-accent'}`}>
+              <span className={`text-[10px] font-semibold st px-2.5 py-1 rounded-full border inline-flex items-center gap-1 ${aemet.hasAviso ? 'border-red-700/40 text-red-800 bg-red-700/[0.06]' : 'border-accent/40 text-accent'}`}>
                 {aemet.hasAviso ? <><Icon name="warning" className="w-3 h-3" strokeWidth={2.2} />Con avisos</> : <><Icon name="checkCircle" className="w-3 h-3" strokeWidth={2.2} />Sin avisos</>}
               </span>
             </div>
