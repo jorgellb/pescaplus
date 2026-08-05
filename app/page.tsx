@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import type { Metadata } from 'next'
 import Layout from '@/components/Layout'
 import Marquee from '@/components/Marquee'
@@ -86,43 +87,64 @@ export default async function Home() {
     <Layout>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(faqLd) }} />
 
-      {/* HERO */}
-      <section className="bg-paper border-b border-ink/[0.07]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      {/* HERO
+          La foto de atardecer va de fondo. Lleva `priority` porque es el
+          elemento más grande de la primera pantalla: es lo que Google mide como
+          LCP, y cargarla perezosa penalizaría justo la métrica que importa.
+          El velo es un degradado que cierra por la izquierda —donde va el
+          texto— y se abre por la derecha, dejando respirar el sol y las barcas.
+          El contraste de cada bloque está MEDIDO sobre los píxeles del fondo. */}
+      <section className="relative isolate overflow-hidden border-b border-ink/[0.07]">
+        <Image
+          src="/imagenesHome/hero_mar_atardecer_web_pesca.jpg"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          quality={82}
+          className="object-cover -z-20"
+        />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-ink/85 via-ink/65 to-ink/45" />
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-7">
-            <p className="inline-flex items-center gap-2 text-[13px] font-semibold text-accent bg-accent/[0.09] px-3 py-1.5 rounded-full mb-6">
+            <p className="inline-flex items-center gap-2 text-[13px] font-semibold text-paper bg-paper/15 backdrop-blur-sm px-3 py-1.5 rounded-full mb-6">
               <Icon name="rod" className="w-3.5 h-3.5" strokeWidth={2} />Todo para el pescador en España
             </p>
-            <h1 className="font-display text-ink text-[2rem] sm:text-[2.75rem] md:text-5xl leading-[1.08] max-w-[19ch]">
+            <h1 className="font-display text-paper text-[2rem] sm:text-[2.75rem] md:text-5xl leading-[1.08] max-w-[19ch]">
               Tu tienda de pesca online{' '}
-              <span className="text-accent">y todo para salir a pescar</span>
+              <span className="text-[color-mix(in_srgb,var(--accent)_45%,white)]">y todo para salir a pescar</span>
             </h1>
-            <p className="mt-6 text-lg text-ink/65 max-w-xl leading-relaxed">
+            <p className="mt-6 text-lg text-paper/85 max-w-xl leading-relaxed">
               Cañas, carretes, señuelos y aparejos al mejor precio. Y además, gratis: previsión de
-              las <strong className="text-ink/80 font-semibold">mejores horas</strong> según mareas y viento,
-              el <strong className="text-ink/80 font-semibold">mapa de dónde pica hoy</strong> y
-              <strong className="text-ink/80 font-semibold"> salidas de pesca</strong> con patrón o con otros pescadores.
+              las <strong className="text-paper font-semibold">mejores horas</strong> según mareas y viento,
+              el <strong className="text-paper font-semibold">mapa de dónde pica hoy</strong> y
+              <strong className="text-paper font-semibold"> salidas de pesca</strong> con patrón o con otros pescadores.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/mejores" className="bg-accent text-paper px-6 py-3.5 text-[15px] font-semibold rounded-full shadow-hard-accent hover:brightness-110 transition-all">
                 Ver la tienda
               </Link>
-              <Link href="/mejores-horas" className="bg-paper text-ink px-6 py-3.5 text-[15px] font-semibold rounded-full border border-ink/[0.07] hover:border-accent hover:text-accent transition-colors">
+              <Link href="/mejores-horas" className="bg-paper/10 backdrop-blur-sm text-paper px-6 py-3.5 text-[15px] font-semibold rounded-full border border-paper/40 hover:bg-paper hover:text-ink transition-colors">
                 ¿Cuándo salgo a pescar?
               </Link>
             </div>
           </div>
 
           <div className="lg:col-span-5">
-            <div className="relative">
+            {/* La ficha de producto se acota a 320 px y se pega a la derecha.
+                A todo lo ancho tapaba media foto y parecía un recorte de
+                catálogo pegado encima del atardecer; pequeña, sigue diciendo
+                "esto es una tienda" y deja respirar el fondo. */}
+            <div className="relative w-full max-w-[320px] mx-auto lg:ml-auto lg:mr-0">
               {heroA && (
-                <div className="relative aspect-[4/5] border border-ink/10 rounded-xl shadow-hard-lg overflow-hidden bg-ink/[0.05]">
+                <div className="relative aspect-square border border-paper/20 rounded-2xl shadow-hard-lg overflow-hidden bg-ink/[0.05]">
                   <ProductImage src={proxiedImage(heroA.imageUrl, heroA.title)} alt={heroA.title} priority sizes="(max-width: 1024px) 90vw, 40vw" className="absolute inset-0 w-full h-full object-cover" />
                   <Link href={`/products/${heroA.id}`} className="absolute inset-0" aria-label={heroA.title} />
                 </div>
               )}
               {heroB && (
-                <div className="hidden sm:block absolute -bottom-8 -left-8 w-40 aspect-square border border-ink/10 rounded-xl shadow-hard bg-ink/[0.05] overflow-hidden">
+                <div className="hidden sm:block absolute -bottom-6 -left-6 w-28 aspect-square border border-paper/20 rounded-xl shadow-hard bg-ink/[0.05] overflow-hidden">
                   <ProductImage src={proxiedImage(heroB.imageUrl, heroB.title)} alt={heroB.title} sizes="200px" className="absolute inset-0 w-full h-full object-cover" />
                 </div>
               )}
