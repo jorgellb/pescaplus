@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { ADMIN_COOKIE, sessionToken, verifyPassword } from '@/lib/admin-auth'
+import { ADMIN_COOKIE, sessionToken, verifyPassword, insecureDefaultsInProduction } from '@/lib/admin-auth'
 import { rateLimit, clientIp } from '@/lib/rate-limit'
 
 const loginSchema = z.object({ password: z.string().min(1).max(200) })
@@ -18,6 +18,15 @@ export async function POST(request: NextRequest) {
   const parsed = loginSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) {
     return NextResponse.json({ success: false, error: 'Contraseña requerida' }, { status: 400 })
+  }
+
+  // Sin esto, desplegar sin definir las variables daría "contraseña incorrecta"
+  // con la contraseña correcta, y a ver quién lo adivina.
+  if (insecureDefaultsInProduction()) {
+    return NextResponse.json({
+      success: false,
+      error: 'El panel está bloqueado: faltan ADMIN_PASSWORD y/o ADMIN_SESSION_SECRET en producción. Defínelas y vuelve a desplegar.',
+    }, { status: 503 })
   }
 
   if (!verifyPassword(parsed.data.password)) {
