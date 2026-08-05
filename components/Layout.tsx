@@ -35,14 +35,6 @@ export default function Layout({ children }: LayoutProps) {
                 y mareas, mapa de zonas y especies, y salidas de pesca con patrón profesional
                 o con otros pescadores.
               </p>
-              <a
-                href="/descargas/pescaplus.apk"
-                download
-                className="inline-flex items-center gap-2 text-sm font-semibold text-accent hover:text-ink transition-colors"
-              >
-                <Icon name="download" className="w-4 h-4" strokeWidth={2} />
-                Instalar la app · Android
-              </a>
             </div>
 
             {/* Las cinco secciones, en su propia rejilla para que quepan en una fila. */}

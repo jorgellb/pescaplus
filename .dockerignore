@@ -33,6 +33,5 @@ eslint.config.*
 .vscode
 .idea
 
-# APK publicada: se sirve desde public/descargas, pero pesa 3,4 MB y se puede
-# regenerar; si se quiere en la web, dejar este renglón comentado.
-# public/descargas
+# La APK ya no se distribuye desde la web: irá por Google Play, y su consola
+# exige que la app no se ofrezca por fuera. Se generará al final del proyecto.
