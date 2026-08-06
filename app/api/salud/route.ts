@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { photosStorageState } from '@/lib/photos'
+import { photosStorageState, dirStorageState, imageCacheDir } from '@/lib/photos'
 
 /** Siempre en vivo: un estado cacheado no dice nada de si el servidor responde. */
 export const dynamic = 'force-dynamic'
@@ -43,6 +43,11 @@ export async function GET() {
     // tumba el health check — el sitio funciona igual — pero así se ve antes de
     // perder nada. Ver lib/photos.ts.
     fotos: photosStorageState(),
+    // Lo mismo para la caché de imágenes optimizadas, que NO tiene volumen
+    // todavía. «efimero» aquí no pierde datos —se regeneran— pero cuesta caro:
+    // ~2 s por foto, y /especies tiene 29, así que la primera visita tras cada
+    // despliegue se arrastra. «ok» significa que el volumen está montado y bien.
+    imagenes: dirStorageState(imageCacheDir()),
     ms: Date.now() - inicio,
     hora: new Date().toISOString(),
   })

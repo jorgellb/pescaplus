@@ -56,8 +56,19 @@ export type PhotosStorageState = 'ok' | 'efimero' | 'no-escribible'
  * - `no-escribible`: no hay dónde guardar; la subida queda desactivada.
  */
 export function photosStorageState(): PhotosStorageState {
+  return dirStorageState(photosDir())
+}
+
+/**
+ * La misma comprobación, para cualquier carpeta que deba vivir en un volumen.
+ *
+ * Se separó de `photosStorageState()` al montar la caché de imágenes: la
+ * pregunta —«¿esto es un volumen de verdad o se lo lleva el próximo
+ * despliegue?»— es idéntica, y la respuesta se saca igual, comparando el
+ * dispositivo de la carpeta con el de la raíz.
+ */
+export function dirStorageState(dir: string): PhotosStorageState {
   try {
-    const dir = photosDir()
     mkdirSync(dir, { recursive: true })
     accessSync(dir, constants.W_OK)
     // Un volumen montado es otro dispositivo. Si coincide con el de la raíz,
@@ -67,6 +78,18 @@ export function photosStorageState(): PhotosStorageState {
   } catch {
     return 'no-escribible'
   }
+}
+
+/**
+ * Dónde guarda Next las fotos ya convertidas a AVIF/WebP.
+ *
+ * Convertir cuesta ~2 s por foto en este servidor y varias a la vez se estorban,
+ * así que si esta carpeta no es un volumen, cada despliegue borra el trabajo y la
+ * primera visita a /especies vuelve a convertir las 29. La ruta la fija Next; en
+ * el contenedor `cwd` es /app.
+ */
+export function imageCacheDir(): string {
+  return join(process.cwd(), '.next', 'cache', 'images')
 }
 
 export function uploadsEnabled(): boolean {

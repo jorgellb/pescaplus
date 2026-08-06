@@ -153,15 +153,33 @@ Next guarda el resultado en `.next/cache/images` y a partir de ahí sirve en 0,1
 (`x-nextjs-cache: HIT`). El problema es que esa carpeta vive **dentro** del
 contenedor: cada despliegue la borra y el primer visitante vuelve a pagarlo todo.
 
-En Coolify → *Storages*, un volumen persistente en:
+En Coolify → *Storages* → **Volume Mount** (no *Directory Mount*), destino:
 
 ```
 /app/.next/cache/images
 ```
 
-Con eso la conversión se paga una vez en la vida de cada foto, no una vez por
-despliegue. No es imprescindible —el sitio funciona igual— pero es la diferencia
-entre que la primera visita tras cada despliegue tarde o no.
+El *Source* lo rellena Coolify solo. Tiene que ser **Volume Mount**: un
+*Directory Mount* llega como `root:root` y el usuario `nextjs` del contenedor no
+podría escribir.
+
+El Dockerfile crea esa carpeta con `chown nextjs:nodejs` **antes** de `USER
+nextjs`, y ese detalle es el que hace que funcione: `output: standalone` no copia
+`.next/cache`, así que la carpeta no existía en la imagen y Docker habría creado
+el punto de montaje como root. Existiendo antes, el volumen hereda el dueño.
+
+Después de montarlo y redesplegar, se comprueba en `/api/salud`:
+
+| Valor | Qué significa |
+|---|---|
+| `"imagenes":"ok"` | volumen montado; la conversión se paga una vez por foto |
+| `"imagenes":"efimero"` | **no hay volumen**: cada despliegue borra la caché |
+| `"imagenes":"no-escribible"` | el volumen quedó como root; se reconvierte en CADA visita |
+
+Ojo con el tercero: es peor que no montar nada, y no da ningún error visible.
+
+No es imprescindible —el sitio funciona igual— pero es la diferencia entre que la
+primera visita tras cada despliegue tarde o no.
 
 Relacionado: `minimumCacheTTL` está en un año en `next.config.ts` (por defecto son
 4 horas). Si alguna vez cambias una foto, **cámbiale también el nombre**: la caché

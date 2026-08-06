@@ -86,6 +86,22 @@ COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 ENV PHOTOS_DIR=/app/datos/fotos
 RUN mkdir -p /app/datos/fotos && chown -R nextjs:nodejs /app/datos
 
+# Caché de imágenes optimizadas. Aquí guarda Next el AVIF ya convertido, que en
+# este servidor cuesta ~2 s por foto (y varias a la vez se estorban: 8 en
+# paralelo pasan de 2,0 s a 4,4-5,5 s cada una).
+#
+# Se crea AQUÍ, vacía y con el dueño correcto, y esa es toda la gracia:
+# `output: standalone` no copia `.next/cache`, así que la carpeta no existía en
+# la imagen. Al montarle encima un volumen, Docker habría creado el punto de
+# montaje como root y el usuario `nextjs` se habría quedado sin poder escribir
+# —la caché no fallaría de forma visible, simplemente no guardaría nada y CADA
+# visita reconvertiría las fotos—. Existiendo antes, el volumen hereda
+# `nextjs:nodejs` y funciona.
+#
+# Sin volumen montado esto sigue valiendo; lo único que pasa es que cada
+# despliegue borra la caché y la primera visita la regenera entera.
+RUN mkdir -p /app/.next/cache/images && chown -R nextjs:nodejs /app/.next/cache
+
 USER nextjs
 EXPOSE 3000
 
