@@ -37,7 +37,19 @@ const cleanConnectionString = connectionString?.replace(/([?&])ssl(mode)?=[^&]*/
 const pool = new Pool({
   connectionString: cleanConnectionString,
   ssl: sslConfig(),
-  max: Number(process.env.DATABASE_POOL_MAX ?? 5),
+  /*
+   * Una sola conexión por proceso durante el build.
+   *
+   * El plan de Aiven da 20 conexiones en total (medido: `SHOW max_connections`
+   * = 20). Next levanta un proceso por núcleo para generar las páginas
+   * estáticas —16 en esta máquina— y cada uno abría su propio pool de 5: hasta
+   * 80 conexiones peleándose por 20. De ahí los cientos de `TooManyConnections`
+   * del build, y de ahí que la lectura del catálogo cayera al semilla.
+   *
+   * En caliente es al revés: un contenedor atendiendo muchas peticiones a la
+   * vez, y ahí 5 es lo razonable.
+   */
+  max: Number(process.env.DATABASE_POOL_MAX ?? (process.env.NEXT_PHASE === 'phase-production-build' ? 1 : 5)),
   idleTimeoutMillis: 10_000,
 })
 const adapter = new PrismaPg(pool)

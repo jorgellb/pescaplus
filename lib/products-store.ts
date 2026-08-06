@@ -140,20 +140,71 @@ function applyInput(input: ProductInput, id: string): Product {
 }
 
 /**
+ * Estamos generando páginas estáticas, no atendiendo a un visitante.
+ *
+ * La diferencia lo cambia todo: en caliente, caer al catálogo de memoria dura lo
+ * que dure la incidencia y la siguiente petición ya va bien. Durante el BUILD el
+ * resultado se congela en HTML y se sirve así hasta el próximo despliegue.
+ */
+function enBuild(): boolean {
+  return process.env.NEXT_PHASE === 'phase-production-build'
+}
+
+/** Fallos de conexión que se arreglan solos si esperas un momento. */
+function esTransitorio(error: unknown): boolean {
+  const t = error instanceof Error ? `${error.message} ${(error as { code?: string }).code ?? ''}` : String(error)
+  return /TooManyConnections|too many clients|ECONNRESET|ETIMEDOUT|Connection terminated|Timed out fetching/i.test(t)
+}
+
+const espera = (ms: number) => new Promise((r) => setTimeout(r, ms))
+
+/**
  * READ helper. When no database is configured we use the in-memory store (local
  * dev / demos). When a database IS configured but the read fails, we degrade to
  * memory so the public site keeps serving the base catalog instead of 500-ing.
+ *
+ * Con dos salvedades que costaron un catálogo publicado a medias:
+ *
+ *  1. `TooManyConnections` se REINTENTA. El plan de Aiven da 20 conexiones y el
+ *     build levanta un proceso por núcleo; en los picos alguno se queda fuera un
+ *     instante y con esperar 300 ms ya entra. Rendirse al primer intento era
+ *     tirar la lectura buena por un problema que dura milisegundos.
+ *
+ *  2. En BUILD, si la base de datos está configurada y aun así falla, esto LANZA
+ *     en vez de degradar. Servir 84 productos de los 382 que hay es peor que un
+ *     despliegue roto: el despliegue roto se ve, y el catálogo a medias no —se
+ *     queda ahí, indexándose, hasta que alguien cuenta los productos a mano.
  */
 async function withDb<T>(op: (prisma: any) => Promise<T>, fallback: () => T | Promise<T>): Promise<T> {
   if (!isDatabaseConfigured()) return fallback()
-  try {
-    const { prisma } = await import('@/lib/prisma')
-    await ensureSeeded(prisma)
-    return await op(prisma)
-  } catch (error) {
-    console.warn('Database read failed, using in-memory store instead:', error)
-    return fallback()
+
+  const intentos = 3
+  let ultimo: unknown
+  for (let i = 0; i < intentos; i++) {
+    try {
+      const { prisma } = await import('@/lib/prisma')
+      await ensureSeeded(prisma)
+      return await op(prisma)
+    } catch (error) {
+      ultimo = error
+      if (i < intentos - 1 && esTransitorio(error)) {
+        await espera(300 * (i + 1))
+        continue
+      }
+      break
+    }
   }
+
+  if (enBuild()) {
+    throw new Error(
+      'Lectura del catálogo fallida durante el build y con DATABASE_URL configurada. ' +
+        'No se degrada al catálogo semilla porque quedaría congelado en el HTML: ' +
+        'el sitio se publicaría con una fracción de los productos y sin avisar. ' +
+        `Causa: ${ultimo instanceof Error ? ultimo.message : String(ultimo)}`,
+    )
+  }
+  console.warn('Database read failed, using in-memory store instead:', ultimo)
+  return fallback()
 }
 
 /**
