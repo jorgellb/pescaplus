@@ -115,5 +115,44 @@
       "Cuidado con las manos al desanzuelar: muerde en seco. Usa alicate largo y devuelve con cuidado lo que no te lleves."
     ],
     "generatedAt": "2026-08-06T00:00:00.000Z"
+  },
+  "lechas": {
+    "intro": "La lecha, o pez limón, es un torpedo. Es de esos peces que cuando se enganchan hacen dudar de si el freno estaba bien puesto, porque la primera carrera es larga y va hacia abajo, buscando la estructura de la que ha salido. Caza en grupo persiguiendo alevines contra la superficie o contra una pared, y el ataque es tan violento que se ve y se oye. No es un pez de esperar sentado: se busca, se localiza la comida o la estructura, y se le presenta algo que se mueva rápido. Y una vez enganchada, la pelea se gana o se pierde en los primeros veinte segundos: si le dejas llegar a la piedra o al pecio, se acabó.",
+    "where": "Bajos, bocanas de puerto y cualquier estructura que concentre alevines, entre cinco y cincuenta metros. Trabaja tanto en superficie como a media agua, así que no hay que casarse con una profundidad. Las bocanas y los diques de los puertos grandes son sitio seguro a finales de verano, porque ahí se juntan bancos de boga y de pequeños carángidos. En mar abierto, los bajos aislados y las cabeceras de los veriles: cualquier cosa que rompa el fondo plano y detenga la corriente. Las comidas visibles en superficie son la señal más clara, igual que con los túnidos.",
+    "techniques": "Tres vías. Cebo vivo —boga o caballa— presentado cerca de la estructura, que es la forma más segura de sacar las grandes. Spinning pesado con stickbaits trabajados en superficie, que es la más espectacular. Y jigging vertical sobre el bajo cuando no salen arriba. En las tres, equipo sobrado y freno bien ajustado desde el principio: es un pez que castiga cualquier holgura. Bajo de fluorocarbono grueso, porque roza contra la piedra durante la pelea, y anzuelos y anillas fuertes — las lechas doblan herrajes flojos con facilidad.",
+    "seasons": "De agosto a noviembre, con el agua entre 18 y 26 grados. El final del verano y el principio del otoño es su momento, cuando el agua está más caliente y hay más alevín. Alba y atardecer son las horas, sobre todo si se ven comidas en superficie. En pleno día puede seguir entrando al jig sobre el bajo, aunque con menos alegría.",
+    "tips": [
+      "Freno ajustado antes del primer lance: la primera carrera es hacia la estructura y no da margen.",
+      "Revisa el bajo después de cada pelea. Roza contra la piedra y queda tocado aunque no se vea.",
+      "Si no salen a superficie, no insistas arriba: pásate al jig sobre el bajo.",
+      "Devuelve con cuidado las que no vayas a comer, sin sacarlas del agua más de lo justo: se recuperan bien si se hace rápido."
+    ],
+    "generatedAt": "2026-08-06T00:00:00.000Z"
+  },
+  "meros": {
+    "intro": "El mero es el rey de la roca y también el pez que más motivos da para no pescarlo. Es un animal territorial que vive toda su vida pegado al mismo refugio, crece despacio y cambia de sexo con la edad, así que cada ejemplar grande que sale de una cueva tarda muchos años en ser reemplazado. Eso explica por qué está protegido en tantos sitios y por qué la captura y suelta tiene aquí más sentido que en ninguna otra especie. Dicho eso, es un pez impresionante: se acerca con curiosidad, ataca de golpe y lo primero que hace es meterse en su agujero. Si lo consigue, ya no hay nada que hacer.",
+    "where": "Cuevas, grandes rocas y pecios, entre quince y cincuenta metros, siempre pegado a su refugio. No se mueve buscando comida como otros depredadores: espera a la entrada de su casa y sale lo justo. Por eso se pesca sobre estructura concreta y no derivando sobre fondo plano. Las horas de corriente moderada son las buenas, porque le llevan comida a la puerta. En un pecio o en un bajo con cuevas, el mero grande suele estar siempre en el mismo hueco, y quien conoce el sitio lo sabe.",
+    "techniques": "Vivo al fondo junto a la piedra, o jigging vertical sobre la estructura. Pulpo y calamar entero también funcionan muy bien. Equipo contundente y freno prácticamente cerrado: no es pesca de dejar correr, es de levantarlo de la piedra en los dos primeros segundos o perderlo. Bajo grueso y anzuelo fuerte, porque el roce contra la roca es constante. Y si vas a devolverlo, súbelo lo más rápido posible, no lo saques del agua más de unos segundos y ten en cuenta que desde mucha profundidad la descompresión le afecta: en ese caso, mejor no pescarlo.",
+    "seasons": "De mayo a octubre, con el agua entre 16 y 24 grados. Horas de luz con corriente moderada. Pero antes de la temporada está la norma: es una especie muy regulada, con vedas, tallas y prohibiciones que cambian mucho de una comunidad a otra, y en varias zonas la captura recreativa está directamente prohibida. Consúltalo siempre antes de salir.",
+    "tips": [
+      "Freno casi cerrado. O lo levantas de la piedra en dos segundos o se mete en la cueva y lo pierdes.",
+      "Es un pez que tarda años en reemplazarse y cambia de sexo con la edad: valora la captura y suelta.",
+      "Desde mucha profundidad la descompresión le afecta y devolverlo no siempre lo salva. Si vas a soltarlo, no lo pesques hondo.",
+      "MUY REGULADO: vedas, tallas y prohibiciones cambian por comunidad, y en varias zonas la captura recreativa está prohibida. Confírmalo antes."
+    ],
+    "generatedAt": "2026-08-06T00:00:00.000Z"
+  },
+  "sepia": {
+    "intro": "La sepia es la hermana tranquila del calamar, y se pesca casi al revés. Nada de tirones ni de media agua: vive pegada al fondo, sobre pradera o arena, y entra a la costa en invierno y primavera para desovar. Por eso la temporada es tan marcada y tan corta. Se acerca al señuelo caminando por el fondo, lo abraza y se queda quieta, así que la picada es todavía más sutil que la del calamar: muchas veces uno se da cuenta al recoger, cuando nota que la jibionera pesa el doble. Es pesca de agua clara, de fondo somero y de ir muy despacio, y engancha a quien le gusta afinar.",
+    "where": "Praderas y arenales someros, entre dos y veinticinco metros, siempre pegada al fondo. Las praderas de posidonia y los arenales limpios junto a roca son el sitio clásico. En temporada de desove se acerca mucho a la costa, así que se pesca bien desde espigones, bocanas y playas con algo de fondo. Busca agua clara: como al pulpo y al calamar, la turbidez le impide ver el señuelo y la pesca se muere. Los fondos mixtos de arena con matas son mejores que la arena limpia y sin nada.",
+    "techniques": "Eging lento por el fondo, con jibioneras lastradas para que trabajen abajo y no a media agua. La clave está en la lentitud: dejar caer, arrastrar unos centímetros, parar largo, repetir. La sepia entra en las paradas. También la potera cebada con cangrejo o pescado, muy eficaz cuando están desovando. Al notar el peso, sube con presión constante y sin sacudidas, igual que con el calamar. Y ten cuidado al subirla a bordo: suelta un chorro de tinta con bastante puntería.",
+    "seasons": "De diciembre a mayo, con el agua entre 12 y 18 grados. Es de las pocas pescas que da su mejor momento en pleno invierno. De día y al atardecer, siempre con agua clara y mar en calma. El pico llega con la entrada de desove, cuando se acerca a la costa en cantidad y se puede pescar cómodamente desde tierra.",
+    "tips": [
+      "Trabaja el fondo de verdad: jibionera lastrada y arrastre lento, no tirones a media agua.",
+      "Entra en las paradas. Cuanto más aguantes quieto entre movimiento y movimiento, más pescas.",
+      "Necesita agua clara. Con el mar removido, mejor cambiar de plan.",
+      "Consulta cupos y medidas de tu comunidad, que varían, y ten cuidado con la tinta al subirla."
+    ],
+    "generatedAt": "2026-08-06T00:00:00.000Z"
   }
 }
