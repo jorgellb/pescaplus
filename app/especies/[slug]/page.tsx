@@ -261,7 +261,14 @@ export default async function SpeciesPage({ params }: Params) {
           * la maqueta — vertical va al lado del texto, apaisada va encima.
           */}
         {paneles.map((panel) => {
-          const apaisada = panel.orientacion === 'apaisada'
+          /*
+           * Las clases van escritas enteras a propósito: Tailwind rastrea el
+           * código fuente, y una clase construida a trozos (`aspect-[${x}]`) no
+           * la ve y no la genera.
+           */
+          const ASPECTO = { '16/9': 'aspect-[16/9]', '4/3': 'aspect-[4/3]', '4/5': 'aspect-[4/5]' } as const
+          const ratio = panel.ratio ?? '16/9'
+          const apaisada = ratio !== '4/5'
           const foto = (
             <Image
               src={panel.src}
@@ -289,7 +296,7 @@ export default async function SpeciesPage({ params }: Params) {
             <section key={panel.src} className="border border-ink/[0.07] rounded-2xl bg-paper shadow-hard overflow-hidden">
               {apaisada ? (
                 <>
-                  <div className="relative aspect-[16/9] bg-ink/[0.05] border-b border-ink/[0.07]">{foto}</div>
+                  <div className={`relative ${ASPECTO[ratio]} bg-ink/[0.05] border-b border-ink/[0.07]`}>{foto}</div>
                   {texto}
                 </>
               ) : (
@@ -299,7 +306,7 @@ export default async function SpeciesPage({ params }: Params) {
                  * de la izquierda quedaba con un hueco en blanco enorme.
                  */
                 <div className="grid grid-cols-1 md:grid-cols-[minmax(0,340px)_1fr]">
-                  <div className="relative aspect-[4/5] bg-ink/[0.05] border-b md:border-b-0 md:border-r border-ink/[0.07]">
+                  <div className={`relative ${ASPECTO[ratio]} bg-ink/[0.05] border-b md:border-b-0 md:border-r border-ink/[0.07]`}>
                     {foto}
                   </div>
                   {texto}

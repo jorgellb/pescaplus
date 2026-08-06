@@ -35,16 +35,19 @@ export interface ActionShot {
    */
   layout: 'cabecera' | 'panel'
   /**
-   * Solo en `panel`: la forma de la foto manda la maqueta, no al revés.
+   * Solo en `panel`: la proporción REAL de la foto, y de ahí sale la maqueta.
    *
-   * - `vertical` (4:5): la foto va a un lado y el texto al otro. Se usa cuando la
+   * Se anota el ratio y no un «vertical/apaisada» porque encajar a la fuerza una
+   * foto de 4:3 en un hueco de 16:9 le corta un cuarto — y en estas fotos lo que
+   * se recorta suele ser justo el aparejo.
+   *
+   * - `4/5` (vertical): va a un lado y el texto al otro. Se usa cuando la
    *   verticalidad ES el contenido — el sabiki del jurel enseña la línea madre
-   *   entera de arriba abajo, y recortarlo a apaisado se cargaría lo que hay que
-   *   ver.
-   * - `apaisada` (16:9): la foto va arriba a todo el ancho y el texto debajo. De
-   *   lado mediría 190 px de alto y no se vería nada.
+   *   entera de arriba abajo.
+   * - `16/9` y `4/3` (apaisadas): la foto va arriba a todo el ancho y el texto
+   *   debajo. De lado medirían 190 px de alto y no se vería nada.
    */
-  orientacion?: 'vertical' | 'apaisada'
+  ratio?: '16/9' | '4/3' | '4/5'
   /** Solo en `panel`: titular de la sección. */
   heading?: string
   /**
@@ -74,7 +77,7 @@ export const ACTION_SHOTS: Record<string, ActionShot[]> = {
       caption:
         'El pargo entrando por detrás, a la altura del manto, y el calamar soltando tinta justo antes. El montaje es el de toda la vida: plomo corredizo por encima del emerillón, bajo largo de fluorocarbono y el cefalópodo enganchado de forma que siga nadando. Esa nube de tinta no lo esconde — lo delata.',
       layout: 'panel',
-      orientacion: 'apaisada',
+      ratio: '16/9',
       heading: 'Calamar vivo: el cebo que elige el tamaño',
       why: [
         'Tres cosas se suman, y de ahí viene su fama. La primera es que selecciona. Un calamar entero es un bocado que la morralla no puede abarcar: las mojarras y los sargos pequeños que te dejan una sardina en la espina en veinte minutos aquí ni lo intentan. Lo que entra, entra grande — y eso es justo lo que se busca en un pez que convive con mucho pescado pequeño en los mismos veriles.',
@@ -116,6 +119,47 @@ export const ACTION_SHOTS: Record<string, ActionShot[]> = {
     },
   ],
 
+  lubina: [
+    {
+      src: '/imagenesPeces/lubina_senuelo_web.jpg',
+      alt: 'Una lubina con la boca completamente abierta engullendo un pecesillo de vinilo translúcido montado en cabeza plomada, bajo el agua sobre un fondo de rocas con algas',
+      caption:
+        'La lubina no muerde el vinilo: lo succiona. Ahí está el momento exacto, con la boca abierta del todo y el señuelo entrando de frente. Es un vinilo fino y translúcido en cabeza plomada ligera, sobre roca con alga y a poca profundidad — el escenario de siempre.',
+      layout: 'panel',
+      ratio: '4/3',
+      heading: 'Vinilos: el señuelo que se adapta a la lubina, y no al revés',
+      why: [
+        'La lubina de costa vive del lanzón, la aguja y el chanquete: peces finos, alargados y casi transparentes. Un vinilo delgado como el de la foto no se parece a esa presa, es esa presa. Por eso funciona incluso cuando el agua está clara y plana, que es cuando la lubina se vuelve desconfiada y deja de entrar a lo demás.',
+        'Pero la ventaja de verdad es la cabeza plomada. Un paseante trabaja arriba y un jerkbait a su profundidad y punto; con el mismo vinilo, cambiando de 5 a 20 gramos pasas de rascar la superficie a peinar el fondo. Un solo señuelo cubre toda la columna de agua, y eso importa porque la lubina no está siempre a la misma altura: al amanecer caza arriba y con el sol alto se descuelga.',
+        'Además es blando, y ése es el detalle que más peces mete en el copo. Un señuelo rígido lo escupe en cuanto lo nota; el vinilo lo retiene un instante más, y ese instante es el que te da tiempo a clavar. A eso se suma que la pala trabaja a velocidades ridículas — justo la recuperación lenta que pide esta especie.',
+        'Y son baratos. Diez colores y tres tamaños caben en un bolsillo por lo que cuesta un jerkbait, así que puedes probar hasta dar con lo que quieren ese día en vez de insistir con lo único que llevas.',
+      ],
+      care: {
+        title: 'Los cuatro fallos que lo estropean',
+        intro:
+          'Un vinilo pesca solo si se mueve bien, y se mueve bien por muy poco: casi todo lo que falla está en cómo lo montas, no en el color que elegiste.',
+        items: [
+          {
+            t: 'Ensártalo recto o no pesca',
+            d: 'Apoya el anzuelo a lo largo del cuerpo y mira por dónde tiene que salir ANTES de pinchar. Un vinilo torcido gira sobre sí mismo, riza la línea y la lubina ni se acerca — y desde arriba no se nota, así que lo achacas al día.',
+          },
+          {
+            t: 'Elige el plomo por profundidad, no por distancia',
+            d: 'Es el fallo más común: se monta el más pesado porque llega más lejos, y entonces el señuelo va arrastrando por el fondo o pasa demasiado rápido. Primero decides a qué altura está el pez, y luego el peso que lo deja ahí.',
+          },
+          {
+            t: 'Más despacio de lo que crees',
+            d: 'La pala de un shad ya trabaja a velocidad de paseo. Recupera lento, deja que la ola haga parte del trabajo y mete alguna caída muerta: la mayoría de las picadas llegan cuando el vinilo baja, no cuando tira.',
+          },
+          {
+            t: 'Cámbialo en cuanto se rasgue',
+            d: 'Un vinilo con el lomo abierto o el rabo mordido pierde la acción entera. Cuesta céntimos y te está costando la sesión; y si vas a pescar entre roca, monta anzuelo offset al estilo texano y te ahorras la mitad de los enganches.',
+          },
+        ],
+      },
+    },
+  ],
+
   jurel: [
     {
       src: '/imagenesPeces/jureles_sabiki_web.jpg',
@@ -123,7 +167,7 @@ export const ACTION_SHOTS: Record<string, ActionShot[]> = {
       caption:
         'Un sabiki trabajando con el banco encima: seis plumillas escalonadas sobre la línea madre, el plomo abajo manteniéndola recta y tensa, y los jureles entrando desde todos los lados. Uno ya ha mordido. Ésta es exactamente la escena que busca el aparejo, y cuando pasa no sube uno: suben tres o cuatro a la vez.',
       layout: 'panel',
-      orientacion: 'vertical',
+      ratio: '4/5',
       heading: 'Por qué el sabiki puede con todo lo demás',
       why: [
         'El jurel come en banco y por competencia: en cuanto uno se lanza, los de al lado van detrás. El sabiki juega con eso. Las plumillas imitan un puñado de alevines o quisquilla desperdigados, y el tinsel y las perlitas rematan — con luz, ese destello es lo que dispara la agresividad.',
