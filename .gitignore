@@ -45,3 +45,6 @@ next-env.d.ts
 
 # Fotos subidas en desarrollo (en producción van a un volumen).
 .datos/
+
+# Copias de seguridad: llevan datos personales y credenciales de sesión.
+copias/
