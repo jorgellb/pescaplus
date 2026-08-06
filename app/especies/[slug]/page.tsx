@@ -6,7 +6,7 @@ import Layout from '@/components/Layout'
 import { SEA_SPECIES, MONTHS_SHORT, deSpecies } from '@/lib/fishing-species'
 import { zonesForSpecies } from '@/lib/species-zones'
 import { getSpeciesGuide } from '@/lib/species-guides'
-import { actionShot } from '@/lib/species-action-shots'
+import { actionShots } from '@/lib/species-action-shots'
 import { getTaxonomy, categoryName } from '@/lib/taxonomy-store'
 import { NATIONAL_SIZES_URL } from '@/lib/fishing-regulations'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
@@ -84,7 +84,9 @@ export default async function SpeciesPage({ params }: Params) {
    * y entonces la ficha se pinta igual, sin hueco ni aviso.
    */
   const guide = getSpeciesGuide(sp.id)
-  const accion = actionShot(sp.id)
+  const acciones = actionShots(sp.id)
+  const cabecera = acciones.find((a) => a.layout === 'cabecera')
+  const paneles = acciones.filter((a) => a.layout === 'panel')
 
   const breadcrumbLd = breadcrumbJsonLd([
     { name: 'Inicio', url: SITE_URL },
@@ -202,7 +204,7 @@ export default async function SpeciesPage({ params }: Params) {
           <div className="space-y-3">
             <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3">Cómo pescarla</h2>
             <div className="border border-ink/[0.07] rounded-xl bg-paper p-5 space-y-4 overflow-hidden">
-              {accion?.layout === 'cabecera' && (
+              {cabecera && (
                 /*
                  * Sangra hasta el borde de la tarjeta (`-mx-5 -mt-5` compensa el
                  * p-5) para que la foto haga de cabecera del bloque en lugar de
@@ -211,8 +213,8 @@ export default async function SpeciesPage({ params }: Params) {
                 <figure className="-mx-5 -mt-5">
                   <div className="relative aspect-[16/9] bg-ink/[0.05] border-b border-ink/[0.07]">
                     <Image
-                      src={accion.src}
-                      alt={accion.alt}
+                      src={cabecera.src}
+                      alt={cabecera.alt}
                       fill
                       /*
                        * La columna mide 472 px en escritorio: `max-w-5xl` (1024)
@@ -224,7 +226,7 @@ export default async function SpeciesPage({ params }: Params) {
                     />
                   </div>
                   <figcaption className="px-5 pt-4 text-[13px] text-ink/70 leading-relaxed border-b border-ink/[0.07] pb-4">
-                    {accion.caption}
+                    {cabecera.caption}
                   </figcaption>
                 </figure>
               )}
@@ -253,61 +255,86 @@ export default async function SpeciesPage({ params }: Params) {
           * y se lleva su propia sección a ancho completo, con la foto a un lado.
           * Va justo detrás de «Cómo pescarla» porque es su continuación.
           */}
-        {accion?.layout === 'panel' && accion.care && (
-          <section className="border border-ink/[0.07] rounded-2xl bg-paper shadow-hard overflow-hidden">
-            <div className="grid grid-cols-1 md:grid-cols-[minmax(0,340px)_1fr]">
-              <div className="relative aspect-[4/5] bg-ink/[0.05] border-b md:border-b-0 md:border-r border-ink/[0.07]">
-                <Image
-                  src={accion.src}
-                  alt={accion.alt}
-                  fill
-                  /* 340 px de columna en escritorio; a ancho completo por debajo de md. */
-                  sizes="(max-width: 768px) calc(100vw - 32px), 340px"
-                  className="object-cover"
-                />
-              </div>
-
-              {/*
-                * Solo el «por qué» acompaña a la foto. Con los consejos aquí
-                * dentro el texto medía el doble que la imagen y la columna
-                * izquierda quedaba con medio metro de hueco en blanco; así las
-                * dos alturas casan.
-                */}
-              <div className="p-5 sm:p-7 space-y-3">
-                <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3">
-                  {accion.heading}
-                </h2>
-                <p className="text-[13px] text-ink/60 leading-relaxed">{accion.caption}</p>
-                {accion.why && <p className="text-[15px] text-ink/80 leading-relaxed">{accion.why}</p>}
-              </div>
+        {/*
+          * Paneles de aparejo. Una especie puede tener varios: el pargo lleva el
+          * kabura de cabecera arriba y el calamar vivo aquí abajo. La foto manda
+          * la maqueta — vertical va al lado del texto, apaisada va encima.
+          */}
+        {paneles.map((panel) => {
+          const apaisada = panel.orientacion === 'apaisada'
+          const foto = (
+            <Image
+              src={panel.src}
+              alt={panel.alt}
+              fill
+              sizes={apaisada ? '(max-width: 768px) calc(100vw - 32px), 976px' : '(max-width: 768px) calc(100vw - 32px), 340px'}
+              className="object-cover"
+            />
+          )
+          const texto = (
+            <div className="p-5 sm:p-7 space-y-3">
+              <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3">
+                {panel.heading}
+              </h2>
+              <p className="text-[13px] text-ink/60 leading-relaxed">{panel.caption}</p>
+              {panel.why?.map((parrafo) => (
+                <p key={parrafo.slice(0, 40)} className="text-[15px] text-ink/80 leading-relaxed">
+                  {parrafo}
+                </p>
+              ))}
             </div>
+          )
 
-            {/* Los cuidados, a ancho completo y en dos columnas: seis puntos en
-              * una sola columna estrecha eran una tira imposible de repasar. */}
-            <div className="border-t border-ink/[0.07] p-5 sm:p-7 space-y-4">
-              <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60">
-                {accion.care.title}
-              </p>
-              <p className="text-[15px] text-ink/80 leading-relaxed max-w-3xl">{accion.care.intro}</p>
-              <ol className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 pt-1">
-                {accion.care.items.map((it, n) => (
-                  <li key={it.t} className="flex gap-3">
-                    <span
-                      aria-hidden
-                      className="shrink-0 w-6 h-6 rounded-full bg-ink text-paper font-mono text-[11px] font-bold flex items-center justify-center mt-0.5"
-                    >
-                      {n + 1}
-                    </span>
-                    <span className="text-[15px] leading-relaxed">
-                      <strong className="text-ink font-semibold">{it.t}.</strong>{' '}
-                      <span className="text-ink/80">{it.d}</span>
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          </section>
-        )}
+          return (
+            <section key={panel.src} className="border border-ink/[0.07] rounded-2xl bg-paper shadow-hard overflow-hidden">
+              {apaisada ? (
+                <>
+                  <div className="relative aspect-[16/9] bg-ink/[0.05] border-b border-ink/[0.07]">{foto}</div>
+                  {texto}
+                </>
+              ) : (
+                /*
+                 * Vertical: solo el «por qué» acompaña a la foto. Con los consejos
+                 * aquí dentro el texto medía el doble que la imagen y la columna
+                 * de la izquierda quedaba con un hueco en blanco enorme.
+                 */
+                <div className="grid grid-cols-1 md:grid-cols-[minmax(0,340px)_1fr]">
+                  <div className="relative aspect-[4/5] bg-ink/[0.05] border-b md:border-b-0 md:border-r border-ink/[0.07]">
+                    {foto}
+                  </div>
+                  {texto}
+                </div>
+              )}
+
+              {/* Los cuidados, a ancho completo y en dos columnas: seis puntos en
+                * una sola columna estrecha eran una tira imposible de repasar. */}
+              {panel.care && (
+                <div className="border-t border-ink/[0.07] p-5 sm:p-7 space-y-4">
+                  <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60">
+                    {panel.care.title}
+                  </p>
+                  <p className="text-[15px] text-ink/80 leading-relaxed max-w-3xl">{panel.care.intro}</p>
+                  <ol className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 pt-1">
+                    {panel.care.items.map((it, n) => (
+                      <li key={it.t} className="flex gap-3">
+                        <span
+                          aria-hidden
+                          className="shrink-0 w-6 h-6 rounded-full bg-ink text-paper font-mono text-[11px] font-bold flex items-center justify-center mt-0.5"
+                        >
+                          {n + 1}
+                        </span>
+                        <span className="text-[15px] leading-relaxed">
+                          <strong className="text-ink font-semibold">{it.t}.</strong>{' '}
+                          <span className="text-ink/80">{it.d}</span>
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+            </section>
+          )
+        })}
 
         {/* Where */}
         {spots.length > 0 && (
