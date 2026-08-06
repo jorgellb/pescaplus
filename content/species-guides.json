@@ -193,5 +193,44 @@
       "Consulta la talla mínima de tu comunidad y devuelve lo que no llegue, mojándote las manos antes de tocarlo."
     ],
     "generatedAt": "2026-08-06T00:00:00.000Z"
+  },
+  "brecas": {
+    "intro": "La breca es el pan de cada día de la pesca a fondo desde barco. No da peleas memorables ni exige equipo especial, pero está, come casi todo el año y llena la nevera cuando lo demás falla. Tiene la boca pequeña y muy blanda, y ahí está el único detalle que separa al que pesca del que se queda mirando: anzuelo pequeño y bajo fino, porque con un anzuelo grande simplemente no le entra. Pica con toques rápidos y seguidos, muy distintos del golpe seco de un espárido grande, y conviene esperar a que el toque se convierta en peso antes de subir. Es pesca tranquila, agradecida y perfecta para días de mar plana.",
+    "where": "Arena y fango con roca dispersa, entre quince y sesenta metros, desde barco fondeado o a la deriva. El sitio bueno no es la arena limpia ni la piedra cerrada, sino la mezcla: manchas de roca sueltas sobre fondo blando, que es donde encuentra los gusanos y los pequeños crustáceos de los que vive. Con la sonda se identifican bien esas transiciones. La corriente suave ayuda; la corriente fuerte obliga a tanto plomo que se pierde la sensibilidad y se dejan de notar los toques.",
+    "techniques": "Fondo ligero con bajos finos de dos o tres anzuelos, del 8 al 10, y línea del 0,20 al 0,25. El plomo, el mínimo que aguante: aquí la sensibilidad lo es todo, porque la picada es sutil. Gusana, gamba pelada y tiras finas de calamar son los cebos, y conviene cebar poco pero a menudo si se está fondeado. Deja que el aparejo toque fondo y súbelo un palmo, no más. Y no subas al primer toque: espera a notar el peso, que es cuando ya se lo ha tragado.",
+    "seasons": "De abril a octubre, con el agua entre 14 y 22 grados. La mañana es el mejor momento, sobre todo con corriente suave. Es una de las pescas más constantes del calendario, sin entradas ni salidas bruscas de temporada; simplemente hay más en los meses templados. Los días de mar plana son los ideales, porque permiten usar poco plomo y notar la picada.",
+    "tips": [
+      "Anzuelo pequeño, del 8 al 10. Con anzuelo grande no le entra en la boca y se queda todo en toques.",
+      "El mínimo plomo que aguante: si no notas los toques, no vas a pescar.",
+      "No subas al primer toque. Espera a notar peso.",
+      "Es fácil sacar muchas: coge solo las que vayas a comer y devuelve las pequeñas con las manos mojadas."
+    ],
+    "generatedAt": "2026-08-06T00:00:00.000Z"
+  },
+  "congrio": {
+    "intro": "El congrio es pesca de noche, de aparejo bruto y de paciencia. Vive metido en la roca, en las escolleras profundas y en los pecios, y sale de noche a comer lo que encuentra. Todo en él exige fuerza: mide lo que mide, tiene una dentadura seria y una forma de defenderse muy suya, que consiste en enrollarse sobre sí mismo y hacer palanca dentro del agujero. Por eso el material fino aquí no sirve de nada. Y una advertencia que no sobra: fuera del agua sigue siendo peligroso durante mucho rato, se retuerce con fuerza y muerde en serio. No se le mete la mano en la boca ni se le sujeta con confianza.",
+    "where": "Roca, escolleras profundas, puertos y pecios, entre quince y cien metros; desde costa, en espigones con fondo. El punto clásico es el pie de una escollera grande, donde los bloques dejan huecos. Desde barco, cualquier pecio o piedra cerrada. Necesita profundidad y refugio: en playa abierta no hay congrio. Lanza corto y busca la base de la piedra, no el fondo limpio alejado — aquí lanzar lejos suele ser tirar el cebo donde no está.",
+    "techniques": "Fondo con aparejos fuertes: línea gruesa, anzuelo grande y resistente, y bajo capaz de aguantar el roce contra la roca, porque el roce es constante. Sardina entera, calamar o tiras de pulpo, cebos grandes y con olor. Deja el aparejo trabajar sin tocarlo y da tiempo a la picada: coge el cebo y se retira despacio hacia su agujero. La clave está justo ahí — hay que apretar antes de que llegue, porque en cuanto se mete y se enrolla no hay forma de sacarlo. Freno fuerte y bombeo constante desde el primer segundo.",
+    "seasons": "De octubre a marzo, con el agua entre 11 y 18 grados. Noche cerrada, sin excepción: de día no se pesca. Las noches de invierno con mar tranquila y marea con algo de movimiento son las buenas. Es de las pocas pescas que mejora justo cuando el resto del calendario se apaga.",
+    "tips": [
+      "Aparejo fuerte de verdad: roza contra la roca todo el rato y el material fino no aguanta.",
+      "Aprieta antes de que llegue a su agujero. Si se mete y se enrolla, ya no sale.",
+      "Lanza corto, al pie de la piedra. En el fondo limpio y lejano no hay nada.",
+      "Fuera del agua sigue siendo peligroso mucho rato: alicate largo, nunca la mano, y cuidado al devolverlo."
+    ],
+    "generatedAt": "2026-08-06T00:00:00.000Z"
+  },
+  "lenguado": {
+    "intro": "El lenguado es la pesca más silenciosa que hay desde la playa. No hay carreras, no hay peleas y muchas veces ni siquiera hay una picada clara: se nota un peso muerto que antes no estaba, y ya está. Vive enterrado en la arena fina, con los ojos fuera, esperando a que le pase algo por encima, y de noche sale a comer moviéndose muy poco. Todo lo que funciona con él va en la misma dirección: cebo pequeño, anzuelo pequeño, bajo largo y mucha calma. Es de esas pescas que enganchan precisamente porque no pasa casi nada, hasta que pasa.",
+    "where": "Arenales finos, desembocaduras y esteros, entre uno y quince metros — muy cerca de la orilla. Busca la arena limpia y fina, sin piedra, y sobre todo las depresiones: la fosa que se forma detrás de una barra, el canal de una desembocadura, la zona donde el agua se remansa. Localízalas de día con la bajamar, porque de noche vas a lanzar de memoria. La mar tranquila es condición, no preferencia: con marejada la arena se remueve y el lenguado se entierra y no come.",
+    "techniques": "Surfcasting fino a fondo, con bajos largos —de 80 centímetros a más de un metro— y anzuelo pequeño del 6 al 4. La gusana americana o coreana y la tita son los cebos, montados enteros y estirados a lo largo del anzuelo, no arrugados. El plomo, el justo para que quede quieto en el fondo: aquí no se busca que el cebo baile. Deja el aparejo quieto y ten paciencia; si no hay picada en veinte minutos, recoge unos metros y vuelve a esperar. Al notar el peso, sube despacio y sin clavar con fuerza: tiene la boca pequeña y se descose fácil.",
+    "seasons": "De octubre a marzo, con el agua entre 11 y 18 grados. De noche y con mar tranquila. Es una pesca de invierno y de mala hora, que es justo lo que la mantiene tranquila: no vas a encontrarte a mucha gente en la playa. Las noches sin viento después de unos días de calma son las mejores.",
+    "tips": [
+      "Bajo largo y anzuelo pequeño. Aquí lo que sobra estorba.",
+      "Monta la gusana estirada a lo largo del anzuelo, no arrugada: cambia mucho el resultado.",
+      "Localiza las fosas de día con la bajamar, porque de noche lanzarás a ciegas.",
+      "Sube despacio y sin clavar fuerte: tiene la boca pequeña y se descose. Y devuelve lo que no llegue a talla."
+    ],
+    "generatedAt": "2026-08-06T00:00:00.000Z"
   }
 }
