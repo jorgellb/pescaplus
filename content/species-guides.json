@@ -232,5 +232,44 @@
       "Sube despacio y sin clavar fuerte: tiene la boca pequeña y se descose. Y devuelve lo que no llegue a talla."
     ],
     "generatedAt": "2026-08-06T00:00:00.000Z"
+  },
+  "atun": {
+    "intro": "El atún es otra liga. Todo en él es desproporcionado: el tamaño, la velocidad, la duración de la pelea y el equipo que hace falta para no salir escaldado. Se pesca desde barco, en aguas abiertas, buscando comidas que pueden aparecer a kilómetros de donde uno esperaba, y cuando se engancha uno grande la lucha se mide en decenas de minutos. Pero antes que la técnica está la ley, y aquí manda de verdad: el atún rojo tiene autorización específica y cupos estrictos, y en pesca recreativa lo habitual es captura y suelta. Salir a por él sin haberse informado antes no es un descuido, es una infracción seria.",
+    "where": "Aguas abiertas, líneas de corriente y zonas de cebo, entre la superficie y unos sesenta metros. Las señales son las de siempre en la pesca de altura: pájaros trabajando, agua que hierve, manchas densas en la sonda, y las líneas donde se juntan dos masas de agua distintas. Los objetos flotantes y las boyas también concentran vida. Es pesca de navegar y mirar; el que encuentra la comida pesca, y el que no, se pasa el día dando vueltas. La corriente marca dónde estará el cebo, así que planificar sobre ella es lo que ahorra combustible.",
+    "techniques": "Curricán para peinar agua mientras se busca, spinning a comidas con poppers y stickbaits grandes cuando se localiza actividad en superficie, y jigging pesado con jigs de 150 a 300 gramos cuando están abajo. Equipo sobredimensionado y revisado: carrete con capacidad y freno de sobra, nudos bien hechos, anzuelos y anillas reforzados. La pelea se hace con el cuerpo y con el arnés, no con los brazos. Y si es captura y suelta, prepara la maniobra antes: tenerlo listo para soltarlo rápido y sin subirlo a bordo es lo que determina si sobrevive.",
+    "seasons": "De mayo a octubre, con el agua entre 18 y 28 grados. Pleno día, con las comidas más explosivas al alba. Pero la temporada de verdad la fija la autorización, no el calendario: los cupos y las ventanas de pesca las establece la administración cada año y cambian. Consúltalas antes de planificar nada.",
+    "tips": [
+      "Infórmate ANTES: el atún rojo exige autorización específica y cupos estrictos, y en recreativa suele ser captura y suelta.",
+      "Revisa nudos, anillas y anzuelos antes de salir. Un fallo de material con un pez así no se perdona.",
+      "Acércate a la comida en paralelo, nunca por encima: pasarle el barco la hunde.",
+      "Si vas a soltarlo, prepara la maniobra de antemano y no lo subas a bordo: cada segundo fuera del agua cuenta."
+    ],
+    "generatedAt": "2026-08-06T00:00:00.000Z"
+  },
+  "llampuga": {
+    "intro": "La llampuga, o dorado, es el color del Mediterráneo en otoño. Es un pez espectacular —verdes y dorados que se apagan en cuanto sale del agua— rapidísimo, que crece a una velocidad increíble y que vive muy poco. Y tiene una manía que define su pesca por completo: se refugia bajo cualquier cosa que flote. Una tabla, una boya, un montón de algas a la deriva. En Baleares se aprovecha desde hace siglos con los cadufs, esas estructuras flotantes puestas a propósito. Así que aquí no se busca el pez, se busca el objeto flotante: si lo encuentras, casi seguro que hay llampugas debajo.",
+    "where": "Objetos flotantes, cadufs y líneas de corriente en aguas abiertas, cazando entre la superficie y unos veinte metros junto a la estructura. Cualquier cosa que flote merece un acercamiento: palés, boyas, troncos, matas de alga. También las líneas donde se junta agua de distinto color. Acércate por sotavento y sin pasar por encima, y no te pegues demasiado en el primer lance — la llampuga sale a buscar el señuelo, no hace falta ponérselo en la cara. Si un objeto da una y deja de dar, déjalo reposar unos minutos y vuelve.",
+    "techniques": "Curricán con plumillas de colores vivos junto a los objetos flotantes es la forma clásica y la más eficaz para localizar. Cuando ya están localizadas, spinning a la vista con poppers pequeños o vivo, que es mucho más divertido. Recuperación rápida: son extraordinariamente veloces y un señuelo lento les aburre. Bajo de fluorocarbono, no acero, porque no cortan como la anjova pero sí ven el hilo. Y ten cuidado a bordo: saltan con una fuerza notable y no paran quietas.",
+    "seasons": "De agosto a noviembre, con el agua entre 20 y 27 grados. Es de las pocas pescas que da su mejor momento a pleno día y con sol alto, que además es cuando se ven los objetos flotantes. El otoño es su temporada, con el pico entre septiembre y octubre. Cuando el agua empieza a enfriar, se van.",
+    "tips": [
+      "No busques el pez, busca lo que flota. Cualquier objeto a la deriva merece un lance.",
+      "Acércate por sotavento y sin pasar por encima del objeto.",
+      "Recupera rápido: son velocísimas y un señuelo lento no les interesa.",
+      "Si el objeto deja de dar, déjalo reposar unos minutos y vuelve. Suele funcionar mejor que insistir."
+    ],
+    "generatedAt": "2026-08-06T00:00:00.000Z"
+  },
+  "espeton": {
+    "intro": "El espetón, o barracuda mediterránea, es un torpedo de superficie con muy mala cara y peor dentadura. Caza en aguas someras, muchas veces a la vista, y ataca con una velocidad que sorprende la primera vez: el señuelo desaparece de golpe. Como la anjova, tiene dientes que cortan, así que el bajo reforzado no es opcional. Es una pesca muy visual y muy adictiva, porque se ve venir el ataque, y además se practica desde puntos accesibles: bocanas, escolleras y zonas someras del Mediterráneo, sin necesidad de barco. El inconveniente es que es desconfiado con el señuelo mal presentado y se aburre enseguida si el movimiento no le convence.",
+    "where": "Bocanas, escolleras y aguas someras del Mediterráneo, entre la superficie y unos quince metros. Busca donde haya pez pequeño concentrado: la bocana de un puerto, la punta de un dique, una zona somera con pradera donde se refugien los alevines. Es un cazador de emboscada que aprovecha la estructura, así que trabaja los bordes y las esquinas más que el agua abierta. Cuando hay comidas visibles en superficie, no hay duda de dónde lanzar; cuando no, peina metódicamente el borde de la estructura.",
+    "techniques": "Spinning con needles finos de 12 a 16 centímetros y paseantes recuperados rápido, con tirones nerviosos y pausas cortas. El movimiento errático es lo que dispara el ataque; la recuperación uniforme le aburre. Bajo reforzado siempre —de acero fino o fluorocarbono muy grueso— porque los dientes cortan. Anzuelos afilados, porque tiene la boca dura y muchos ataques no llegan a clavar. Y al desanzuelar, alicate largo y respeto: la dentadura hace daño de verdad.",
+    "seasons": "De junio a noviembre, con el agua entre 18 y 26 grados. Alba y atardecer son sus horas, mejor con comidas visibles. El final del verano y el otoño concentran la mejor actividad, cuando hay más alevín en la costa. Con mar plana y agua clara se ve venir el ataque, que es parte de la gracia.",
+    "tips": [
+      "Bajo reforzado siempre: corta el fluorocarbono normal sin enterarse.",
+      "Recuperación nerviosa con tirones y pausas. El movimiento uniforme no le interesa.",
+      "Anzuelos muy afilados: tiene la boca dura y se pierden muchos ataques.",
+      "Alicate largo al desanzuelar y cuidado con las manos. Devuelve con cuidado lo que no te lleves."
+    ],
+    "generatedAt": "2026-08-06T00:00:00.000Z"
   }
 }
