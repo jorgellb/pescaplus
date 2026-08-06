@@ -310,5 +310,44 @@
       "Revisa el nudo tras cada pelea, y devuelve con cuidado lo que no te vayas a llevar."
     ],
     "generatedAt": "2026-08-06T00:00:00.000Z"
+  },
+  "gallo-pedro": {
+    "intro": "El gallo de San Pedro es un pez raro y elegante que se pesca sin querer más veces de las que se busca a propósito. Tiene esa mancha oscura y redonda en el costado que le da nombre, un cuerpo comprimidísimo y una forma de comer que explica toda su pesca: se acerca muy despacio a la presa, la encara de frente y la absorbe de golpe con una boca que se proyecta hacia fuera. Nada de perseguir. Por eso los señuelos rápidos no le sirven y el vivo pequeño presentado quieto es lo que funciona. No pelea gran cosa, pero es de los pescados más apreciados en la cocina, y eso le da valor propio.",
+    "where": "Fondos mixtos de arena y roca, cerca de estructura, entre veinte y noventa metros y siempre pegado al fondo. Busca las transiciones: la mancha de piedra sobre arena, el borde de un bajo, los alrededores de un pecio. No es un pez de cardumen, así que no esperes rachas; aparece de uno en uno. La corriente floja es su condición, porque necesita acercarse despacio a la presa y con mucha agua en movimiento no puede. De ahí que las primeras horas, con la marea aún parada, sean las buenas.",
+    "techniques": "Pesca a fondo con vivo pequeño —una boga o un jurelito— presentado cerca del fondo y sin movimiento, o jigging muy lento con vinilos y jigs ligeros. La palabra clave es lenta: si trabajas rápido, no entra. Bajo fino y anzuelo proporcionado al cebo, no grande. La picada es suave y poco espectacular, un peso que se instala; da un par de segundos antes de subir, porque la absorción no es instantánea. Y sube con calma: tiene la boca delicada y se descose con facilidad.",
+    "seasons": "De octubre a abril, con el agua entre 12 y 19 grados. Las primeras horas del día y con poca corriente. Es una pesca de invierno y de mar tranquila, que además coincide con la temporada de otras especies de fondo, así que rara vez se sale solo a por él: aparece mientras se busca otra cosa.",
+    "tips": [
+      "Trabaja lento de verdad. Con recuperación rápida no entra: no persigue, absorbe.",
+      "Da un par de segundos antes de subir. La absorción no es instantánea.",
+      "Busca las transiciones de arena a roca, no la piedra cerrada ni la arena limpia.",
+      "Sube con calma: boca delicada y anzuelo que se suelta con facilidad."
+    ],
+    "generatedAt": "2026-08-06T00:00:00.000Z"
+  },
+  "gallineta": {
+    "intro": "La gallineta es pesca de profundidad y de paciencia, de las que exigen más al material y a la espalda que a la técnica. Vive en roca y fango profundos, en cantiles y veriles, y hay que bajar a buscarla a ochenta metros o más, así que cada subida es un trabajo. A cambio, cuando el sitio es bueno se sacan varias de una vez, porque suele estar agrupada. Tiene una particularidad importante que conviene saber antes de cogerla: las espinas de la aleta dorsal son venenosas y el pinchazo duele mucho y se inflama. No es peligroso, pero arruina la jornada; se manipula con guante o con trapo, nunca con la mano desnuda.",
+    "where": "Roca y fango profundos, cantiles y veriles, entre ochenta y doscientos metros, siempre desde embarcación. Se busca sobre el canto de un veril o en las manchas de piedra que salen en la sonda a esa profundidad. Es imprescindible una deriva lenta y controlada: con mucha corriente o mucho viento el aparejo se va y no trabaja en vertical, y a esa profundidad eso significa no pescar. Por eso los días de mar en calma son los únicos que valen la pena.",
+    "techniques": "Pesca a fondo profundo con bajos de dos o tres anzuelos y plomo suficiente para mantener la vertical, que a esa profundidad no es poco. Sardina, calamar o alacha en tiras, cebos con olor que aguanten la bajada. Baja hasta tocar fondo, levanta un metro y espera; cuando notes la picada, no subas de inmediato — deja que carguen los demás anzuelos, porque suele haber más de una. La subida es larga, así que hazla constante y sin parones para no perderlas. Carrete con capacidad y línea trenzada, que a esa profundidad el nailon no transmite nada.",
+    "seasons": "De octubre a marzo, con el agua entre 11 y 17 grados. Por la mañana, con mar en calma y deriva lenta. Es pesca de invierno, y la meteorología manda más que el calendario: sin mar tranquila no hay forma de trabajar bien a esa profundidad, y un día de viento se convierte en tiempo perdido.",
+    "tips": [
+      "Ojo con las espinas dorsales: son venenosas y el pinchazo duele e inflama. Guante o trapo, nunca la mano.",
+      "Cuando pique, espera un poco antes de subir: suelen entrar varias en el mismo bajo.",
+      "Trenzado, no nailon: a esa profundidad el nailon no te deja notar nada.",
+      "Sin mar en calma no salgas a por ella: sin deriva lenta el aparejo no trabaja vertical."
+    ],
+    "generatedAt": "2026-08-06T00:00:00.000Z"
+  },
+  "galanes": {
+    "intro": "El galán, o raor, es probablemente el pescado más codiciado de Baleares y una pesca con culto propio. Es pequeño, de colores llamativos y vive enterrado en la arena, del que sale a comer cuando el sol está alto y el agua clara — justo al revés que casi todo lo demás. La temporada es cortísima y está muy regulada, con una veda estricta y una apertura que en Baleares suele caer el 1 de septiembre y que se vive como un acontecimiento. Todo en su pesca es fino: aparejo delicado, anzuelo diminuto y mucho tacto, porque la picada es un temblor. Quien lo prueba, repite.",
+    "where": "Arenales limpios junto a praderas, en Baleares y Levante, entre cinco y cuarenta metros sobre arena y pescando a la deriva. El sitio es muy concreto: arena limpia, sin piedra, cerca del borde de una pradera de posidonia. Necesita agua clara y sol alto para salir, así que el mediodía luminoso es su mejor momento, algo poco habitual en pesca. Con agua turbia o cielo cubierto la cosa baja mucho. La deriva suave sobre el arenal es la forma de ir encontrando las manchas donde están agrupados.",
+    "techniques": "Pesca fina a fondo a la deriva, con bajos muy finos y anzuelos pequeños, del 10 al 12. Gamba pelada, cangrejo ermitaño o un trocito de gusana, siempre cebo menudo y bien presentado. El plomo, el mínimo que mantenga contacto con el fondo. La picada es un temblor rápido, casi imperceptible, y hay que responder con un movimiento corto de muñeca, no con un clavado. Es pesca de sensibilidad: caña fina, línea fina y atención constante, porque en cuanto te despistas te han limpiado el anzuelo.",
+    "seasons": "De septiembre a noviembre, con el agua entre 18 y 26 grados. Media mañana con sol alto y agua clara. Pero antes que la temporada está la norma: en Baleares hay veda estricta y cupos, con una apertura que habitualmente cae el 1 de septiembre y que puede cambiar. Consúltalo cada año antes de salir, porque es de las pescas más vigiladas que hay.",
+    "tips": [
+      "VEDA ESTRICTA Y CUPOS en Baleares, con apertura habitual el 1 de septiembre. Confírmalo cada temporada.",
+      "Quiere sol alto y agua clara: es de las pocas pescas que da mejor a mediodía.",
+      "Anzuelo diminuto y cebo menudo. Con anzuelo grande no hay galán.",
+      "Responde con un movimiento corto de muñeca, no con un clavado: la picada es un temblor."
+    ],
+    "generatedAt": "2026-08-06T00:00:00.000Z"
   }
 }
