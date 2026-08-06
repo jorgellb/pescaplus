@@ -349,5 +349,31 @@
       "Responde con un movimiento corto de muñeca, no con un clavado: la picada es un temblor."
     ],
     "generatedAt": "2026-08-06T00:00:00.000Z"
+  },
+  "ballesta": {
+    "intro": "El pez ballesta era una rareza en nuestras costas y cada año se ve más, empujado por el agua cálida. Es un bicho curioso: cuerpo comprimido, ojos altos y una espina dorsal que puede bloquear en posición erguida para trabarse dentro de un agujero — de ahí el nombre. Pero lo que lo define para el pescador es su boca: pequeña, durísima, con dientes hechos para partir concha y erizo. Come con una cautela exasperante, mordisqueando el cebo poco a poco, y es capaz de limpiar un anzuelo sin que la puntera se mueva apenas. Quien lo ha intentado sabe que es de los que más paciencia exigen para lo poco que abulta.",
+    "where": "Roca, pecios y estructuras artificiales en aguas cálidas, entre cinco y treinta metros y siempre cerca de la estructura. No se aleja de su refugio: trabaja el pie de la piedra, los bloques de una escollera, las estructuras sumergidas. Necesita buena visibilidad, así que el agua clara y el día luminoso son la condición. En verano y principios de otoño, cuando el agua está más caliente, se acerca más a la costa y aparece incluso en puertos y espigones donde antes no se veía.",
+    "techniques": "Pesca a fondo fina junto a la piedra, con anzuelo pequeño y muy fuerte: pequeño porque tiene la boca minúscula, y fuerte porque con esos dientes dobla o parte los flojos. Mejillón, gamba y cangrejo son los cebos, bien sujetos al anzuelo y sin trozos colgando, porque lo primero que hace es arrancar lo que sobra. Bajo corto y resistente al roce. Y la clave está en la respuesta: mordisquea con toques minúsculos y hay que esperar a que el toque se convierta en un tirón sostenido antes de apretar. Si clavas a los primeros toques, no habrá nada.",
+    "seasons": "De junio a octubre, con el agua entre 20 y 27 grados. Pleno día y con buena visibilidad, que es poco habitual entre los peces de roca. Es una especie en expansión: donde hace unos años no estaba, ahora aparece, y su temporada se alarga a medida que el agua se mantiene caliente más tiempo.",
+    "tips": [
+      "Anzuelo pequeño pero muy fuerte: la boca es minúscula y los dientes doblan los flojos.",
+      "Cebo bien sujeto y sin trozos colgando: lo primero que hace es arrancar lo que sobra.",
+      "Espera a que el toque se convierta en tirón sostenido. Clavar a los primeros toques no sirve de nada.",
+      "Cuidado al manipularlo: los dientes y la espina dorsal que bloquea hacen daño. Alicate y calma."
+    ],
+    "generatedAt": "2026-08-06T00:00:00.000Z"
+  },
+  "brotola": {
+    "intro": "La brótola es de las capturas más agradecidas del invierno para quien pesca a fondo. Vive en roca y cuevas profundas, en cantiles y pecios, y sale a comer cuando cae la luz, así que la ventana buena empieza justo cuando la mayoría recoge. Es un pez de cuerpo blando, con una barbilla característica bajo la mandíbula que usa para rastrear el fondo, y come con decisión: la picada es franca, sin los toques dubitativos de los espáridos. No da peleas de las que se recuerdan, pero tiene una carne excelente y aparece cuando el resto del calendario está apagado, que es cuando más se agradece.",
+    "where": "Roca y cuevas profundas, cantiles y pecios, entre veinte y ochenta metros, siempre pegada al fondo y a la piedra. Busca la base del cantil, la boca de una cueva, el borde de un pecio: lugares con refugio donde pueda esconderse de día. No es pez de fondo plano ni de arena limpia. La mar en calma es importante, no por ella sino por poder mantener el aparejo en vertical junto a la piedra sin engancharse a cada momento, que es la diferencia entre pescar y perder bajos.",
+    "techniques": "Pesca a fondo con bajos cortos junto a la piedra: cortos precisamente para reducir los enganches, que en este terreno son constantes. Sardina, tiras de calamar o alacha, cebos con olor que trabajen bien en poca luz. Plomo suficiente para mantener la vertical y contacto permanente con el fondo, levantando un poco cada cierto tiempo para no quedarse clavado. La picada es clara, así que no hay que darle muchas vueltas: cuando carga, se sube con firmeza y sin parones para sacarla de la piedra cuanto antes.",
+    "seasons": "De octubre a marzo, con el agua entre 12 y 18 grados. Atardecer y noche, con mar en calma. Es una pesca de invierno pura, que además se solapa con la del congrio y la de la gallineta, así que muchas salidas nocturnas de fondo acaban dando las tres. La caída de la luz es el momento en que se activa.",
+    "tips": [
+      "Bajos cortos: en este terreno los largos solo sirven para engancharse.",
+      "Levanta el aparejo cada cierto tiempo para no quedarte clavado en la piedra.",
+      "Empieza justo cuando cae la luz: es cuando se activa, y mucha gente ya está recogiendo.",
+      "Sube con firmeza y sin parones para separarla de la roca, y consulta la talla mínima de tu zona."
+    ],
+    "generatedAt": "2026-08-06T00:00:00.000Z"
   }
 }
