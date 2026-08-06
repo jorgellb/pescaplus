@@ -65,6 +65,25 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "images.unsplash.com" },
     ],
     formats: ["image/avif", "image/webp"],
+    /*
+     * Un año, en vez de las 4 horas que trae Next por defecto.
+     *
+     * Codificar un AVIF cuesta ~2 s por foto en este servidor, y con varias a la
+     * vez se estorban (8 en paralelo pasan de 2,0 s a 4,4-5,5 s cada una). Con el
+     * valor por defecto —se ve en la cabecera `cache-control: max-age=14400`— esa
+     * factura se volvía a pagar cada 4 horas: el primer visitante de cada tramo
+     * se comía la espera entera. Y las fotos de peces no cambian nunca.
+     *
+     * OJO al sustituir una foto: al clavarse por URL, reemplazar el fichero sin
+     * cambiarle el nombre deja la versión vieja servida hasta un año. Si cambias
+     * una imagen, cámbiale también el nombre.
+     *
+     * Esto NO sobrevive a un despliegue: la caché vive en `.next/cache/images`,
+     * dentro del contenedor, así que cada despliegue la borra y la primera visita
+     * vuelve a generarlo todo. Para que persista hace falta montar un volumen en
+     * esa ruta desde Coolify — está anotado en DESPLIEGUE.md.
+     */
+    minimumCacheTTL: 31536000,
   },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];

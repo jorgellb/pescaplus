@@ -143,6 +143,30 @@ despliegue se las lleva por delante — sin dar ningún error.** Por eso
 Se detecta comparando el dispositivo de la carpeta con el de la raíz: un volumen
 montado siempre es otro dispositivo.
 
+## 3 ter. El volumen de la caché de imágenes (opcional, pero se nota)
+
+Convertir una foto a AVIF cuesta **~2 s por imagen en este servidor**, y varias a
+la vez se estorban: medido en producción, 8 en paralelo pasan de 2,0 s a 4,4-5,5 s
+cada una. `/especies` tiene 29 fotos, así que una carga en frío se arrastra.
+
+Next guarda el resultado en `.next/cache/images` y a partir de ahí sirve en 0,13 s
+(`x-nextjs-cache: HIT`). El problema es que esa carpeta vive **dentro** del
+contenedor: cada despliegue la borra y el primer visitante vuelve a pagarlo todo.
+
+En Coolify → *Storages*, un volumen persistente en:
+
+```
+/app/.next/cache/images
+```
+
+Con eso la conversión se paga una vez en la vida de cada foto, no una vez por
+despliegue. No es imprescindible —el sitio funciona igual— pero es la diferencia
+entre que la primera visita tras cada despliegue tarde o no.
+
+Relacionado: `minimumCacheTTL` está en un año en `next.config.ts` (por defecto son
+4 horas). Si alguna vez cambias una foto, **cámbiale también el nombre**: la caché
+se clava por URL y la vieja seguiría sirviéndose.
+
 ## 4. Los crons (esto NO se migra solo)
 
 En Vercel los declaraba `vercel.json`. **Fuera de Vercel ese fichero no hace

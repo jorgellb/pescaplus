@@ -31,7 +31,7 @@ export default function EspeciesHub() {
 
       <section className="max-w-5xl mx-auto px-4 py-10 sm:px-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {SEA_SPECIES.map((sp) => {
+          {SEA_SPECIES.map((sp, i) => {
             const inSeason = sp.bestMonths.includes(currentMonth)
             return (
               <Link
@@ -45,7 +45,26 @@ export default function EspeciesHub() {
                       src={sp.images[0]}
                       alt={`Foto de ${sp.name.toLowerCase()}`}
                       fill
-                      sizes="(max-width: 640px) 100vw, 50vw"
+                      /*
+                       * El `sizes` anterior («50vw») mentía y salía caro. La
+                       * rejilla vive dentro de `max-w-5xl` (1024 px) a dos
+                       * columnas con 24 px de hueco: la tarjeta mide 476 px como
+                       * mucho. Pero «50vw» en una pantalla de 1920 declara 960,
+                       * así que el navegador pedía el candidato de 1080 px —y
+                       * 2048 en pantallas del doble de densidad, por encima
+                       * incluso del original, que tiene 1448 px de ancho.
+                       *
+                       * Importa porque cada tamaño nuevo obliga al servidor a
+                       * codificar un AVIF, y eso aquí cuesta ~2 s por foto: son
+                       * 29, y compitiendo por la CPU se estorban entre ellas
+                       * (medido: 8 a la vez pasan de 2,0 s a 4,4-5,5 s cada una).
+                       */
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) calc(50vw - 36px), 476px"
+                      /*
+                       * Las primeras de la rejilla se ven sin bajar la página, y
+                       * `lazy` las dejaba a la cola. El resto sigue perezoso.
+                       */
+                      priority={i < 4}
                       className="object-cover group-hover:scale-[1.03] transition-transform duration-300"
                     />
                   )}
