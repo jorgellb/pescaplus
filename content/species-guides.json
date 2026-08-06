@@ -76,5 +76,44 @@
       "Sángralo y enfríalo nada más subirlo: es un pescado que se estropea rápido y así se aprovecha de verdad."
     ],
     "generatedAt": "2026-08-05T00:00:00.000Z"
+  },
+  "calamares": {
+    "intro": "Pescar calamares es de las pocas cosas que se hacen mejor al atardecer y con la mar como un plato. Nada de temporales ni de madrugones: se sale cuando el sol se va, se busca agua limpia y se trabaja con paciencia. El calamar no ataca de golpe como un pez; se acerca al señuelo, lo estudia y lo abraza con los tentáculos, así que la picada no es un tirón sino un peso extraño que aparece de repente en la puntera. Eso es lo que hay que aprender a notar. Y una vez enganchado no hay que apretar: no tiene boca dura donde clavar, se sujeta por las púas de la jibionera, y un tirón brusco lo suelta. Es pesca de tacto fino y de repetir el mismo gesto hasta que funciona.",
+    "where": "Arenales limpios y praderas junto a roca, y también puertos y bocanas, entre cinco y cuarenta metros. El borde donde la arena se junta con la pradera de alga es el sitio clásico: ahí caza el pescado pequeño del que vive. Desde costa, los espigones y las bocanas con algo de profundidad y agua limpia; desde barco, la deriva sobre praderas y sobre el canto de los bajos. Un detalle que cambia mucho: las luces de puerto concentran cebo por la noche y el calamar se acerca al borde de la zona iluminada, no al centro. Trabaja ese límite entre la luz y la sombra.",
+    "techniques": "Eging con jibioneras del 2.5 al 3.5, alternando colores naturales y llamativos hasta dar con el del día, que cambia sin lógica aparente. La secuencia que funciona es sencilla: dejar caer hasta el fondo, dar dos o tres tirones secos hacia arriba y esperar quieto con el hilo semitenso, porque el calamar entra casi siempre en la caída. La otra vía es la potera clásica fondeado, con el barco parado sobre una pradera y cebo natural en la potera. Sube despacio y con presión constante, sin bombear, y ten el salabre a mano: cerca de la superficie es cuando más se sueltan.",
+    "seasons": "De septiembre a febrero, con el agua entre 13 y 19 grados. El atardecer y las primeras horas de la noche son el momento; el mediodía casi no da. Busca días de mar en calma y agua limpia, porque con marejada y agua turbia no ve el señuelo y no entra. Las noches sin viento del final del otoño son las mejores del año.",
+    "tips": [
+      "La picada no es un tirón: es un peso raro que aparece de golpe. Espera quieto tras cada serie de tirones.",
+      "No des tirones para clavar ni bombees al subir. Se sujeta por las púas y un golpe seco lo suelta.",
+      "En puertos, trabaja el borde de la zona iluminada, no el centro.",
+      "Si te enganchas un calamar y suelta tinta, deja reposar unos minutos esa vertical antes de insistir."
+    ],
+    "generatedAt": "2026-08-06T00:00:00.000Z"
+  },
+  "pulpo": {
+    "intro": "El pulpo es la pesca más tranquila que hay y también la que más exige mirar. No se busca por el pez, se busca por la casa: una hura entre bolos, una grieta bajo la piedra, un montón de conchas vacías delante de un agujero, que es la señal que lo delata. Vive pegado a la roca somera y sale poco, así que hay que llevarle el cebo a la puerta. La picada tampoco se parece a nada: la pulpera se queda enganchada, pero de una forma blanda, como si hubiera cogido un trapo. Y a partir de ahí es cuestión de presión constante, porque en cuanto se agarra a la piedra con las ventosas es capaz de aguantar más de lo que parece razonable.",
+    "where": "Roca somera, bolos y cuevas pequeñas, entre tres y treinta metros, siempre buscando huras. La pista más fiable son las conchas: si delante de un hueco hay un montoncito de valvas y cangrejos vacíos, ahí vive uno. Los cantiles con bloques sueltos, las escolleras de puerto y las zonas de piedra con arena entre medias son los sitios de siempre. Con agua clara y mar en calma se ve el fondo y se puede pescar dirigido, que es lo que marca la diferencia; con agua sucia es dar palos de ciego.",
+    "techniques": "Pulpera trabajada a fondo con mucha paciencia, arrastrando despacio junto a la piedra y parando cada poco. El cebo —cangrejo o un trozo de pescado bien sujeto— es lo que le hace salir de la hura. Cuando notes ese peso blando, no tires de golpe: aplica presión firme y sostenida para despegarlo antes de que se afiance, y luego sube sin aflojar en ningún momento, porque cada centímetro que le des lo usa para volver a agarrarse. Un salabre amplio en superficie evita el disgusto de perderlo en el último metro.",
+    "seasons": "De septiembre a enero, con el agua entre 13 y 20 grados. Es pesca de día, y necesita agua clara y mar en calma para poder leer el fondo. Los días siguientes a un temporal, con el agua todavía removida, no valen. La mejor combinación es sol alto, poco viento y marea con algo de movimiento.",
+    "tips": [
+      "Busca conchas y cangrejos vacíos delante de un hueco: es la señal de que ahí vive uno.",
+      "Presión firme y constante, nunca un tirón. Y no aflojes al subir, porque vuelve a agarrarse.",
+      "Con agua turbia, cambia de plan: esta pesca necesita ver el fondo.",
+      "OJO CON LA NORMATIVA: en varias comunidades la captura recreativa de pulpo está prohibida o sujeta a peso mínimo y vedas. Confírmalo antes de salir."
+    ],
+    "generatedAt": "2026-08-06T00:00:00.000Z"
+  },
+  "anjova": {
+    "intro": "La anjova, o chova, es probablemente el pez más agresivo que se puede pescar desde la costa española. Caza en grupo y a la carrera, y cuando un banco entra en una playa lo destroza todo: se ven las lisas saltando fuera del agua intentando escapar y el agua llena de escamas. Tiene una dentadura que corta como una cuchilla, y ese detalle no es anecdótico — es la diferencia entre pescar y perder el señuelo en la primera picada. Sin bajo de acero no hay anjova: corta el fluorocarbono más grueso como si fuera hilo de coser. Pelea rápido, con carreras cortas y cambios de dirección, y no se rinde hasta la orilla.",
+    "where": "Estuarios y playas del sur, con el bajo Guadalquivir y la bahía de Cádiz como zonas de referencia, entre dos y veinte metros y muy activa a media agua. Busca la corriente: la bocana de un estero con la marea saliendo, el canal entre bancos de arena, la punta de un espigón donde el agua acelera. Las señales visuales son las que mandan, igual que con el bonito: si ves lisas saltando o aves trabajando sobre un punto, ahí está el banco y hay que llegar rápido, porque se mueve.",
+    "techniques": "Dos formas, y las dos con bajo de acero SIEMPRE. Con cebo, sardina entera o un vivo presentado a media agua, no en el fondo, dejándolo trabajar con la corriente. Con señuelo, paseantes y vinilos grandes recuperados rápido, incluso muy rápido: cuanto más nervioso el movimiento, más entra. Anzuelos fuertes y bien afilados, y revisa el bajo después de cada captura porque los dientes lo dejan marcado. Al manipularla, cuidado con las manos: muerde en seco y hace daño de verdad.",
+    "seasons": "De junio a octubre, con el agua entre 18 y 26 grados. Atardecer y noche son sus mejores momentos, y el amanecer también da bien. Las mareas con mucho movimiento —vivas— concentran la actividad en las bocanas, porque arrastran el pescado pequeño del que vive. Con marea muerta y agua parada la cosa baja mucho.",
+    "tips": [
+      "Bajo de acero siempre, sin excepción. Con fluorocarbono la pierdes en la primera picada.",
+      "Presenta a media agua, no en el fondo: es donde caza.",
+      "Recupera rápido con señuelo. El movimiento nervioso es lo que dispara el ataque.",
+      "Cuidado con las manos al desanzuelar: muerde en seco. Usa alicate largo y devuelve con cuidado lo que no te lleves."
+    ],
+    "generatedAt": "2026-08-06T00:00:00.000Z"
   }
 }
