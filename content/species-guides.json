@@ -271,5 +271,44 @@
       "Alicate largo al desanzuelar y cuidado con las manos. Devuelve con cuidado lo que no te lleves."
     ],
     "generatedAt": "2026-08-06T00:00:00.000Z"
+  },
+  "potas": {
+    "intro": "La pota se pesca de noche, lejos de la costa y con luz. Vive en agua profunda y de noche sube a media agua siguiendo el pequeño pelágico, y ahí es donde se la espera: barco a la deriva, un foco encendido y la paciencia de trabajar la vertical hasta que aparece. Cuando llega el banco, la pesca puede ser frenética durante un rato y luego apagarse de golpe. Es más grande y más fuerte que el calamar, y tira con ganas. Dos avisos prácticos que se aprenden a la mala: suelta muchísima tinta, y a bordo hay que tener claro dónde va a caer, porque mancha todo lo que toca y no sale.",
+    "where": "Aguas profundas, entre cuarenta y doscientos metros, pescando a la deriva de noche. Se busca sobre veriles y caídas donde haya cebo, y se deja el barco derivar con el foco encendido para atraerlas a media agua. La sonda es imprescindible: se ve subir la mancha y ahí se sabe a qué profundidad hay que trabajar. No es pesca de costa ni de improvisar; requiere embarcación, profundidad y una noche con la mar tranquila para poder derivar con control.",
+    "techniques": "Poteras luminosas —fosforescentes o de led— trabajadas a la deriva, con la luz de atracción encendida. La técnica es sencilla: bajar a la profundidad donde marque la sonda, dar tirones amplios y dejar caer, porque como en el calamar la entrada suele producirse en la caída. Cuando enganchas una, no la subas a toda prisa: sube con presión constante, porque se sujetan por las púas y un tirón fuerte las suelta. Y ojo con la carga eléctrica del foco y con derivar sin control: es pesca nocturna en profundidad y la seguridad manda.",
+    "seasons": "De octubre a febrero, con el agua entre 13 y 19 grados. Noche cerrada, siempre con foco o lámpara. Las noches sin luna y con mar tranquila son las buenas, porque la luz artificial destaca más y la deriva se controla mejor. Es una pesca típicamente de invierno, cuando además coincide con la temporada de calamar y sepia.",
+    "tips": [
+      "Trabaja la profundidad que marque la sonda, no a ojo: la mancha sube y baja durante la noche.",
+      "Sube con presión constante. Se sujetan por las púas y un tirón las suelta.",
+      "Prepara dónde va a caer antes de subirla: la tinta mancha todo y no sale.",
+      "Es pesca nocturna en profundidad: luces de navegación, chaleco y alguien atento a la deriva."
+    ],
+    "generatedAt": "2026-08-06T00:00:00.000Z"
+  },
+  "herrera": {
+    "intro": "La herrera es el surfcasting elegante del invierno. Pequeña, rayada y muy pegada a la orilla, es de esas capturas que no llenan la nevera pero hacen bonita la sesión. Come en la misma rompiente, a veces en un palmo de agua, escarbando en la arena con el hocico. Tiene la boca pequeña, así que exige lo mismo que la dorada pero llevado más al extremo: anzuelo diminuto, bajo fino y cebo justo. La ventaja es que es menos desconfiada y da más alegrías al que empieza. La condición que casi nadie explica es la mar: no la quiere plana ni brava, sino rizadita, con la orilla justo removida.",
+    "where": "Playas de arena con rompiente suave, entre uno y diez metros — literalmente en la orilla. No hace falta lanzar lejos; de hecho, lanzar lejos es el error más común. La franja donde rompe la ola y remueve la arena es su comedero, porque ahí quedan al descubierto los gusanos y los pequeños moluscos. Busca las playas de arena fina y limpia, y dentro de ellas las zonas con algo de removido pero sin corriente fuerte. Los canales entre bancos también dan bien con la marea entrando.",
+    "techniques": "Surfcasting ligero con bajos finos de varios anzuelos, del 10 al 8, y línea del 0,18 al 0,22. Cebo pequeño y bien presentado: un trozo corto de gusana americana, tita o gamba pelada. El plomo, el justo para aguantar en la rompiente sin arrastrar. Lanza corto, a la primera o segunda línea de rompiente, y mantén la línea tensa para notar los toques, que son rápidos y suaves. Al ser bajo de varios anzuelos, es fácil sacar dos o tres de una vez cuando el banco está delante.",
+    "seasons": "De septiembre a febrero, con el agua entre 13 y 19 grados. Mañana y última hora son las mejores, y siempre con la mar rizadita: el mar plano no la mueve y el mar bravo la echa. Es la pesca de playa perfecta para el invierno, cuando la lubina exige noche y temporal y uno quiere algo más tranquilo.",
+    "tips": [
+      "No lances lejos. Está en la primera línea de rompiente y ahí es donde hay que dejar el cebo.",
+      "Anzuelo pequeño y trozo corto de gusana: con cebo grande solo tendrás toques.",
+      "Busca mar rizadita. Ni plana ni brava.",
+      "Devuelve las pequeñas: son de talla reducida y es fácil quedarse con más de lo razonable."
+    ],
+    "generatedAt": "2026-08-06T00:00:00.000Z"
+  },
+  "palometon": {
+    "intro": "El palometón es el trofeo del spinning desde la orilla en Levante y el Delta del Ebro. Es un pez potente, de cuerpo alto y carreras larguísimas, que caza pegadísimo a la costa persiguiendo mújoles y que puede aparecer a diez metros de tus pies. Enganchar uno desde arena, con equipo de lanzado, es una de las peleas más duras que se pueden tener sin barco: se va, vuelve, cambia de dirección y aguanta. La parte que frustra es que se le busca mucho y se le encuentra poco: son días de peinar agua sin ver nada y de repente una explosión en superficie que lo justifica todo.",
+    "where": "Desembocaduras, playas y bocanas del Levante y el Delta del Ebro, cazando entre la superficie y quince metros, muy pegado a la orilla. Busca donde haya mújol: las desembocaduras con agua salobre, los canales de riego que desaguan al mar, las bocanas de puerto. La señal inequívoca son los mújoles saltando en desbandada. Con la marea moviéndose y algo de corriente la actividad sube mucho; con agua parada, baja. Es pesca de caminar la orilla y peinar, no de plantarse en un punto.",
+    "techniques": "Spinning con needles de 14 a 18 centímetros y poppers grandes, recogidos rápido y con acción. También cebo vivo —un mújol pequeño— cuando se sabe que está la zona y no entran al señuelo. Equipo de lanzado potente, carrete con capacidad de línea suficiente para una carrera larga, y freno bien ajustado desde el principio. Bajo de fluorocarbono grueso, porque aunque no corta como la anjova, la boca y el roce castigan. Y revisa el nudo después de cada pelea, que es donde falla casi todo.",
+    "seasons": "De mayo a octubre, con el agua entre 17 y 26 grados. Alba y primeras horas son el mejor momento, y el atardecer también funciona. El verano y el principio del otoño concentran la actividad, con el pico cuando el agua está más caliente y hay más mújol en las desembocaduras.",
+    "tips": [
+      "Busca los mújoles. Donde salten en desbandada, ahí está.",
+      "Carrete con capacidad de sobra: la primera carrera es muy larga y no perdona una bobina justa.",
+      "Camina la orilla y peina. No es pesca de plantarse en un sitio y esperar.",
+      "Revisa el nudo tras cada pelea, y devuelve con cuidado lo que no te vayas a llevar."
+    ],
+    "generatedAt": "2026-08-06T00:00:00.000Z"
   }
 }
