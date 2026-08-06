@@ -154,5 +154,44 @@
       "Consulta cupos y medidas de tu comunidad, que varían, y ten cuidado con la tinta al subirla."
     ],
     "generatedAt": "2026-08-06T00:00:00.000Z"
+  },
+  "jurel": {
+    "intro": "El jurel, o chicharro, es el pez que salva las noches. Está casi siempre, es accesible desde cualquier puerto y no exige ni barco ni equipo caro, así que es con el que empieza mucha gente y al que vuelve todo el mundo cuando lo demás no da. Va en cardumen y come sin descanso, de ahí que cuando encuentras el banco no pares. Su costumbre más útil para el pescador es la de juntarse bajo las luces de puerto por la noche: la luz atrae plancton, el plancton atrae pez pequeño, y el jurel se pone justo debajo a cazar. Eso convierte una farola de un muelle en un punto de pesca fiable durante meses.",
+    "where": "Puertos, escolleras y aguas libres cercanas, entre cinco y sesenta metros, siempre en cardumen a media agua. De noche, bajo las luces: los focos del muelle, las farolas del paseo, las luces de las embarcaciones fondeadas. Trabaja el límite entre la zona iluminada y la oscuridad, que es donde emboscan. De día se va a más profundidad y hay que buscarlo con la sonda o por la actividad en superficie. Las bocanas con corriente y las puntas de escollera son sitio seguro al amanecer.",
+    "techniques": "Sabiki o aparejo de plumillas, que es lo más eficaz cuando el banco está encima: se deja caer, se dan tirones suaves y suben varios a la vez. Microjigging con jigs pequeños para seleccionar los ejemplares grandes, y spinning ligero cuando cazan en superficie. Un truco que cambia mucho el resultado: si el sabiki no entra, añade un trocito minúsculo de sardina a las plumillas. No hace falta más equipo que una caña ligera; de hecho, cuanto más fina, más divertido, porque el jurel pelea de lado y con una caña gruesa no se disfruta.",
+    "seasons": "De abril a octubre, con el agua entre 14 y 23 grados. El atardecer y la noche junto a las luces es su momento estelar, y el amanecer también da bien. Es de las pescas más constantes del año: rara vez te vas de vacío si has encontrado el banco. En verano se concentra en los puertos y en otoño empieza a salir más afuera.",
+    "tips": [
+      "De noche, trabaja el borde de la zona iluminada, no el centro: ahí es donde emboscan.",
+      "Si el sabiki no entra, pon un trocito mínimo de sardina en las plumillas. Suele resolverlo.",
+      "Usa equipo fino. Con caña gruesa se pesca igual pero no se disfruta nada.",
+      "Es carnada excelente para otras especies, pero si lo vas a usar de vivo, cógelo con las manos mojadas y devuélvelo entero si no lo usas."
+    ],
+    "generatedAt": "2026-08-06T00:00:00.000Z"
+  },
+  "caballa": {
+    "intro": "La caballa es el aviso de que ha llegado la primavera. Aparece en marzo, entra pegada a la costa siguiendo el pez pequeño y durante unas semanas se pesca en cantidad desde cualquier espigón. Es rápida, voraz y ataca sin pensarlo, así que perdona los errores que otras especies castigan: es la pesca perfecta para enseñar a alguien o para llevar a los críos. Su única exigencia está después de la captura, no antes — es un pescado graso que se estropea a una velocidad enorme, así que lo que se decide en la nevera importa más que lo que se decide en el aparejo.",
+    "where": "Aguas libres cercanas a la costa, espigones y bocanas, entre cinco y cuarenta metros y en bancos muy activos. La señal es visual: el agua que hierve, los pájaros trabajando, las salpicaduras. Cuando el banco entra en una bocana se nota desde lejos. Desde tierra, las puntas de espigón y los muelles con algo de fondo; desde barco, cualquier mancha de cebo en la sonda con actividad encima. El banco se mueve rápido, así que no te instales: si deja de picar en diez minutos, muévete tú.",
+    "techniques": "Plumas o sabiki cuando el banco está encima, y spinning ligero con jigs lanzables de 10 a 30 gramos cuando cazan a distancia y hay que llegar. La recuperación rápida es la que funciona; la caballa persigue sin dudar. Un trozo de sardina en las plumas ayuda cuando están más frías. No hace falta afinar el bajo ni esconder nada: cuando entra el banco, entra a todo. Lo importante es tener el aparejo listo, porque el paso puede durar veinte minutos.",
+    "seasons": "De marzo a junio, con el agua entre 13 y 19 grados. Es una entrada de temporada muy marcada: llega, se pesca a manos llenas unas semanas y se va. Mañana y última hora son las mejores, con el banco cerca de la costa. Estar atento a los avisos de que ha entrado la caballa en tu zona vale más que cualquier técnica.",
+    "tips": [
+      "Si deja de picar, muévete tú: el banco no vuelve, se ha ido.",
+      "Recupera rápido con jig. La caballa persigue y el movimiento vivo es lo que dispara el ataque.",
+      "Es un pescado que se estropea rapidísimo: sángralo y a hielo nada más cogerlo. Ahí se decide si vale la pena.",
+      "Coge solo lo que vayas a comer. Es fácil llenar la nevera en una hora y tirar la mitad."
+    ],
+    "generatedAt": "2026-08-06T00:00:00.000Z"
+  },
+  "pargos": {
+    "intro": "El pargo es roca brava y cebo grande. No es un pez de finuras: come pulpo, cangrejo entero y sardinas de buen tamaño, y los ejemplares grandes viven pegados a la piedra en veriles con corriente. Tiene una boca potente y una desconfianza notable, así que la combinación que funciona es cebo generoso pero presentación limpia — nada de plomos colgando ni de montajes recargados. Cuando pica, arranca fuerte y hacia el fondo, igual que el dentón, y también busca meterse en la piedra. La diferencia es que el pargo suele dar más margen: no es tan explosivo en el primer segundo, pero aguanta más tiempo tirando.",
+    "where": "Roca con arena, veriles y bajos con corriente, entre diez y sesenta metros; los grandes, pegados a la piedra. El sitio de libro es el borde donde la roca cae a la arena, porque ahí busca cangrejo y molusco. La corriente vuelve a ser determinante: sin agua en movimiento, la actividad baja mucho. En zonas con mucha profundidad, los ejemplares buenos suelen estar más hondos que el resto de espáridos, así que si solo sacas breas y sargos pequeños, prueba a bajar más.",
+    "techniques": "Pesca a fondo con cebos grandes, cebo vivo, o jigging lento. Con cebo, el pulpo y el cangrejo son los que seleccionan tamaño: filtran a los pequeños y dejan pasar los buenos. Bajo largo de fluorocarbono y el plomo justo, con el cebo lo más natural posible. Con jig, la caída lenta sobre el veril es lo que entra. Freno bien puesto desde el principio, porque la primera carrera va hacia la roca, y presión sostenida para levantarlo del fondo antes de que llegue.",
+    "seasons": "Dos ventanas: de abril a junio y de septiembre a noviembre, con el agua entre 15 y 24 grados. Amanecer y caída de la tarde son las horas buenas, mejor si coinciden con corriente. En verano, con el agua muy caliente, se va hondo y hay que buscarlo abajo; en invierno la actividad baja bastante.",
+    "tips": [
+      "Cebo grande para seleccionar tamaño: pulpo y cangrejo filtran a los pequeños.",
+      "Sin corriente hay poca pesca. Planifica sobre el estado de la marea, no sobre la hora.",
+      "Si solo sacas espáridos pequeños, baja más: los pargos buenos suelen estar más hondos.",
+      "Consulta la talla mínima de tu comunidad y devuelve lo que no llegue, mojándote las manos antes de tocarlo."
+    ],
+    "generatedAt": "2026-08-06T00:00:00.000Z"
   }
 }
