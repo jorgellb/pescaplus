@@ -6,6 +6,7 @@ import Layout from '@/components/Layout'
 import { SEA_SPECIES, MONTHS_SHORT, deSpecies } from '@/lib/fishing-species'
 import { zonesForSpecies } from '@/lib/species-zones'
 import { getSpeciesGuide } from '@/lib/species-guides'
+import { actionShot } from '@/lib/species-action-shots'
 import { getTaxonomy, categoryName } from '@/lib/taxonomy-store'
 import { NATIONAL_SIZES_URL } from '@/lib/fishing-regulations'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
@@ -83,6 +84,7 @@ export default async function SpeciesPage({ params }: Params) {
    * y entonces la ficha se pinta igual, sin hueco ni aviso.
    */
   const guide = getSpeciesGuide(sp.id)
+  const accion = actionShot(sp.id)
 
   const breadcrumbLd = breadcrumbJsonLd([
     { name: 'Inicio', url: SITE_URL },
@@ -199,7 +201,33 @@ export default async function SpeciesPage({ params }: Params) {
 
           <div className="space-y-3">
             <h2 className="font-display uppercase text-2xl md:text-3xl leading-none border-b border-ink/[0.07] pb-3">Cómo pescarla</h2>
-            <div className="border border-ink/[0.07] rounded-xl bg-paper p-5 space-y-4">
+            <div className="border border-ink/[0.07] rounded-xl bg-paper p-5 space-y-4 overflow-hidden">
+              {accion && (
+                /*
+                 * Sangra hasta el borde de la tarjeta (`-mx-5 -mt-5` compensa el
+                 * p-5) para que la foto haga de cabecera del bloque en lugar de
+                 * flotar dentro con un marco doble.
+                 */
+                <figure className="-mx-5 -mt-5">
+                  <div className="relative aspect-[16/9] bg-ink/[0.05] border-b border-ink/[0.07]">
+                    <Image
+                      src={accion.src}
+                      alt={accion.alt}
+                      fill
+                      /*
+                       * La columna mide 472 px en escritorio: `max-w-5xl` (1024)
+                       * menos 48 de padding y 32 de hueco, entre dos. Por debajo
+                       * de 1024 la rejilla cae a una columna y ocupa el ancho.
+                       */
+                      sizes="(max-width: 640px) calc(100vw - 32px), (max-width: 1024px) calc(100vw - 48px), 472px"
+                      className="object-cover"
+                    />
+                  </div>
+                  <figcaption className="px-5 pt-4 text-[13px] text-ink/70 leading-relaxed border-b border-ink/[0.07] pb-4">
+                    {accion.caption}
+                  </figcaption>
+                </figure>
+              )}
               <div>
                 <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60 mb-1">Técnicas</p>
                 <p className="text-[15px] text-ink/80 leading-relaxed">{sp.technique}.</p>
