@@ -65,7 +65,25 @@ function referrerDeEntrada(): string {
   }
 }
 
+/*
+ * El panel de administración NO se mide.
+ *
+ * Se vio en la primera verificación: las visitas de Jorge al propio panel
+ * entraban como tráfico del sitio. No lo son —es trabajo interno— y encima
+ * envenenan justo las cifras que se miran para decidir: inflan las visitas,
+ * hunden el CTR (nadie compra desde el panel) y meten rutas de admin en el
+ * ranking de páginas. Se corta en el cliente, antes de enviar nada.
+ */
+export function medible(ruta: string): boolean {
+  // El prefijo se compara con la barra: con `startsWith('/admin')` a secas, una
+  // página pública como «/administracion-pesquera» caería en la exclusión y
+  // dejaría de medirse sin que nadie lo notara. Lo pilló la prueba.
+  const interna = (base: string) => ruta === base || ruta.startsWith(`${base}/`)
+  return !interna('/admin') && !interna('/api')
+}
+
 function enviar(cuerpo: Record<string, unknown>) {
+  if (!medible(location.pathname)) return
   try {
     const datos = JSON.stringify({
       ...cuerpo,

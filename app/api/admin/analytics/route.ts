@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { isRequestAuthenticated } from '@/lib/admin-auth'
 import { getClickStats } from '@/lib/clicks-store'
-import { analiticaCompleta } from '@/lib/analytics-queries'
+import { analiticaCompleta, embudo } from '@/lib/analytics-queries'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,6 +22,10 @@ export async function GET(request: NextRequest) {
    * acumulando clics y el registro de eventos empieza vacío. Convivirán hasta
    * que `Event` tenga historia suficiente.
    */
-  const [stats, analitica] = await Promise.all([getClickStats(), analiticaCompleta(dias)])
-  return NextResponse.json({ success: true, stats, analitica })
+  const [stats, analitica, recorrido] = await Promise.all([
+    getClickStats(),
+    analiticaCompleta(dias),
+    embudo(dias),
+  ])
+  return NextResponse.json({ success: true, stats, analitica, recorrido })
 }

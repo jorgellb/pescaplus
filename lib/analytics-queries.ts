@@ -201,3 +201,136 @@ export async function analiticaCompleta(dias = 30): Promise<AnaliticaCompleta> {
     horas: horas.map((r) => ({ hora: n(r.hora), visitas: n(r.visitas) })),
   }
 }
+
+export interface Embudo {
+  dias: number
+  entradas: { path: string; visitas: number; convierten: number; pctConversion: number; paginasMedia: number }[]
+  salidas: { path: string; veces: number }[]
+  transiciones: { desde: string; hacia: string; veces: number }[]
+  profundidad: { tramo: string; visitas: number }[]
+  pasos: { mediana: number; media: number; muestras: number }
+}
+
+/**
+ * El recorrido completo, no solo el último clic.
+ *
+ * Se agrupa por `visitor` y NO por `session`, y es a propósito: los clics de
+ * afiliado se registran en `/go/[id]`, que es una redirección de servidor sin
+ * JavaScript, así que no conoce el id de sesión que genera el navegador. Si se
+ * agrupara por sesión, el recorrido y la conversión no se podrían unir nunca —
+ * habría páginas por un lado y clics por otro—. `visitor` está en los dos y,
+ * como el hash lleva la fecha dentro, equivale a «un visitante en un día»: una
+ * unidad más estable que la sesión de 30 minutos, que se parte sola cuando
+ * alguien deja el móvil en el bolsillo durante la travesía.
+ *
+ * La alternativa era una cookie de sesión legible por el servidor, y se
+ * descartó: rompería la promesa de cero cookies que sostiene el resto.
+ */
+export async function embudo(dias = 30): Promise<Embudo> {
+  const { prisma } = await import('@/lib/prisma')
+  const desde = new Date(Date.now() - dias * 86_400_000)
+  const n = (v: unknown) => Number(v ?? 0)
+
+  /*
+   * Base común: cada página vista numerada dentro de su visitante, y una marca
+   * de si ese visitante acabó pulsando hacia la tienda. Numerar aquí una sola
+   * vez evita repetir la misma ventana en cada consulta de abajo.
+   */
+  const comun = Prisma.sql`
+    WITH vistas AS (
+      SELECT visitor, path, "createdAt",
+             row_number() OVER (PARTITION BY visitor ORDER BY "createdAt")      AS paso,
+             count(*)     OVER (PARTITION BY visitor)                           AS total,
+             row_number() OVER (PARTITION BY visitor ORDER BY "createdAt" DESC) AS desdeElFinal
+      FROM "Event" WHERE type = 'pageview' AND "createdAt" >= ${desde} AND visitor <> ''
+    ), convierten AS (
+      SELECT DISTINCT visitor FROM "Event"
+      WHERE type = 'afiliado' AND "createdAt" >= ${desde} AND visitor <> ''
+    )
+  `
+
+  const entradas = await prisma.$queryRaw<
+    { path: string; visitas: bigint; convierten: bigint; paginasmedia: number }[]
+  >(Prisma.sql`
+    ${comun}
+    SELECT v.path,
+           count(*)                                          AS visitas,
+           count(c.visitor)                                  AS convierten,
+           avg(v.total)                                      AS paginasmedia
+    FROM vistas v LEFT JOIN convierten c ON c.visitor = v.visitor
+    WHERE v.paso = 1
+    GROUP BY v.path ORDER BY visitas DESC LIMIT 25
+  `)
+
+  /*
+   * Dónde se van los que NO compran. La última página de quien sí convirtió no
+   * dice nada —se fue a la tienda, que es lo que se buscaba—; mezclarlas haría
+   * que las páginas que mejor funcionan parecieran puntos de fuga.
+   */
+  const salidas = await prisma.$queryRaw<{ path: string; veces: bigint }[]>(Prisma.sql`
+    ${comun}
+    SELECT v.path, count(*) AS veces
+    FROM vistas v LEFT JOIN convierten c ON c.visitor = v.visitor
+    WHERE v.desdeElFinal = 1 AND v.total > 1 AND c.visitor IS NULL
+    GROUP BY v.path ORDER BY veces DESC LIMIT 20
+  `)
+
+  const transiciones = await prisma.$queryRaw<{ desde: string; hacia: string; veces: bigint }[]>(Prisma.sql`
+    ${comun}
+    SELECT a.path AS desde, b.path AS hacia, count(*) AS veces
+    FROM vistas a JOIN vistas b ON b.visitor = a.visitor AND b.paso = a.paso + 1
+    WHERE a.path <> b.path
+    GROUP BY 1, 2 ORDER BY veces DESC LIMIT 25
+  `)
+
+  const profundidad = await prisma.$queryRaw<{ tramo: string; visitas: bigint }[]>(Prisma.sql`
+    ${comun}
+    SELECT CASE WHEN total = 1 THEN '1 página'
+                WHEN total = 2 THEN '2 páginas'
+                WHEN total BETWEEN 3 AND 5 THEN '3-5 páginas'
+                ELSE '6 o más' END AS tramo,
+           count(DISTINCT visitor) AS visitas
+    FROM vistas GROUP BY 1
+    ORDER BY min(total)
+  `)
+
+  /*
+   * Cuántas páginas ve alguien ANTES de pulsar. La mediana y no la media: un
+   * único visitante obsesivo con cuarenta páginas desplaza la media y hace creer
+   * que hace falta mucho recorrido para vender.
+   */
+  const [pasos] = await prisma.$queryRaw<{ mediana: number | null; media: number | null; muestras: bigint }[]>(Prisma.sql`
+    WITH clic AS (
+      SELECT visitor, min("createdAt") AS momento FROM "Event"
+      WHERE type = 'afiliado' AND "createdAt" >= ${desde} AND visitor <> '' GROUP BY visitor
+    ), previas AS (
+      SELECT c.visitor, count(e.id) AS n
+      FROM clic c JOIN "Event" e
+        ON e.visitor = c.visitor AND e.type = 'pageview'
+       AND e."createdAt" >= ${desde} AND e."createdAt" <= c.momento
+      GROUP BY c.visitor
+    )
+    SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY n) AS mediana,
+           avg(n) AS media, count(*) AS muestras
+    FROM previas
+  `)
+
+  return {
+    dias,
+    entradas: entradas.map((r) => ({
+      path: r.path,
+      visitas: n(r.visitas),
+      convierten: n(r.convierten),
+      pctConversion: n(r.visitas) ? Math.round((n(r.convierten) / n(r.visitas)) * 1000) / 10 : 0,
+      paginasMedia: Math.round(n(r.paginasmedia) * 10) / 10,
+    })),
+    salidas: salidas.map((r) => ({ path: r.path, veces: n(r.veces) })),
+    transiciones: transiciones.map((r) => ({ desde: r.desde, hacia: r.hacia, veces: n(r.veces) })),
+    profundidad: profundidad.map((r) => ({ tramo: r.tramo, visitas: n(r.visitas) })),
+    pasos: {
+      mediana: Math.round(n(pasos?.mediana) * 10) / 10,
+      media: Math.round(n(pasos?.media) * 10) / 10,
+      muestras: n(pasos?.muestras),
+    },
+  }
+}

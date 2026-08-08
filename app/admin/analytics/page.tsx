@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import type { AnaliticaCompleta } from '@/lib/analytics-queries'
+import type { AnaliticaCompleta, Embudo } from '@/lib/analytics-queries'
 
 /**
  * Panel de analítica.
@@ -71,6 +71,7 @@ const TD = 'py-2 text-sm text-ink border-t border-ink/[0.07]'
 export default function AnalyticsPage() {
   const [dias, setDias] = useState(30)
   const [datos, setDatos] = useState<AnaliticaCompleta | null>(null)
+  const [recorrido, setRecorrido] = useState<Embudo | null>(null)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
 
@@ -87,6 +88,7 @@ export default function AnalyticsPage() {
         if (!vivo) return
         if (!d.success) throw new Error(d.error || 'No se pudo cargar')
         setDatos(d.analitica)
+        setRecorrido(d.recorrido ?? null)
       } catch (e) {
         if (vivo) setError(e instanceof Error ? e.message : 'No se pudo cargar')
       } finally {
@@ -277,6 +279,98 @@ export default function AnalyticsPage() {
               </div>
             </Seccion>
           </div>
+
+
+          {recorrido && (
+            <Seccion
+              titulo="El recorrido hasta la compra"
+              nota="Agrupado por visitante y día, no por sesión de 30 minutos: el clic a la tienda se registra en el servidor, que no conoce el id de sesión del navegador. Así recorrido y conversión se pueden unir."
+            >
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+                <Cifra
+                  etiqueta="Páginas antes de comprar"
+                  valor={recorrido.pasos.mediana || '—'}
+                  nota={`Mediana de ${recorrido.pasos.muestras} compras`}
+                />
+                {recorrido.profundidad.map((p) => (
+                  <Cifra key={p.tramo} etiqueta={p.tramo} valor={p.visitas} nota="visitantes" />
+                ))}
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div>
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60 mb-2">
+                    Por dónde entran, y cuáles acaban en compra
+                  </p>
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[420px]">
+                      <thead>
+                        <tr>
+                          <th className={THEAD}>Página de entrada</th>
+                          <th className={`${THEAD} text-right`}>Llegan</th>
+                          <th className={`${THEAD} text-right`}>Páginas</th>
+                          <th className={`${THEAD} text-right`}>Convierten</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {recorrido.entradas.map((e) => (
+                          <tr key={e.path}>
+                            <td className={`${TD} font-mono text-[12px]`}>{e.path}</td>
+                            <td className={`${TD} text-right tabular-nums`}>{e.visitas}</td>
+                            <td className={`${TD} text-right tabular-nums text-ink/60`}>{e.paginasMedia}</td>
+                            <td className={`${TD} text-right tabular-nums ${e.convierten ? 'text-accent font-semibold' : 'text-ink/60'}`}>
+                              {e.convierten ? `${e.pctConversion}%` : '—'}
+                            </td>
+                          </tr>
+                        ))}
+                        {recorrido.entradas.length === 0 && (
+                          <tr><td className={`${TD} text-ink/60`} colSpan={4}>Sin datos todavía.</td></tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <div>
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60 mb-2">
+                      Dónde se van los que NO compran
+                    </p>
+                    <table className="w-full">
+                      <tbody>
+                        {recorrido.salidas.map((x) => (
+                          <tr key={x.path}>
+                            <td className={`${TD} font-mono text-[12px]`}>{x.path}</td>
+                            <td className={`${TD} text-right tabular-nums`}>{x.veces}</td>
+                          </tr>
+                        ))}
+                        {recorrido.salidas.length === 0 && (
+                          <tr><td className={`${TD} text-ink/60`} colSpan={2}>Sin datos todavía.</td></tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div>
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60 mb-2">
+                      Saltos más repetidos
+                    </p>
+                    <ul className="space-y-1.5">
+                      {recorrido.transiciones.slice(0, 10).map((t) => (
+                        <li key={`${t.desde}>${t.hacia}`} className="text-[12px] font-mono flex items-baseline gap-2">
+                          <span className="text-ink/60 tabular-nums w-8 shrink-0">{t.veces}</span>
+                          <span className="text-ink">{t.desde}</span>
+                          <span className="text-accent">→</span>
+                          <span className="text-ink">{t.hacia}</span>
+                        </li>
+                      ))}
+                      {recorrido.transiciones.length === 0 && <li className="text-sm text-ink/60">Sin datos todavía.</li>}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </Seccion>
+          )}
 
           <Seccion titulo="Qué páginas funcionan" nota="El scroll y el tiempo distinguen lo que se lee de lo que se abre y se cierra. La última columna dice qué contenido acaba en venta.">
             <div className="overflow-x-auto">

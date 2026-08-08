@@ -58,3 +58,25 @@ describe('bots y dispositivo', () => {
     expect(dispositivoDe('Mozilla/5.0 (X11; Linux x86_64) Chrome/120')).toBe('escritorio')
   })
 })
+
+describe('qué se mide y qué no', () => {
+  it('el panel de administración queda fuera', async () => {
+    // Se descubrió midiendo: las visitas de Jorge al panel entraban como tráfico
+    // del sitio. Inflan las visitas, hunden el CTR —nadie compra desde el
+    // panel— y meten rutas internas en el ranking de páginas.
+    const { medible } = await import('@/components/Analitica')
+    expect(medible('/admin')).toBe(false)
+    expect(medible('/admin/analytics')).toBe(false)
+    expect(medible('/admin/taxonomia')).toBe(false)
+    expect(medible('/api/e')).toBe(false)
+  })
+  it('el sitio público sí se mide', async () => {
+    const { medible } = await import('@/components/Analitica')
+    expect(medible('/')).toBe(true)
+    expect(medible('/especies/lubina')).toBe(true)
+    expect(medible('/carta')).toBe(true)
+    // Ojo con el prefijo suelto: una página pública que empiece por «admin»
+    // sin barra no puede caer por error en la exclusión.
+    expect(medible('/administracion-pesquera')).toBe(true)
+  })
+})
