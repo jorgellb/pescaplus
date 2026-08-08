@@ -119,6 +119,47 @@ export const ACTION_SHOTS: Record<string, ActionShot[]> = {
     },
   ],
 
+  dorada: [
+    {
+      src: '/imagenesPeces/dorada_cangrejo_web.jpg',
+      alt: 'Una dorada con la boca abierta frente a un cangrejo entero montado en un anzuelo con bajo fino, bajo el agua sobre un fondo de roca con algas',
+      caption:
+        'Una dorada de las buenas —se le ve la banda dorada entre los ojos— encarando un cangrejo entero montado por el lateral del caparazón, con las patas libres y moviéndose. Bajo fino, anzuelo pequeño y nada más. Fíjate en que se acerca despacio y de frente: no ataca, examina.',
+      layout: 'panel',
+      ratio: '4/3',
+      heading: 'El cangrejo: el cebo que la dorada no sabe rechazar',
+      why: [
+        'Abre la boca de una dorada y verás muelas. Tiene dientes molariformes de verdad, planos y anchos, hechos para triturar conchas y caparazones — es un triturador especializado, y los moluscos y los crustáceos no son una alternativa en su dieta: son su dieta. Por eso el cangrejo no funciona como truco ni como imitación de nada. Es lo que come todos los días.',
+        'La segunda razón es que filtra, y en un arenal eso lo vale todo. Donde una tira de gusana dura quince minutos porque las mojarras y los sargos pequeños la deshilachan, un cangrejo entero sigue ahí: no pueden con él. Así dejas de reponer cebo cada media hora y lo que se acerca es lo que buscabas.',
+        'Y aguanta. Resiste el lanzado largo y la corriente sin descomponerse, que es justo lo que pide el surfcasting: poner el cebo lejos y esperar quieto. Una gamba mal montada llega deshecha a los cincuenta metros; el cangrejo llega entero y entero se queda.',
+        'El detalle que cambia el día es el punto del bicho. Un cangrejo en muda —blando, recién cambiado de caparazón— es lo más caro de conseguir y lo que más rápido entra: sin coraza, huele y sabe a lo que ella busca, y no tiene que trabajárselo. Con cangrejo duro se pesca; con cangrejo blando se pesca antes.',
+      ],
+      care: {
+        title: 'Montaje: fino, y sin prisa al clavar',
+        intro:
+          'Con este cebo casi todo lo que se falla es de nervios o de grosor. La dorada es desconfiada y tiene tiempo: examina, prueba y solo entonces se lo lleva.',
+        items: [
+          {
+            t: 'El anzuelo por el lateral del caparazón',
+            d: 'Entra por un costado y sale por arriba, dejando las patas libres para que sigan moviéndose. Pinchado por el centro se queda muerto, y un cangrejo quieto en la arena no llama la atención de nada.',
+            },
+          {
+            t: 'Si está blando, hilo elástico',
+            d: 'Un cangrejo en muda es el mejor cebo que hay y también el que peor aguanta el lanzado: sin unas vueltas de hilo elástico llega al agua hecho pedazos y te has gastado el bueno para nada.',
+          },
+          {
+            t: 'Fino de verdad',
+            d: 'Bajo del 0,22 al 0,28 y anzuelo del 4 al 1, como dice la ficha. Con nailon grueso lo suelta: nota la resistencia al chupar y se va. Aquí no se pesca con fuerza, se pesca con que no se entere.',
+          },
+          {
+            t: 'No claves en el primer golpe',
+            d: 'Da dos toques secos probando y luego se marcha con el cebo en la boca. Es en ESE segundo movimiento, cuando la puntera se va de verdad, cuando hay que apretar. Clavar en el primero es sacarle el cangrejo de entre los dientes.',
+          },
+        ],
+      },
+    },
+  ],
+
   lubina: [
     {
       src: '/imagenesPeces/lubina_senuelo_web.jpg',
