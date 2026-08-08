@@ -1,146 +1,372 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { fishingLabel } from '@/lib/fishing'
-import Icon, { type IconName } from '@/components/icons/Icon'
+import { useEffect, useState } from 'react'
+import type { AnaliticaCompleta } from '@/lib/analytics-queries'
 
-interface Stats {
-  total: number
-  last7: number
-  windowDays: number
-  byProduct: { productId: string; title: string; count: number }[]
-  byCategory: { typeFishing: string; count: number }[]
-  byDay: { date: string; count: number }[]
+/**
+ * Panel de analítica.
+ *
+ * Antes enseñaba una sola cosa: los clics de afiliado. O sea, la última milla,
+ * sin nada de lo que la produce. Ahora enseña el embudo entero — de dónde llega
+ * la gente, qué lee, cuánto se queda, qué herramienta usa y qué páginas acaban
+ * en un clic hacia la tienda.
+ *
+ * Se maqueta con tablas y barras dentro de las celdas, no con gráficos: en un
+ * panel de trabajo la pregunta casi siempre es «cuál es la cifra exacta y cómo
+ * se compara con la de al lado», y una tabla responde a las dos a la vez.
+ */
+
+const VENTANAS = [
+  { d: 1, t: 'Hoy' },
+  { d: 7, t: '7 días' },
+  { d: 30, t: '30 días' },
+  { d: 90, t: '90 días' },
+]
+
+/** Umbrales oficiales de Core Web Vitals, medidos sobre el p75. */
+const UMBRALES: Record<string, [number, number, string]> = {
+  LCP: [2500, 4000, 'ms'],
+  INP: [200, 500, 'ms'],
+  CLS: [0.1, 0.25, ''],
 }
 
-export default function AdminAnalyticsPage() {
-  const [stats, setStats] = useState<Stats | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  const load = useCallback(async () => {
-    setLoading(true)
-    try {
-      const res = await fetch('/api/admin/analytics')
-      const data = await res.json()
-      if (data.success) setStats(data.stats)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    load()
-  }, [load])
-
-  if (loading) return <div className="py-24 text-center text-ink/60 text-sm">Cargando analítica…</div>
-  if (!stats) return <div className="py-24 text-center text-ink/60 text-sm">No se pudo cargar la analítica.</div>
-
-  const dayMax = Math.max(...stats.byDay.map((d) => d.count), 1)
-  const prodMax = Math.max(...stats.byProduct.map((p) => p.count), 1)
-  const catMax = Math.max(...stats.byCategory.map((c) => c.count), 1)
-  const topCat = stats.byCategory[0]
-
+function Cifra({ etiqueta, valor, sufijo, nota }: { etiqueta: string; valor: string | number; sufijo?: string; nota?: string }) {
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-extrabold text-ink tracking-tight">Analítica de afiliados</h1>
-        <p className="text-sm text-ink/60 mt-1">
-          Clics en los botones de compra (redirecciones a AliExpress). Ventana: últimos {stats.windowDays} días.
-        </p>
-      </div>
-
-      {stats.total === 0 ? (
-        <div className="py-20 text-center border border-ink/10 rounded-2xl bg-white space-y-3">
-          <Icon name="chartBar" className="w-12 h-12 mx-auto text-ink/40" strokeWidth={1.5} />
-          <p className="text-ink/80 font-semibold">Aún no hay clics registrados</p>
-          <p className="text-sm text-ink/60 max-w-md mx-auto">
-            Cuando los visitantes pulsen <span className="text-emerald-400 font-semibold">Comprar</span>, verás aquí qué
-            productos y categorías convierten.
-          </p>
-        </div>
-      ) : (
-        <>
-          {/* KPIs */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <Kpi label="Clics totales" value={stats.total.toLocaleString('es-ES')} icon="cursor" />
-            <Kpi label="Clics (7 días)" value={stats.last7.toLocaleString('es-ES')} icon="chartUp" />
-            <Kpi label="Productos con clics" value={String(stats.byProduct.length)} icon="package" />
-            <Kpi label="Categoría top" value={topCat ? fishingLabel(topCat.typeFishing) : '—'} icon="trophy" small />
-          </div>
-
-          {/* Daily bar chart (single series) */}
-          <section className="rounded-2xl border border-ink/10 bg-white p-5">
-            <h2 className="text-sm font-bold text-ink mb-4">Clics por día (últimos 14)</h2>
-            <div className="flex items-end gap-1.5 h-40" role="img" aria-label="Clics por día, últimos 14 días">
-              {stats.byDay.map((d) => {
-                const pct = Math.round((d.count / dayMax) * 100)
-                const label = new Date(d.date + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })
-                return (
-                  <div key={d.date} className="flex-1 flex flex-col items-center justify-end gap-1 group" title={`${label}: ${d.count} clics`}>
-                    <span className="text-[10px] text-ink/60 tabular-nums opacity-0 group-hover:opacity-100 transition-opacity">{d.count}</span>
-                    <div
-                      className="w-full rounded-t bg-accent group-hover:bg-accent transition-colors min-h-[2px]"
-                      style={{ height: `${Math.max(pct, d.count > 0 ? 4 : 0)}%` }}
-                    />
-                    <span className="text-[9px] text-ink/60 tabular-nums">{label.slice(0, 2)}</span>
-                  </div>
-                )
-              })}
-            </div>
-          </section>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Top products */}
-            <section className="rounded-2xl border border-ink/10 bg-white p-5">
-              <h2 className="text-sm font-bold text-ink mb-4">Productos más clicados</h2>
-              <div className="space-y-3">
-                {stats.byProduct.map((p) => (
-                  <a key={p.productId} href={`/products/${p.productId}`} target="_blank" className="block group" title={`${p.count} clics`}>
-                    <div className="flex justify-between items-center gap-2 mb-1">
-                      <span className="text-xs text-ink/80 truncate group-hover:text-accent transition-colors">{p.title}</span>
-                      <span className="text-xs font-bold text-ink tabular-nums flex-shrink-0">{p.count}</span>
-                    </div>
-                    <div className="h-2 rounded-full bg-ink/10 overflow-hidden">
-                      <div className="h-full rounded-full bg-accent" style={{ width: `${Math.round((p.count / prodMax) * 100)}%` }} />
-                    </div>
-                  </a>
-                ))}
-              </div>
-            </section>
-
-            {/* By category */}
-            <section className="rounded-2xl border border-ink/10 bg-white p-5">
-              <h2 className="text-sm font-bold text-ink mb-4">Clics por categoría</h2>
-              <div className="space-y-3">
-                {stats.byCategory.map((c) => (
-                  <div key={c.typeFishing} title={`${c.count} clics`}>
-                    <div className="flex justify-between items-center gap-2 mb-1">
-                      <span className="text-xs text-ink/80">{fishingLabel(c.typeFishing)}</span>
-                      <span className="text-xs font-bold text-ink tabular-nums">{c.count}</span>
-                    </div>
-                    <div className="h-2 rounded-full bg-ink/10 overflow-hidden">
-                      <div className="h-full rounded-full bg-ink" style={{ width: `${Math.round((c.count / catMax) * 100)}%` }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          </div>
-        </>
-      )}
+    <div className="border border-ink/[0.07] rounded-xl bg-paper p-4">
+      <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">{etiqueta}</p>
+      <p className="font-display text-3xl leading-none mt-2 text-ink">
+        {valor}
+        {sufijo && <span className="text-lg text-ink/60 ml-0.5">{sufijo}</span>}
+      </p>
+      {nota && <p className="text-[11px] text-ink/60 mt-1.5 leading-snug">{nota}</p>}
     </div>
   )
 }
 
-function Kpi({ label, value, icon, small }: { label: string; value: string; icon: IconName; small?: boolean }) {
+/** Barra de proporción dentro de una celda: compara de un vistazo sin leer. */
+function Barra({ parte, total }: { parte: number; total: number }) {
+  const pct = total > 0 ? Math.round((parte / total) * 100) : 0
   return (
-    <div className="rounded-2xl border border-ink/10 bg-white p-4 flex items-center gap-3">
-      <span className="p-2.5 bg-paper rounded-xl border border-ink/10 text-accent"><Icon name={icon} className="w-5 h-5" strokeWidth={1.7} /></span>
-      <div className="min-w-0">
-        <p className={`font-extrabold text-ink leading-none truncate ${small ? 'text-base' : 'text-xl'}`}>{value}</p>
-        <p className="text-[11px] uppercase tracking-widest text-ink/60 mt-1">{label}</p>
+    <div className="h-1.5 bg-ink/[0.07] rounded-full overflow-hidden mt-1">
+      <div className="h-full bg-accent rounded-full" style={{ width: `${pct}%` }} />
+    </div>
+  )
+}
+
+function Seccion({ titulo, children, nota }: { titulo: string; children: React.ReactNode; nota?: string }) {
+  return (
+    <section className="space-y-3">
+      <div>
+        <h2 className="font-display uppercase text-xl text-ink leading-none border-b border-ink/[0.07] pb-2">{titulo}</h2>
+        {nota && <p className="text-[11px] text-ink/60 mt-2">{nota}</p>}
       </div>
+      {children}
+    </section>
+  )
+}
+
+const THEAD = 'font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60 text-left py-2'
+const TD = 'py-2 text-sm text-ink border-t border-ink/[0.07]'
+
+export default function AnalyticsPage() {
+  const [dias, setDias] = useState(30)
+  const [datos, setDatos] = useState<AnaliticaCompleta | null>(null)
+  const [cargando, setCargando] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    let vivo = true
+    // El estado se toca dentro de la función asíncrona, no en el cuerpo del
+    // efecto: llamarlo directamente ahí provoca un render extra en cada montaje
+    // y el linter lo rechaza.
+    const cargar = async () => {
+      setCargando(true)
+      setError('')
+      try {
+        const d = await (await fetch(`/api/admin/analytics?dias=${dias}`)).json()
+        if (!vivo) return
+        if (!d.success) throw new Error(d.error || 'No se pudo cargar')
+        setDatos(d.analitica)
+      } catch (e) {
+        if (vivo) setError(e instanceof Error ? e.message : 'No se pudo cargar')
+      } finally {
+        if (vivo) setCargando(false)
+      }
+    }
+    void cargar()
+    return () => {
+      vivo = false
+    }
+  }, [dias])
+
+  const r = datos?.resumen
+  const maxSerie = Math.max(1, ...(datos?.serie.map((s) => s.visitas) ?? [1]))
+  const maxHora = Math.max(1, ...(datos?.horas.map((h) => h.visitas) ?? [1]))
+  const totalCanales = datos?.canales.reduce((a, c) => a + c.visitas, 0) ?? 0
+  const totalDisp = datos?.dispositivos.reduce((a, c) => a + c.visitas, 0) ?? 0
+
+  return (
+    <div className="space-y-8">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="font-display uppercase text-3xl text-ink leading-none">Analítica</h1>
+          <p className="text-sm text-ink/60 mt-2">
+            Medición propia, sin cookies ni terceros. El visitante es un hash que cambia cada día.
+          </p>
+        </div>
+        <div className="flex gap-1.5">
+          {VENTANAS.map((v) => (
+            <button
+              key={v.d}
+              onClick={() => setDias(v.d)}
+              className={`font-mono text-[11px] font-bold uppercase tracking-widest px-3 py-2 rounded-lg border transition-colors ${
+                dias === v.d ? 'bg-ink text-paper border-ink' : 'bg-paper text-ink/60 border-ink/[0.12] hover:text-ink'
+              }`}
+            >
+              {v.t}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {cargando && <p className="text-sm text-ink/60">Cargando…</p>}
+      {error && <p className="text-sm text-red-700 border border-red-200 bg-red-50 rounded-lg p-3">{error}</p>}
+
+      {datos && r && (
+        <>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <Cifra etiqueta="Páginas vistas" valor={r.visitas.toLocaleString('es-ES')} />
+            <Cifra etiqueta="Visitantes" valor={r.visitantes.toLocaleString('es-ES')} nota="Únicos por día, sin cookies" />
+            <Cifra etiqueta="Sesiones" valor={r.sesiones.toLocaleString('es-ES')} />
+            <Cifra
+              etiqueta="Páginas / sesión"
+              valor={r.sesiones ? (r.visitas / r.sesiones).toFixed(1) : '0'}
+              nota="Más de 1,5 significa que navegan"
+            />
+            <Cifra etiqueta="Permanencia" valor={r.segundosMedia} sufijo="s" nota="Media por página" />
+            <Cifra etiqueta="Rebote" valor={r.rebotePct} sufijo="%" nota="Salidas antes de 10 s" />
+            <Cifra etiqueta="Clics a tienda" valor={r.afiliados.toLocaleString('es-ES')} />
+            <Cifra etiqueta="CTR" valor={r.ctrPct} sufijo="%" nota="Clics por cada 100 páginas vistas" />
+          </div>
+
+          <Seccion titulo="Core Web Vitals reales" nota="Percentil 75 de visitas de verdad, que es el umbral que usa Google. No es un laboratorio: son los móviles de la gente.">
+            {datos.vitals.length === 0 ? (
+              <p className="text-sm text-ink/60">Todavía sin muestras.</p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {datos.vitals.map((v) => {
+                  const u = UMBRALES[v.name]
+                  const estado = !u ? '' : v.p75 <= u[0] ? 'bien' : v.p75 <= u[1] ? 'mejorable' : 'mal'
+                  const color = estado === 'bien' ? 'text-accent' : estado === 'mejorable' ? 'text-amber-700' : 'text-red-700'
+                  return (
+                    <div key={v.name} className="border border-ink/[0.07] rounded-xl bg-paper p-4">
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">{v.name}</p>
+                      <p className={`font-display text-3xl leading-none mt-2 ${color}`}>
+                        {v.p75}
+                        {u && <span className="text-lg ml-0.5">{u[2]}</span>}
+                      </p>
+                      <p className="text-[11px] text-ink/60 mt-1.5">
+                        {estado && <span className="uppercase font-semibold">{estado}</span>} · {v.muestras} muestras
+                        {u && ` · bien ≤ ${u[0]}${u[2]}`}
+                      </p>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </Seccion>
+
+          <Seccion titulo="Por día">
+            {datos.serie.length === 0 ? (
+              <p className="text-sm text-ink/60">Sin datos en esta ventana.</p>
+            ) : (
+              <div className="border border-ink/[0.07] rounded-xl bg-paper p-4 overflow-x-auto">
+                <div className="flex items-end gap-1 min-w-max h-32">
+                  {datos.serie.map((s) => (
+                    <div key={s.dia} className="flex flex-col justify-end items-center gap-1 w-8" title={`${s.dia}: ${s.visitas} vistas, ${s.visitantes} visitantes, ${s.afiliados} clics`}>
+                      <div className="w-full bg-accent rounded-sm" style={{ height: `${(s.visitas / maxSerie) * 100}%`, minHeight: s.visitas ? 2 : 0 }} />
+                      <span className="font-mono text-[9px] text-ink/60">{s.dia.slice(8)}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="font-mono text-[10px] uppercase tracking-widest text-ink/60 mt-3">Páginas vistas por día · pasa el ratón para el detalle</p>
+              </div>
+            )}
+          </Seccion>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <Seccion titulo="De dónde llegan">
+              <table className="w-full">
+                <thead>
+                  <tr>
+                    <th className={THEAD}>Canal</th>
+                    <th className={`${THEAD} text-right`}>Visitas</th>
+                    <th className={`${THEAD} text-right`}>Personas</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {datos.canales.map((c) => (
+                    <tr key={c.canal}>
+                      <td className={TD}>
+                        <span className="capitalize">{c.canal}</span>
+                        <Barra parte={c.visitas} total={totalCanales} />
+                      </td>
+                      <td className={`${TD} text-right tabular-nums`}>{c.visitas}</td>
+                      <td className={`${TD} text-right tabular-nums text-ink/60`}>{c.visitantes}</td>
+                    </tr>
+                  ))}
+                  {datos.canales.length === 0 && (
+                    <tr><td className={`${TD} text-ink/60`} colSpan={3}>Sin datos todavía.</td></tr>
+                  )}
+                </tbody>
+              </table>
+              {datos.referrers.length > 0 && (
+                <div className="pt-2">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60 mb-2">Sitios concretos</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {datos.referrers.map((f) => (
+                      <span key={f.ref} className="text-[12px] border border-ink/[0.12] rounded-lg px-2 py-1">
+                        {f.ref} <span className="text-ink/60 tabular-nums">{f.visitas}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </Seccion>
+
+            <Seccion titulo="Con qué entran">
+              <table className="w-full">
+                <thead>
+                  <tr>
+                    <th className={THEAD}>Dispositivo</th>
+                    <th className={`${THEAD} text-right`}>Visitas</th>
+                    <th className={`${THEAD} text-right`}>%</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {datos.dispositivos.map((d) => (
+                    <tr key={d.device}>
+                      <td className={TD}>
+                        <span className="capitalize">{d.device}</span>
+                        <Barra parte={d.visitas} total={totalDisp} />
+                      </td>
+                      <td className={`${TD} text-right tabular-nums`}>{d.visitas}</td>
+                      <td className={`${TD} text-right tabular-nums text-ink/60`}>
+                        {totalDisp ? Math.round((d.visitas / totalDisp) * 100) : 0}%
+                      </td>
+                    </tr>
+                  ))}
+                  {datos.dispositivos.length === 0 && (
+                    <tr><td className={`${TD} text-ink/60`} colSpan={3}>Sin datos todavía.</td></tr>
+                  )}
+                </tbody>
+              </table>
+              <div className="pt-2">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60 mb-2">A qué hora entran (Madrid)</p>
+                <div className="flex items-end gap-px h-16">
+                  {Array.from({ length: 24 }, (_, h) => {
+                    const v = datos.horas.find((x) => x.hora === h)?.visitas ?? 0
+                    return (
+                      <div key={h} className="flex-1 bg-accent rounded-t-sm" style={{ height: `${(v / maxHora) * 100}%`, minHeight: v ? 2 : 1 }} title={`${h}:00 — ${v} visitas`} />
+                    )
+                  })}
+                </div>
+                <div className="flex justify-between font-mono text-[9px] text-ink/60 mt-1">
+                  <span>0h</span><span>6h</span><span>12h</span><span>18h</span><span>23h</span>
+                </div>
+              </div>
+            </Seccion>
+          </div>
+
+          <Seccion titulo="Qué páginas funcionan" nota="El scroll y el tiempo distinguen lo que se lee de lo que se abre y se cierra. La última columna dice qué contenido acaba en venta.">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[640px]">
+                <thead>
+                  <tr>
+                    <th className={THEAD}>Página</th>
+                    <th className={`${THEAD} text-right`}>Vistas</th>
+                    <th className={`${THEAD} text-right`}>Personas</th>
+                    <th className={`${THEAD} text-right`}>Tiempo</th>
+                    <th className={`${THEAD} text-right`}>Scroll</th>
+                    <th className={`${THEAD} text-right`}>Clics</th>
+                    <th className={`${THEAD} text-right`}>CTR</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {datos.paginas.map((p) => (
+                    <tr key={p.path}>
+                      <td className={`${TD} font-mono text-[12px]`}>{p.path}</td>
+                      <td className={`${TD} text-right tabular-nums`}>{p.visitas}</td>
+                      <td className={`${TD} text-right tabular-nums text-ink/60`}>{p.visitantes}</td>
+                      <td className={`${TD} text-right tabular-nums text-ink/60`}>{p.segundos ? `${p.segundos}s` : '—'}</td>
+                      <td className={`${TD} text-right tabular-nums text-ink/60`}>{p.scroll ? `${p.scroll}%` : '—'}</td>
+                      <td className={`${TD} text-right tabular-nums font-semibold`}>{p.afiliados || '—'}</td>
+                      <td className={`${TD} text-right tabular-nums ${p.afiliados ? 'text-accent font-semibold' : 'text-ink/60'}`}>
+                        {p.visitas ? `${Math.round((p.afiliados / p.visitas) * 1000) / 10}%` : '—'}
+                      </td>
+                    </tr>
+                  ))}
+                  {datos.paginas.length === 0 && (
+                    <tr><td className={`${TD} text-ink/60`} colSpan={7}>Sin datos todavía.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </Seccion>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <Seccion titulo="Herramientas" nota="Cuáles se usan de verdad, y por cuánta gente distinta.">
+              <table className="w-full">
+                <thead>
+                  <tr>
+                    <th className={THEAD}>Herramienta</th>
+                    <th className={`${THEAD} text-right`}>Usos</th>
+                    <th className={`${THEAD} text-right`}>Personas</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {datos.herramientas.map((h) => (
+                    <tr key={h.name}>
+                      <td className={TD}>{h.name}</td>
+                      <td className={`${TD} text-right tabular-nums`}>{h.usos}</td>
+                      <td className={`${TD} text-right tabular-nums text-ink/60`}>{h.visitantes}</td>
+                    </tr>
+                  ))}
+                  {datos.herramientas.length === 0 && (
+                    <tr><td className={`${TD} text-ink/60`} colSpan={3}>Aún sin registrar.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </Seccion>
+
+            <Seccion titulo="Qué buscan" nota="Lo que se busca y no aparece es la lista de lo que falta por escribir o por vender.">
+              <table className="w-full">
+                <thead>
+                  <tr>
+                    <th className={THEAD}>Término</th>
+                    <th className={`${THEAD} text-right`}>Veces</th>
+                    <th className={`${THEAD} text-right`}>Sin resultado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {datos.busquedas.map((b) => (
+                    <tr key={b.termino}>
+                      <td className={TD}>{b.termino}</td>
+                      <td className={`${TD} text-right tabular-nums`}>{b.veces}</td>
+                      <td className={`${TD} text-right tabular-nums ${b.sinResultado ? 'text-red-700 font-semibold' : 'text-ink/60'}`}>
+                        {b.sinResultado || '—'}
+                      </td>
+                    </tr>
+                  ))}
+                  {datos.busquedas.length === 0 && (
+                    <tr><td className={`${TD} text-ink/60`} colSpan={3}>Aún sin registrar.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </Seccion>
+          </div>
+        </>
+      )}
     </div>
   )
 }

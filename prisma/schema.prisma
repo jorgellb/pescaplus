@@ -646,3 +646,47 @@ model AdminAuditLog {
   @@index([entity, entityId])
   @@index([createdAt])
 }
+
+/**
+ * Registro de eventos: la analítica de verdad.
+ *
+ * Antes solo existía ProductClick, o sea la ÚLTIMA milla —el clic de afiliado—
+ * sin nada de lo que pasa antes: cuánta gente entra, por dónde, qué lee y qué
+ * herramienta usa. Se medía la conversión sin conocer el embudo.
+ *
+ * Una sola tabla genérica en vez de una por evento: los agregados se hacen por
+ * `type` y los índices cubren las tres preguntas que se hacen siempre (qué pasó,
+ * dónde y quién). Añadir una métrica nueva no toca el esquema.
+ *
+ * PRIVACIDAD: no hay cookies ni identificadores persistentes. `visitor` es un
+ * hash que incluye una sal que cambia cada día, así que sirve para contar únicos
+ * de una jornada y es inútil para seguir a nadie entre días. No se guarda la IP.
+ */
+model Event {
+  id        String   @id @default(cuid())
+  /** pageview | salida | vital | afiliado | herramienta | busqueda | error */
+  type      String
+  /** Ruta normalizada: los ids se sustituyen por :id para poder agrupar. */
+  path      String   @default("")
+  /** Host de procedencia ya limpio, o "" si es directo. */
+  ref       String   @default("")
+  /** Canal: organico | social | directo | referido | campaña. */
+  canal     String   @default("")
+  /** Hash diario y sin IP. Cuenta únicos del día, no persigue entre días. */
+  visitor   String   @default("")
+  /** Id de sesión que genera el navegador; hila las páginas de una visita. */
+  session   String   @default("")
+  device    String   @default("")
+  /** Valor numérico del evento: milisegundos, píxeles de scroll o la métrica. */
+  value     Float?
+  /** Nombre concreto dentro del tipo: "LCP", "aqui", "mejores-horas"… */
+  name      String   @default("")
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  @@index([type, createdAt])
+  @@index([path, createdAt])
+  @@index([createdAt])
+  @@index([session])
+  @@index([name, createdAt])
+}

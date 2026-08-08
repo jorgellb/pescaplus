@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { resolveProduct } from '@/lib/product-service'
 import { recordClick } from '@/lib/clicks-store'
+import { dispositivoDe, hashVisitante, normalizarRuta } from '@/lib/analytics'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,6 +24,38 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       productId: product.id,
       productTitle: product.title,
       typeFishing: String(product.typeFishing),
+    })
+
+    /*
+     * El mismo clic, además, como evento del registro general.
+     *
+     * Se anota aquí y no en el navegador porque TODA salida hacia la tienda pasa
+     * por esta ruta: no hay forma de saltársela, ni con un bloqueador ni
+     * copiando el enlace. Y lo que se guarda como `path` es la página de la que
+     * VIENE el clic, que es el dato que faltaba: sin él se sabía cuántos clics
+     * había, pero no qué contenido los producía — o sea, no se podía saber si
+     * una guía vende o solo se lee.
+     */
+    const referer = request.headers.get('referer') || ''
+    let origen = ''
+    try {
+      origen = referer ? new URL(referer).pathname : ''
+    } catch {
+      /* referer ilegible: el clic se cuenta igual, sin origen */
+    }
+    const { prisma } = await import('@/lib/prisma')
+    await prisma.event.create({
+      data: {
+        type: 'afiliado',
+        path: normalizarRuta(origen || '/'),
+        name: product.id.slice(0, 60),
+        visitor: hashVisitante(
+          (request.headers.get('x-forwarded-for') || '').split(',')[0].trim(),
+          request.headers.get('user-agent') || '',
+        ),
+        device: dispositivoDe(request.headers.get('user-agent') || ''),
+        meta: { titulo: product.title, categoria: String(product.typeFishing) },
+      },
     })
   } catch {
     /* never block the redirect on a tracking failure */

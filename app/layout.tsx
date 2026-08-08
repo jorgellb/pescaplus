@@ -1,4 +1,6 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
+import Analitica from "@/components/Analitica";
 import { Space_Grotesk, Space_Mono } from "next/font/google";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import CapacitorBridge from "@/components/CapacitorBridge";
@@ -93,6 +95,14 @@ export default function RootLayout({
         {children}
         <ServiceWorkerRegister />
         <CapacitorBridge />
+        {/*
+          * Suspense obligatorio: Analitica lee `useSearchParams`, y sin un límite
+          * de suspense eso obliga a Next a renderizar en el servidor CADA página
+          * bajo demanda — se perderían todas las páginas estáticas del sitio.
+          */}
+        <Suspense fallback={null}>
+          <Analitica />
+        </Suspense>
       </body>
     </html>
   );
