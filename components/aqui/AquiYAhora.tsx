@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Icon from '@/components/icons/Icon'
+import { medirHerramienta } from '@/lib/medir'
 
 /**
  * «Aquí y ahora»: qué hay bajo tus pies, en este momento.
@@ -105,6 +106,10 @@ export default function AquiYAhora() {
    * exactamente la misma lectura.
    */
   const consultarPunto = useCallback(async (lat: number, lon: number) => {
+    // Se mide la CONSULTA, no la visita a /aqui: entrar y no pulsar nada no es
+    // usar la herramienta, y contarlo igual haría creer que funciona cuando lo
+    // que pasa es que la gente llega y se va.
+    medirHerramienta('aqui')
     setPos({ lat, lon })
     setGuardado('no')
     setEstado('consultando')

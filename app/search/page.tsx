@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Layout from '@/components/Layout'
+import { registrarServidor } from '@/lib/analytics-server'
 import ProductCard from '@/components/ProductCard'
 import AsesorButton from '@/components/AsesorButton'
 import { listProducts } from '@/lib/products-store'
@@ -27,6 +28,23 @@ export default async function SearchPage({
   // when relevance scoring finds nothing.
   let results = query ? await retrieveProducts(query, undefined, 40) : []
   if (query && results.length === 0) results = await listProducts({ search: query })
+
+  /*
+   * Se anota QUÉ se busca y CUÁNTOS resultados salieron.
+   *
+   * El valor 0 es el dato que vale dinero: son las búsquedas que la gente hace y
+   * la tienda no sabe responder. Cada una es o un producto que falta en el
+   * catálogo o una palabra por la que nadie ha etiquetado nada. Sin esto solo se
+   * ve el tráfico que SÍ encuentra, que es el que menos hay que arreglar.
+   */
+  if (query) {
+    await registrarServidor({
+      type: 'busqueda',
+      path: '/search',
+      name: query.slice(0, 60).toLowerCase(),
+      value: results.length,
+    })
+  }
 
   return (
     <Layout>

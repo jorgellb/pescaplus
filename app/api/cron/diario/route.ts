@@ -52,5 +52,27 @@ export async function GET(request: NextRequest) {
     console.error('publishDueReviews failed:', error)
   }
 
-  return NextResponse.json({ success: verif.success && alert.success, verificacion: verif, alertas: alert, reviewsPublished, remindersSent })
+  /*
+   * Retención de la analítica.
+   *
+   * `Event` crece con cada página vista y nadie la vacía sola: en un sitio con
+   * algo de tráfico son cientos de miles de filas al año, y el plan de Aiven
+   * tiene el disco que tiene. Se guardan 180 días, que cubre comparar una
+   * temporada con la misma del semestre anterior — que es la comparación que se
+   * hace en un sitio de pesca, donde todo depende de la época del año.
+   *
+   * Va aquí y no en su propio cron porque un borrado que se ejecuta a diario y
+   * en pequeñas tandas nunca se convierte en el borrado gigante que bloquea la
+   * tabla.
+   */
+  let eventosPurgados = 0
+  try {
+    const { prisma } = await import('@/lib/prisma')
+    const corte = new Date(Date.now() - 180 * 86_400_000)
+    eventosPurgados = (await prisma.event.deleteMany({ where: { createdAt: { lt: corte } } })).count
+  } catch (error) {
+    console.error('Purga de eventos fallida:', error)
+  }
+
+  return NextResponse.json({ success: verif.success && alert.success, verificacion: verif, alertas: alert, reviewsPublished, remindersSent, eventosPurgados })
 }
