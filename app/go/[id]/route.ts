@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { resolveProduct } from '@/lib/product-service'
 import { recordClick } from '@/lib/clicks-store'
-import { dispositivoDe, hashVisitante, normalizarRuta } from '@/lib/analytics'
+import { registrarServidor } from '@/lib/analytics-server'
 
 export const dynamic = 'force-dynamic'
 
@@ -33,8 +33,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
      * por esta ruta: no hay forma de saltársela, ni con un bloqueador ni
      * copiando el enlace. Y lo que se guarda como `path` es la página de la que
      * VIENE el clic, que es el dato que faltaba: sin él se sabía cuántos clics
-     * había, pero no qué contenido los producía — o sea, no se podía saber si
-     * una guía vende o solo se lee.
+     * había, pero no qué contenido los producía.
+     *
+     * Va por `registrarServidor` y no escribiendo el evento a mano, que es como
+     * estaba. La diferencia es el filtro de bots: escrito a mano no lo tenía, y
+     * en producción se vio el resultado —19 clics de afiliado con 5 páginas
+     * vistas, y UN SOLO «visitante» responsable de 15 de ellos, todos desde la
+     * portada—. Un rastreador que sigue los enlaces de la home inflaba justo la
+     * métrica que se mira para decidir qué vender.
      */
     const referer = request.headers.get('referer') || ''
     let origen = ''
@@ -43,19 +49,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     } catch {
       /* referer ilegible: el clic se cuenta igual, sin origen */
     }
-    const { prisma } = await import('@/lib/prisma')
-    await prisma.event.create({
-      data: {
-        type: 'afiliado',
-        path: normalizarRuta(origen || '/'),
-        name: product.id.slice(0, 60),
-        visitor: hashVisitante(
-          (request.headers.get('x-forwarded-for') || '').split(',')[0].trim(),
-          request.headers.get('user-agent') || '',
-        ),
-        device: dispositivoDe(request.headers.get('user-agent') || ''),
-        meta: { titulo: product.title, categoria: String(product.typeFishing) },
-      },
+    await registrarServidor({
+      type: 'afiliado',
+      path: origen || '/',
+      name: product.id.slice(0, 60),
+      meta: { titulo: product.title, categoria: String(product.typeFishing) },
     })
   } catch {
     /* never block the redirect on a tracking failure */
