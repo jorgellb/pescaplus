@@ -3,6 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import Layout from '@/components/Layout'
 import { SEA_SPECIES, MONTHS_SHORT } from '@/lib/fishing-species'
+import SelectorAgua from '@/components/SelectorAgua'
 
 export const revalidate = 86400
 
@@ -26,6 +27,7 @@ export default function EspeciesHub() {
             Qué se pesca en España, cuándo y cómo: temporada, horas, técnicas, cebos y las zonas donde se busca cada especie.
             Cada ficha conecta con la previsión de actividad por localidad.
           </p>
+          <SelectorAgua activo="mar" />
         </div>
       </section>
 

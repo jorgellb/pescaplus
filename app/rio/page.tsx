@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import Layout from '@/components/Layout'
+import SelectorAgua from '@/components/SelectorAgua'
 import { FRESHWATER_SPECIES } from '@/lib/freshwater-species'
 import { MONTHS_SHORT, deSpecies } from '@/lib/fishing-species'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
@@ -57,6 +58,7 @@ export default function RioPage() {
             {FRESHWATER_SPECIES.length} especies de río, embalse y laguna. Cuándo entran, dónde se buscan, con qué se
             pescan — y qué dice la normativa de cada una, que aquí cambia más que en el mar.
           </p>
+          <SelectorAgua activo="rio" />
         </div>
       </section>
 
