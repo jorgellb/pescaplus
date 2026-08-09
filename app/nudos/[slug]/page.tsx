@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import Layout from '@/components/Layout'
+import Diagrama from '@/components/nudos/Diagrama'
 import { FICHAS, ficha } from '@/lib/knots'
 import { getTaxonomy, categoryName } from '@/lib/taxonomy-store'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
@@ -102,6 +103,10 @@ export default async function FichaNudo({ params }: Params) {
           </h2>
           <p className="text-[15px] text-ink/80 leading-relaxed">{f.cuando}</p>
         </div>
+
+        {/* El esquema va ANTES de los pasos: ver el orden de las piezas hace que
+          * los pasos se entiendan a la primera en vez de tener que imaginárselo. */}
+        <Diagrama id={f.id} />
 
         <div className="space-y-4">
           <h2 className="font-display uppercase text-2xl text-ink leading-none border-b border-ink/[0.07] pb-2">
