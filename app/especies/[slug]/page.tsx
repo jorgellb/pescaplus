@@ -4,6 +4,8 @@ import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import Layout from '@/components/Layout'
 import { SEA_SPECIES, MONTHS_SHORT, deSpecies } from '@/lib/fishing-species'
+import { FRESHWATER_SPECIES, isFreshwater } from '@/lib/freshwater-species'
+
 import { zonesForSpecies } from '@/lib/species-zones'
 import { getSpeciesGuide } from '@/lib/species-guides'
 import { actionShots } from '@/lib/species-action-shots'
@@ -12,6 +14,17 @@ import { NATIONAL_SIZES_URL } from '@/lib/fishing-regulations'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
 import { safeJsonLd } from '@/lib/json-ld'
 import Icon, { type IconName } from '@/components/icons/Icon'
+
+/*
+ * Mar y agua dulce comparten ficha.
+ *
+ * La maqueta, la guía, las fotos de acción y el calendario de meses valen para
+ * las dos, así que duplicar la página solo serviría para que dentro de un mes
+ * una de las dos copias tuviera una mejora que la otra no. Lo que NO se comparte
+ * son las listas: la malla de zonas costeras y las mejores horas siguen leyendo
+ * solo `SEA_SPECIES`, porque un lucio no tiene marea.
+ */
+const TODAS_LAS_ESPECIES = [...SEA_SPECIES, ...FRESHWATER_SPECIES]
 
 export const revalidate = 86400
 
@@ -37,13 +50,13 @@ export const revalidate = 86400
 type Params = { params: Promise<{ slug: string }> }
 
 export function generateStaticParams() {
-  return SEA_SPECIES.map((s) => ({ slug: s.id }))
+  return TODAS_LAS_ESPECIES.map((s) => ({ slug: s.id }))
 }
 
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params
-  const sp = SEA_SPECIES.find((s) => s.id === slug)
+  const sp = TODAS_LAS_ESPECIES.find((s) => s.id === slug)
   // Slug inventado: noindex. La página llama a notFound() pero Next responde 200
   // (ver el comentario de app/categories/[category]/layout.tsx).
   if (!sp) return { title: 'Especie no encontrada', robots: { index: false, follow: false } }
@@ -67,13 +80,16 @@ function Row({ label, value, icon }: { label: string; value: string; icon: IconN
 
 export default async function SpeciesPage({ params }: Params) {
   const { slug } = await params
-  const sp = SEA_SPECIES.find((s) => s.id === slug)
+  const sp = TODAS_LAS_ESPECIES.find((s) => s.id === slug)
   if (!sp) notFound()
 
   const taxonomy = await getTaxonomy()
   const currentMonth = Number(new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Madrid', month: 'numeric' }).format(new Date()))
   const inSeason = sp.bestMonths.includes(currentMonth)
-  const spots = zonesForSpecies(sp.id).slice(0, 18)
+  // Las zonas son 187 localidades COSTERAS. Preguntar por ellas en un lucio
+  // devolvería una lista vacía, pero es más honesto no preguntar: deja claro en
+  // el código que la sección de zonas es cosa del mar.
+  const spots = isFreshwater(sp.id) ? [] : zonesForSpecies(sp.id).slice(0, 18)
 
   /**
    * La prosa de la especie. Las fichas eran ricas en DATOS y pobres en texto:
@@ -102,7 +118,9 @@ export default async function SpeciesPage({ params }: Params) {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
           <nav className="font-mono text-[11px] uppercase tracking-widest text-ink/60 mb-5">
             <Link href="/" className="hover:text-accent">Inicio</Link> <span className="mx-1">/</span>{' '}
-            <Link href="/especies" className="hover:text-accent">Especies</Link> <span className="mx-1">/</span>{' '}
+            <Link href={isFreshwater(sp.id) ? '/rio' : '/especies'} className="hover:text-accent">
+              {isFreshwater(sp.id) ? 'Agua dulce' : 'Especies'}
+            </Link> <span className="mx-1">/</span>{' '}
             <span className="text-ink">{sp.name}</span>
           </nav>
           <div className="flex flex-wrap items-center gap-3 mb-3">

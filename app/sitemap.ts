@@ -5,6 +5,7 @@ import { listGuides } from '@/lib/guides-store'
 import { roundupSlugs } from '@/lib/roundups'
 import { FISHING_SPOTS } from '@/lib/fishing-spots'
 import { SEA_SPECIES } from '@/lib/fishing-species'
+import { FRESHWATER_SPECIES } from '@/lib/freshwater-species'
 import { allSpeciesZonePairs } from '@/lib/species-zones'
 import { getSpeciesGuide } from '@/lib/species-guides'
 import { getZoneGuide } from '@/lib/zone-guides'
@@ -60,6 +61,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/diario`, changeFrequency: 'monthly', priority: 0.4 },
     { url: `${base}/calendario`, changeFrequency: 'weekly', priority: 0.6 },
     { url: `${base}/especies`, changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${base}/rio`, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${base}/guias`, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${base}/advice`, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${base}/contacto`, changeFrequency: 'yearly', priority: 0.4 },
@@ -75,7 +77,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }))
 
   // Aquí sí hay fecha real: la de la guía escrita para cada especie.
-  const speciesRoutes: MetadataRoute.Sitemap = SEA_SPECIES.map((sp) => ({
+  // Mar y agua dulce comparten la ruta /especies/[slug], así que van juntas.
+  const speciesRoutes: MetadataRoute.Sitemap = [...SEA_SPECIES, ...FRESHWATER_SPECIES].map((sp) => ({
     url: `${base}/especies/${sp.id}`,
     lastModified: fechaDeGuia(getSpeciesGuide(sp.id)?.generatedAt),
     changeFrequency: 'monthly',
