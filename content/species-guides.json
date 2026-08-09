@@ -375,5 +375,200 @@
       "Sube con firmeza y sin parones para separarla de la roca, y consulta la talla mínima de tu zona."
     ],
     "generatedAt": "2026-08-06T00:00:00.000Z"
+  },
+  "black-bass": {
+    "intro": "El black bass es la especie que ha hecho del embalse español un destino de pesca. No es de aquí —llegó de Norteamérica en los años cincuenta— pero se adaptó tan bien a nuestros pantanos que hoy es el objetivo número uno del spinning en agua dulce. Pesca de caña ligera, señuelo artificial y mucho ojo: se pesca buscando, no esperando. Un bass de dos kilos es un buen pez y uno de cuatro es la captura de la temporada.",
+    "where": "Vive pegado a la estructura, y esa palabra es la clave de todo. Un embalse a simple vista es una lámina de agua uniforme, pero él está en lo que rompe esa uniformidad: un árbol hundido, un montón de piedras, un puente, el borde de un herbazal, una pared vertical. Rara vez lo encontrarás en mitad de una cala sin nada. En primavera se pega a la orilla para frezar, entre medio metro y tres; con el calor del verano se descuelga a seis u ocho metros o se mete debajo de la sombra. Los embalses de Extremadura, Andalucía y Castilla son los clásicos, pero hay bass en casi toda España.",
+    "techniques": "Spinning en todas sus formas. Con el agua templada, señuelos de superficie al amanecer: un popper o un walker sobre la vegetación provoca ataques que se ven, y engancha. El resto del día, vinilos —el shad para peinar y el craw para el fondo— montados en cabeza plomada, en texas si hay mucha rama, o en jig cuando hace falta bajar entre la estructura. El crankbait sirve para localizar rápido: se lanza mucho, se recupera y donde toque, ahí está. Con agua fría y pez apático, todo se ralentiza: vinilo pequeño, plomo ligero y una recuperación tan lenta que parezca que no pasa nada.",
+    "seasons": "La primavera manda, de abril a junio. El agua pasa de dieciséis a veinticuatro grados, el pez sube a la orilla a frezar y se pesca a la vista con caña ligera. Es la mejor época del año y con diferencia. El verano no es malo pero obliga a madrugar y a buscar profundidad en las horas centrales. En septiembre y octubre vuelve a activarse antes del frío y come con ganas de cara al invierno. De diciembre a marzo se puede pescar, pero hay que aceptar jornadas de uno o dos peces y bajar muchísimo el ritmo.",
+    "tips": [
+      "Busca la estructura, no el agua. Media hora mirando el mapa del embalse antes de salir vale más que tres horas lanzando al azar.",
+      "Si ataca y falla, no cambies de sitio: lanza otra vez al mismo punto. Muchas veces vuelve a entrar, y a la segunda va decidido.",
+      "La temperatura del agua manda más que la hora. Un termómetro barato te dice si el pez está arriba o abajo antes de mojar el señuelo.",
+      "IMPORTANTE: es especie exótica invasora. Su suelta está prohibida y varias comunidades obligan a sacrificarlo. Consulta la orden de tu comunidad antes de salir."
+    ],
+    "generatedAt": "2026-08-09T09:29:20.000072Z"
+  },
+  "lucio": {
+    "intro": "El lucio es una emboscada con dientes. No persigue: se queda quieto entre la vegetación, camuflado, y espera a que algo pase lo bastante cerca para explotar en un metro. Todo su cuerpo está diseñado para eso —alargado, con la dorsal retrasadísima para dar un único acelerón brutal—. Es el depredador más grande de nuestras aguas dulces después del siluro, y el que más ilusión hace ver aparecer detrás del señuelo.",
+    "where": "Vegetación sumergida y bordes. Busca el herbazal, la orilla con juncos, el árbol caído, la entrada de una cala. Y sobre todo busca el borde: el punto donde la vegetación acaba y empieza el agua abierta es su comedor, porque desde ahí ve pasar todo sin ser visto. Rara vez está a más de seis metros. En invierno se descuelga algo más y se pega al veril, pero sigue siendo un pez de pocas aguas. Está bien establecido en el Ebro, en los embalses de Castilla y León y en buena parte de la mitad norte.",
+    "techniques": "Señuelos grandes y despacio. Aquí no se pesca fino: jerkbaits de doce a veinte centímetros, vinilos de buen tamaño, cucharillas ondulantes. La recuperación es de tirón y pausa, y la mayoría de los ataques llegan en la pausa, cuando el señuelo se para y cae de lado. También funciona muy bien el pez muerto montado a fondo o bajo flotador, sobre todo con agua fría. Y una regla que no se negocia: bajo de acero o de fluorocarbono grueso. Tiene una dentadura que corta el nailon como una cuchilla, y sin bajo pierdes el pez y le dejas el señuelo dentro.",
+    "seasons": "Al revés que casi todo lo demás: el frío es su temporada. De octubre a marzo es cuando mejor entra, con el agua entre seis y catorce grados. Los meses de invierno dan los ejemplares más grandes, porque las hembras van cargadas antes de la freza de finales de invierno. En verano se pesca peor: con el agua caliente se apaga, se mete en lo profundo o en la sombra espesa y come poco. Si solo puedes salir en agosto, madruga mucho y busca las zonas con más oxígeno.",
+    "tips": [
+      "Deja la pausa más larga de lo que te pide el cuerpo. El ataque casi siempre llega cuando el señuelo lleva dos segundos parado.",
+      "Si lo ves seguir el señuelo sin decidirse, haz un ocho con la caña al llegar a tus pies. Muchos entran en ese último giro.",
+      "Usa guantes y pinzas largas para desanzuelar. La boca está llena de dientes hacia dentro y una mano ahí acaba en puntos.",
+      "IMPORTANTE: especie exótica invasora. Suelta prohibida y sacrificio obligatorio en varias comunidades. Comprueba la norma de la tuya."
+    ],
+    "generatedAt": "2026-08-09T09:29:20.000072Z"
+  },
+  "lucioperca": {
+    "intro": "La lucioperca es el pez de los que aguantan hasta que se hace de noche. Tiene un ojo grande y lechoso, con una capa reflectante detrás de la retina que le permite ver cuando sus presas ya no ven nada — y por eso caza en la penumbra y en la noche cerrada, justo cuando el resto de pescadores está recogiendo. No pelea como un lucio ni salta como un bass, pero es de los peces más finos de comer y el más difícil de descifrar.",
+    "where": "Fondos de grava, cortados y estructura profunda en embalses grandes y en el tramo bajo del Ebro. De día está honda, entre cuatro y veinte metros, muchas veces apoyada en el fondo o pegada a una pared. Al anochecer sube: se acerca a las orillas de grava y a las colas del embalse a cazar peces pequeños en poca agua. Ese movimiento de subida es toda la pesca — dar con la hora y con el sitio donde sube vale más que cualquier señuelo.",
+    "techniques": "Vertical y arrastre lento, siempre pegado al fondo. El vinilo de ocho a doce centímetros en cabeza plomada es el señuelo de referencia: se lanza, se deja caer hasta tocar, y se recupera con toques cortos dejando que vuelva a tocar cada pocos metros. La picada suele ser un simple peso, no un tirón. Desde barca, la vertical con vinilo o jig sobre los cortados es lo más eficaz. Al anochecer, spinning normal en poca agua con minnows y vinilos claros.",
+    "seasons": "Primavera y otoño, con el agua entre diez y dieciocho grados. Marzo a mayo y septiembre a noviembre son los tramos buenos. En pleno verano se pesca de noche o no se pesca. En invierno sigue comiendo pero muy despacio, y hay que bajar el ritmo hasta lo que parece absurdo: dejar el vinilo quieto en el fondo diez segundos y solo entonces moverlo un palmo.",
+    "tips": [
+      "Si no notas el fondo, no estás pescando. Sube gramos hasta que sientas el toque del plomo al llegar abajo.",
+      "La picada es un peso, no un tirón. En cuanto la línea se ponga rara, clava: no esperes a sentir algo claro.",
+      "Los días muy nublados y con viento la sacan de la penumbra y la ponen a comer a media tarde. Aprovecha las jornadas feas.",
+      "IMPORTANTE: especie exótica invasora. Consulta la normativa de tu comunidad, que puede exigir su sacrificio."
+    ],
+    "generatedAt": "2026-08-09T09:29:20.000072Z"
+  },
+  "trucha-comun": {
+    "intro": "La trucha común es la pesca de río en estado puro: agua fría, corriente y un pez que vive donde el oxígeno y la comida se juntan. No es la más grande ni la que más pelea, pero es la que más se estudia — porque para engañarla hay que entender qué está comiendo hoy, dónde se coloca y por qué. Es también el pez que mejor mide la salud de un río: donde hay truchas de verdad, el agua está limpia.",
+    "where": "En la corriente, pero nunca dentro de lo más fuerte. Busca el sitio donde puede quedarse quieta gastando poca energía y viendo pasar comida: detrás de una piedra grande, en la vena de agua que separa el rápido de la calma, en la cola de una poza, bajo la sombra de un árbol tumbado. Cabeceras y tramos medios de ríos de montaña. En verano sube a las zonas más altas y frías; en primavera baja algo. Si el agua pasa de dieciocho grados, deja de comer.",
+    "techniques": "Mosca y spinning ultraligero, cada una en su momento. Con mosca, la ninfa cubre el noventa por ciento de las jornadas porque la trucha come debajo del agua casi siempre; la seca es para cuando hay eclosión y se ven anillos en la superficie, y entonces no hay nada mejor. Con spinning, cucharilla del cero al dos y minnows de cinco a siete centímetros, pescando río arriba y recuperando algo más rápido que la corriente. En los dos casos manda lo mismo: acercarse sin que te vea. Una trucha que te ha visto llegar no come.",
+    "seasons": "De marzo a julio, según abra la temporada en tu comunidad. La primavera es lo mejor con diferencia: el agua se calienta hasta los ocho o doce grados, empiezan las eclosiones y el pez come todo el día. En verano hay que madrugar o esperar a la última hora, y subir a las cabeceras donde el agua sigue fresca. Muchos tramos cierran en otoño e invierno para proteger la freza, y en los que quedan abiertos casi siempre es con captura y suelta.",
+    "tips": [
+      "Pesca río arriba. La trucha mira siempre a contracorriente, así que si vas hacia abajo te ve venir mucho antes de que lances.",
+      "Levanta una piedra y mira qué bichos hay debajo. Eso te dice qué ninfa montar mejor que cualquier catálogo.",
+      "La sombra es tu aliada: pisa despacio, no proyectes tu silueta sobre el agua y agáchate en las pozas claras.",
+      "Temporada, cupos y tallas cambian por comunidad y por tramo, y muchos son de anzuelo sin muerte. Consulta la orden anual antes de salir."
+    ],
+    "generatedAt": "2026-08-09T09:29:20.000072Z"
+  },
+  "trucha-arcoiris": {
+    "intro": "La arcoíris es la trucha con la que casi todos empezamos. Viene de Norteamérica y en España se cría y se suelta en cotos intensivos, así que es la más accesible: no hace falta subir a una cabecera perdida ni dominar la mosca para tener una jornada entretenida. Y pelea más que la común — salta, corre y da guerra hasta el último metro. Que sea de repoblación no le quita mérito a lo que hace en la caña.",
+    "where": "En cotos intensivos y tramos repoblados está donde la echaron, así que las primeras horas se concentra cerca de los puntos de suelta y luego se reparte. Busca las pozas profundas, la sombra y las zonas donde entra agua nueva. En embalse el asunto cambia: allí busca la capa de agua que está a su temperatura, y en verano eso puede significar cinco o siete metros aunque el pez se vea saltar en superficie. Entre ocho y dieciocho grados es su rango; por encima se apaga.",
+    "techniques": "Vale casi todo, y por eso es tan buena para aprender. Cucharilla y minnow con spinning ligero, ninfa y streamer con mosca, y donde esté autorizado el cebo natural, pasta y lombriz bajo flotador. Recién soltada entra a casi cualquier cosa que se mueva; a los pocos días se vuelve selectiva y ahí empieza la pesca de verdad. En embalse funciona el arrastre lento a la profundidad correcta, que es todo el problema y toda la solución.",
+    "seasons": "Marzo a junio y septiembre a octubre. Los cotos intensivos funcionan durante toda su temporada, pero el pez está mucho más activo con el agua fresca. En pleno verano se refugia en lo hondo y come a primera y última hora. En invierno sigue picando, más despacio.",
+    "tips": [
+      "Si acaban de soltar, no te pegues al punto de suelta: a media mañana el pez ya se ha repartido y hay más sitio río abajo.",
+      "Cambia de señuelo antes que de sitio. Suele ser cuestión de tamaño y de velocidad, no de estar en el lugar equivocado.",
+      "En embalse, cuenta los segundos de hundimiento. Cuando pique, repite exactamente esa cuenta: has encontrado la capa.",
+      "Es especie exótica, tolerada en cotos intensivos y aguas concretas. Fuera de ellos consulta la norma de tu comunidad."
+    ],
+    "generatedAt": "2026-08-09T09:30:30.857999Z"
+  },
+  "barbo": {
+    "intro": "El barbo es el pez más fuerte de nuestros ríos y el que más subestima todo el mundo. No tiene dientes ni cara de depredador, pero engancha uno de tres kilos en corriente y vas a saber lo que es sujetar. Es autóctono, vive en los tramos medios y bajos, y come rebuscando en el fondo con esa boca hacia abajo rodeada de cuatro barbillones que le sirven para encontrar comida sin verla.",
+    "where": "Fondo de grava y corriente sostenida. El sitio clásico es la tabla justo detrás de un rápido: el agua se calma, deja caer todo lo que arrastra y ahí está él, aguantando la corriente y comiendo lo que llega. También en los pozos con fondo limpio y en las juntas de dos corrientes. Entre medio metro y cuatro. Tajo, Ebro, Duero, Guadiana y sus afluentes están llenos de barbos, y en verano se ven en manadas rebuscando a plena luz.",
+    "techniques": "Pesca de fondo con plomada corredera y bajo largo, que es lo que mejor funciona. También inglesa y boloñesa en corriente, dejando que el cebo ruede por el fondo de forma natural. Un cebado ligero y constante en el mismo punto —donde esté permitido— concentra el banco y cambia la jornada por completo. La picada es inconfundible: un tirón que se lleva la caña, sin dudas ni avisos.",
+    "seasons": "De abril a septiembre, con el agua entre catorce y veintiséis grados. El verano es su mejor momento, justo cuando otras especies se apagan: cuanto más calor, más activo. La freza es en primavera y en muchas comunidades hay veda entonces. En invierno se puede pescar pero come mucho menos y hay que buscarlo en los pozos profundos.",
+    "tips": [
+      "Bajo largo, de un metro o más. Con el cebo pegado al plomo nota el peso y lo suelta.",
+      "El maíz cocido en casa pesca más que el de bote: más blando, más oloroso y más barato si vas a cebar.",
+      "No claves al primer toque. El barbo primero empuja el cebo con el hocico y come después; espera a que la caña se doble.",
+      "Especie autóctona. Algunas poblaciones (comizo, cabecicorto) están protegidas: consulta tallas y cupos de tu comunidad."
+    ],
+    "generatedAt": "2026-08-09T09:30:30.857999Z"
+  },
+  "carpa": {
+    "intro": "La carpa es probablemente el pez más pescado de España y el que ha creado toda una cultura propia alrededor: el carpfishing, con sus montajes al pelo, sus boilies y sus noches enteras junto a la caña. Es fuerte, lista y crece mucho — un ejemplar de diez kilos no es raro y los hay bastante mayores. Y tiene algo que engancha: aprende. Una carpa que ha sido pescada dos veces con el mismo montaje ya no cae a la tercera.",
+    "where": "Fondo blando y agua tranquila: embalses, canales, lagunas y tramos lentos de río. Rebusca en el limo, así que las zonas de barro con vegetación son su comedor. En verano ronda la orilla al amanecer y se la ve levantar burbujas mientras hoza en el fondo — esas burbujas son el mejor indicador que existe de dónde lanzar. Entre uno y seis metros. En invierno se agrupa en las zonas más profundas y se mueve poco.",
+    "techniques": "Carpfishing con montaje al pelo y plomada autoclavante es lo más eficaz y lo más extendido: el pez se clava solo contra el peso del plomo. También inglesa y boloñesa con flotador, que es más entretenido y muy bueno en pesca de un día. El cebado importa tanto como el montaje: un puñado de maíz o de pellets en el mismo punto cada poco rato mantiene el banco delante de ti en vez de de paso.",
+    "seasons": "De abril a octubre, con el agua por encima de los catorce grados. Mayo y junio, alrededor de la freza, son los meses de más actividad y de los peces más gordos. El verano obliga a pescar de noche o al amanecer. En invierno la carpa apenas come: se pesca, pero con sesiones largas y mucha paciencia.",
+    "tips": [
+      "Busca burbujas. Si ves una zona burbujeando de forma constante, hay carpas hozando ahí debajo: lanza al borde, no encima.",
+      "Ceba poco y a menudo, no mucho de golpe. Si las llenas, se van con la barriga llena y sin haber tocado tu anzuelo.",
+      "Afloja el freno o usa bait runner. Una carpa arranca de golpe y con el freno cerrado te tira la caña al agua, literalmente.",
+      "Está considerada exótica en la mayoría de cuencas: consulta la normativa de tu comunidad, sobre todo respecto a devolverla."
+    ],
+    "generatedAt": "2026-08-09T09:30:30.857999Z"
+  },
+  "siluro": {
+    "intro": "El siluro es el pez más grande que puedes pescar en agua dulce en España, y no por poco: supera los dos metros y los cien kilos en el Ebro. Llegó introducido en los años setenta y hoy es el gran reclamo de Mequinenza y Riba-roja, con pescadores de media Europa viniendo a por él. No es una pesca elegante ni sutil: es equipo pesado, cebos grandes y aguantar un pulso que puede durar media hora.",
+    "where": "Hoyas profundas, cortados y las juntas de los ríos en los grandes embalses del Ebro. De día está en lo hondo, entre tres y veinticinco metros, muchas veces tumbado en el fondo o pegado a una pared. De noche sube a media agua y se acerca a las zonas someras a cazar. También hay siluro en el Segre, el Cinca y en varios embalses del centro peninsular, cada vez en más sitios.",
+    "techniques": "Tres caminos. A fondo desde la orilla con equipo pesado y pez muerto o calamar, que es la más accesible y la que da los ejemplares más grandes. Vertical desde embarcación con vinilos de quince a veinticinco centímetros sobre los cortados. Y el clonk, esa pieza de madera con la que se golpea el agua para producir un sonido que los atrae — muy efectivo y muy espectacular. En los tres casos, línea gruesa, anzuelos fuertes y un freno que aguante.",
+    "seasons": "De mayo a octubre, cuanto más caliente el agua mejor. Julio y agosto, con el Ebro a veinticinco grados o más, es cuando más se mueve y más come. La noche es su momento en verano. En invierno se ralentiza mucho y se concentra en las hoyas profundas: se pesca, pero hay que ir a por él con paciencia.",
+    "tips": [
+      "Guantes siempre. La boca es una lija con miles de dientes diminutos y te deja las manos en carne viva en dos capturas.",
+      "Sujétalo por la mandíbula inferior con la mano dentro, nunca por las agallas. Y si es grande, no lo saques del agua para la foto.",
+      "El freno bien puesto y la caña abajo. Aquí no se levanta el pez a pulso: se le cansa dejándole correr contra un freno constante.",
+      "IMPORTANTE: especie exótica invasora. Suelta prohibida y sacrificio obligatorio en varias comunidades. Comprueba la norma."
+    ],
+    "generatedAt": "2026-08-09T09:30:30.857999Z"
+  },
+  "boga-rio": {
+    "intro": "La boga de río es un pez humilde que casi nadie busca a propósito y que, sin embargo, enseña más de pesca fina que muchos peces grandes. Es autóctona, pequeña, y tiene una boca rarísima: el labio inferior es córneo y recto, casi como una cuchilla, y lo usa para raspar las algas de las piedras. Si te fijas en un canto rodado de un río con bogas, verás las marcas.",
+    "where": "Tramos medios con fondo pedregoso y agua bien oxigenada. Se coloca en corriente ligera sobre piedra, entre treinta centímetros y dos metros, muchas veces en grupos numerosos. Busca las tablas soleadas donde el fondo tiene piedra limpia con una capa fina de alga verde: ahí es donde come. Está en buena parte de las cuencas peninsulares, aunque en retroceso en muchas de ellas.",
+    "techniques": "Boloñesa y coup con flotador, anzuelo pequeño y bajo muy fino. Es pesca de sensibilidad: el bajo del 0,10 al 0,14, anzuelos del 16 al 20 y un flotador ligero que marque la picada más leve. El cebo se presenta a media agua o rozando el fondo, dejándolo bajar con la corriente de forma natural. Un cebado ligero con pan rallado o masilla la concentra rápido.",
+    "seasons": "De abril a septiembre, con el agua entre catorce y veinticuatro grados. Las horas centrales del día son las buenas, al contrario que casi todo lo demás, porque come mientras hay luz sobre las piedras. En invierno se mueve poco y se pesca mal.",
+    "tips": [
+      "Baja el tamaño de todo. Con anzuelo grande no puede ni cogerlo: la boca es pequeña y está orientada hacia abajo.",
+      "Prueba con el alga verde del propio río en el anzuelo. Es literalmente lo que está comiendo.",
+      "Es un pez perfecto para enseñar a pescar a un niño: pica seguido, no hace falta equipo y se ve todo desde la orilla.",
+      "Autóctona y en retroceso; varias subespecies están protegidas. Consulta la normativa antes de retener ninguna."
+    ],
+    "generatedAt": "2026-08-09T09:31:30.364531Z"
+  },
+  "cacho": {
+    "intro": "El cacho es el pez de los ríos españoles que está en todas partes y no le importa nada. Aguanta el agua templada, la turbia, la de ciudad y la de montaña, y come literalmente de todo: insectos, alevines, frutos que caen del árbol, pan del que tira la gente en un puente. Por eso es el pez con el que más gente pesca su primera captura con señuelo, y por eso es tan buen entrenamiento: si aprendes a engañar cachos, has aprendido a leer un río.",
+    "where": "Casi cualquier río, y muchas veces a la vista. Pozas con sombra de vegetación, tablas, remansos junto a un puente, la cola de un rápido. Muchas veces está a media agua o directamente en superficie esperando lo que caiga del árbol de arriba. Entre treinta centímetros y tres metros. Los ejemplares grandes son más desconfiados y se colocan en las pozas profundas con sombra.",
+    "techniques": "Spinning ultraligero con cucharilla del cero al uno es lo más divertido y lo más efectivo. También mosca seca, sobre todo en verano con imitaciones de hormiga, saltamontes o escarabajo — porque eso es lo que se le cae encima. Y boloñesa con flotador y cebo natural donde se quiera pescar tranquilo: pan, cereza, lombriz. Ataca rápido y con decisión, así que no hace falta sutileza en la recuperación.",
+    "seasons": "De marzo a octubre, y muy activo cuanto más calor. Entre diez y veinticuatro grados come bien. El verano es su mejor época y encima es cuando la mayoría de los ríos truchero están en horas bajas, así que rellena bien el calendario. En invierno se ralentiza pero sigue ahí.",
+    "tips": [
+      "Busca los árboles que cuelgan sobre el agua. Debajo de cada uno suele haber un cacho esperando lo que caiga.",
+      "En verano, prueba una mosca seca de hormiga. Es de las pescas más entretenidas que hay y no necesitas equipo caro.",
+      "No tiene interés gastronómico por las espinas, así que es un pez ideal para practicar captura y suelta con cuidado.",
+      "Es autóctono. Trátalo bien: mano mojada, sin tirarlo a la orilla y devuelto rápido."
+    ],
+    "generatedAt": "2026-08-09T09:31:30.364531Z"
+  },
+  "perca-sol": {
+    "intro": "La perca sol es la primera captura de media España. Pequeña, vistosa, con reflejos azules y naranjas, y con un descaro que hace que pique casi siempre — un niño con una caña y una lombriz saca percas sol donde no sacaría otra cosa. Esa es su cara amable. La otra es que es una especie exótica invasora que compite con los alevines de nuestros peces autóctonos y que se ha extendido por casi todas las cuencas.",
+    "where": "Pegada a la orilla, siempre. Bordes de embalse, lagunas, remansos con vegetación, muelles y pantalanes. Entre treinta centímetros y dos metros, casi nunca más. Le gusta el sol y la vegetación, y suele estar en grupos: donde pica una, hay veinte. En cuanto sube la temperatura del agua se pone a la vista en la orilla.",
+    "techniques": "Lo más simple funciona mejor. Coup o boloñesa con flotador ligero, anzuelo pequeño y un trozo de lombriz o un grano de maíz. Con señuelo, microvinilos de dos a cuatro centímetros en cabeza plomada ligera; ataca cosas casi de su tamaño con una confianza absurda. No hace falta bajo fino ni disimulo.",
+    "seasons": "De mayo a septiembre, con el agua por encima de dieciséis grados. Todo el día con sol. En invierno se retira a lo hondo y desaparece de la orilla.",
+    "tips": [
+      "Es el mejor pez para iniciar a alguien. Pica rápido, es bonita y no requiere equipo: una caña, un flotador y lombriz.",
+      "Si buscas black bass y solo sacas percas sol, cambia a un señuelo más grande: filtra el tamaño y deja de molestarte.",
+      "Cuidado con las espinas de la dorsal al manipularla: son rígidas y pinchan de verdad.",
+      "IMPORTANTE: especie exótica invasora. Su suelta está prohibida por el RD 630/2013. Consulta la norma de tu comunidad."
+    ],
+    "generatedAt": "2026-08-09T09:31:30.364531Z"
+  },
+  "tenca": {
+    "intro": "La tenca es un pez de laguna quieta, de piel oscura y muy mucosa, con un ojo pequeño y rojo que la delata en cuanto la ves. Es autóctona y tiene tradición de verdad en zonas como Extremadura y la provincia de Salamanca, donde se cría, se come y hasta tiene fiestas dedicadas. Pescarla es una pesca lenta, de flotador y paciencia, que se disfruta de otra manera.",
+    "where": "Lagunas, charcas, canales y balsas con fondo blando y mucha vegetación. Se mueve por el borde del herbazal, entre medio metro y dos metros y medio, hozando en el limo. Es discreta: no arma escándalo como la carpa, y muchas veces la única señal de que está ahí son unas burbujas finas subiendo entre las plantas.",
+    "techniques": "Coup e inglesa con flotador y cebado ligero. Bajo fino, anzuelo pequeño y el cebo apoyado o justo rozando el fondo. La picada es característica: el flotador tiembla, se mueve de lado, se hunde despacio. No hay que precipitarse. Un cebado suave de masilla con maíz partido en el borde de la vegetación la trae y la mantiene.",
+    "seasons": "De mayo a septiembre, y necesita calor de verdad: por debajo de dieciocho grados casi no come. Julio y agosto son sus mejores meses, al amanecer y en las primeras horas de la tarde. En invierno se entierra prácticamente en el fondo y no se pesca.",
+    "tips": [
+      "Pesca el borde de la vegetación, no el agua abierta. La tenca sale a comer justo en esa línea y vuelve a meterse.",
+      "Ten paciencia con la picada: tiembla y se mueve mucho antes de hundirse. Clavar pronto es fallarla.",
+      "Manéjala con la mano bien mojada. Esa capa de mucosa es su protección y se la quitas con los dedos secos.",
+      "Autóctona y con interés gastronómico y cultural en varias zonas. Consulta tallas y cupos de tu comunidad."
+    ],
+    "generatedAt": "2026-08-09T09:31:30.364531Z"
+  },
+  "anguila-rio": {
+    "intro": "La anguila tiene una de las historias más asombrosas de la naturaleza: nace en el mar de los Sargazos, cruza el Atlántico de larva, entra en nuestros ríos siendo angula, pasa años engordando en agua dulce y vuelve a cruzar el océano para desovar y morir. Esa historia es también su problema: las presas le cortan el paso río arriba y las poblaciones europeas han caído más de un noventa por ciento. Hoy está catalogada en peligro crítico.",
+    "where": "Tramos bajos, marismas, canales y desembocaduras con fondo blando. Es nocturna y de refugio: de día se esconde bajo piedras, raíces, tuberías o en el limo, y de noche sale a rebuscar por el fondo. Entre medio metro y cinco. Aguanta agua turbia y con poco oxígeno mejor que casi cualquier otro pez, así que aparece en sitios donde no esperarías nada.",
+    "techniques": "Pesca de fondo con plomada y bajo resistente, siempre de noche. Anzuelo fuerte, porque tiene una mandíbula que aprieta, y línea sobrada: se enrosca en cualquier obstáculo y hay que sacarla de ahí. El cebo, lombriz grande, trozo de pez muerto o de calamar. La picada es un tironeo continuo y desordenado, no un golpe limpio.",
+    "seasons": "De mayo a octubre, de noche cerrada, y especialmente con agua turbia después de una crecida — es cuando más se mueve. En invierno se entierra y no come. Pero antes de nada: comprueba si puedes pescarla.",
+    "tips": [
+      "En la mayoría de comunidades su pesca está PROHIBIDA o muy restringida por su estado de conservación. Comprueba la orden anual antes de intentarlo.",
+      "Si la capturas por accidente, devuélvela cuanto antes y con la mano mojada. Es una especie en peligro crítico.",
+      "Es incapaz de estarse quieta y lo llena todo de mucosidad. Un trapo húmedo a mano hace el manejo mucho más fácil y más seguro para ella.",
+      "No la retengas en la duda. Aquí equivocarse tiene consecuencias reales sobre una población que ya está al límite."
+    ],
+    "generatedAt": "2026-08-09T09:32:18.205039Z"
+  },
+  "salmon": {
+    "intro": "El salmón atlántico es el pez más codiciado de los ríos del norte y el más difícil de conseguir, empezando por el permiso. Sube del mar a desovar a los mismos ríos de Asturias, Cantabria, Galicia, Navarra y León donde nació, y durante esa subida deja de alimentarse — así que cuando ataca un señuelo no es por hambre, es por reflejo o por agresividad. Eso lo cambia todo: no se le ofrece comida, se le provoca.",
+    "where": "En las tablas de corriente y en la cola de las pozas, donde descansa entre esfuerzo y esfuerzo remontando. Entre uno y cuatro metros. Los cotos salmoneros están perfectamente delimitados y cada uno tiene sus puestos históricos, que son los sitios donde el pez para: un guía local o un pescador veterano te ahorra tres temporadas de aprendizaje.",
+    "techniques": "Mosca con streamer y tubo es la forma clásica y la que se permite en más tramos. La cucharilla ondulante y el devón funcionan donde estén autorizados. La clave no es el señuelo sino la presentación: cruzar el señuelo por delante del pez a la velocidad y profundidad correctas, una y otra vez, hasta que uno se harta y ataca. Es pesca de repetición y de fe.",
+    "seasons": "De abril a julio, según abra cada río. La campaña es corta y está reglamentada al detalle. Las primeras semanas dan los ejemplares grandes que suben del mar; según avanza el verano entran peces más pequeños y el río baja de caudal.",
+    "tips": [
+      "Se pesca por permiso: coto, jornada y cupo, con sorteo previo por comunidad. Infórmate con meses de antelación, no la semana antes.",
+      "El precintado de la pieza es obligatorio donde se permite la captura. Llévalo todo en regla antes de mojar el señuelo.",
+      "Pesca cubriendo el agua metódicamente: un paso abajo después de cada lance. Cubrir bien vale más que el señuelo perfecto.",
+      "Normativa muy estricta y cambiante cada año. Consulta la orden anual de tu comunidad antes de cualquier otra cosa."
+    ],
+    "generatedAt": "2026-08-09T09:32:18.205039Z"
+  },
+  "reo": {
+    "intro": "El reo es una trucha común que decidió bajar al mar, engordar allí y volver al río convertida en otra cosa: plateada, corpulenta y con una fuerza que no tiene nada que ver con la de sus hermanas de agua dulce. Se pesca sobre todo de noche en las rías y tramos bajos del Cantábrico y Galicia, y esa pesca nocturna a la mosca es de las experiencias más intensas que hay en el río español.",
+    "where": "Rías y tramos bajos, entrando con la marea a las pozas. Entre medio metro y cuatro. De día está escondida en lo profundo y bajo cobertura; de noche sale a las tablas y a los bordes a cazar. Conocer el punto de día, verlo con luz y pescarlo de noche es la forma de trabajar: nadie improvisa un puesto a oscuras.",
+    "techniques": "Mosca nocturna con streamer es la técnica reina, pescando lento y dejando que el señuelo trabaje con la corriente. Con spinning, minnows de siete a once centímetros y cucharillas, también a última hora y de noche donde se permita. En los dos casos, movimientos suaves y silencio: en poca agua y de noche, un mal paso vacía la poza.",
+    "seasons": "De mayo a septiembre, coincidiendo con la entrada de peces del mar. Las noches cortas de junio y julio son las mejores. Las dos horas alrededor del amanecer también dan mucho.",
+    "tips": [
+      "Reconoce el puesto de día. De noche no se improvisa: hay que saber dónde está cada piedra antes de meter el pie.",
+      "Frontal con luz roja y encendida lo mínimo. La luz blanca sobre el agua espanta todo lo que hubiera cerca.",
+      "Distínguelo del salmón por el pedúnculo caudal —grueso en el reo, estrecho en el salmón— y por los puntos bajo la línea lateral.",
+      "Está regulado como el salmón en muchos ríos: permiso, cupos y temporada específicos. Consulta la orden anual."
+    ],
+    "generatedAt": "2026-08-09T09:32:18.205039Z"
   }
 }
