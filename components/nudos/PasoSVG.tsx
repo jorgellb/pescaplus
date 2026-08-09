@@ -1,119 +1,146 @@
 /**
  * Los pasos de cada nudo, dibujados.
  *
- * Un nudo no se aprende leyendo. El texto puede decir «pasa el bucle por encima
+ * Un nudo no se aprende leyendo: el texto puede decir «pasa el bucle por encima
  * del anzuelo» con toda la precisión del mundo y quien no lo ha hecho nunca no
- * sabrá por dónde. Estos dibujos son el paso a paso de verdad.
+ * sabrá por dónde.
  *
- * LO QUE HACE QUE PAREZCAN REALES: los cruces. En un nudo lo único que importa
- * visualmente es qué hebra pasa por encima y cuál por debajo, y en un SVG plano
- * eso no se ve solo. El truco es `Cruce`: se dibuja la hebra de abajo entera,
- * encima un trazo del color del papel y algo más grueso justo donde se cruzan
- * —que borra la de abajo—, y por último la de arriba. El resultado es una hebra
- * que pasa por detrás de otra, igual que en un dibujo de manual.
+ * LO QUE HACE QUE PAREZCA HILO Y NO UNA RAYA. Dos cosas, y las dos importan:
  *
- * Los colores salen del sistema: la línea de trabajo va en acento para poder
- * seguirla de un paso al siguiente, y el resto en tinta.
+ *  1. **Volumen.** Cada hebra se dibuja TRES veces sobre el mismo trazado: un
+ *     borde oscuro y ancho, encima el cuerpo más claro y algo más estrecho, y
+ *     encima un filo de luz muy fino desplazado hacia arriba. El ojo lee eso
+ *     como un cilindro. Con un solo trazo plano se ve un esquema; con los tres
+ *     se ve un hilo.
+ *  2. **Cruces.** En un nudo lo único que hay que entender es qué hebra pasa por
+ *     delante y cuál por detrás. Se resuelve dibujando la de abajo entera y
+ *     luego la de arriba CON su borde: el borde tapa la de abajo y aparece la
+ *     profundidad, igual que en un manual de marinería.
+ *
+ * Y el nudo manda sobre el anzuelo. En la primera versión el anzuelo ocupaba
+ * media viñeta y el nudo quedaba diminuto, que es justo al revés de lo que hay
+ * que mirar.
  */
 
-const HILO = 'stroke-ink/75'
-const TRABAJO = 'stroke-accent'
-const PAPEL = 'stroke-paper'
+/** Grosores de la «cuerda». Cambiar aquí afecta a todos los dibujos por igual. */
+const BORDE = 11
+const CUERPO = 7.5
+const LUZ = 2
 
 /**
- * Un trozo de hebra que pasa POR DELANTE, borrando lo que haya debajo.
+ * Una hebra con volumen.
  *
- * El halo del color del papel es lo que crea la sensación de profundidad. Sin
- * él las dos hebras se ven cortándose por el mismo punto y el dibujo deja de
- * explicar nada, que es justo lo que hay que explicar.
+ * `tono` decide si es la línea de trabajo —la que hay que seguir de un paso al
+ * siguiente, en color de acento— o el resto del hilo, en tinta.
  */
-function Cruce({ d, clase, ancho = 3 }: { d: string; clase: string; ancho?: number }) {
+function Hebra({ d, trabajo = false, escala = 1 }: { d: string; trabajo?: boolean; escala?: number }) {
+  const borde = trabajo ? 'stroke-accent' : 'stroke-ink/80'
+  const cuerpo = trabajo ? 'stroke-accent/55' : 'stroke-ink/40'
+  const luz = trabajo ? 'stroke-accent/25' : 'stroke-ink/15'
   return (
-    <>
-      <path d={d} className={PAPEL} strokeWidth={ancho + 4} fill="none" strokeLinecap="round" />
-      <path d={d} className={clase} strokeWidth={ancho} fill="none" strokeLinecap="round" />
-    </>
-  )
-}
-
-/** Anzuelo de perfil, con el ojal arriba. Igual en los cinco pasos. */
-function Anzuelo() {
-  return (
-    <g>
-      <circle cx="100" cy="34" r="7" className={`${HILO} fill-none`} strokeWidth="3" />
-      <path d="M100 41 L100 88 Q100 108 118 108 Q135 108 135 90 L135 74"
-            className={`${HILO} fill-none`} strokeWidth="3.4" strokeLinecap="round" />
-      <path d="M135 74 L129 82 M135 74 L142 81" className={HILO} strokeWidth="2.6" strokeLinecap="round" />
+    <g fill="none" strokeLinecap="round" strokeLinejoin="round">
+      <path d={d} className={borde} strokeWidth={BORDE * escala} />
+      <path d={d} className={cuerpo} strokeWidth={CUERPO * escala} />
+      <path d={d} className={luz} strokeWidth={LUZ * escala} transform="translate(0 -1.6)" />
     </g>
   )
 }
 
-function Mano({ x, y, texto }: { x: number; y: number; texto: string }) {
+/**
+ * Anzuelo de acero. Va en gris frío y con brillo propio para que se distinga del
+ * hilo de un vistazo: son dos materiales distintos y el dibujo tiene que decirlo.
+ */
+function Anzuelo({ x = 0, y = 0, s = 1 }: { x?: number; y?: number; s?: number }) {
   return (
-    <text x={x} y={y} textAnchor="middle" className="fill-accent font-mono" style={{ fontSize: 10, letterSpacing: 0.5 }}>
+    <g transform={`translate(${x} ${y}) scale(${s})`} fill="none" strokeLinecap="round">
+      <circle cx="0" cy="0" r="11" className="stroke-ink/70" strokeWidth="6" />
+      <circle cx="0" cy="0" r="11" className="stroke-ink/25" strokeWidth="3" />
+      <path d="M0 11 L0 76 Q0 104 26 104 Q50 104 50 78 L50 56" className="stroke-ink/70" strokeWidth="7" />
+      <path d="M0 11 L0 76 Q0 104 26 104 Q50 104 50 78 L50 56" className="stroke-ink/25" strokeWidth="3.4" />
+      <path d="M50 56 L41 68 M50 56 L60 67" className="stroke-ink/70" strokeWidth="5.5" />
+    </g>
+  )
+}
+
+function Pie({ texto }: { texto: string }) {
+  return (
+    <text x="150" y="238" textAnchor="middle" className="fill-ink/60 font-mono" style={{ fontSize: 13 }}>
       {texto}
     </text>
+  )
+}
+
+/** Flecha de movimiento: dice hacia dónde va la mano en ese paso. */
+function Flecha({ d }: { d: string }) {
+  return (
+    <path d={d} className="stroke-accent fill-none" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"
+          markerEnd="url(#punta)" />
   )
 }
 
 /* ── Palomar ─────────────────────────────────────────────────────────────── */
 
 const PALOMAR = [
-  // 1. El bucle atraviesa el ojal
+  /* 1 · El bucle doblado atraviesa el ojal. */
   <g key="1">
-    <Anzuelo />
-    <path d="M12 20 Q50 20 78 28" className={HILO} strokeWidth="3" fill="none" strokeLinecap="round" />
-    <path d="M12 48 Q50 48 78 40" className={HILO} strokeWidth="3" fill="none" strokeLinecap="round" />
-    <Cruce d="M78 28 Q95 34 112 30 Q125 26 128 34 Q131 44 118 44 Q100 44 78 40" clase={TRABAJO} />
-    <Mano x={100} y={150} texto="bucle de 15 cm" />
+    <Anzuelo x={186} y={92} s={0.85} />
+    <Hebra d="M14 84 Q90 76 150 88" />
+    <Hebra d="M14 124 Q90 132 150 120" />
+    <Hebra d="M150 88 Q196 92 214 96 Q230 100 214 106 Q196 112 150 120" trabajo />
+    <Flecha d="M120 168 L182 128" />
+    <Pie texto="El bucle entra por el ojal" />
   </g>,
-  // 2. Nudo simple sin apretar
+
+  /* 2 · Nudo simple con las dos hebras juntas, sin apretar. */
   <g key="2">
-    <Anzuelo />
-    <path d="M12 20 Q46 20 70 30" className={HILO} strokeWidth="3" fill="none" strokeLinecap="round" />
-    <path d="M12 52 Q46 52 70 42" className={HILO} strokeWidth="3" fill="none" strokeLinecap="round" />
-    <path d="M70 30 Q56 46 70 56 Q84 64 92 50" className={TRABAJO} strokeWidth="3" fill="none" strokeLinecap="round" />
-    <Cruce d="M92 50 Q98 38 84 34 Q74 32 70 42" clase={TRABAJO} />
-    <path d="M92 50 Q112 46 130 52" className={TRABAJO} strokeWidth="3" fill="none" strokeLinecap="round" />
-    <Mano x={100} y={150} texto="sin apretar" />
+    <Anzuelo x={196} y={98} s={0.85} />
+    <Hebra d="M14 74 Q78 68 128 82" />
+    <Hebra d="M14 132 Q78 140 128 126" />
+    {/* La lazada: baja, cruza por detrás y vuelve a subir */}
+    <Hebra d="M128 82 Q86 96 96 132 Q106 164 146 152 Q178 142 170 112" trabajo />
+    <Hebra d="M170 112 Q162 88 128 126" trabajo />
+    <Hebra d="M170 112 Q198 104 224 108" trabajo />
+    <Pie texto="Nudo simple, SIN apretar" />
   </g>,
-  // 3. El bucle pasa POR ENCIMA de todo el anzuelo
+
+  /* 3 · El bucle pasa por encima del anzuelo entero. El paso decisivo. */
   <g key="3">
-    <Anzuelo />
-    <path d="M12 24 Q46 24 72 34" className={HILO} strokeWidth="3" fill="none" strokeLinecap="round" />
-    <path d="M12 50 Q46 50 72 42" className={HILO} strokeWidth="3" fill="none" strokeLinecap="round" />
-    <path d="M72 34 Q60 44 72 50" className={TRABAJO} strokeWidth="3" fill="none" strokeLinecap="round" />
-    {/* El bucle abraza el anzuelo entero y baja por detrás */}
-    <Cruce d="M72 50 Q66 88 92 116 Q118 138 140 112 Q156 92 148 66 Q142 46 118 42 Q92 38 72 42" clase={TRABAJO} ancho={3} />
-    <path d="M96 124 L104 116 M96 124 L104 132" className="stroke-accent" strokeWidth="2.2" strokeLinecap="round" fill="none" />
-    <Mano x={100} y={150} texto="por encima del anzuelo" />
+    <Anzuelo x={150} y={86} s={0.85} />
+    <Hebra d="M14 74 Q64 68 106 80" />
+    <Hebra d="M14 118 Q64 124 106 112" />
+    <Hebra d="M106 80 Q88 96 106 112" trabajo />
+    {/* El bucle abraza el anzuelo por fuera y sale por debajo */}
+    <Hebra d="M106 112 Q92 168 140 196 Q192 224 224 176 Q248 138 226 100 Q210 74 160 74 Q126 74 106 80" trabajo />
+    <Flecha d="M78 196 L128 186" />
+    <Pie texto="Por encima de TODO el anzuelo" />
   </g>,
-  // 4. Mojar y apretar tirando de los dos cabos
+
+  /* 4 · Mojar y cerrar tirando de los dos cabos a la vez. */
   <g key="4">
-    <Anzuelo />
-    <path d="M12 30 Q48 30 80 38" className={HILO} strokeWidth="3" fill="none" strokeLinecap="round" />
-    <path d="M12 46 Q48 46 80 40" className={HILO} strokeWidth="3" fill="none" strokeLinecap="round" />
-    <g className={TRABAJO}>
-      <path d="M80 38 Q92 30 102 36" strokeWidth="3" fill="none" strokeLinecap="round" />
-      <path d="M80 41 Q92 48 102 42" strokeWidth="3" fill="none" strokeLinecap="round" />
-      <path d="M102 36 Q112 39 102 42" strokeWidth="3" fill="none" strokeLinecap="round" />
-    </g>
-    {/* Flechas: se tira de los dos a la vez */}
-    <path d="M46 60 L16 60 M16 60 L24 55 M16 60 L24 65" className="stroke-accent" strokeWidth="2" fill="none" strokeLinecap="round" />
-    <Mano x={100} y={150} texto="moja y tira de los dos" />
+    <Anzuelo x={214} y={96} s={0.85} />
+    <Hebra d="M14 94 Q98 88 168 100" />
+    <Hebra d="M14 116 Q98 122 168 106" />
+    {/* Las vueltas ya recogidas sobre el ojal */}
+    <Hebra d="M168 100 Q192 84 210 94" trabajo />
+    <Hebra d="M168 106 Q192 122 210 110" trabajo />
+    <Hebra d="M210 94 Q226 102 210 110" trabajo />
+    <Flecha d="M96 168 L26 168" />
+    <Pie texto="Moja y tira de los dos a la vez" />
   </g>,
-  // 5. Terminado
+
+  /* 5 · Terminado y recortado. */
   <g key="5">
-    <Anzuelo />
-    <path d="M12 34 Q52 34 86 38" className={HILO} strokeWidth="3" fill="none" strokeLinecap="round" />
-    <g className={TRABAJO}>
-      <path d="M86 36 Q94 30 100 34" strokeWidth="3.2" fill="none" strokeLinecap="round" />
-      <path d="M86 40 Q94 46 100 41" strokeWidth="3.2" fill="none" strokeLinecap="round" />
-      <path d="M90 33 L90 44 M95 32 L95 45" strokeWidth="2.4" fill="none" strokeLinecap="round" />
-    </g>
-    <path d="M100 38 L114 38" className={TRABAJO} strokeWidth="2.4" fill="none" strokeLinecap="round" />
-    <path d="M110 30 L120 46 M120 30 L110 46" className="stroke-accent" strokeWidth="1.8" strokeLinecap="round" />
-    <Mano x={100} y={150} texto="corta a 2 mm" />
+    <Anzuelo x={214} y={104} s={0.85} />
+    <Hebra d="M14 104 Q110 100 176 104" />
+    {/* El nudo cerrado: vueltas apretadas contra el ojal */}
+    <Hebra d="M176 100 Q196 88 206 100" trabajo />
+    <Hebra d="M176 108 Q196 120 206 108" trabajo />
+    <Hebra d="M186 94 L186 116" trabajo escala={0.8} />
+    <Hebra d="M196 92 L196 118" trabajo escala={0.8} />
+    {/* La punta cortada al ras */}
+    <Hebra d="M206 104 L228 104" trabajo escala={0.7} />
+    <path d="M222 92 L238 116 M238 92 L222 116" className="stroke-ink/50" strokeWidth="3" strokeLinecap="round" />
+    <Pie texto="Apretado y cortado a 2 mm" />
   </g>,
 ]
 
@@ -122,19 +149,23 @@ const POR_NUDO: Record<string, React.JSX.Element[]> = {
 }
 
 export default function PasoSVG({ id, paso }: { id: string; paso: number }) {
-  const pasos = POR_NUDO[id]
-  const dibujo = pasos?.[paso]
+  const dibujo = POR_NUDO[id]?.[paso]
   if (!dibujo) return null
   return (
-    <div className="border border-ink/[0.07] rounded-lg bg-paper mt-2 p-1 max-w-[240px]">
-      <svg viewBox="0 0 200 160" className="w-full h-auto" role="img" aria-hidden>
+    <div className="border border-ink/[0.07] rounded-lg bg-paper mt-3 p-2 max-w-[330px]">
+      <svg viewBox="0 0 300 250" className="w-full h-auto" role="img" aria-hidden>
+        <defs>
+          <marker id="punta" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+            <path d="M0 1 L9 5 L0 9 z" className="fill-accent" />
+          </marker>
+        </defs>
         {dibujo}
       </svg>
     </div>
   )
 }
 
-/** Para saber si un nudo ya tiene sus dibujos y avisar cuando no. */
+/** Para saber qué nudos ya tienen sus dibujos y cuáles faltan. */
 export function tienePasos(id: string): boolean {
   return Boolean(POR_NUDO[id])
 }
