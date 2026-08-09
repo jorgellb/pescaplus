@@ -144,8 +144,85 @@ const PALOMAR = [
   </g>,
 ]
 
+/* ── Clinch mejorado ─────────────────────────────────────────────────────── */
+
+/**
+ * Las vueltas en espiral alrededor de la línea madre.
+ *
+ * Se dibujan como arcos sueltos y NO como una hélice de un solo trazo: cada
+ * vuelta tiene que verse pasando por delante de la madre y desapareciendo por
+ * detrás, y eso solo sale dibujándolas una a una con su borde, que tapa lo que
+ * hay debajo. Una hélice continua se lee como un muelle plano.
+ */
+function Vueltas({ x, y, n, paso = 22 }: { x: number; y: number; n: number; paso?: number }) {
+  return (
+    <>
+      {Array.from({ length: n }, (_, i) => (
+        <Hebra key={i} d={`M${x + i * paso} ${y - 15} Q${x + i * paso + 13} ${y} ${x + i * paso} ${y + 15}`} trabajo escala={0.85} />
+      ))}
+    </>
+  )
+}
+
+const CLINCH = [
+  /* 1 · Pasar por el ojal y dar las vueltas. */
+  <g key="1">
+    <Anzuelo x={246} y={104} s={0.8} />
+    <Hebra d="M14 104 Q120 100 236 104" />
+    <Hebra d="M236 104 Q252 118 236 130 Q170 138 96 132" trabajo />
+    <Vueltas x={110} y={132} n={5} />
+    <Pie texto="Pasa por el ojal y da 5-6 vueltas" />
+  </g>,
+
+  /* 2 · La punta vuelve al hueco de encima del ojal. */
+  <g key="2">
+    <Anzuelo x={246} y={100} s={0.8} />
+    <Hebra d="M14 100 Q120 96 236 100" />
+    <Hebra d="M236 100 Q252 114 236 126 Q170 134 100 128" trabajo />
+    <Vueltas x={114} y={128} n={5} />
+    {/* La punta sube y entra por el primer hueco, junto al ojal */}
+    <Hebra d="M100 128 Q88 168 150 176 Q206 182 222 122" trabajo />
+    <Flecha d="M204 154 L222 126" />
+    <Pie texto="La punta, al hueco de junto al ojal" />
+  </g>,
+
+  /* 3 · Y también por el bucle grande: esto es la «mejora». */
+  <g key="3">
+    <Anzuelo x={246} y={96} s={0.8} />
+    <Hebra d="M14 96 Q120 92 236 96" />
+    <Hebra d="M236 96 Q252 110 236 122 Q170 130 104 124" trabajo />
+    <Vueltas x={118} y={124} n={5} />
+    <Hebra d="M104 124 Q92 164 150 172 Q200 178 218 126" trabajo />
+    {/* El bucle grande que acaba de formarse, y la punta pasando por él */}
+    <Hebra d="M218 126 Q210 152 176 152 Q150 152 152 176" trabajo />
+    <Flecha d="M120 200 L170 166" />
+    <Pie texto="Y por el bucle grande: la MEJORA" />
+  </g>,
+
+  /* 4 · Cerrar mojado. */
+  <g key="4">
+    <Anzuelo x={252} y={104} s={0.8} />
+    <Hebra d="M14 104 Q128 100 196 104" />
+    <Vueltas x={200} y={104} n={4} paso={14} />
+    <Hebra d="M196 104 Q220 104 250 104" trabajo escala={0.9} />
+    <Flecha d="M110 168 L30 168" />
+    <Pie texto="Moja y tira: la espiral se aprieta" />
+  </g>,
+
+  /* 5 · Terminado: espiral ordenada y punta al ras. */
+  <g key="5">
+    <Anzuelo x={254} y={108} s={0.8} />
+    <Hebra d="M14 108 Q128 104 202 108" />
+    <Vueltas x={206} y={108} n={5} paso={11} />
+    <Hebra d="M260 108 L282 108" trabajo escala={0.7} />
+    <path d="M276 96 L292 120 M292 96 L276 120" className="stroke-ink/50" strokeWidth="3" strokeLinecap="round" />
+    <Pie texto="Espiral limpia, sin vueltas montadas" />
+  </g>,
+]
+
 const POR_NUDO: Record<string, React.JSX.Element[]> = {
   'nudo-palomar': PALOMAR,
+  'nudo-clinch-mejorado': CLINCH,
 }
 
 export default function PasoSVG({ id, paso }: { id: string; paso: number }) {
