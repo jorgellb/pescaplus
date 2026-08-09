@@ -65,6 +65,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/pesca', label: 'Qué pescar y dónde', hint: 'Guía por especie y zona del litoral', emoji: '🎯' },
       { href: '/especies', label: 'Especies de mar', hint: 'Lubina, dorada, atún… cómo y cuándo', emoji: '🐟' },
       { href: '/rio', label: 'Agua dulce', hint: 'Black bass, lucio, trucha, barbo, siluro', emoji: '🎣' },
+      { href: '/nudos', label: 'Nudos y montajes', hint: 'Palomar, FG, plomo corredizo, al pelo…', emoji: '🪢' },
       { href: '/mejores-horas', label: 'Zonas de pesca', hint: 'Puertos y playas con previsión propia', emoji: '⚓' },
       { href: '/diario', label: 'Diario de capturas', hint: 'Registra lo que pescas y con qué', emoji: '📖' },
     ],

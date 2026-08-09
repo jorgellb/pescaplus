@@ -6,6 +6,7 @@ import { roundupSlugs } from '@/lib/roundups'
 import { FISHING_SPOTS } from '@/lib/fishing-spots'
 import { SEA_SPECIES } from '@/lib/fishing-species'
 import { FRESHWATER_SPECIES } from '@/lib/freshwater-species'
+import { FICHAS as FICHAS_NUDOS } from '@/lib/knots'
 import { allSpeciesZonePairs } from '@/lib/species-zones'
 import { getSpeciesGuide } from '@/lib/species-guides'
 import { getZoneGuide } from '@/lib/zone-guides'
@@ -63,6 +64,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/especies`, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${base}/rio`, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${base}/guias`, changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${base}/nudos`, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/advice`, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${base}/contacto`, changeFrequency: 'yearly', priority: 0.4 },
     { url: `${base}/aviso-legal`, changeFrequency: 'yearly', priority: 0.2 },
@@ -83,6 +85,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: fechaDeGuia(getSpeciesGuide(sp.id)?.generatedAt),
     changeFrequency: 'monthly',
     priority: 0.6,
+  }))
+
+  // Nudos y montajes: contenido que no caduca, así que sin `lastmod`.
+  const nudoRoutes: MetadataRoute.Sitemap = FICHAS_NUDOS.map((n) => ({
+    url: `${base}/nudos/${n.id}`,
+    changeFrequency: 'yearly' as const,
+    priority: 0.65,
   }))
 
   const spotRoutes: MetadataRoute.Sitemap = FISHING_SPOTS.map((s) => ({
@@ -162,5 +171,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     /* guides store unavailable */
   }
 
-  return [...staticRoutes, ...categoryRoutes, ...speciesRoutes, ...spotRoutes, ...speciesZoneRoutes, ...subcategoryRoutes, ...roundupRoutes, ...productRoutes, ...guideRoutes]
+  return [...staticRoutes, ...categoryRoutes, ...speciesRoutes, ...nudoRoutes, ...spotRoutes, ...speciesZoneRoutes, ...subcategoryRoutes, ...roundupRoutes, ...productRoutes, ...guideRoutes]
 }
