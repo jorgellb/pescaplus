@@ -97,8 +97,19 @@ export interface MarineForecast {
   }
 }
 
-/** Seconds between refetches — drives the "próxima actualización" metadata. */
-export const FORECAST_REVALIDATE_S = 1800
+/**
+ * Cada cuánto se vuelve a pedir la previsión. Tres horas, no media.
+ *
+ * Open-Meteo actualiza su modelo cada 3-6 horas, así que refrescar cada 30
+ * minutos pedía SEIS VECES el mismo dato. Con 195 puntos y dos llamadas por
+ * punto eso son 18.720 peticiones diarias contra un límite gratuito de 10.000
+ * —por IP, y el contenedor entero comparte una—, y de ahí el 429 que dejó la web
+ * sin previsión. A tres horas baja a unas 3.100.
+ *
+ * No se pierde nada de precisión: el dato nuevo no existe hasta que el modelo
+ * corre otra vez.
+ */
+export const FORECAST_REVALIDATE_S = 3 * 60 * 60
 
 function distanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const dLat = (lat2 - lat1) * 111.32
@@ -165,9 +176,31 @@ export function fallosDePrevision() {
   return ultimoFallo
 }
 
+/**
+ * La última respuesta BUENA de cada URL, para no quedarnos mudos.
+ *
+ * Cuando Open-Meteo devuelve 429, la web entera dejaba de mostrar previsión: ni
+ * viento, ni olas, ni ventanas de pesca. Y para decidir si sales a pescar, un
+ * dato de hace cuatro horas vale infinitamente más que una pantalla vacía —
+ * sobre todo cuando el modelo solo se actualiza cada tres.
+ *
+ * Se guarda en memoria del proceso y con tope de entradas: es un colchón para
+ * un corte de horas, no un almacén. Si el contenedor se reinicia se pierde, y no
+ * pasa nada — se vuelve a llenar con la primera petición que salga bien.
+ */
+const MAX_RESPALDO = 200
+const RESPALDO_VALIDO_MS = 12 * 60 * 60 * 1000
+const respaldo = new Map<string, { cuando: number; datos: any }>()
+
+/** Antigüedad en horas del dato servido, o null si es fresco. Para avisar. */
+let ultimaAntiguedadH: number | null = null
+export function antiguedadPrevisionH(): number | null {
+  return ultimaAntiguedadH
+}
+
 async function getJson(url: string): Promise<any | null> {
   try {
-    const res = await fetch(url, { next: { revalidate: 1800 }, signal: AbortSignal.timeout(12000) })
+    const res = await fetch(url, { next: { revalidate: FORECAST_REVALIDATE_S }, signal: AbortSignal.timeout(12000) })
     if (!res.ok) {
       // El 429 es el sospechoso habitual: Open-Meteo limita por IP y el
       // servidor entero comparte una sola, así que se agota mucho antes de lo
@@ -175,16 +208,40 @@ async function getJson(url: string): Promise<any | null> {
       const motivo = `HTTP ${res.status}${res.status === 429 ? ' (cuota de Open-Meteo agotada para la IP del servidor)' : ''}`
       ultimoFallo = { cuando: new Date().toISOString(), url: url.slice(0, 120), motivo }
       console.warn('[PREVISIÓN] fallo:', motivo, url.slice(0, 120))
-      return null
+      return deRespaldo(url)
     }
     ultimoFallo = null
-    return await res.json()
+    const datos = await res.json()
+    if (respaldo.size >= MAX_RESPALDO) respaldo.delete(respaldo.keys().next().value as string)
+    respaldo.set(url, { cuando: Date.now(), datos })
+    ultimaAntiguedadH = null
+    return datos
   } catch (e) {
     const motivo = e instanceof Error ? `${e.name}: ${e.message}` : String(e)
     ultimoFallo = { cuando: new Date().toISOString(), url: url.slice(0, 120), motivo }
     console.warn('[PREVISIÓN] fallo:', motivo, url.slice(0, 120))
+    return deRespaldo(url)
+  }
+}
+
+/**
+ * El último dato bueno, si no es demasiado viejo.
+ *
+ * Doce horas es el tope: pasado eso, una previsión deja de describir el mar de
+ * hoy y enseñarla sería peor que no enseñar nada, porque el visitante se la
+ * creería.
+ */
+function deRespaldo(url: string): any | null {
+  const guardado = respaldo.get(url)
+  if (!guardado) return null
+  const edad = Date.now() - guardado.cuando
+  if (edad > RESPALDO_VALIDO_MS) {
+    respaldo.delete(url)
     return null
   }
+  ultimaAntiguedadH = Math.round((edad / 3_600_000) * 10) / 10
+  console.warn(`[PREVISIÓN] sirviendo respaldo de hace ${ultimaAntiguedadH} h`)
+  return guardado.datos
 }
 
 const num = (v: unknown): number | null => (typeof v === 'number' && Number.isFinite(v) ? v : null)
@@ -278,12 +335,28 @@ async function computeMarineForecast(
 ): Promise<MarineForecast> {
   const profile = getSpecies(speciesId)
   const modality = getModality(modalityId)
+  /*
+   * Se pide por CELDA del modelo, no por punto exacto.
+   *
+   * Open-Meteo trabaja con una malla de unos 11 km: Chipiona y Rota caen en la
+   * misma celda y devuelven exactamente el mismo dato, pero se pedían por
+   * separado. Redondeando a 0,1° (≈11 km) los 195 puntos se quedan en unas
+   * decenas de coordenadas distintas, y como la URL es la clave de caché, todos
+   * los puntos de una celda comparten una sola petición.
+   *
+   * No se pierde precisión porque esa precisión nunca existió: el modelo ya
+   * estaba devolviendo el valor de la celda, no el del punto.
+   */
+  const celda = (n: number) => (Math.round(n * 10) / 10).toFixed(1)
+  const cLat = celda(spot.lat)
+  const cLon = celda(spot.lon)
+
   const forecastUrl =
-    `https://api.open-meteo.com/v1/forecast?latitude=${spot.lat}&longitude=${spot.lon}` +
+    `https://api.open-meteo.com/v1/forecast?latitude=${cLat}&longitude=${cLon}` +
     `&hourly=temperature_2m,precipitation,precipitation_probability,weather_code,cloud_cover,surface_pressure,wind_speed_10m,wind_gusts_10m,wind_direction_10m,is_day,uv_index,visibility` +
     `&timezone=Europe%2FMadrid&forecast_days=7`
   const marineUrl =
-    `https://marine-api.open-meteo.com/v1/marine?latitude=${spot.lat}&longitude=${spot.lon}` +
+    `https://marine-api.open-meteo.com/v1/marine?latitude=${cLat}&longitude=${cLon}` +
     `&hourly=wave_height,wave_direction,wave_period,swell_wave_height,swell_wave_period,swell_wave_direction,ocean_current_velocity,ocean_current_direction,sea_surface_temperature` +
     `&timezone=Europe%2FMadrid&forecast_days=7`
 

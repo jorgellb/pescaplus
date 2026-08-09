@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { photosStorageState, dirStorageState, imageCacheDir } from '@/lib/photos'
-import { fallosDePrevision } from '@/lib/marine-forecast'
+import { fallosDePrevision, antiguedadPrevisionH } from '@/lib/marine-forecast'
 
 /** Siempre en vivo: un estado cacheado no dice nada de si el servidor responde. */
 export const dynamic = 'force-dynamic'
@@ -52,6 +52,8 @@ export async function GET() {
     // Último fallo de la previsión, o null si la última llamada fue bien. Es la
     // única forma de saber POR QUÉ el sitio dice «previsión no disponible».
     prevision: fallosDePrevision(),
+    // Horas de antigüedad del dato servido, o null si es fresco.
+    previsionAntiguedadH: antiguedadPrevisionH(),
     ms: Date.now() - inicio,
     hora: new Date().toISOString(),
   })
