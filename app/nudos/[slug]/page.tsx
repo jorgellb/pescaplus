@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import Layout from '@/components/Layout'
 import Diagrama from '@/components/nudos/Diagrama'
+import PasoSVG from '@/components/nudos/PasoSVG'
 import { FICHAS, ficha } from '@/lib/knots'
 import { getTaxonomy, categoryName } from '@/lib/taxonomy-store'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
@@ -124,6 +125,10 @@ export default async function FichaNudo({ params }: Params) {
                 <div className="pt-1">
                   <p className="font-semibold text-ink text-[15px]">{p.t}</p>
                   <p className="text-[15px] text-ink/80 leading-relaxed mt-0.5">{p.d}</p>
+                  {/* El dibujo va junto a SU paso, no todos juntos al final: el
+                    * texto y la imagen del mismo movimiento tienen que leerse a la
+                    * vez o hay que ir y volver con las manos ocupadas. */}
+                  <PasoSVG id={f.id} paso={i} />
                 </div>
               </li>
             ))}
