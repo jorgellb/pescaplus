@@ -106,11 +106,9 @@ export default function CalendarioPage() {
               <div key={sp.name} className="border border-ink/[0.07] rounded-xl bg-paper p-4">
                 <div className="flex items-center justify-between gap-3 mb-2">
                   <h3 className="font-bold text-ink">
-                    {sp.category ? (
-                      <Link href={`/categories/${sp.category}`} className="hover:text-accent transition-colors">{sp.name}</Link>
-                    ) : (
-                      sp.name
-                    )}
+                    {/* A la FICHA, no a la tienda: quien mira el calendario está decidiendo
+                      * a qué ir, no qué comprar todavía. */}
+                    <Link href={`/especies/${sp.id}`} className="hover:text-accent transition-colors">{sp.name}</Link>
                   </h3>
                   <span className="font-mono text-[10px] uppercase tracking-widest text-ink/60">{sp.water === 'mar' ? 'Mar' : 'Agua dulce'}</span>
                 </div>
