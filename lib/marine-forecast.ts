@@ -148,12 +148,41 @@ export function groupByDay(hours: HourPoint[]): { dateISO: string; hours: HourPo
 const COMPASS = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSO', 'SO', 'OSO', 'O', 'ONO', 'NO', 'NNO']
 export const windDirLabel = (deg: number | null) => (deg == null ? null : COMPASS[Math.round(deg / 22.5) % 16])
 
+/**
+ * Último motivo por el que falló la previsión, para poder diagnosticarlo.
+ *
+ * Antes esto no existía y el fallo era MUDO: la página decía «no disponible» y
+ * no había forma de saber si era un 429 por cuota, un tiempo de espera agotado,
+ * un problema de DNS del servidor o un cambio en la API. Con el sitio caído y
+ * sin pista, la única opción era adivinar.
+ *
+ * Se guarda en memoria del proceso, sin base de datos: es información de
+ * diagnóstico del momento, no un histórico.
+ */
+let ultimoFallo: { cuando: string; url: string; motivo: string } | null = null
+
+export function fallosDePrevision() {
+  return ultimoFallo
+}
+
 async function getJson(url: string): Promise<any | null> {
   try {
     const res = await fetch(url, { next: { revalidate: 1800 }, signal: AbortSignal.timeout(12000) })
-    if (!res.ok) return null
+    if (!res.ok) {
+      // El 429 es el sospechoso habitual: Open-Meteo limita por IP y el
+      // servidor entero comparte una sola, así que se agota mucho antes de lo
+      // que sugieren las pruebas hechas desde un portátil.
+      const motivo = `HTTP ${res.status}${res.status === 429 ? ' (cuota de Open-Meteo agotada para la IP del servidor)' : ''}`
+      ultimoFallo = { cuando: new Date().toISOString(), url: url.slice(0, 120), motivo }
+      console.warn('[PREVISIÓN] fallo:', motivo, url.slice(0, 120))
+      return null
+    }
+    ultimoFallo = null
     return await res.json()
-  } catch {
+  } catch (e) {
+    const motivo = e instanceof Error ? `${e.name}: ${e.message}` : String(e)
+    ultimoFallo = { cuando: new Date().toISOString(), url: url.slice(0, 120), motivo }
+    console.warn('[PREVISIÓN] fallo:', motivo, url.slice(0, 120))
     return null
   }
 }

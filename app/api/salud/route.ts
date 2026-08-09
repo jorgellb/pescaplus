@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { photosStorageState, dirStorageState, imageCacheDir } from '@/lib/photos'
+import { fallosDePrevision } from '@/lib/marine-forecast'
 
 /** Siempre en vivo: un estado cacheado no dice nada de si el servidor responde. */
 export const dynamic = 'force-dynamic'
@@ -48,6 +49,9 @@ export async function GET() {
     // ~2 s por foto, y /especies tiene 29, así que la primera visita tras cada
     // despliegue se arrastra. «ok» significa que el volumen está montado y bien.
     imagenes: dirStorageState(imageCacheDir()),
+    // Último fallo de la previsión, o null si la última llamada fue bien. Es la
+    // única forma de saber POR QUÉ el sitio dice «previsión no disponible».
+    prevision: fallosDePrevision(),
     ms: Date.now() - inicio,
     hora: new Date().toISOString(),
   })
