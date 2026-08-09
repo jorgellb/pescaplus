@@ -220,9 +220,90 @@ const CLINCH = [
   </g>,
 ]
 
+/* ── Nudo FG ─────────────────────────────────────────────────────────────── */
+
+/**
+ * La trenza del FG: el trenzado pasando alternativamente por encima y por debajo
+ * del fluorocarbono.
+ *
+ * Es LO ÚNICO que hay que entender de este nudo, y es justo lo que el texto no
+ * consigue explicar — «pasa por encima y por debajo dieciocho veces» no dice por
+ * dónde empieza cada pasada. Aquí se ve: las pasadas de encima van completas, y
+ * las de debajo se cortan al llegar al fluorocarbono y reaparecen al otro lado,
+ * que es como el ojo entiende que pasan por detrás.
+ */
+function Trenza({ x, y, n, paso = 20 }: { x: number; y: number; n: number; paso?: number }) {
+  return (
+    <>
+      {Array.from({ length: n }, (_, i) => {
+        const cx = x + i * paso
+        const arriba = i % 2 === 0
+        return arriba ? (
+          // Pasada por DELANTE: entera, y su borde tapa el fluorocarbono.
+          <Hebra key={i} d={`M${cx} ${y - 20} Q${cx + paso / 2} ${y} ${cx} ${y + 20}`} trabajo escala={0.7} />
+        ) : (
+          // Pasada por DETRÁS: se interrumpe justo donde cruza.
+          <g key={i}>
+            <Hebra d={`M${cx} ${y - 20} Q${cx + paso / 2} ${y - 8} ${cx + paso / 3} ${y - 7}`} trabajo escala={0.7} />
+            <Hebra d={`M${cx + paso / 3} ${y + 7} Q${cx + paso / 2} ${y + 8} ${cx} ${y + 20}`} trabajo escala={0.7} />
+          </g>
+        )
+      })}
+    </>
+  )
+}
+
+const FG = [
+  /* 1 · Tensar el trenzado. Sin tensión este nudo no sale. */
+  <g key="1">
+    <Hebra d="M14 118 Q150 112 286 118" />
+    <path d="M40 150 L14 150 M14 150 L24 144 M14 150 L24 156" className="stroke-accent fill-none" strokeWidth="3.5" strokeLinecap="round" />
+    <path d="M260 150 L286 150 M286 150 L276 144 M286 150 L276 156" className="stroke-accent fill-none" strokeWidth="3.5" strokeLinecap="round" />
+    <Pie texto="Trenzado TENSO: sin esto no sale" />
+  </g>,
+
+  /* 2 · Trenzar alternando, 18-20 veces. El corazón del nudo. */
+  <g key="2">
+    <Hebra d="M14 118 Q150 114 286 118" />
+    <Trenza x={70} y={116} n={9} />
+    <Pie texto="18-20 pasadas alternando" />
+  </g>,
+
+  /* 3 · Dos medias llaves para fijar la trenza. */
+  <g key="3">
+    <Hebra d="M14 112 Q120 108 286 112" />
+    <Trenza x={54} y={110} n={7} />
+    <Hebra d="M196 110 Q216 84 236 110 Q248 128 224 132 Q206 134 208 112" trabajo escala={0.8} />
+    <Hebra d="M236 110 Q262 106 286 110" trabajo escala={0.8} />
+    <Pie texto="Dos medias llaves: fijan la trenza" />
+  </g>,
+
+  /* 4 · Remate sobre las dos líneas juntas. */
+  <g key="4">
+    <Hebra d="M14 112 Q120 108 286 112" />
+    <Trenza x={46} y={110} n={6} />
+    <Hebra d="M172 96 Q186 112 172 126" trabajo escala={0.75} />
+    <Hebra d="M196 96 Q210 112 196 126" trabajo escala={0.75} />
+    <Hebra d="M220 96 Q234 112 220 126" trabajo escala={0.75} />
+    <Hebra d="M236 112 Q262 108 286 112" trabajo escala={0.75} />
+    <Pie texto="Tres o cuatro más, de remate" />
+  </g>,
+
+  /* 5 · Y probarlo con las manos ANTES de pescar. */
+  <g key="5">
+    <Hebra d="M14 112 Q100 108 148 110" />
+    <Trenza x={148} y={110} n={5} paso={16} />
+    <Hebra d="M228 110 Q258 108 286 112" trabajo escala={0.8} />
+    <path d="M96 156 L26 156 M26 156 L38 149 M26 156 L38 163" className="stroke-accent fill-none" strokeWidth="4" strokeLinecap="round" />
+    <path d="M204 156 L274 156 M274 156 L262 149 M274 156 L262 163" className="stroke-accent fill-none" strokeWidth="4" strokeLinecap="round" />
+    <Pie texto="PRUÉBALO con fuerza antes de pescar" />
+  </g>,
+]
+
 const POR_NUDO: Record<string, React.JSX.Element[]> = {
   'nudo-palomar': PALOMAR,
   'nudo-clinch-mejorado': CLINCH,
+  'nudo-fg': FG,
 }
 
 export default function PasoSVG({ id, paso }: { id: string; paso: number }) {
