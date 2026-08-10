@@ -137,6 +137,55 @@ export default function CurvaMarea({
         </svg>
       </div>
 
+      {/*
+        * La lectura hora a hora, en números.
+        *
+        * La curva enseña la FORMA y esta tira da el DATO: a las 07:00 hay 2,14 m
+        * y está subiendo. Son dos preguntas distintas —«cómo va el día» y «qué
+        * altura hay a la hora a la que puedo ir»— y la segunda no se responde
+        * mirando un trazo, hay que leerla.
+        *
+        * Se marca la hora actual y se separa el sentido con una flecha, porque
+        * para pescar importa tanto la altura como si sube o baja.
+        */}
+      <div className="mt-4 overflow-x-auto">
+        <table className="w-full min-w-[560px] border-collapse">
+          <caption className="sr-only">Altura de la marea hora a hora</caption>
+          <tbody>
+            {[0, 12].map((desde) => (
+              <tr key={desde} className="align-top">
+                {Array.from({ length: 12 }, (_, k) => {
+                  const h = desde + k
+                  const t = inicio + h * 3600_000
+                  const alt = tideHeightAt(extremes, t)
+                  const antes = tideHeightAt(extremes, t - 1800_000)
+                  const sube = alt != null && antes != null ? alt > antes : null
+                  const esAhora = ahora >= t && ahora < t + 3600_000
+                  return (
+                    <td
+                      key={h}
+                      className={`text-center py-1.5 px-0.5 border-t border-ink/[0.07] ${
+                        esAhora ? 'bg-ink text-paper rounded' : ''
+                      }`}
+                    >
+                      <div className={`font-mono text-[10px] ${esAhora ? 'text-paper/70' : 'text-ink/50'}`}>
+                        {String(h).padStart(2, '0')}h
+                      </div>
+                      <div className={`font-mono text-[12px] font-bold ${esAhora ? 'text-paper' : 'text-ink'}`}>
+                        {alt == null ? '—' : alt.toFixed(2)}
+                      </div>
+                      <div className={`font-mono text-[11px] ${esAhora ? 'text-paper/70' : 'text-accent'}`}>
+                        {sube == null ? '' : sube ? '↑' : '↓'}
+                      </div>
+                    </td>
+                  )
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
       <p className="text-[12px] text-ink/60 mt-3 leading-relaxed">
         Alturas sobre el cero del proveedor, interpoladas entre pleamares y bajamares.
         {smallRange && ' La carrera de marea aquí es pequeña: la forma de la curva importa más que los centímetros.'}
