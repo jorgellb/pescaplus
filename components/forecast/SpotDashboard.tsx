@@ -50,6 +50,7 @@ import { isSpeciesZone } from '@/lib/species-zones'
 import { scoreLabel, scoreHex, windWord, weatherIcon } from '@/lib/forecast-format'
 import { fmtTime, fmtDayLabel, fmtDateLong, fmtWindowRange, todayMadridISO, addDaysISO, ratingLabel } from '@/lib/solunar-format'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
+import CurvaMarea from '@/components/CurvaMarea'
 import Icon, { type IconName } from '@/components/icons/Icon'
 
 const MOD_ICON: Record<string, IconName> = { tierra: 'umbrella', kayak: 'kayak', barco: 'boat' }
@@ -1293,6 +1294,15 @@ export default async function SpotDashboard({
           </div>
         </div>
       </section>
+
+      {/* La curva del día. Va tras las métricas porque «subiendo/bajando» dice el
+        * estado pero no la FORMA: cuánto queda de subida, si el pico es plano o
+        * brusco, y a qué hora coincide con el amanecer. */}
+      {tidesAll.length > 0 && (
+        <section className="max-w-5xl mx-auto px-4 sm:px-6 pb-8">
+          <CurvaMarea extremes={tidesAll} ahora={now} smallRange={!!tides?.smallRange} />
+        </section>
+      )}
     </Layout>
   )
 }
