@@ -10,5 +10,7 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['tests/**/*.test.ts'],
+    // Las pruebas NUNCA tocan la base de datos ni servicios reales: ver el fichero.
+    setupFiles: ['./tests/sin-servicios-reales.ts'],
   },
 })
