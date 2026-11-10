@@ -26,9 +26,7 @@ const NVIDIA_API_KEY = process.env.OPENROUTER_API_KEY
 const NVIDIA_BASE_URL = process.env.OPENROUTER_BASE_URL ?? 'https://openrouter.ai/api/v1'
 const NVIDIA_MODELS = (process.env.OPENROUTER_MODELS?.split(',').map((s) => s.trim()).filter(Boolean)) || [
   'google/gemma-4-26b-a4b-it:free',
-  'nvidia/nemotron-nano-12b-v2-vl:free',
   'google/gemma-4-31b-it:free',
-  'nvidia/nemotron-nano-9b-v2:free',
 ]
 const nvidiaOn = NVIDIA_API_KEY && NVIDIA_API_KEY !== 'your_openrouter_api_key'
 

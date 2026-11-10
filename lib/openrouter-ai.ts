@@ -21,31 +21,35 @@ const NVIDIA_BASE_URL = process.env.NVIDIA_BASE_URL ?? 'https://integrate.api.nv
 interface ModelRef {
   provider: 'groq' | 'openrouter' | 'nvidia'
   model: string
+  /** Campos extra del cuerpo de la petición que solo entiende este modelo. */
+  extra?: Record<string, unknown>
 }
-const groq = (model: string): ModelRef => ({ provider: 'groq', model })
+const groq = (model: string, extra?: Record<string, unknown>): ModelRef => ({ provider: 'groq', model, extra })
 const openrouter = (model: string): ModelRef => ({ provider: 'openrouter', model })
 const nvidia = (model: string): ModelRef => ({ provider: 'nvidia', model })
 
 /**
- * Groq (gratis, sin coste ni con crédito comprado) da un límite MUCHO más
- * generoso que el nivel gratuito de OpenRouter — documentación oficial,
- * 2026-07-28: 30 peticiones/min POR MODELO, con tope diario de 14.400 en
- * `llama-3.1-8b-instant` y 1.000 en `llama-3.3-70b-versatile` (frente a las
- * 50/día COMPARTIDAS entre todos los modelos gratuitos de OpenRouter). Se
- * ponen primero en la cadena por eso. Probados en vivo: ambos responden JSON
- * válido en menos de 1,3 s, sin gastar tokens en razonar.
+ * Groq va primero: gratis y con mucho más cupo que el nivel gratuito de
+ * OpenRouter. Medido el 2026-11-10 en sus cabeceras: 1.000 peticiones/día y
+ * 8.000 tokens/min POR MODELO (frente a las 50/día COMPARTIDAS de OpenRouter).
  *
- * `openai/gpt-oss-120b` de Groq tiene el MISMO fallo que los razonadores
- * grandes ya vistos con NVIDIA y con OpenRouter gratis: quema TODO el
- * presupuesto de tokens "pensando" (898 de 900 en la prueba) y no llega a
- * escribir el JSON. `gpt-oss-20b` funciona pero gasta la mayoría de tokens
- * razonando (724 de 883) — se deja fuera por el mismo motivo de cautela que
- * `nemotron-nano-9b-v2:free`. Ninguno de los dos se usa aquí.
+ * El 2026-11-10 Groq retiró `llama-3.1-8b-instant` y `llama-3.3-70b-versatile`
+ * (404 `model_not_found`) y el asistente se quedó mudo. Solo le quedan los
+ * `gpt-oss` de OpenAI, que son razonadores: SIN `reasoning_effort: 'low'`
+ * gastan todo el presupuesto pensando (898 de 900 tokens) y el JSON sale
+ * vacío. CON él, medido: 7-32 tokens de razonamiento, JSON válido, chat en
+ * 1-1,5 s. Por eso el parámetro va pegado al modelo y no se puede olvidar.
  */
-const GROQ_MODELS: ModelRef[] = [
-  groq('llama-3.1-8b-instant'),
-  groq('llama-3.3-70b-versatile'),
-]
+const GPT_OSS_SIN_DIVAGAR = { reasoning_effort: 'low' }
+/** El bueno: primera opción de todo lo que lee el cliente (~1-1,5 s). */
+const GROQ_FUERTE = groq('openai/gpt-oss-120b', GPT_OSS_SIN_DIVAGAR)
+/**
+ * El rápido (~0,5 s), pero de respaldo: con el prompt real del chat recomendó
+ * un gusano para carpa como señuelo de lubina. Tiene su propio cupo diario,
+ * así que si el 120b se agota (p. ej. pulir el catálogo) el chat sigue vivo.
+ */
+const GROQ_RAPIDO = groq('openai/gpt-oss-20b', GPT_OSS_SIN_DIVAGAR)
+const GROQ_MODELS: ModelRef[] = [GROQ_FUERTE, GROQ_RAPIDO]
 
 /**
  * SOLO MODELOS GRATUITOS (":free") — decisión explícita de Jorge para no
@@ -60,15 +64,15 @@ const GROQ_MODELS: ModelRef[] = [
  * dan timeout o "fetch failed" con regularidad; `inclusionai/ling-3.0-flash:free`,
  * `openrouter/free` y los `nvidia/nemotron-3-*:free` (super-120b, nano-30b,
  * omni-reasoning, ultra-550b) queman TODO el presupuesto de tokens
- * "pensando" y nunca llegan a escribir el JSON. Estos 4 sí respondieron con
- * JSON válido de forma consistente. Override con la env var OPENROUTER_MODELS
- * (coma-separada) o una sola OPENROUTER_MODEL.
+ * "pensando" y nunca llegan a escribir el JSON. Los dos Gemma responden JSON
+ * válido de forma consistente. Los `nvidia/nemotron-nano-*:free` que iban
+ * entre ellos desaparecieron de OpenRouter el 2026-11 (404 "no longer
+ * available"). Override con la env var OPENROUTER_MODELS (coma-separada) o una
+ * sola OPENROUTER_MODEL.
  */
 const DEFAULT_OPENROUTER_MODELS = [
   'google/gemma-4-26b-a4b-it:free',
-  'nvidia/nemotron-nano-12b-v2-vl:free',
   'google/gemma-4-31b-it:free',
-  'nvidia/nemotron-nano-9b-v2:free',
 ]
 const OPENROUTER_MODELS: string[] = (() => {
   const fromList = process.env.OPENROUTER_MODELS?.split(',').map((s) => s.trim()).filter(Boolean)
@@ -138,7 +142,7 @@ async function callAiModel(
           method: 'POST',
           signal: controller.signal,
           headers,
-          body: JSON.stringify({ model: ref.model, messages, max_tokens: maxTokens, temperature, top_p: topP }),
+          body: JSON.stringify({ model: ref.model, messages, max_tokens: maxTokens, temperature, top_p: topP, ...ref.extra }),
         })
 
         /**
@@ -403,7 +407,7 @@ async function* streamAiModel(
         method: 'POST',
         signal: controller.signal,
         headers,
-        body: JSON.stringify({ model: ref.model, messages, max_tokens: maxTokens, temperature, top_p: topP, stream: true }),
+        body: JSON.stringify({ model: ref.model, messages, max_tokens: maxTokens, temperature, top_p: topP, stream: true, ...ref.extra }),
       })
       if (!response.ok || !response.body) {
         console.warn(`${ref.provider} stream ${ref.model} -> HTTP ${response.status}, trying next`)
@@ -712,7 +716,7 @@ Devuelve SOLO JSON válido:
       topP: 0.9,
       timeoutMs: 30000,
       // Calidad por delante de velocidad: el 8b inventa gramática y anglicismos.
-      models: [groq('llama-3.3-70b-versatile'), ...DEFAULT_MODEL_CHAIN],
+      models: [GROQ_FUERTE, ...DEFAULT_MODEL_CHAIN],
     },
   )
   const fallback = offlineSeoListing(originalTitle, typeFishing, price, currency)
@@ -885,7 +889,7 @@ Devuelve SOLO JSON válido: {"title": string (máx 90 caracteres), "description"
       maxTokens: 1000,
       temperature: 0.6,
       timeoutMs: 30000,
-      models: [groq('llama-3.3-70b-versatile'), ...DEFAULT_MODEL_CHAIN],
+      models: [GROQ_FUERTE, ...DEFAULT_MODEL_CHAIN],
     },
   )
   const parsed = parseAiJson('rewrite-product-copy', content)
@@ -1148,17 +1152,18 @@ Devuelve SOLO JSON válido: {"title": string, "seoTitle": string, "description":
          * Tres PRESUPUESTOS distintos, no tres modelos cualesquiera. Pulir 183
          * fichas agota cualquier cupo diario individual, así que la cadena está
          * pensada para que al acabarse uno siga habiendo otro:
-         *   1. Groq llama-3.3-70b — el más rápido (~4 s).
-         *   2. NVIDIA llama-3.3-70b — cupo independiente, más lento (~19 s)
-         *      pero mismo modelo y misma calidad de castellano.
+         *   1. Groq gpt-oss-120b — el más rápido (~1,5 s).
+         *   2. NVIDIA gemma-4-31b — cupo independiente, más lento (~16 s).
+         *      Es el mismo modelo que el Gemma de OpenRouter, pero NVIDIA no
+         *      lo cuenta contra las 50 peticiones/día de aquel.
          *   3. Los Gemma gratis de OpenRouter, como último recurso.
-         * El 8b de Groq queda fuera a propósito: inventa gramática ("¡Pescar ha
-         * nunca sido tan divertido!") y llegó a devolver JSON no parseable.
-         * El nemotron-49b de NVIDIA también: 54 s y JSON roto.
+         * NVIDIA retiró `meta/llama-3.3-70b-instruct` el 2026-08-26 (410 Gone),
+         * y de sus otros instruct los Mistral y el nemotron-70b dan 404 a esta
+         * cuenta. El nemotron-49b quedó fuera antes: 54 s y JSON roto.
          */
         models: [
-          groq('llama-3.3-70b-versatile'),
-          nvidia('meta/llama-3.3-70b-instruct'),
+          GROQ_FUERTE,
+          nvidia('google/gemma-4-31b-it'),
           openrouter('google/gemma-4-31b-it:free'),
           openrouter('google/gemma-4-26b-a4b-it:free'),
         ],
@@ -1308,7 +1313,7 @@ Devuelve SOLO JSON válido:
       // El Llama grande de Groq primero (rápido, sin razonar, 1.000/día de
       // cuota — de sobra para una guía que se genera de vez en cuando); la
       // pareja Gemma de OpenRouter como red si Groq fallara entero.
-      models: [groq('llama-3.3-70b-versatile'), openrouter('google/gemma-4-31b-it:free'), openrouter('google/gemma-4-26b-a4b-it:free')],
+      models: [GROQ_FUERTE, openrouter('google/gemma-4-31b-it:free'), openrouter('google/gemma-4-26b-a4b-it:free')],
     },
   )
   if (!content) {
@@ -1424,7 +1429,7 @@ Devuelve SOLO JSON válido:
       maxTokens: 3200,
       temperature: 0.6,
       timeoutMs: 30000,
-      models: [groq('llama-3.3-70b-versatile'), openrouter('google/gemma-4-31b-it:free'), openrouter('google/gemma-4-26b-a4b-it:free')],
+      models: [GROQ_FUERTE, openrouter('google/gemma-4-31b-it:free'), openrouter('google/gemma-4-26b-a4b-it:free')],
     },
   )
   if (!content) {
