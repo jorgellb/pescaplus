@@ -29,9 +29,10 @@ const openrouter = (model: string): ModelRef => ({ provider: 'openrouter', model
 const nvidia = (model: string): ModelRef => ({ provider: 'nvidia', model })
 
 /**
- * Groq va primero: gratis y con mucho más cupo que el nivel gratuito de
- * OpenRouter. Medido el 2026-11-10 en sus cabeceras: 1.000 peticiones/día y
- * 8.000 tokens/min POR MODELO (frente a las 50/día COMPARTIDAS de OpenRouter).
+ * Groq va DETRÁS de OpenRouter (decisión de Jorge, 2026-11-10), pero es el que
+ * aguanta el volumen: gratis y con mucho más cupo. Medido el 2026-11-10 en sus
+ * cabeceras: 1.000 peticiones/día y 8.000 tokens/min POR MODELO (frente a las
+ * 50/día COMPARTIDAS de OpenRouter gratis).
  *
  * El 2026-11-10 Groq retiró `llama-3.1-8b-instant` y `llama-3.3-70b-versatile`
  * (404 `model_not_found`) y el asistente se quedó mudo. Solo le quedan los
@@ -53,9 +54,14 @@ const GROQ_MODELS: ModelRef[] = [GROQ_FUERTE, GROQ_RAPIDO]
 
 /**
  * SOLO MODELOS GRATUITOS (":free") — decisión explícita de Jorge para no
- * gastar nada. Quedan como red de seguridad DETRÁS de Groq: si Groq entero
- * fallara (cuenta distinta, infraestructura distinta), esta cadena sigue
- * funcionando de forma independiente.
+ * gastar nada — y PRIMEROS de la cadena (también decisión suya, 2026-11-10).
+ *
+ * Ojo con el cupo: la cuenta no ha comprado nunca crédito, así que son 50
+ * peticiones/día para TODA la web (chat, fichas, pulido, guías y fotos), con
+ * reinicio a las 00:00 UTC. Al gastarse, OpenRouter responde 429 sin
+ * `retry-after` y con `x-ratelimit-reset` en milisegundos; `callAiModel` lo
+ * reconoce como cupo agotado, salta a Groq sin esperar y no vuelve a
+ * preguntar a OpenRouter hasta el reinicio (ver `cupoAgotadoHasta`).
  *
  * Probados uno a uno en vivo antes de elegir estos 4 (ver `proveedor-ia-openrouter`
  * en la memoria del proyecto). De los ~18 modelos gratuitos que ofrecía
@@ -81,8 +87,8 @@ const OPENROUTER_MODELS: string[] = (() => {
   return DEFAULT_OPENROUTER_MODELS
 })()
 
-/** Cadena por defecto: Groq primero (más rápido y con más cuota gratis diaria), OpenRouter como red detrás. */
-const DEFAULT_MODEL_CHAIN: ModelRef[] = [...GROQ_MODELS, ...OPENROUTER_MODELS.map(openrouter)]
+/** Cadena por defecto: OpenRouter gratis primero, Groq detrás (120b y luego 20b). */
+const DEFAULT_MODEL_CHAIN: ModelRef[] = [...OPENROUTER_MODELS.map(openrouter), ...GROQ_MODELS]
 
 /**
  * Reintentos del MISMO modelo ante un 429 antes de pasar al siguiente.
@@ -93,6 +99,53 @@ const DEFAULT_MODEL_CHAIN: ModelRef[] = [...GROQ_MODELS, ...OPENROUTER_MODELS.ma
  * caso queda holgado y sigue absorbiendo el 429 típico del límite por minuto.
  */
 const REINTENTOS_429 = 1
+
+/**
+ * Un 429 que pide esperar más que esto no es "espera un momento", es "se acabó
+ * el cupo del día": se salta el modelo en vez de esperar.
+ */
+const ESPERA_MAXIMA_S = 20
+
+/**
+ * Hasta cuándo (ms) no merece la pena preguntar a un cupo agotado. Vive en el
+ * proceso: tras un reinicio del servidor se pierde y basta un 429 para volver
+ * a aprenderlo.
+ */
+const cupoAgotadoHasta = new Map<string, number>()
+
+/**
+ * Los modelos `:free` de OpenRouter comparten UN cupo para toda la cuenta, así
+ * que un 429 de uno vale para todos. El resto de cupos son por modelo.
+ */
+function claveCupo(ref: ModelRef): string {
+  return ref.provider === 'openrouter' && ref.model.endsWith(':free') ? 'openrouter:free' : `${ref.provider}:${ref.model}`
+}
+
+function cupoAgotado(ref: ModelRef): boolean {
+  return Date.now() < (cupoAgotadoHasta.get(claveCupo(ref)) ?? 0)
+}
+
+/** Segundos que pide esperar un 429, si lo dice (`retry-after` o el reinicio en ms de OpenRouter). */
+function segundosHastaReintento(response: Response): number | null {
+  const retryAfter = Number(response.headers.get('retry-after'))
+  if (Number.isFinite(retryAfter) && retryAfter > 0) return retryAfter
+  // Groq manda aquí duraciones tipo "7.6s" (Number → NaN); OpenRouter, un instante en ms.
+  const reset = Number(response.headers.get('x-ratelimit-reset'))
+  if (Number.isFinite(reset) && reset > 1e12) return Math.max(0, (reset - Date.now()) / 1000)
+  return null
+}
+
+/**
+ * Si un 429 es de cupo agotado (espera larga), lo apunta y devuelve true para
+ * que quien llama pase al siguiente modelo sin esperar.
+ */
+function apuntarSiCupoAgotado(ref: ModelRef, response: Response): boolean {
+  const s = segundosHastaReintento(response)
+  if (s === null || s <= ESPERA_MAXIMA_S) return false
+  cupoAgotadoHasta.set(claveCupo(ref), Date.now() + s * 1000)
+  console.warn('%s %s -> cupo agotado durante %d min, paso al siguiente', ref.provider, ref.model, Math.round(s / 60))
+  return true
+}
 
 interface AiCallOptions {
   maxTokens?: number
@@ -124,6 +177,7 @@ async function callAiModel(
       : ref.provider === 'nvidia' ? NVIDIA_API_KEY
       : OPENROUTER_API_KEY
     if (!apiKey) continue // proveedor sin configurar: se salta sin ruido
+    if (cupoAgotado(ref)) continue // ya dijo hoy que no le queda cupo
     const headers: Record<string, string> = {
       Authorization: `Bearer ${apiKey}`,
       Accept: 'application/json',
@@ -159,13 +213,14 @@ async function callAiModel(
          * Se espera lo que pida el proveedor (`retry-after`) o un margen
          * creciente, y se reintenta el MISMO modelo. Solo al agotar los
          * reintentos se pasa al siguiente.
+         *
+         * Salvo que pida esperar horas: eso es el cupo del día (OpenRouter gratis
+         * tras sus 50 peticiones), y esperar solo retrasaría la respuesta de Groq.
          */
+        if (response.status === 429 && apuntarSiCupoAgotado(ref, response)) break
         if (response.status === 429 && intento < REINTENTOS_429) {
-          const retryAfter = Number(response.headers.get('retry-after'))
-          const esperaS = Number.isFinite(retryAfter) && retryAfter > 0
-            ? Math.min(retryAfter, 20)
-            : 3 * (intento + 1)
-          console.warn(`${ref.provider} ${ref.model} -> 429, esperando ${esperaS}s y reintentando`)
+          const esperaS = segundosHastaReintento(response) ?? 3 * (intento + 1)
+          console.warn('%s %s -> 429, esperando %ds y reintentando', ref.provider, ref.model, esperaS)
           await new Promise((r) => setTimeout(r, esperaS * 1000))
           continue
         }
@@ -386,14 +441,15 @@ async function* streamAiModel(
   { maxTokens = 1024, temperature = 0.7, topP = 0.95, idleMs = 20000 }: AiCallOptions = {},
 ): AsyncGenerator<string> {
   for (const ref of DEFAULT_MODEL_CHAIN) {
+    const isGroq = ref.provider === 'groq'
+    const baseUrl = isGroq ? GROQ_BASE_URL : OPENROUTER_BASE_URL
+    const apiKey = isGroq ? GROQ_API_KEY : OPENROUTER_API_KEY
+    if (!apiKey || cupoAgotado(ref)) continue
     const controller = new AbortController()
     let timer = setTimeout(() => controller.abort(), idleMs)
     let yielded = false
     let reader: ReadableStreamDefaultReader<Uint8Array> | undefined
     try {
-      const isGroq = ref.provider === 'groq'
-      const baseUrl = isGroq ? GROQ_BASE_URL : OPENROUTER_BASE_URL
-      const apiKey = isGroq ? GROQ_API_KEY : OPENROUTER_API_KEY
       const headers: Record<string, string> = {
         Authorization: `Bearer ${apiKey}`,
         Accept: 'text/event-stream',
@@ -410,6 +466,7 @@ async function* streamAiModel(
         body: JSON.stringify({ model: ref.model, messages, max_tokens: maxTokens, temperature, top_p: topP, stream: true, ...ref.extra }),
       })
       if (!response.ok || !response.body) {
+        if (response.status === 429 && apuntarSiCupoAgotado(ref, response)) continue
         console.warn(`${ref.provider} stream ${ref.model} -> HTTP ${response.status}, trying next`)
         continue
       }
@@ -715,8 +772,6 @@ Devuelve SOLO JSON válido:
       temperature: 0.6,
       topP: 0.9,
       timeoutMs: 30000,
-      // Calidad por delante de velocidad: el 8b inventa gramática y anglicismos.
-      models: [GROQ_FUERTE, ...DEFAULT_MODEL_CHAIN],
     },
   )
   const fallback = offlineSeoListing(originalTitle, typeFishing, price, currency)
@@ -889,7 +944,6 @@ Devuelve SOLO JSON válido: {"title": string (máx 90 caracteres), "description"
       maxTokens: 1000,
       temperature: 0.6,
       timeoutMs: 30000,
-      models: [GROQ_FUERTE, ...DEFAULT_MODEL_CHAIN],
     },
   )
   const parsed = parseAiJson('rewrite-product-copy', content)
@@ -1152,20 +1206,22 @@ Devuelve SOLO JSON válido: {"title": string, "seoTitle": string, "description":
          * Tres PRESUPUESTOS distintos, no tres modelos cualesquiera. Pulir 183
          * fichas agota cualquier cupo diario individual, así que la cadena está
          * pensada para que al acabarse uno siga habiendo otro:
-         *   1. Groq gpt-oss-120b — el más rápido (~1,5 s).
-         *   2. NVIDIA gemma-4-31b — cupo independiente, más lento (~16 s).
-         *      Es el mismo modelo que el Gemma de OpenRouter, pero NVIDIA no
-         *      lo cuenta contra las 50 peticiones/día de aquel.
-         *   3. Los Gemma gratis de OpenRouter, como último recurso.
+         *   1. Los Gemma gratis de OpenRouter (primero por decisión de Jorge).
+         *      Sus 50 peticiones/día se van en las primeras fichas; a partir
+         *      de ahí el 429 de cupo se salta al instante.
+         *   2. Groq gpt-oss-120b — el más rápido (~1,5 s) y el que aguanta.
+         *   3. NVIDIA gemma-4-31b — cupo independiente, más lento (~16 s).
+         *      Mismo modelo que el Gemma de OpenRouter, pero NVIDIA no lo
+         *      cuenta contra las 50 peticiones/día de aquel.
          * NVIDIA retiró `meta/llama-3.3-70b-instruct` el 2026-08-26 (410 Gone),
          * y de sus otros instruct los Mistral y el nemotron-70b dan 404 a esta
          * cuenta. El nemotron-49b quedó fuera antes: 54 s y JSON roto.
          */
         models: [
-          GROQ_FUERTE,
-          nvidia('google/gemma-4-31b-it'),
           openrouter('google/gemma-4-31b-it:free'),
           openrouter('google/gemma-4-26b-a4b-it:free'),
+          GROQ_FUERTE,
+          nvidia('google/gemma-4-31b-it'),
         ],
       },
     )
@@ -1313,7 +1369,7 @@ Devuelve SOLO JSON válido:
       // El Llama grande de Groq primero (rápido, sin razonar, 1.000/día de
       // cuota — de sobra para una guía que se genera de vez en cuando); la
       // pareja Gemma de OpenRouter como red si Groq fallara entero.
-      models: [GROQ_FUERTE, openrouter('google/gemma-4-31b-it:free'), openrouter('google/gemma-4-26b-a4b-it:free')],
+      models: [openrouter('google/gemma-4-31b-it:free'), openrouter('google/gemma-4-26b-a4b-it:free'), GROQ_FUERTE],
     },
   )
   if (!content) {
@@ -1345,7 +1401,7 @@ Devuelve SOLO JSON válido:
   ]
   const failed = checks.filter(([, ok]) => !ok).map(([k]) => k)
   if (failed.length) {
-    console.warn(`zone-guide ${facts.name}: validación fallida en [${failed.join(', ')}]`, {
+    console.warn('zone-guide %s: validación fallida en [%s]', facts.name, failed.join(', '), {
       intro: g.intro.length, species: g.species.length, techniques: g.techniques.length,
       seasons: g.seasons.length, tips: g.tips.map((t) => t.length),
     })
@@ -1429,7 +1485,7 @@ Devuelve SOLO JSON válido:
       maxTokens: 3200,
       temperature: 0.6,
       timeoutMs: 30000,
-      models: [GROQ_FUERTE, openrouter('google/gemma-4-31b-it:free'), openrouter('google/gemma-4-26b-a4b-it:free')],
+      models: [openrouter('google/gemma-4-31b-it:free'), openrouter('google/gemma-4-26b-a4b-it:free'), GROQ_FUERTE],
     },
   )
   if (!content) {
@@ -1461,7 +1517,7 @@ Devuelve SOLO JSON válido:
   ]
   const failed = checks.filter(([, ok]) => !ok).map(([k]) => k)
   if (failed.length) {
-    console.warn(`species-guide ${facts.name}: validación fallida en [${failed.join(', ')}]`, {
+    console.warn('species-guide %s: validación fallida en [%s]', facts.name, failed.join(', '), {
       intro: g.intro.length, where: g.where.length, techniques: g.techniques.length,
       seasons: g.seasons.length, tips: g.tips.map((t) => t.length),
     })
@@ -1499,12 +1555,12 @@ export interface SpeciesIdContext {
   month?: number | null
 }
 
-/** Una pasada de identificación contra un modelo con visión. */
+/** Una pasada de identificación contra el primer modelo con visión de `models` que conteste. */
 async function askVision(
   imageDataUrl: string,
   guide: string,
   ctx: SpeciesIdContext,
-  model: ModelRef,
+  models: ModelRef[],
 ): Promise<{ id: string; score: number; evidence: string }[] | null> {
   const donde = ctx.seaName ? `\nDÓNDE se ha pescado: ${ctx.seaName}.` : ''
   const cuando = ctx.month ? `\nMES: ${ctx.month} (1=enero, 12=diciembre).` : ''
@@ -1541,10 +1597,10 @@ Si en la foto no hay ningún animal de la guía, devuelve {"candidatos": []}.`,
         ],
       } as unknown as ChatMessage,
     ],
-    { maxTokens: 700, temperature: 0.1, timeoutMs: 40000, models: [model] },
+    { maxTokens: 700, temperature: 0.1, timeoutMs: 40000, models },
   )
 
-  const parsed = parseAiJson(`identify-species:${model.model}`, content)
+  const parsed = parseAiJson(`identify-species:${models[0]?.model}`, content)
   if (!parsed) return null
   const raw = Array.isArray(parsed.candidatos) ? parsed.candidatos : []
   return raw
@@ -1605,10 +1661,17 @@ export async function identifySpecies(
    * foto clara se resuelve con una sola llamada.
    */
   const SEGURO = 80
-  const a = await askVision(imageDataUrl, guide, ctx, openrouter('google/gemma-4-31b-it:free'))
+  /*
+   * La primera opinión tiene respaldo en el Gemma de NVIDIA (mismo modelo,
+   * cupo aparte): OpenRouter va primero en el chat y sus 50 peticiones/día
+   * gratis pueden estar gastadas cuando llega una foto. Medido el 2026-11-10:
+   * acierta sargo y dorada con seguridad 100 en ~3 s. La segunda opinión NO
+   * tiene ese respaldo a propósito: sería el mismo modelo opinando dos veces.
+   */
+  const a = await askVision(imageDataUrl, guide, ctx, [openrouter('google/gemma-4-31b-it:free'), nvidia('google/gemma-4-31b-it')])
   const dudaA = !a || a.length === 0 || (a[0]?.score ?? 0) < SEGURO
   const b = dudaA
-    ? await askVision(imageDataUrl, guide, ctx, openrouter('google/gemma-4-26b-a4b-it:free'))
+    ? await askVision(imageDataUrl, guide, ctx, [openrouter('google/gemma-4-26b-a4b-it:free')])
     : null
 
   // Ningún modelo contestó: es un fallo técnico (cuota, red), NO "no la
