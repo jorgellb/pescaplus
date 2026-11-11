@@ -2,6 +2,7 @@ import { unstable_cache, revalidateTag } from 'next/cache'
 import type { Product } from '@/types'
 import { CATALOG, slugify, filterProducts, type ProductFilter } from '@/lib/catalog'
 import { decodeEntities } from '@/lib/text'
+import { conSubcategoria } from '@/lib/subcategoria-auto'
 
 /**
  * Cache tag for the whole product catalog. Reads are served from one cached
@@ -250,7 +251,8 @@ async function ensureSeeded(prisma: any): Promise<void> {
 }
 
 function toProduct(row: any): Product {
-  return {
+  // Sin tipo guardado se deduce del título (ver lib/subcategoria-auto.ts).
+  return conSubcategoria({
     id: row.id,
     sku: row.sku,
     title: decodeEntities(row.title),
@@ -273,7 +275,7 @@ function toProduct(row: any): Product {
     seoTitle: decodeEntities(row.seoTitle ?? ''),
     seoDescription: decodeEntities(row.seoDescription || row.description?.slice(0, 160) || ''),
     aiOptimized: row.aiOptimized ?? false,
-  }
+  })
 }
 
 // ---------------------------------------------------------------------------
