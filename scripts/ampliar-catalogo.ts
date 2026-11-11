@@ -547,8 +547,24 @@ async function redactar() {
  * la marca pegada al final («… | PescaPlus»), el enlace a la categoría suelto
  * al final en vez de dentro de una frase, y espacios de más.
  */
+/**
+ * Marcas de vendedor que la tienda no enseña porque delatan el origen: la misma
+ * lista que el prompt del pulido (lib/openrouter-ai.ts) manda quitar. La IA a
+ * veces las deja (13 de 210 fichas el 2026-11-11), así que se quitan aquí.
+ */
+const MARCAS_DE_VENDEDOR = /\s*\b(deukio|sougayilang|zukibo|lixada|noeby|dndyuju|rooblinos|seasir|josby|pro ?beros|hirisi|anatono)\b\s*(?:-\s*)?/gi
+
+function sinMarcasDeVendedor(t: string): string {
+  const limpio = t
+    .replace(MARCAS_DE_VENDEDOR, ' ')
+    .replace(/\s+([,.;:!?)])/g, '$1')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+  return limpio.charAt(0).toUpperCase() + limpio.slice(1)
+}
+
 function limpiarSeo(seo: Seo, categoria: string, descripcionSeo: (p: { seoDescription: string; description: string }) => string): Seo {
-  const sinMarca = (t: string) => t.replace(/\s*[|·–-]\s*PescaPlus\s*\.?\s*$/i, '').replace(/\s+/g, ' ').trim()
+  const sinMarca = (t: string) => sinMarcasDeVendedor(t.replace(/\s*[|·–-]\s*PescaPlus\s*\.?\s*$/i, ''))
   // «… cada captura. [carretes de pesca](/categories/carretes)» → dentro de una frase.
   let description = seo.description
     .trim()
@@ -560,10 +576,10 @@ function limpiarSeo(seo: Seo, categoria: string, descripcionSeo: (p: { seoDescri
   return {
     title: sinSeparadorFinal(seo.title),
     seoTitle: sinSeparadorFinal(seo.seoTitle),
-    description: description.replace(/[ \t]+/g, ' '),
+    description: sinMarcasDeVendedor(description),
     // Frases enteras: la IA a veces se pasa de 160 y el recorte deja «…en PescaPlus y».
     seoDescription: descripcionSeo({ seoDescription: sinMarca(seo.seoDescription), description }),
-    imageAlts: seo.imageAlts.map((a) => a.trim()).filter(Boolean),
+    imageAlts: seo.imageAlts.map(sinMarcasDeVendedor).filter(Boolean),
   }
 }
 
