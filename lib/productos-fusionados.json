@@ -1,0 +1,8 @@
+{
+  "_que_es": "Fichas de producto fusionadas con otra: id que se borra -> id que se queda. next.config.ts redirige la ficha y /go/ del primero al segundo (308); scripts/fusionar-duplicados.mjs borra el primero de la base de datos. Solo se añade un par cuando es el MISMO articulo: comprobado el 2026-11-11 con las fotos, identicas en los tres pares.",
+  "fusionados": {
+    "allblue-levin-plantilla-de-metal-18g-26g-cebo-senuelos-mupypa3n": "allblue-levin-plantilla-de-metal-18g-26g-cebo-senuelos",
+    "9km-50-uds-anzuelos-de-pesca-de-vastago-largo-anzuelos-msfza5t0": "9km-50-uds-anzuelos-de-pesca-de-vastago-largo-anzuelos",
+    "blux-crazy-anguila-80mm-8-unids-bolsa-senuelo-senuelos-mupyr3yh": "blux-crazy-anguila-80mm-8-unids-bolsa-senuelo-senuelos"
+  }
+}

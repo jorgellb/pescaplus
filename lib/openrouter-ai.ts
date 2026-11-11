@@ -755,7 +755,7 @@ Modalidad: ${fishingLabel(typeFishing)} (${typeFishing}). Precio aprox: ${price 
 
 ${SPANISH_RULE}
 
-Conserva del título original los datos que el comprador busca (medida, material, ratio, capacidad, uso) y quita las marcas de vendedor de marketplace.
+Conserva del título original los datos que el comprador busca (medida, material, ratio, capacidad, uso) y quita las marcas de vendedor de marketplace. Conserva también lo que distingue a ESTE producto de otros parecidos: el tipo concreto («en T», «con rodamiento», «con caja»), el modelo y el formato (unidades, gramajes, medidas). Las marcas de pesca reconocidas (Shimano, Daiwa, Penn, Rapala, KastKing…) se conservan.
 
 Devuelve SOLO JSON válido:
 {"title": string (40-70 caracteres, describe el producto con su dato clave),
@@ -1135,7 +1135,7 @@ ${catLabel ? `- Categoría: ${catLabel} (página: ${catLink})` : ''}
 ${SPANISH_RULE}
 
 TAREAS:
-1. "title" (40-65 caracteres): quita marcas de vendedor de marketplace (DEUKIO, Sougayilang, Zukibo, Lixada, Noeby, DNDYUJU, Rooblinos, SEASIR, JOSBY, Proberos, Hirisi, Anatono…) y códigos raros, pero CONSERVA los datos que el comprador busca: medida, material, ratio, capacidad, uso (p. ej. "3 m", "fibra de carbono", "5.2:1", "agua salada"). MAYÚSCULAS A LA ESPAÑOLA: solo la primera palabra y los nombres propios. Se escribe "Caña telescópica de fibra de carbono 3 m", NO "Caña Telescópica De Fibra De Carbono" (eso es el estilo inglés y en castellano está mal).
+1. "title" (40-65 caracteres): quita marcas de vendedor de marketplace (DEUKIO, Sougayilang, Zukibo, Lixada, Noeby, DNDYUJU, Rooblinos, SEASIR, JOSBY, Proberos, Hirisi, Anatono…) y códigos raros, pero CONSERVA los datos que el comprador busca: medida, material, ratio, capacidad, uso (p. ej. "3 m", "fibra de carbono", "5.2:1", "agua salada"), y lo que distingue a ESTE producto de otros parecidos: tipo concreto, modelo y formato (unidades, gramajes). Un título genérico como "Carrete de pesca giratorio" vale para cien productos y no posiciona ninguno; las marcas de pesca reconocidas (Shimano, Daiwa, Penn, Rapala, KastKing…) se conservan. MAYÚSCULAS A LA ESPAÑOLA: solo la primera palabra y los nombres propios. Se escribe "Caña telescópica de fibra de carbono 3 m", NO "Caña Telescópica De Fibra De Carbono" (eso es el estilo inglés y en castellano está mal).
 2. "description" (3-5 frases, mínimo 200 caracteres): beneficios y usos reales, con las palabras clave integradas con naturalidad. Marca 2-3 conceptos clave con **negrita**.${catLink ? ` Incluye UNA sola vez, dentro de una frase, un enlace markdown a su categoría con esta forma EXACTA: [${ancla}](${catLink}). El texto del enlace debe ser palabras de verdad como "${ancla}" — NUNCA escribas literalmente "texto ancla".` : ''}
 3. "seoTitle" (50-60 caracteres, APROVÉCHALOS): la palabra clave principal al principio y " | PescaPlus" al final si cabe. Un meta título de 20 caracteres desperdicia el espacio donde caben las palabras que la gente busca. Escríbelo como una frase con sentido, no encadenando palabras clave con barras.
 4. "seoDescription" (entre 140 y 160 caracteres, NUNCA más de 160): resume el beneficio principal y termina con una llamada a la acción. Cuenta los caracteres y termina la frase — si te pasas de 160 se corta a media palabra en Google.${imageCount > 0 ? `\n5. "imageAlts": EXACTAMENTE ${imageCount} textos alternativos DISTINTOS entre sí, de 6 a 14 palabras, describiendo el producto y su uso; sin "imagen de", sin marcas de vendedor y sin comillas.` : ''}

@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import fusion from "./lib/productos-fusionados.json";
 
 // Content-Security-Policy tuned to what the storefront actually needs:
 // same-origin everything, inline styles/scripts (Next runtime + JSON-LD, no
@@ -87,6 +88,21 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
+  },
+  /**
+   * Fichas fusionadas: el duplicado que se borra lleva a la ficha que se queda.
+   *
+   * Va aquí y no en la página porque aquí sale un 308 de verdad: la ficha se
+   * pinta en streaming (hay un loading.tsx global), y una redirección lanzada
+   * desde la página puede acabar como una etiqueta meta con estado 200. Así
+   * Google pasa lo indexado a la ficha buena y los favoritos guardados siguen
+   * funcionando. La salida a la tienda (/go/) es temporal: no se cachea.
+   */
+  async redirects() {
+    return Object.entries(fusion.fusionados).flatMap(([de, a]) => [
+      { source: `/products/${de}`, destination: `/products/${a}`, permanent: true },
+      { source: `/go/${de}`, destination: `/go/${a}`, permanent: false },
+    ]);
   },
 };
 
