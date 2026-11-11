@@ -201,6 +201,59 @@ export async function getAliExpressProductDetail(
 }
 
 /**
+ * ¿Es un enlace que se puede sustituir sin perder nada?
+ *
+ * Sí: vacío, el enlace largo `/s/…` que devuelve `productdetail.get` (sale con
+ * `sk` y `aff_fsk` vacíos) o una ficha de producto sin parámetros de afiliado.
+ * No: todo lo demás, empezando por los `/e/_…` del portal de afiliados. Esos los
+ * pega Jorge a mano, y antes el refresco del lunes los pisaba con el de la API.
+ */
+export function esEnlaceReemplazable(url: string): boolean {
+  if (!url.trim()) return true
+  let u: URL
+  try {
+    u = new URL(url)
+  } catch {
+    return true
+  }
+  if (u.hostname === 's.click.aliexpress.com') return u.pathname.startsWith('/s/')
+  if (/(^|\.)aliexpress\.[a-z.]+$/.test(u.hostname) && u.pathname.startsWith('/item/')) {
+    return !/(^|[?&])(aff_|sk=)/.test(u.search)
+  }
+  return false
+}
+
+const ENLACE_CORTO = /^https:\/\/s\.click\.aliexpress\.com\/e\/[\w-]+$/
+
+/**
+ * Enlaces cortos (`/e/_…`) para varios productos, con
+ * `aliexpress.affiliate.link.generate`: son los mismos que da el portal de
+ * afiliados, con la clave `sk` incluida. Devuelve id → enlace; lo que falle se
+ * queda fuera, y quien llama conserva el enlace que tenía.
+ */
+export async function generarEnlacesCortos(productIds: string[]): Promise<Map<string, string>> {
+  const enlaces = new Map<string, string>()
+  if (productIds.length === 0) return enlaces
+  try {
+    const data = (await callApi('aliexpress.affiliate.link.generate', {
+      promotion_link_type: '0',
+      source_values: productIds.map((id) => `https://www.aliexpress.com/item/${id}.html`).join(','),
+      tracking_id: TRACKING_ID,
+    })) as {
+      resp_result?: { result?: { promotion_links?: { promotion_link?: { promotion_link?: string; source_value?: string }[] } } }
+    }
+    // La respuesta no respeta el orden de la petición: se empareja por la URL de origen.
+    for (const l of data.resp_result?.result?.promotion_links?.promotion_link ?? []) {
+      const id = l.source_value?.match(/\/item\/(\d+)\.html/)?.[1]
+      if (id && l.promotion_link && ENLACE_CORTO.test(l.promotion_link)) enlaces.set(id, l.promotion_link)
+    }
+  } catch (error) {
+    console.warn('AliExpress link.generate failed, keeping the API links:', error)
+  }
+  return enlaces
+}
+
+/**
  * Batch-fetch several products by id (aliexpress.affiliate.productdetail.get
  * accepts a comma-separated list). Used by the price/link refresh job.
  */

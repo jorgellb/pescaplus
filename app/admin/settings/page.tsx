@@ -82,7 +82,10 @@ export default function AdminSettingsPage() {
     const res = await fetch('/api/admin/refresh', { method: 'POST' })
     const data = await res.json()
     if (data.success && data.configured) {
-      setNote(`✅ Precios/enlaces revisados: ${data.updated} actualizados, ${data.unavailable} marcados sin stock (de ${data.checked}).`)
+      setNote(
+        `✅ Precios/enlaces revisados: ${data.updated} actualizados, ${data.unavailable} marcados sin stock (de ${data.checked}).` +
+          (data.shortened ? ` ${data.shortened} enlaces pasados a enlace corto; los pegados a mano no se tocan.` : ''),
+      )
     } else if (data.success && !data.configured) {
       setNote('⚠️ AliExpress no está configurado (define ALIEXPRESS_APP_KEY/SECRET).')
     } else {
