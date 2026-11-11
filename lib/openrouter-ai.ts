@@ -1,6 +1,7 @@
 import type { ChatMessage } from '@/types'
 import type { ProductInput } from '@/lib/products-store'
 import { fishingLabel, getFishingType, FISHING_TYPES } from '@/lib/fishing'
+import { recortarPorPalabras } from '@/lib/seo-producto'
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY
 const OPENROUTER_BASE_URL = process.env.OPENROUTER_BASE_URL ?? 'https://openrouter.ai/api/v1'
@@ -26,7 +27,17 @@ interface ModelRef {
 }
 const groq = (model: string, extra?: Record<string, unknown>): ModelRef => ({ provider: 'groq', model, extra })
 const openrouter = (model: string): ModelRef => ({ provider: 'openrouter', model })
-const nvidia = (model: string): ModelRef => ({ provider: 'nvidia', model })
+const nvidia = (model: string, extra?: Record<string, unknown>): ModelRef => ({ provider: 'nvidia', model, extra })
+
+/**
+ * El de NVIDIA para el pulido SEO desde el 2026-11-11, cuando `google/gemma-4-31b-it`
+ * pasó a dar 404 (sigue en la lista de /models, pero «Function not found for
+ * account»). De los que esta cuenta puede usar, es el único que contesta rápido
+ * (~1,6 s) y en JSON. Es razonador: SIN `enable_thinking: false` gasta los 1.200
+ * tokens pensando y devuelve el texto vacío (medido), igual que les pasaba a los
+ * gpt-oss de Groq sin `reasoning_effort`. Por eso el parámetro va pegado.
+ */
+const NVIDIA_PULIDO = nvidia('nvidia/nemotron-3.5-lightning-30b-a3b', { chat_template_kwargs: { enable_thinking: false } })
 
 /**
  * Groq va DETRÁS de OpenRouter (decisión de Jorge, 2026-11-10), pero es el que
@@ -1063,7 +1074,9 @@ function seoProblems(
   if (SEO_BANNED.test(todo)) malos.push('vocabulario impropio (caza/inglés)')
   if (SEO_PLACEHOLDER.test(todo)) malos.push('ha copiado un marcador del prompt')
 
-  if (p.title.length < 15 || p.title.length > 70) malos.push(`título de ${p.title.length} car.`)
+  // Solo se rechaza un título absurdo de corto: uno largo lo recorta el código
+  // por una pausa (ver `recortar`), que es exacto y no falla.
+  if (p.title.length < 15) malos.push(`título de ${p.title.length} car.`)
   if (p.title === p.title.toLowerCase()) malos.push('título todo en minúsculas')
   if (p.title === p.title.toUpperCase()) malos.push('título todo en mayúsculas')
 
@@ -1109,6 +1122,20 @@ export async function polishProductSeo(input: {
   seoDescription?: string
   typeFishing?: string
   imageCount?: number
+  /**
+   * `lote`: para trabajos de muchas fichas seguidas (scripts/ampliar-catalogo.ts).
+   * Usa NVIDIA y, si falla, el Groq grande, y NUNCA OpenRouter: sus 50
+   * peticiones al día son lo primero que usa el asesor del chat, y un lote se
+   * las comería en minutos. Si el Groq grande se agota, el chat sigue con el
+   * pequeño, que tiene cupo propio.
+   */
+  cadena?: 'normal' | 'lote'
+  /**
+   * Del producto solo se sabe el título (alta nueva desde la tienda, que no da
+   * descripción). Probado el 2026-11-11: sin esta regla el modelo rellenaba
+   * con datos inventados («fibra de carbono», «capacidad 0,20-0,35 mm»).
+   */
+  soloTitulo?: boolean
 }): Promise<PolishedProduct> {
   const current = {
     title: input.title,
@@ -1140,7 +1167,8 @@ TAREAS:
 3. "seoTitle" (50-60 caracteres, APROVÉCHALOS): la palabra clave principal al principio y " | PescaPlus" al final si cabe. Un meta título de 20 caracteres desperdicia el espacio donde caben las palabras que la gente busca. Escríbelo como una frase con sentido, no encadenando palabras clave con barras.
 4. "seoDescription" (entre 140 y 160 caracteres, NUNCA más de 160): resume el beneficio principal y termina con una llamada a la acción. Cuenta los caracteres y termina la frase — si te pasas de 160 se corta a media palabra en Google.${imageCount > 0 ? `\n5. "imageAlts": EXACTAMENTE ${imageCount} textos alternativos DISTINTOS entre sí, de 6 a 14 palabras, describiendo el producto y su uso; sin "imagen de", sin marcas de vendedor y sin comillas.` : ''}
 
-${BRAND_RULE}
+${BRAND_RULE}${input.soloTitulo ? `
+SOLO SABES LO QUE DICE EL TÍTULO: no añadas materiales, medidas, pesos, capacidades, compatibilidades ni prestaciones que no aparezcan en él. Si un dato no está, no lo digas: explica para qué sirve este tipo de producto y en qué pesca se usa. En los textos alternativos describe solo lo que el título deja claro.` : ''}
 Devuelve SOLO JSON válido: {"title": string, "seoTitle": string, "description": string, "seoDescription": string${imageCount > 0 ? ', "imageAlts": string[]' : ''}}`
 
   /**
@@ -1162,7 +1190,7 @@ Devuelve SOLO JSON válido: {"title": string, "seoTitle": string, "description":
 
   const recortar = (p: ReturnType<typeof leer>) => ({
     ...p,
-    title: p.title.slice(0, 140),
+    title: recortarPorPalabras(p.title, 70),
     // 60 es lo que enseña Google antes de cortar con puntos suspensivos.
     seoTitle: recorteLimpio(p.seoTitle, 60),
     description: p.description.slice(0, 1400),
@@ -1217,12 +1245,14 @@ Devuelve SOLO JSON válido: {"title": string, "seoTitle": string, "description":
          * y de sus otros instruct los Mistral y el nemotron-70b dan 404 a esta
          * cuenta. El nemotron-49b quedó fuera antes: 54 s y JSON roto.
          */
-        models: [
-          openrouter('google/gemma-4-31b-it:free'),
-          openrouter('google/gemma-4-26b-a4b-it:free'),
-          GROQ_FUERTE,
-          nvidia('google/gemma-4-31b-it'),
-        ],
+        models: input.cadena === 'lote'
+          ? [NVIDIA_PULIDO, GROQ_FUERTE]
+          : [
+              openrouter('google/gemma-4-31b-it:free'),
+              openrouter('google/gemma-4-26b-a4b-it:free'),
+              GROQ_FUERTE,
+              NVIDIA_PULIDO,
+            ],
       },
     )
     const parsed = parseAiJson('polish-product-seo', content)
@@ -1230,6 +1260,15 @@ Devuelve SOLO JSON válido: {"title": string, "seoTitle": string, "description":
     hubeRespuesta = true
 
     const cand = leer(parsed)
+    /*
+     * El enlace a la categoría lo puede poner el código, así que no se rechaza
+     * una ficha buena solo por olvidarlo: se añade al final, dentro de una
+     * frase. Medido el 2026-11-11 con el modelo de NVIDIA: lo olvidaba en 3 de
+     * cada 5 fichas, y cada rechazo era una petición más de cupo.
+     */
+    if (catLink && ancla && !cand.description.includes(`](${catLink})`)) {
+      cand.description = `${cand.description.trim()} Encuentra más opciones en nuestra sección de [${ancla}](${catLink}).`
+    }
     const fallos = seoProblems(cand, catLink)
     if (fallos.length === 0) return { ...recortar(cand), generatedBy: 'ai' }
 

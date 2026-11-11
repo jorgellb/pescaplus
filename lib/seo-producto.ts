@@ -67,7 +67,9 @@ export function recortarPorPalabras(texto: string, max: number): string {
   const t = espacios(texto)
   if (t.length <= max) return t
   const tramo = t.slice(0, max + 1)
-  const pausa = Math.max(tramo.lastIndexOf(':'), tramo.lastIndexOf(','), tramo.lastIndexOf(' - '), tramo.lastIndexOf(' – '), tramo.lastIndexOf(' | '))
+  // Dos puntos y comas entre cifras no son pausas: «5,2:1», «0,8 mm».
+  let pausa = -1
+  for (const m of tramo.matchAll(/(?<!\d)[:,](?!\d)| [-–|] /g)) pausa = m.index ?? pausa
   if (pausa >= max * 0.55) return limpiarCola(tramo.slice(0, pausa))
   const espacio = tramo.lastIndexOf(' ')
   return limpiarCola(espacio > 0 ? tramo.slice(0, espacio) : t.slice(0, max))

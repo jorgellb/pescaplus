@@ -72,6 +72,11 @@ describe('tituloSeo', () => {
     expect(quitarMarca('Caña X')).toBe('Caña X')
   })
 
+  it('no toma por pausa los dos puntos ni la coma de una cifra', () => {
+    const t = recortarPorPalabras('Carrete giratorio ultraligero ratio 5,2:1 arrastre 26LB metal CNC agua dulce y salada', 60)
+    expect(t).toBe('Carrete giratorio ultraligero ratio 5,2:1 arrastre 26LB')
+  })
+
   it('recortarPorPalabras no parte palabras', () => {
     expect(recortarPorPalabras('uno dos tres cuatro', 12)).toBe('uno dos tres')
     expect(recortarPorPalabras('corto', 60)).toBe('corto')
