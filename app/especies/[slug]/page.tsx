@@ -3,7 +3,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import Layout from '@/components/Layout'
-import { SEA_SPECIES, MONTHS_SHORT, deSpecies } from '@/lib/fishing-species'
+import { SEA_SPECIES, MONTHS_SHORT, deSpecies, elSpecies } from '@/lib/fishing-species'
+import { enumerar } from '@/lib/seo-producto'
 import { FRESHWATER_SPECIES, isFreshwater } from '@/lib/freshwater-species'
 
 import { zonesForSpecies } from '@/lib/species-zones'
@@ -14,6 +15,10 @@ import { NATIONAL_SIZES_URL } from '@/lib/fishing-regulations'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
 import { safeJsonLd } from '@/lib/json-ld'
 import Icon, { type IconName } from '@/components/icons/Icon'
+import ProductCard from '@/components/ProductCard'
+import { listProducts } from '@/lib/products-store'
+import { especiesDeNudo, productosParaEspecie, zonasRepartidas } from '@/lib/enlazado'
+import { FICHAS } from '@/lib/knots'
 
 /*
  * Mar y agua dulce comparten ficha.
@@ -83,13 +88,34 @@ export default async function SpeciesPage({ params }: Params) {
   const sp = TODAS_LAS_ESPECIES.find((s) => s.id === slug)
   if (!sp) notFound()
 
-  const taxonomy = await getTaxonomy()
+  const [taxonomy, productos] = await Promise.all([
+    getTaxonomy(),
+    // El material es un extra de la ficha: si el catálogo no responde, la
+    // ficha de la especie sale igual, sin esa sección.
+    listProducts().catch(() => []),
+  ])
+  /*
+   * La vuelta del enlazado de las fichas de producto: los productos que nombran
+   * esta especie o que usan una técnica con la que se pesca (lib/enlazado.ts),
+   * y los nudos cuya ficha la menciona.
+   */
+  const material = productosParaEspecie(sp, productos, 8)
+  const nudosDeLaEspecie = FICHAS.filter((f) => especiesDeNudo(f).includes(sp.id))
+  const tecnicasDelMaterial = [...new Set(material.flatMap((m) => (m.tecnica ? [m.tecnica.nombre] : [])))]
+  const nombraAlguno = material.some((m) => m.motivo === 'menciona')
+  const explicaMaterial = [
+    nombraAlguno ? `Aparejos cuya ficha nombra ${elSpecies(sp)}` : 'Aparejos',
+    tecnicasDelMaterial.length
+      ? `${nombraAlguno ? ' o' : ''} de ${enumerar(tecnicasDelMaterial)}, ${tecnicasDelMaterial.length > 1 ? 'técnicas' : 'la técnica'} con que se pesca.`
+      : '.',
+  ].join('')
   const currentMonth = Number(new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Madrid', month: 'numeric' }).format(new Date()))
   const inSeason = sp.bestMonths.includes(currentMonth)
   // Las zonas son 187 localidades COSTERAS. Preguntar por ellas en un lucio
   // devolvería una lista vacía, pero es más honesto no preguntar: deja claro en
   // el código que la sección de zonas es cosa del mar.
-  const spots = isFreshwater(sp.id) ? [] : zonesForSpecies(sp.id).slice(0, 18)
+  const spots = isFreshwater(sp.id) ? [] : zonasRepartidas(sp.id, 18)
+  const totalZonas = isFreshwater(sp.id) ? 0 : zonesForSpecies(sp.id).length
 
   /**
    * La prosa de la especie. Las fichas eran ricas en DATOS y pobres en texto:
@@ -361,6 +387,33 @@ export default async function SpeciesPage({ params }: Params) {
           )
         })}
 
+        {material.length > 0 && (
+          <div className="space-y-4">
+            <div className="flex flex-col gap-1 border-b border-ink/[0.07] pb-3">
+              <h2 className="font-display uppercase text-2xl md:text-3xl leading-none">Material para pescar {sp.name.toLowerCase()}</h2>
+              <p className="text-sm text-ink/60">{explicaMaterial}</p>
+            </div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
+              {material.map((m) => (
+                <ProductCard key={m.product.id} {...m.product} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {nudosDeLaEspecie.length > 0 && (
+          <div className="space-y-3">
+            <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60">Nudos y montajes para {elSpecies(sp)}</p>
+            <div className="flex flex-wrap gap-2">
+              {nudosDeLaEspecie.map((f) => (
+                <Link key={f.id} href={`/nudos/${f.id}`} className="px-3 py-1.5 text-sm font-semibold text-ink border border-ink/10 rounded-full hover:bg-ink hover:text-paper transition-colors">
+                  {f.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Where */}
         {spots.length > 0 && (
           <div className="space-y-3">
@@ -377,6 +430,11 @@ export default async function SpeciesPage({ params }: Params) {
                   {s.name} <span className="font-mono text-[10px] uppercase tracking-widest opacity-50">{s.region}</span>
                 </Link>
               ))}
+              {totalZonas > spots.length && (
+                <Link href="/pesca" className="px-3 py-1.5 text-sm font-semibold text-accent hover:underline">
+                  y {totalZonas - spots.length} zonas más →
+                </Link>
+              )}
             </div>
           </div>
         )}
@@ -398,7 +456,8 @@ export default async function SpeciesPage({ params }: Params) {
         <div>
           <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60 mb-3">Otras especies</p>
           <div className="flex flex-wrap gap-2">
-            {SEA_SPECIES.filter((o) => o.id !== sp.id).map((o) => (
+            {/* Las del mismo agua: a quien lee sobre el lucio le sirven la lucioperca y el black bass, no el congrio. */}
+            {(isFreshwater(sp.id) ? FRESHWATER_SPECIES : SEA_SPECIES).filter((o) => o.id !== sp.id).map((o) => (
               <Link key={o.id} href={`/especies/${o.id}`} className="px-3 py-1.5 text-xs font-bold text-ink border border-ink/10 rounded-full hover:bg-ink hover:text-paper transition-colors">
                 {o.name}
               </Link>

@@ -3,9 +3,11 @@ import { notFound } from 'next/navigation'
 import Layout from '@/components/Layout'
 import CategoryIcon from '@/components/graphics/CategoryIcon'
 import CategoryBrowser from './CategoryBrowser'
+import ExploraCategoria from '@/components/ExploraCategoria'
 import { FISHING_TYPES, getFishingType } from '@/lib/fishing'
 import { getTrendingRanked } from '@/lib/trending'
 import { getTaxonomy, categoryName, subcategoriesOf, seoText } from '@/lib/taxonomy-store'
+import { listGuides } from '@/lib/guides-store'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
 import { safeJsonLd } from '@/lib/json-ld'
 
@@ -45,7 +47,12 @@ export default async function CategoryPage({ params }: Params) {
   const fishingType = getFishingType(category)
   // Categoría inventada: 404 de verdad, antes de tocar la base de datos.
   if (!fishingType) notFound()
-  const [products, taxonomy] = await Promise.all([getTrendingRanked(category), getTaxonomy()])
+  const [products, taxonomy, guias] = await Promise.all([
+    getTrendingRanked(category),
+    getTaxonomy(),
+    // Las guías son un extra: si no se pueden leer, la categoría sale igual.
+    listGuides({ publishedOnly: true }).catch(() => []),
+  ])
   const catName = categoryName(taxonomy, category)
   const subcategories = subcategoriesOf(taxonomy, category)
   const categoryDescription = fishingType?.tagline ?? 'Los mejores aparejos para tus salidas de pesca.'
@@ -94,6 +101,17 @@ export default async function CategoryPage({ params }: Params) {
       <section className="max-w-7xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
         <CategoryBrowser category={category} initialProducts={products} subcategories={subcategories} />
       </section>
+
+      <div className="max-w-7xl mx-auto px-4 pb-14 sm:px-6 lg:px-8">
+        <ExploraCategoria
+          categoria={category}
+          nombre={catName}
+          nombres={Object.fromEntries(taxonomy.map((c) => [c.id, c.name]))}
+          subcategorias={subcategories.map((s) => ({ ...s, count: products.filter((p) => p.subcategories.includes(s.id)).length }))}
+          hayRanking={products.length > 0}
+          guias={guias.filter((g) => g.typeFishing === category)}
+        />
+      </div>
     </Layout>
   )
 }

@@ -5,6 +5,9 @@ import Layout from '@/components/Layout'
 import Diagrama from '@/components/nudos/Diagrama'
 import PasoSVG from '@/components/nudos/PasoSVG'
 import { FICHAS, ficha } from '@/lib/knots'
+import ProductCard from '@/components/ProductCard'
+import { listProducts } from '@/lib/products-store'
+import { idDeEspeciePorNombre, productosParaNudo } from '@/lib/enlazado'
 import { getTaxonomy, categoryName } from '@/lib/taxonomy-store'
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
 import { safeJsonLd } from '@/lib/json-ld'
@@ -36,7 +39,13 @@ export default async function FichaNudo({ params }: Params) {
   const f = ficha(slug)
   if (!f) notFound()
 
-  const taxonomy = await getTaxonomy()
+  const [taxonomy, productos] = await Promise.all([
+    getTaxonomy(),
+    // El material es un extra: si el catálogo no responde, la ficha sale igual.
+    listProducts().catch(() => []),
+  ])
+  // Material para practicarlo, de sus categorías y primero el de sus especies.
+  const material = productosParaNudo(f, productos, 4)
   const breadcrumbLd = breadcrumbJsonLd([
     { name: 'Inicio', url: SITE_URL },
     { name: 'Nudos y montajes', url: `${SITE_URL}/nudos` },
@@ -160,6 +169,13 @@ export default async function FichaNudo({ params }: Params) {
             <h2 className="font-display uppercase text-2xl text-ink leading-none border-b border-ink/[0.07] pb-2">
               Lo que necesitas
             </h2>
+            {material.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {material.map((p) => (
+                  <ProductCard key={p.id} {...p} />
+                ))}
+              </div>
+            )}
             <div className="flex flex-wrap gap-2">
               {f.gearCats.map((c) => (
                 <Link
@@ -176,10 +192,34 @@ export default async function FichaNudo({ params }: Params) {
 
         {f.especies && f.especies.length > 0 && (
           <p className="text-[13px] text-ink/60">
-            Se usa sobre todo con: <span className="text-ink">{f.especies.join(', ')}</span>.{' '}
-            <Link href="/especies" className="text-accent underline">Ver las fichas de especie</Link>.
+            Se usa sobre todo con:{' '}
+            {f.especies.map((nombre, i) => {
+              const id = idDeEspeciePorNombre(nombre)
+              return (
+                <span key={nombre}>
+                  {i > 0 && ', '}
+                  {id ? (
+                    <Link href={`/especies/${id}`} className="text-accent font-semibold hover:underline">{nombre}</Link>
+                  ) : (
+                    <span className="text-ink">{nombre}</span>
+                  )}
+                </span>
+              )
+            })}
+            .
           </p>
         )}
+
+        <div>
+          <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60 mb-3">Otros nudos y montajes</p>
+          <div className="flex flex-wrap gap-2">
+            {FICHAS.filter((o) => o.id !== f.id).map((o) => (
+              <Link key={o.id} href={`/nudos/${o.id}`} className="px-3 py-1.5 text-xs font-bold text-ink border border-ink/10 rounded-full hover:bg-ink hover:text-paper transition-colors">
+                {o.name}
+              </Link>
+            ))}
+          </div>
+        </div>
       </section>
     </Layout>
   )

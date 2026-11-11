@@ -402,11 +402,31 @@ export function zonasParaEnlazar(especieId: string, desde: string, max = 4): Fis
   return salida
 }
 
+/**
+ * Las zonas de una especie repartidas por la costa, por turnos de región y en
+ * el orden de la costa. La ficha de especie enlazaba las 18 primeras de la
+ * lista, y para la lubina eran las 18 de Galicia: ni una de Cantabria, del
+ * Mediterráneo o de Canarias.
+ */
+export function zonasRepartidas(especieId: string, max: number): FishingSpot[] {
+  const porRegion = new Map<string, FishingSpot[]>()
+  for (const z of zonesForSpecies(especieId)) porRegion.set(z.region, [...(porRegion.get(z.region) ?? []), z])
+  const colas = [...porRegion.values()]
+  const salida: FishingSpot[] = []
+  for (let vuelta = 0; salida.length < max && colas.some((c) => c.length > vuelta); vuelta++) {
+    for (const cola of colas) {
+      if (cola[vuelta] && salida.length < max) salida.push(cola[vuelta])
+    }
+  }
+  return salida
+}
+
 /* ------------------------------------------------------------------------ */
 /* Producto ↔ nudos y montajes                                               */
 /* ------------------------------------------------------------------------ */
 
-function idDeEspeciePorNombre(nombre: string): string | null {
+/** «Lecha (pez limón)» → 'lechas'. Null si no hay ficha con ese nombre. */
+export function idDeEspeciePorNombre(nombre: string): string | null {
   const n = normalizar(nombre).replace(/\s*\(.*\)$/, '')
   return TODAS_LAS_ESPECIES.find((sp) => normalizar(sp.name) === n)?.id ?? null
 }
@@ -511,4 +531,31 @@ export function temporada(sp: Pick<SpeciesProfile, 'bestMonths'>): string {
   }
   if (largo === meses.length) return largo === 1 ? MESES[inicio - 1] : `${MESES[inicio - 1]}–${MESES[fin - 1]}`
   return [...meses].sort((a, b) => a - b).map((m) => MESES[m - 1]).join(', ')
+}
+
+/* ------------------------------------------------------------------------ */
+/* Guía → especies y productos                                               */
+/* ------------------------------------------------------------------------ */
+
+type Texto = { title: string; content: string; typeFishing: string }
+
+/** Las especies de las que habla una guía, con la misma regla que un producto. */
+export function especiesDeGuia(g: Texto, max = 8): EspecieDelProducto[] {
+  return especiesDeProducto({ title: g.title, description: g.content, typeFishing: g.typeFishing, categories: g.typeFishing ? [g.typeFishing] : [] }, max)
+}
+
+/**
+ * El material que acompaña a una guía: de su categoría, primero lo que comparte
+ * especie o técnica con lo que la guía cuenta.
+ */
+export function productosParaGuia(g: Texto, todos: Product[], max = 4): Product[] {
+  if (!g.typeFishing) return []
+  const especies = new Set(especiesDeGuia(g, TODAS_LAS_ESPECIES.length).map((e) => e.especie.id))
+  const tecnicas = new Set(tecnicasDeProducto({ title: g.title, description: g.content, typeFishing: g.typeFishing }).map((t) => t.id))
+  return todos
+    .filter((p) => p.inStock && (p.typeFishing === g.typeFishing || p.categories?.includes(g.typeFishing)))
+    .map((p) => ({ p, s: 2 * comunes(huella(p).especies, especies) + 2 * comunes(huella(p).tecnicas, tecnicas) }))
+    .sort((a, b) => b.s - a.s || popularidad(b.p) - popularidad(a.p) || ordenEstable(a.p, b.p))
+    .slice(0, max)
+    .map(({ p }) => p)
 }

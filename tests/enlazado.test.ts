@@ -12,8 +12,11 @@ import {
   productosParecidos,
   tecnicasDeProducto,
   temporada,
+  especiesDeGuia,
+  productosParaGuia,
   vecinosDe,
   zonasParaEnlazar,
+  zonasRepartidas,
 } from '@/lib/enlazado'
 
 /*
@@ -185,5 +188,30 @@ describe('temporada', () => {
     expect(temporada({ bestMonths: [5, 6, 7] })).toBe('may–jul')
     expect(temporada({ bestMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] })).toBe('todo el año')
     expect(temporada({ bestMonths: [3, 7] })).toBe('mar, jul')
+  })
+})
+
+describe('zonasRepartidas', () => {
+  it('reparte las zonas de la lubina por regiones en vez de quedarse en Galicia', () => {
+    const z = zonasRepartidas('lubina', 18)
+    expect(z).toHaveLength(18)
+    expect(new Set(z.map((x) => x.region)).size).toBeGreaterThan(5)
+    expect(new Set(z.map((x) => x.slug)).size).toBe(18)
+  })
+})
+
+describe('guías', () => {
+  const guia = { title: 'Señuelos para depredadores', content: 'Para la lubina, vinilos de spinning a primera hora.', typeFishing: 'senuelos' }
+
+  it('enlaza las especies de las que habla la guía', () => {
+    expect(especiesDeGuia(guia).map((e) => e.especie.id)).toContain('lubina')
+  })
+
+  it('el material va de su categoría, primero lo que comparte especie o técnica', () => {
+    const nombra = producto({ id: 'n', title: 'Vinilo para lubina', reviews: 1 })
+    const otro = producto({ id: 'o', title: 'Cucharilla giratoria', reviews: 9000 })
+    const fuera = producto({ id: 'f', title: 'Carrete para lubina', typeFishing: 'carretes', categories: ['carretes'] })
+    expect(productosParaGuia(guia, [otro, fuera, nombra]).map((p) => p.id)).toEqual(['n', 'o'])
+    expect(productosParaGuia({ ...guia, typeFishing: '' }, [nombra])).toEqual([])
   })
 })

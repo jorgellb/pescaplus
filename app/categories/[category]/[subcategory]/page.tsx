@@ -11,6 +11,8 @@ import { getTaxonomy, categoryName, subcategoriesOf, seoText, seoMeta } from '@/
 import { SITE_URL, breadcrumbJsonLd } from '@/lib/seo'
 import { safeJsonLd } from '@/lib/json-ld'
 import Icon from '@/components/icons/Icon'
+import ExploraCategoria from '@/components/ExploraCategoria'
+import { listGuides } from '@/lib/guides-store'
 
 type Params = { params: Promise<{ category: string; subcategory: string }> }
 
@@ -60,13 +62,21 @@ export default async function SubcategoryPage({ params }: Params) {
   const fishingType = getFishingType(category)
   if (!fishingType) notFound()
 
-  const [ranked, tax] = await Promise.all([getTrendingRanked(category), getTaxonomy()])
+  const [ranked, tax, guias] = await Promise.all([
+    getTrendingRanked(category),
+    getTaxonomy(),
+    listGuides({ publishedOnly: true }).catch(() => []),
+  ])
   const catName = categoryName(tax, category)
   const subs = subcategoriesOf(tax, category)
   const sub = subs.find((s) => s.id === subcategory)
   if (!sub) notFound()
 
   const products = ranked.filter((p) => p.subcategories.includes(subcategory))
+  const cuantos = (id: string) => ranked.filter((p) => p.subcategories.includes(id)).length
+  // Solo se enlazan los tipos con productos: uno vacío es una página sin nada
+  // que Google indexaría como contenido pobre.
+  const subsConProductos = subs.filter((s) => s.id === subcategory || cuantos(s.id) > 0)
   const description = `${sub.name} para ${catName.toLowerCase()}. ${fishingType.tagline} Encuentra el modelo ideal al mejor precio y con envío rápido.`
   const texto = await seoText(category, subcategory)
 
@@ -112,11 +122,11 @@ export default async function SubcategoryPage({ params }: Params) {
 
       <section className="max-w-7xl mx-auto px-4 py-10 sm:px-6 lg:px-8 space-y-8">
         {/* Sibling subcategories (real pages) */}
-        {subs.length > 1 && (
+        {subsConProductos.length > 1 && (
           <div className="flex flex-wrap gap-2">
             <span className="inline-flex items-center font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60 mr-1">Subcategorías:</span>
             <Link href={`/categories/${category}`} className="px-3.5 py-1.5 text-[11px] font-semibold border border-ink/10 rounded-full text-ink hover:bg-ink hover:text-paper transition-colors">Todas</Link>
-            {subs.map((s) => (
+            {subsConProductos.map((s) => (
               <Link
                 key={s.id}
                 href={`/categories/${category}/${s.id}`}
@@ -150,6 +160,18 @@ export default async function SubcategoryPage({ params }: Params) {
             ))}
           </div>
         )}
+
+        <div className="pt-6">
+          <ExploraCategoria
+            categoria={category}
+            nombre={catName}
+            nombres={Object.fromEntries(tax.map((c) => [c.id, c.name]))}
+            subcategorias={subs.map((s) => ({ ...s, count: cuantos(s.id) }))}
+            actual={subcategory}
+            hayRanking={ranked.length > 0}
+            guias={guias.filter((g) => g.typeFishing === category)}
+          />
+        </div>
       </section>
     </Layout>
   )

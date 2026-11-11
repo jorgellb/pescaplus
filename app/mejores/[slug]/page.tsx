@@ -11,6 +11,10 @@ import { getFishingType } from '@/lib/fishing'
 import { SITE_URL, absoluteUrl, breadcrumbJsonLd } from '@/lib/seo'
 import { absoluteProxiedImage } from '@/lib/img-proxy'
 import { safeJsonLd } from '@/lib/json-ld'
+import ExploraCategoria from '@/components/ExploraCategoria'
+import { listProducts } from '@/lib/products-store'
+import { listGuides } from '@/lib/guides-store'
+import { getTaxonomy, subcategoriesOf } from '@/lib/taxonomy-store'
 
 type Params = { params: Promise<{ slug: string }> }
 
@@ -49,6 +53,11 @@ export default async function RoundupPage({ params }: Params) {
   if (!roundup) notFound()
 
   const { type, h1, intro, items, howToChoose, faq } = roundup
+  const [taxonomia, deLaCategoria, guias] = await Promise.all([
+    getTaxonomy(),
+    listProducts({ typeFishing: slug }).catch(() => []),
+    listGuides({ publishedOnly: true }).catch(() => []),
+  ])
   const others = (await roundupSlugs())
     .filter((s) => s !== slug)
     .slice(0, 6)
@@ -174,6 +183,18 @@ export default async function RoundupPage({ params }: Params) {
           ))}
         </div>
       </section>
+
+      {/* El ranking conectado con el resto del tema: tipos, especies, nudos, guías. */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 pb-12">
+        <ExploraCategoria
+          categoria={slug}
+          nombre={type.name}
+          nombres={Object.fromEntries(taxonomia.map((c) => [c.id, c.name]))}
+          subcategorias={subcategoriesOf(taxonomia, slug).map((s) => ({ ...s, count: deLaCategoria.filter((p) => p.subcategories.includes(s.id)).length }))}
+          hayRanking={false}
+          guias={guias.filter((g) => g.typeFishing === slug)}
+        />
+      </div>
 
       {/* OTHER ROUNDUPS */}
       {others.length > 0 && (
