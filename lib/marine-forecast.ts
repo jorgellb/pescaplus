@@ -1,4 +1,5 @@
 import { unstable_cache } from 'next/cache'
+import { anotarRespuestaOpenMeteo, openMeteoEnPausa } from '@/lib/open-meteo-cupo'
 import type { FishingSpot } from '@/lib/fishing-spots'
 import { solunarDay, type SolunarDay } from '@/lib/solunar'
 import { getSpecies, type SpeciesProfile } from '@/lib/fishing-species'
@@ -199,9 +200,12 @@ export function antiguedadPrevisionH(): number | null {
 }
 
 async function getJson(url: string): Promise<any | null> {
+  // Tras un 429 no se llama: se tira del último dato bueno (ver open-meteo-cupo).
+  if (openMeteoEnPausa()) return deRespaldo(url)
   try {
     const res = await fetch(url, { next: { revalidate: FORECAST_REVALIDATE_S }, signal: AbortSignal.timeout(12000) })
     if (!res.ok) {
+      await anotarRespuestaOpenMeteo(res)
       // El 429 es el sospechoso habitual: Open-Meteo limita por IP y el
       // servidor entero comparte una sola, así que se agota mucho antes de lo
       // que sugieren las pruebas hechas desde un portátil.
@@ -459,11 +463,34 @@ async function computeMarineForecast(
  * recomputed at most every 30 min — the biggest reusable CPU on the dashboard.
  * The only time-dependent field, `isNow`, is re-stamped fresh below.
  */
-const cachedMarineForecast = unstable_cache(
-  (spot: SpotKey, speciesId: string | null, modalityId: string | null) => computeMarineForecast(spot, speciesId, modalityId),
+const cacheMarineForecast = unstable_cache(
+  async (spot: SpotKey, speciesId: string | null, modalityId: string | null) => {
+    const r = await computeMarineForecast(spot, speciesId, modalityId)
+    // Un parte vacío NO se guarda: se quedaría 3 horas aunque Open-Meteo volviera
+    // en un minuto. Lanzar es la forma de que la caché no lo apunte.
+    if (!r.available) throw new Error(SIN_PREVISION)
+    return r
+  },
   ['marine-forecast-v1'],
   { revalidate: FORECAST_REVALIDATE_S, tags: ['marine-forecast'] },
 )
+
+const SIN_PREVISION = 'sin-prevision'
+const PREVISION_VACIA: MarineForecast = {
+  available: false,
+  hasMarine: false,
+  hours: [],
+  meta: { fetchedAt: null, gridKm: null, marineGridKm: null },
+}
+
+async function cachedMarineForecast(spot: SpotKey, speciesId: string | null, modalityId: string | null): Promise<MarineForecast> {
+  try {
+    return await cacheMarineForecast(spot, speciesId, modalityId)
+  } catch (e) {
+    if (e instanceof Error && e.message === SIN_PREVISION) return PREVISION_VACIA
+    throw e
+  }
+}
 
 /** Re-stamp `isNow` from the current time (the cached copy is up to 30 min old). */
 function restampNow(base: MarineForecast): MarineForecast {

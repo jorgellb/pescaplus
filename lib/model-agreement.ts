@@ -1,3 +1,5 @@
+import { anotarRespuestaOpenMeteo, openMeteoEnPausa } from '@/lib/open-meteo-cupo'
+
 /**
  * Multi-model agreement — the honest uncertainty layer. We ask Open-Meteo for
  * the same 7-day hourly wind from the three flagship global models (European
@@ -18,7 +20,12 @@ export interface ModelAgreement {
   fetchedAt: number
 }
 
-export const AGREEMENT_REVALIDATE_S = 3600
+/**
+ * Tres horas, igual que la previsión. Los modelos globales publican cada 6 h
+ * (ECMWF, GFS) o cada 3 h (ICON): pedirlo cada hora devolvía casi siempre lo
+ * mismo y gastaba cupo de Open-Meteo, que es uno solo para todo el servidor.
+ */
+export const AGREEMENT_REVALIDATE_S = 3 * 60 * 60
 
 const MODELS = ['ecmwf_ifs025', 'gfs_seamless', 'icon_seamless'] as const
 
@@ -37,11 +44,18 @@ export const AGREEMENT_LABEL: Record<'alta' | 'media' | 'baja', string> = {
 export async function getModelAgreement(lat: number, lon: number): Promise<ModelAgreement> {
   const empty: ModelAgreement = { available: false, days: [], fetchedAt: Date.now() }
   try {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(3)}&longitude=${lon.toFixed(3)}&hourly=wind_speed_10m&models=${MODELS.join(',')}&forecast_days=7&timezone=Europe%2FMadrid&wind_speed_unit=kmh`
+    // Por celda de ~11 km, como la previsión: la resolución de estos modelos es
+    // aún más gruesa, y así los puntos vecinos comparten petición y caché.
+    const celda = (n: number) => (Math.round(n * 10) / 10).toFixed(1)
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${celda(lat)}&longitude=${celda(lon)}&hourly=wind_speed_10m&models=${MODELS.join(',')}&forecast_days=7&timezone=Europe%2FMadrid&wind_speed_unit=kmh`
     // Secondary enhancement: keep a tighter timeout so a slow multi-model
     // query can't hold the whole dashboard (it degrades to no chip gracefully).
+    if (openMeteoEnPausa()) return empty
     const res = await fetch(url, { next: { revalidate: AGREEMENT_REVALIDATE_S }, signal: AbortSignal.timeout(8000) })
-    if (!res.ok) return empty
+    if (!res.ok) {
+      await anotarRespuestaOpenMeteo(res)
+      return empty
+    }
     const data = (await res.json()) as {
       hourly?: { time?: string[] } & Record<string, (number | null)[] | string[] | undefined>
     }

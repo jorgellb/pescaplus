@@ -2,6 +2,7 @@ import { FISHING_SPOTS } from '@/lib/fishing-spots'
 import { getModality, type Modality, type ModalityProfile } from '@/lib/marine-forecast'
 import { solunarDay } from '@/lib/solunar'
 import { todayMadridISO, addDaysISO } from '@/lib/solunar-format'
+import { anotarRespuestaOpenMeteo, openMeteoEnPausa } from '@/lib/open-meteo-cupo'
 
 /**
  * National day board — the inverse question ("this Saturday, WHERE?"). One
@@ -58,21 +59,58 @@ interface DailyBlock {
   wave_height_max?: (number | null)[]
 }
 
-async function fetchBulk(url: string): Promise<{ daily?: DailyBlock }[] | null> {
-  for (let attempt = 0; attempt < 3; attempt++) {
+/**
+ * Último dato bueno de cada URL, para cuando Open-Meteo corta.
+ *
+ * El cupo gratuito es por IP y todo el servidor comparte uno: cuando se agota,
+ * el ranking se quedaba en blanco aunque tuviera un dato de hace media hora.
+ * Doce horas de tope, como la ficha de cada zona: pasado eso la previsión ya no
+ * describe el mar de hoy.
+ */
+const RESPALDO_VALIDO_MS = 12 * 60 * 60 * 1000
+const respaldo = new Map<string, { cuando: number; datos: { daily?: DailyBlock }[] }>()
+
+function deRespaldo(url: string): { datos: { daily?: DailyBlock }[]; cuando: number } | null {
+  const guardado = respaldo.get(url)
+  if (!guardado || Date.now() - guardado.cuando > RESPALDO_VALIDO_MS) return null
+  return guardado
+}
+
+/**
+ * Una petición a Open-Meteo con hasta un reintento.
+ *
+ * Ante un 429 NO se reintenta: antes se repetía tres veces seguidas, y eso
+ * triplicaba las peticiones justo cuando el cupo ya estaba agotado. Un fallo
+ * pasajero (5xx, red) sí merece un segundo intento.
+ */
+async function fetchBulk(url: string): Promise<{ datos: { daily?: DailyBlock }[]; cuando: number } | null> {
+  for (let intento = 0; intento < 2; intento++) {
+    if (openMeteoEnPausa()) break
     try {
       const res = await fetch(url, {
         next: { revalidate: DAY_BOARD_REVALIDATE_S },
         signal: AbortSignal.timeout(15000),
       })
-      if (!res.ok) continue
+      if (!res.ok) {
+        await anotarRespuestaOpenMeteo(res)
+        console.warn(
+          '[RANKING] fallo:',
+          `HTTP ${res.status}${res.status === 429 ? ' (cupo de Open-Meteo agotado para la IP del servidor)' : ''}`,
+          url.slice(0, 80),
+        )
+        if (res.status === 429 || (res.status >= 400 && res.status < 500)) break
+        continue
+      }
       const data = (await res.json()) as { daily?: DailyBlock }[] | { daily?: DailyBlock }
-      return Array.isArray(data) ? data : [data]
+      const datos = Array.isArray(data) ? data : [data]
+      const cuando = Date.now()
+      respaldo.set(url, { cuando, datos })
+      return { datos, cuando }
     } catch {
-      /* retry */
+      /* red o tiempo agotado: un reintento */
     }
   }
-  return null
+  return deRespaldo(url)
 }
 
 function chunk<T>(list: T[], size: number): T[][] {
@@ -173,9 +211,11 @@ export async function getDayBoard(dateISO?: string | null, modalityId?: string |
     fetchedAt: Date.now(),
   }
   if (forecastChunks.some((c) => c === null)) return empty
-  const forecastAll = forecastChunks.flatMap((c) => c!)
+  const forecastAll = forecastChunks.flatMap((c) => c!.datos)
   const marineAvailable = marineChunks.every((c) => c !== null)
-  const marineAll = marineAvailable ? marineChunks.flatMap((c) => c!) : null
+  const marineAll = marineAvailable ? marineChunks.flatMap((c) => c!.datos) : null
+  // La hora del dato más viejo que se enseña: con el respaldo no es «ahora».
+  const fetchedAt = Math.min(...[...forecastChunks, ...(marineAvailable ? marineChunks : [])].map((c) => c!.cuando))
   const marineBySlug = new Map<string, { daily?: DailyBlock }>()
   if (marineAll) marSpots.forEach((s, i) => marineBySlug.set(s.slug, marineAll[i]))
 
@@ -204,5 +244,5 @@ export async function getDayBoard(dateISO?: string | null, modalityId?: string |
     return { slug: s.slug, name: s.name, region: s.region, type: s.type, lat: s.lat, lon: s.lon, score, windMax, gustMax, waveMax, precipProb, waveUnknown, navegabilidad }
   })
 
-  return { available: true, dateISO: date, days, modality, solunarRating, marineAvailable, spots, fetchedAt: Date.now() }
+  return { available: true, dateISO: date, days, modality, solunarRating, marineAvailable, spots, fetchedAt }
 }
