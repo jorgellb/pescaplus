@@ -13,6 +13,14 @@ import { safeJsonLd } from '@/lib/json-ld'
 import Icon from '@/components/icons/Icon'
 import ExploraCategoria from '@/components/ExploraCategoria'
 import { listGuides } from '@/lib/guides-store'
+import { descripcionDeTipo, nombreDeTipo, resumenDeTipo, tipoSeo, tituloDeTipo } from '@/lib/seo-categorias'
+import type { Product } from '@/types'
+
+/** El precio más bajo de una lista, o null si no hay ninguno. */
+function precioDesde(productos: Product[]): number | null {
+  const precios = productos.map((p) => p.price).filter((n) => n > 0)
+  return precios.length ? Math.min(...precios) : null
+}
 
 type Params = { params: Promise<{ category: string; subcategory: string }> }
 
@@ -44,16 +52,29 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const sub = subcategoriesOf(tax, category).find((s) => s.id === subcategory)
   if (!getFishingType(category) || !sub) return { robots: { index: false, follow: false } }
   const url = `/categories/${category}/${subcategory}`
-  // Meta propios desde el admin; si no hay, los generados por código.
-  const propio = await seoMeta(category, subcategory)
-  const titulo = propio.title ?? `${sub.name} · ${cat}`
+  const [propio, ranked] = await Promise.all([
+    // Meta propios desde el admin; si no hay, los generados con datos reales.
+    seoMeta(category, subcategory),
+    getTrendingRanked(category).catch((): Product[] => []),
+  ])
+  const productos = ranked.filter((p) => p.subcategories.includes(subcategory))
+  const nombre = nombreDeTipo(category, sub, cat)
+  /*
+   * `title.absolute`: el layout de la categoría fija su propio título y eso
+   * cortaba la plantilla del sitio, así que los tipos salían sin la marca
+   * («Trenzado · Líneas de pesca»). Aquí el título se compone entero.
+   */
+  const titulo = propio.title ?? tituloDeTipo(nombre, productos.length, precioDesde(productos))
+  const descripcion =
+    propio.description ?? descripcionDeTipo(nombre, productos.length, precioDesde(productos), productos.slice(0, 2).map((p) => p.title))
   return {
-    title: titulo,
-    description:
-      propio.description ??
-      `${sub.name} para ${cat.toLowerCase()}: los mejores modelos seleccionados al mejor precio, con envío rápido. Compra ${sub.name.toLowerCase()} en PescaPlus.`.slice(0, 160),
+    title: { absolute: titulo },
+    description: descripcion,
     alternates: { canonical: url },
-    openGraph: { title: titulo, url, type: 'website' },
+    // Un tipo que se ha quedado sin productos es una página vacía: fuera del
+    // índice hasta que vuelva a tener, pero sus enlaces se siguen.
+    ...(ranked.length > 0 && productos.length === 0 ? { robots: { index: false, follow: true } } : {}),
+    openGraph: { title: titulo, description: descripcion, url, type: 'website' },
   }
 }
 
@@ -77,8 +98,29 @@ export default async function SubcategoryPage({ params }: Params) {
   // Solo se enlazan los tipos con productos: uno vacío es una página sin nada
   // que Google indexaría como contenido pobre.
   const subsConProductos = subs.filter((s) => s.id === subcategory || cuantos(s.id) > 0)
-  const description = `${sub.name} para ${catName.toLowerCase()}. ${fishingType.tagline} Encuentra el modelo ideal al mejor precio y con envío rápido.`
-  const texto = await seoText(category, subcategory)
+  const nombre = nombreDeTipo(category, sub, catName)
+  const tipo = tipoSeo(category, subcategory)
+  const desde = precioDesde(products)
+  const description = products.length ? `${resumenDeTipo(products.length, desde)}. ${fishingType.tagline}` : fishingType.tagline
+  // El texto del admin manda; si no hay, la guía escrita para este tipo.
+  const texto = (await seoText(category, subcategory)) || tipo?.guia || ''
+
+  const listadoLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: nombre,
+    url: `${SITE_URL}/categories/${category}/${subcategory}`,
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: products.length,
+      itemListElement: products.slice(0, 30).map((p, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        url: `${SITE_URL}/products/${p.id}`,
+        name: p.title,
+      })),
+    },
+  }
 
   const breadcrumbLd = breadcrumbJsonLd([
     { name: 'Inicio', url: SITE_URL },
@@ -89,6 +131,7 @@ export default async function SubcategoryPage({ params }: Params) {
   return (
     <Layout>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(listadoLd) }} />
 
       <section className="bg-paper border-b border-ink/[0.07]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -102,9 +145,9 @@ export default async function SubcategoryPage({ params }: Params) {
               <CategoryIcon id={fishingType.id} className="w-10 h-10" strokeWidth={1.6} />
             </span>
             <div className="min-w-0">
-              <h1 className="font-display uppercase text-[1.7rem] sm:text-4xl md:text-5xl leading-[1.05] text-ink break-words">{sub.name}</h1>
+              <h1 className="font-display uppercase text-[1.7rem] sm:text-4xl md:text-5xl leading-[1.05] text-ink break-words">{nombre}</h1>
               <p className="text-ink/60 text-sm md:text-base mt-2 max-w-2xl">{description}</p>
-              {/* Texto propio de la subcategoría, escrito desde el admin. */}
+              {/* Texto propio de la subcategoría (del admin, o la guía del tipo). */}
               {texto && (
                 <div className="mt-4 max-w-2xl space-y-2">
                   {texto.split('\n').filter(Boolean).map((parrafo, i) => (
@@ -170,6 +213,7 @@ export default async function SubcategoryPage({ params }: Params) {
             actual={subcategory}
             hayRanking={ranked.length > 0}
             guias={guias.filter((g) => g.typeFishing === category)}
+            tecnica={tipo?.tecnica}
           />
         </div>
       </section>

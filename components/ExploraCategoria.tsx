@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { FICHAS } from '@/lib/knots'
-import { COMPLEMENTOS, TODAS_LAS_ESPECIES } from '@/lib/enlazado'
+import { COMPLEMENTOS, TECNICAS, TODAS_LAS_ESPECIES } from '@/lib/enlazado'
+import { normalizar } from '@/lib/seo-producto'
 import { tituloDeRanking } from '@/lib/roundups'
 
 /**
@@ -26,6 +27,8 @@ export interface ExploraCategoriaProps {
   actual?: string
   hayRanking: boolean
   guias: { id: string; title: string }[]
+  /** Técnica del tipo (lib/enlazado.ts): las especies se acotan a las que se pescan con ella. */
+  tecnica?: string
 }
 
 const tarjeta = 'border border-ink/[0.07] rounded-xl bg-paper p-4 space-y-3'
@@ -33,11 +36,16 @@ const etiqueta = 'font-mono text-[11px] font-bold uppercase tracking-widest text
 const chip =
   'inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold text-ink border border-ink/10 rounded-full hover:bg-ink hover:text-paper transition-colors'
 
-export default function ExploraCategoria({ categoria, nombre, nombres, subcategorias, actual, hayRanking, guias }: ExploraCategoriaProps) {
+export default function ExploraCategoria({ categoria, nombre, nombres, subcategorias, actual, hayRanking, guias, tecnica }: ExploraCategoriaProps) {
   // Primero las especies que ponen esta categoría en cabeza de su ficha.
-  const especies = TODAS_LAS_ESPECIES
+  const quePiden = TODAS_LAS_ESPECIES
     .filter((sp) => sp.gearCats.includes(categoria))
     .sort((a, b) => a.gearCats.indexOf(categoria) - b.gearCats.indexOf(categoria))
+  // En un tipo con técnica («Cañas de spinning»), solo las que se pescan con ella.
+  const t = TECNICAS.find((x) => x.id === tecnica)
+  const porTecnica = t ? quePiden.filter((sp) => t.enEspecie.test(normalizar(sp.technique))) : []
+  const especies = porTecnica.length ? porTecnica : quePiden
+  const tituloEspecies = porTecnica.length && t ? `Especies que se pescan a ${t.nombre}` : 'Especies que lo piden en su ficha'
   const nudos = FICHAS.filter((f) => f.gearCats.includes(categoria))
   const conQueSeMonta = COMPLEMENTOS[categoria] ?? []
   const tipos = subcategorias.filter((s) => s.id !== actual && s.count > 0)
@@ -89,7 +97,7 @@ export default function ExploraCategoria({ categoria, nombre, nombres, subcatego
 
         {especies.length > 0 && (
           <div className={`${tarjeta} md:col-span-2`}>
-            <p className={etiqueta}>Especies que lo piden en su ficha</p>
+            <p className={etiqueta}>{tituloEspecies}</p>
             <div className="flex flex-wrap gap-2">
               {especies.slice(0, MAX_ESPECIES).map((sp) => (
                 <Link key={sp.id} href={`/especies/${sp.id}`} className={chip}>
