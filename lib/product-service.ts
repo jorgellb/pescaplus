@@ -1,5 +1,5 @@
 import type { Product } from '@/types'
-import { getProduct, listProducts } from '@/lib/products-store'
+import { getProduct } from '@/lib/products-store'
 import { isAliExpressConfigured, getAliExpressProductDetail } from '@/lib/aliexpress'
 
 /**
@@ -14,9 +14,4 @@ export async function resolveProduct(id: string): Promise<Product | undefined> {
     return getAliExpressProductDetail(id)
   }
   return undefined
-}
-
-export async function relatedProducts(product: Product, limit = 4): Promise<Product[]> {
-  const all = await listProducts({ typeFishing: String(product.typeFishing) })
-  return all.filter((p) => p.id !== product.id).slice(0, limit)
 }

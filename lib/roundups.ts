@@ -162,6 +162,17 @@ export async function getRoundupPreviews(): Promise<RoundupPreview[]> {
   return previews
 }
 
+/**
+ * El nombre del ranking de una categoría: «Las mejores cañas de pesca de 2026».
+ * Lo usan las fichas de producto para enlazar a su ranking con el texto que
+ * el ranking lleva de H1.
+ */
+export function tituloDeRanking(slug: string): string {
+  const type = getFishingType(slug)
+  const phrase = PHRASES[slug]?.phrase ?? `Los mejores ${(type?.name ?? slug).toLowerCase()}`
+  return `${phrase} de ${ROUNDUP_YEAR}`
+}
+
 /** Slugs that have at least one product to feature. */
 export async function roundupSlugs(): Promise<string[]> {
   return (await getRoundupPreviews()).map((p) => p.slug)
