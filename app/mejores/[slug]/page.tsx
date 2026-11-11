@@ -131,7 +131,7 @@ export default async function RoundupPage({ params }: Params) {
                 <a
                   href={`/go/${it.product.id}`}
                   target="_blank"
-                  rel="noopener noreferrer sponsored"
+                  rel="noopener sponsored"
                   className="bg-ink text-paper px-4 py-2.5 text-xs font-semibold border border-ink/10 rounded-full hover:bg-accent hover:border-accent transition-colors whitespace-nowrap"
                 >
                   Ver oferta →

@@ -50,7 +50,7 @@ export default function FavoritesList() {
               <span className="font-display text-[26px] leading-none text-ink">
                 {p.price.toFixed(2)}<span className="text-sm align-top">{p.currency === 'EUR' ? '€' : ` ${p.currency}`}</span>
               </span>
-              <a href={`/go/${p.id}`} target="_blank" rel="noopener noreferrer sponsored" className="relative z-20 inline-flex items-center text-sm font-semibold text-paper bg-ink hover:bg-accent px-3.5 py-2 rounded-lg transition-colors">
+              <a href={`/go/${p.id}`} target="_blank" rel="noopener sponsored" className="relative z-20 inline-flex items-center text-sm font-semibold text-paper bg-ink hover:bg-accent px-3.5 py-2 rounded-lg transition-colors">
                 Comprar
               </a>
             </div>

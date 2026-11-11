@@ -62,6 +62,15 @@ export async function analiticaCompleta(dias = 30): Promise<AnaliticaCompleta> {
   const n = (v: unknown) => Number(v ?? 0)
 
   /*
+   * Clic de afiliado de una persona: de un visitante que ha visto alguna
+   * página. El visitante es un hash que cambia cada día, así que es «ese día».
+   * En octubre-noviembre de 2026, 2.280 de 2.312 clics venían de visitantes
+   * sin una sola página vista —robots que siguen todos los enlaces— y el panel
+   * enseñaba una conversión a la tienda que no existía.
+   */
+  const afiliadoDePersona = Prisma.sql`type = 'afiliado' AND visitor IN (SELECT visitor FROM "Event" WHERE type = 'pageview' AND "createdAt" >= ${desde})`
+
+  /*
    * Una sola pasada para las cifras de cabecera. Se hacen con FILTER en vez de
    * con varias consultas porque así la tabla se recorre una vez: con seis
    * consultas separadas, cada una volvía a barrer el mismo rango de fechas.
@@ -73,7 +82,7 @@ export async function analiticaCompleta(dias = 30): Promise<AnaliticaCompleta> {
       count(*) FILTER (WHERE type = 'pageview')                    AS visitas,
       count(DISTINCT visitor) FILTER (WHERE type = 'pageview')     AS visitantes,
       count(DISTINCT session) FILTER (WHERE type = 'pageview')     AS sesiones,
-      count(*) FILTER (WHERE type = 'afiliado')                    AS afiliados
+      count(*) FILTER (WHERE ${afiliadoDePersona})                 AS afiliados
     FROM "Event" WHERE "createdAt" >= ${desde}
   `)
 
@@ -90,7 +99,7 @@ export async function analiticaCompleta(dias = 30): Promise<AnaliticaCompleta> {
       SELECT to_char(("createdAt" ${Prisma.raw(MADRID)})::date, 'YYYY-MM-DD') AS dia,
              count(*) FILTER (WHERE type = 'pageview')                AS visitas,
              count(DISTINCT visitor) FILTER (WHERE type = 'pageview') AS visitantes,
-             count(*) FILTER (WHERE type = 'afiliado')                AS afiliados
+             count(*) FILTER (WHERE ${afiliadoDePersona})             AS afiliados
       FROM "Event" WHERE "createdAt" >= ${desde}
       GROUP BY 1 ORDER BY 1
     `,
@@ -113,7 +122,7 @@ export async function analiticaCompleta(dias = 30): Promise<AnaliticaCompleta> {
       FROM "Event" WHERE type = 'salida' AND "createdAt" >= ${desde} GROUP BY path
     ), a AS (
       SELECT path, count(*) AS afiliados
-      FROM "Event" WHERE type = 'afiliado' AND "createdAt" >= ${desde} GROUP BY path
+      FROM "Event" WHERE ${afiliadoDePersona} AND "createdAt" >= ${desde} GROUP BY path
     )
     SELECT v.path, v.visitas, v.visitantes, s.segundos, s.scroll, COALESCE(a.afiliados, 0) AS afiliados
     FROM v LEFT JOIN s ON s.path = v.path LEFT JOIN a ON a.path = v.path

@@ -1,8 +1,9 @@
 import { isDatabaseConfigured } from '@/lib/products-store'
 
 /**
- * Affiliate click tracking. Every visit to /go/[id] records a click so the admin
- * can see what actually converts. Uses the database when configured, otherwise an
+ * Affiliate click tracking. Every click that /go/[id] lets through to the shop
+ * (robots stay on its bridge page, see lib/salida-tienda.ts) records a click so
+ * the admin can see what actually converts. Uses the database when configured, otherwise an
  * in-memory ring buffer (fine for local/demo; resets with the server process).
  */
 

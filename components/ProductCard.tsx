@@ -82,7 +82,7 @@ export default function ProductCard({
             <a
               href={`/go/${id}`}
               target="_blank"
-              rel="noopener noreferrer sponsored"
+              rel="noopener sponsored"
               className="relative z-20 inline-flex items-center text-sm font-semibold text-paper bg-ink hover:bg-accent px-3.5 py-2 rounded-lg transition-colors"
             >
               Comprar

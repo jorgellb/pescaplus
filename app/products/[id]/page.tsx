@@ -229,7 +229,7 @@ export default async function ProductPage({ params }: Params) {
                 <a
                   href={`/go/${product.id}`}
                   target="_blank"
-                  rel="noopener noreferrer sponsored"
+                  rel="noopener sponsored"
                   className="w-full flex items-center justify-center gap-2 bg-ink text-paper px-8 py-5 font-display uppercase text-2xl border border-ink/10 rounded-xl shadow-hard-md hover-shift hover:bg-accent hover:border-accent"
                 >
                   Comprar ahora →

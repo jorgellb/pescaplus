@@ -10,8 +10,8 @@ import { canalDe, dispositivoDe, esBot, hashVisitante, normalizarRuta, type Tipo
  *  - **Las búsquedas**: `/search` es un componente de servidor y ahí están el
  *    término y el número de resultados. Medirlo en el cliente obligaría a
  *    reenviar ambos y lo tumbaría cualquier bloqueador.
- *  - **Los clics de afiliado**: pasan por `/go/[id]`, que es una redirección sin
- *    HTML donde no hay JavaScript que valga.
+ *  - **Los clics de afiliado**: pasan por `/go/[id]`, que a una persona le
+ *    responde con una redirección sin HTML donde no hay JavaScript que valga.
  *
  * Nunca lanza: una medición fallida no puede tumbar la página que la produce.
  */
