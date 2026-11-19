@@ -46,9 +46,9 @@ export default function WhosGoingToday({ spotSlug, loggedIn }: { spotSlug: strin
   return (
     <div className="border border-ink/[0.07] rounded-2xl bg-paper p-4 flex flex-wrap items-center justify-between gap-3">
       <p className="text-sm text-ink/80 inline-flex items-center gap-2">
-        <Icon name="users" className="w-4 h-4 text-ink/50" strokeWidth={1.8} />
+        <Icon name="users" className="w-4 h-4 text-ink/60" strokeWidth={1.8} />
         {!loaded ? (
-          <span className="text-ink/40">Cargando…</span>
+          <span className="text-ink/60">Cargando…</span>
         ) : going ? (
           othersCount > 0 ? <>Vas tú y <strong className="text-ink">{othersCount}</strong> {othersCount === 1 ? 'pescador más' : 'pescadores más'} hoy a esta zona.</> : <>Vas tú hoy a esta zona.</>
         ) : count > 0 ? (

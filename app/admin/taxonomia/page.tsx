@@ -151,20 +151,20 @@ export default function TaxonomyAdminPage() {
                 placeholder="Un par de párrafos propios: qué buscar, cómo elegir, para qué pesca sirve…"
                 className={`${field} text-xs`}
               />
-              <p className="text-[10px] text-ink/50">
+              <p className="text-[10px] text-ink/60">
                 Sale en la página de la categoría, debajo del título. Un salto de línea separa párrafos.
               </p>
               <label className="block pt-1">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-ink/60">Meta title</span>
                 <input value={metaTitle[c.id] ?? ''} onChange={(e) => setMetaTitle((s) => ({ ...s, [c.id]: e.target.value }))}
                   maxLength={70} placeholder="Vacío = el automático" className={`${field} text-xs`} />
-                <span className="text-[10px] text-ink/50">{(metaTitle[c.id] ?? '').length}/70</span>
+                <span className="text-[10px] text-ink/60">{(metaTitle[c.id] ?? '').length}/70</span>
               </label>
               <label className="block">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-ink/60">Meta description</span>
                 <textarea value={metaDescription[c.id] ?? ''} onChange={(e) => setMetaDescription((s) => ({ ...s, [c.id]: e.target.value }))}
                   rows={2} maxLength={180} placeholder="Vacío = la automática" className={`${field} text-xs`} />
-                <span className="text-[10px] text-ink/50">{(metaDescription[c.id] ?? '').length}/180</span>
+                <span className="text-[10px] text-ink/60">{(metaDescription[c.id] ?? '').length}/180</span>
               </label>
             </div>
 
@@ -209,7 +209,7 @@ export default function TaxonomyAdminPage() {
                           rows={2} maxLength={180} placeholder="Meta description (vacío = automática)" className={`${field} py-1 text-[11px]`} />
                       </div>
                     ) : (
-                      <p className="text-[10px] text-ink/50 pl-1">Guarda para poder escribirle texto SEO.</p>
+                      <p className="text-[10px] text-ink/60 pl-1">Guarda para poder escribirle texto SEO.</p>
                     )}
                   </div>
               ))}

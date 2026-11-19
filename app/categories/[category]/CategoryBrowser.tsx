@@ -120,7 +120,7 @@ export default function CategoryBrowser({
               href={`/categories/${category}/${s.id}`}
               className="px-3.5 py-1.5 text-[11px] font-semibold border border-ink/10 rounded-full bg-paper text-ink hover:bg-ink hover:text-paper transition-colors"
             >
-              {s.name} <span className="opacity-50">{s.count}</span>
+              {s.name} <span className="opacity-70">{s.count}</span>
             </Link>
           ))}
         </div>

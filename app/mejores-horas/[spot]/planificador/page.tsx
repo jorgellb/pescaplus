@@ -24,8 +24,8 @@ const MONTH_NAMES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Jul
 const WEEKDAYS = ['L', 'M', 'X', 'J', 'V', 'S', 'D']
 
 const RATING_HEX: Record<number, string> = {
-  5: '#0a7d72',
-  4: '#3f9d94',
+  5: '#0b6f66',
+  4: '#287870',
   3: '#b9b29f',
   2: '#a49c8a',
   1: '#8a8272',
@@ -144,7 +144,7 @@ export default async function PlanificadorPage({ params }: { params: Promise<{ s
 
                 <div className="grid grid-cols-7 gap-y-1 text-center">
                   {WEEKDAYS.map((w) => (
-                    <span key={w} className="font-mono text-[9px] uppercase text-ink/35">{w}</span>
+                    <span key={w} className="font-mono text-[9px] uppercase text-ink/60">{w}</span>
                   ))}
                   {Array.from({ length: offset }, (_, i) => (
                     <span key={`e${i}`} />
@@ -156,7 +156,7 @@ export default async function PlanificadorPage({ params }: { params: Promise<{ s
                         className="w-2 h-2 rounded-full inline-block"
                         style={{
                           backgroundColor: RATING_HEX[d.rating] ?? RATING_HEX[3],
-                          boxShadow: d.coef >= 85 ? '0 0 0 1.5px #0f1417b3' : undefined,
+                          boxShadow: d.coef >= 85 ? '0 0 0 1.5px #06141bb3' : undefined,
                         }}
                       />
                     </span>
@@ -168,7 +168,7 @@ export default async function PlanificadorPage({ params }: { params: Promise<{ s
                   <p className="text-[13px] text-ink/80 leading-relaxed">
                     {best.map((d, i) => (
                       <span key={d.dateISO}>
-                        {i > 0 && <span className="text-ink/30"> · </span>}
+                        {i > 0 && <span className="text-ink/60"> · </span>}
                         <span className="font-bold">{fmtDayLabel(d.dateISO)}</span>
                         <span className="text-ink/60"> ({d.rating}/5{d.coef >= 85 ? `, coef ${d.coef}` : ''})</span>
                       </span>

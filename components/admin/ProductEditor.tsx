@@ -473,14 +473,14 @@ export default function ProductEditor({ initial, onClose, onSaved }: ProductEdit
             <div className="space-y-1">
               <label className={labelCls}>Stock</label>
               <label className="flex items-center gap-2 h-[42px] px-3 bg-white border border-ink/25 rounded-lg cursor-pointer">
-                <input type="checkbox" checked={form.inStock} onChange={(e) => set('inStock', e.target.checked)} className="accent-[#0a7d72]" />
+                <input type="checkbox" checked={form.inStock} onChange={(e) => set('inStock', e.target.checked)} className="accent-accent" />
                 <span className="text-sm text-ink/60">Disponible</span>
               </label>
             </div>
             <div className="space-y-1">
               <label className={labelCls}>SEO</label>
               <label className="flex items-center gap-2 h-[42px] px-3 bg-white border border-ink/25 rounded-lg cursor-pointer">
-                <input type="checkbox" checked={form.aiOptimized} onChange={(e) => set('aiOptimized', e.target.checked)} className="accent-[#0a7d72]" />
+                <input type="checkbox" checked={form.aiOptimized} onChange={(e) => set('aiOptimized', e.target.checked)} className="accent-accent" />
                 <span className="text-sm text-ink/60">Optimizado</span>
               </label>
             </div>

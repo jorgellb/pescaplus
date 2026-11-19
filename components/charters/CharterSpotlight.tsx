@@ -56,12 +56,12 @@ export default function CharterSpotlight() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
           {/* — Argumento — */}
           <div>
-            <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-[color-mix(in_srgb,var(--accent)_45%,white)] mb-4">
+            <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent-light mb-4">
               <Icon name="anchor" className="w-3.5 h-3.5 inline -mt-0.5" strokeWidth={2} /> Salir con patrón
             </p>
             <h2 className="font-display uppercase text-4xl sm:text-5xl leading-[0.98] text-paper drop-shadow-sm">
               El único sitio que te dice<br />
-              <span className="text-[color-mix(in_srgb,var(--accent)_45%,white)]">si ese día pica</span>
+              <span className="text-accent-light">si ese día pica</span>
             </h2>
             <p className="text-paper/80 text-[15px] leading-relaxed mt-5 max-w-xl">
               En cualquier web de chárters ves una foto del barco, una hora y un precio. Aquí ves
@@ -73,7 +73,7 @@ export default function CharterSpotlight() {
             <dl className="mt-8 space-y-4">
               {GARANTIAS.map((g) => (
                 <div key={g.title} className="flex gap-3">
-                  <Icon name={g.icon} className="w-5 h-5 text-[color-mix(in_srgb,var(--accent)_45%,white)] shrink-0 mt-0.5" strokeWidth={1.8} />
+                  <Icon name={g.icon} className="w-5 h-5 text-accent-light shrink-0 mt-0.5" strokeWidth={1.8} />
                   <div>
                     <dt className="font-semibold text-[14px] text-paper">{g.title}</dt>
                     <dd className="text-[13px] text-paper/80 leading-snug">{g.text}</dd>

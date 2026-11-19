@@ -4,7 +4,7 @@ import { fmtDayLabel } from '@/lib/solunar-format'
 import Icon from '@/components/icons/Icon'
 
 function WindArrow({ deg }: { deg: number | null }) {
-  if (deg == null) return <span className="text-ink/30">–</span>
+  if (deg == null) return <span className="text-ink/60">–</span>
   return (
     <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" style={{ transform: `rotate(${deg + 180}deg)` }} className="inline-block">
       <path d="M12 2l5 10h-3.2v10h-3.6V12H7z" />

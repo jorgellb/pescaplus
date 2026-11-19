@@ -153,14 +153,14 @@ export default async function CharterPage({ params, searchParams }: { params: Pr
                     </p>
                   )
                 ) : (
-                  <p className="text-[13px] text-ink/55 mt-2">
+                  <p className="text-[13px] text-ink/60 mt-2">
                     Actividad solunar y luna de esa fecha. El viento y el estado del mar se publican
                     cuando la salida entra en los próximos 7 días.
                   </p>
                 )}
 
                 {ventana && (
-                  <p className="text-[12px] text-ink/55 mt-2">
+                  <p className="text-[12px] text-ink/60 mt-2">
                     {ventana.moonPhaseName}, {Math.round(ventana.moonIllumination * 100)} % iluminada
                   </p>
                 )}

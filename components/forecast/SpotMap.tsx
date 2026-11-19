@@ -23,11 +23,11 @@ export default function SpotMap() {
       <div className="p-4 sm:p-6">
         <svg viewBox={`0 0 ${MAP_W} ${MAP_H}`} className="w-full h-auto" role="img" aria-label="Mapa de España con las zonas de pesca">
           <style>{`
-            .region { fill: #0f1417; fill-opacity: 0.05; stroke: #0f1417; stroke-opacity: 0.22; stroke-width: 0.7; transition: fill-opacity .15s; }
-            a:hover .region, a:focus .region { fill: #0a7d72; fill-opacity: 0.13; }
+            .region { fill: #06141b; fill-opacity: 0.05; stroke: #06141b; stroke-opacity: 0.22; stroke-width: 0.7; transition: fill-opacity .15s; }
+            a:hover .region, a:focus .region { fill: #0b6f66; fill-opacity: 0.13; }
             .spot-g text { display: none; paint-order: stroke; stroke: #ffffff; stroke-width: 3.5px; }
             .spot-g:hover text, .spot-g:focus-within text { display: block; }
-            .spot-g:hover .dot, .spot-g:focus-within .dot { fill: #0f1417; }
+            .spot-g:hover .dot, .spot-g:focus-within .dot { fill: #06141b; }
           `}</style>
 
           {/* Land — recessive support under the data */}
@@ -44,8 +44,8 @@ export default function SpotMap() {
           )}
 
           {/* Canarias inset frame */}
-          <rect x={CANARY_BOX.x} y={CANARY_BOX.y} width={CANARY_BOX.w} height={CANARY_BOX.h} fill="none" stroke="#0f1417" strokeOpacity={0.18} rx={10} />
-          <text x={CANARY_BOX.x + 10} y={CANARY_BOX.y + 16} fontSize={9.5} fontFamily="monospace" fill="#0f1417" fillOpacity={0.45} letterSpacing={2}>
+          <rect x={CANARY_BOX.x} y={CANARY_BOX.y} width={CANARY_BOX.w} height={CANARY_BOX.h} fill="none" stroke="#06141b" strokeOpacity={0.18} rx={10} />
+          <text x={CANARY_BOX.x + 10} y={CANARY_BOX.y + 16} fontSize={9.5} fontFamily="monospace" fill="#06141b" fillOpacity={0.45} letterSpacing={2}>
             CANARIAS
           </text>
 
@@ -58,11 +58,11 @@ export default function SpotMap() {
                 <title>{`${s.name} · ${s.region}`}</title>
                 <circle cx={x} cy={y} r={9} fill="transparent" />
                 {s.type === 'mar' ? (
-                  <circle className="dot" cx={x} cy={y} r={3.6} fill="#0a7d72" stroke="#ffffff" strokeWidth={1.2} />
+                  <circle className="dot" cx={x} cy={y} r={3.6} fill="#0b6f66" stroke="#ffffff" strokeWidth={1.2} />
                 ) : (
-                  <rect className="dot" x={x - 3.4} y={y - 3.4} width={6.8} height={6.8} rx={1.5} fill="#c98a1a" stroke="#ffffff" strokeWidth={1.2} />
+                  <rect className="dot" x={x - 3.4} y={y - 3.4} width={6.8} height={6.8} rx={1.5} fill="#94600f" stroke="#ffffff" strokeWidth={1.2} />
                 )}
-                <text x={labelLeft ? x - 9 : x + 9} y={y + 4} fontSize={12.5} fontWeight={700} fill="#0f1417" textAnchor={labelLeft ? 'end' : 'start'}>
+                <text x={labelLeft ? x - 9 : x + 9} y={y + 4} fontSize={12.5} fontWeight={700} fill="#06141b" textAnchor={labelLeft ? 'end' : 'start'}>
                   {s.name}
                 </text>
               </a>
@@ -73,10 +73,10 @@ export default function SpotMap() {
       <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-1.5 px-4 sm:px-6 py-3 border-t border-ink/10 bg-ink/[0.02]">
         <div className="flex flex-wrap items-center gap-x-5 gap-y-1 font-mono text-[10px] uppercase tracking-widest text-ink/60">
           <span className="inline-flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-accent inline-block border border-paper" /> Costa</span>
-          <span className="inline-flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-[3px] bg-[#c98a1a] inline-block border border-paper" /> Embalses y ríos</span>
+          <span className="inline-flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-[3px] bg-[#94600f] inline-block border border-paper" /> Embalses y ríos</span>
           <span className="hidden sm:inline">Pulsa un punto o una comunidad</span>
         </div>
-        <span className="font-mono text-[9px] uppercase tracking-widest text-ink/30">Silueta: IGN</span>
+        <span className="font-mono text-[9px] uppercase tracking-widest text-ink/60">Silueta: IGN</span>
       </div>
     </div>
   )

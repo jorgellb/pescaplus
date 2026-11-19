@@ -138,7 +138,7 @@ function NearRow({ s, i, showNav }: { s: SpotDayScore & { km: number }; i: numbe
         <span className="font-mono text-[11px] font-bold text-ink/60 w-5 text-right shrink-0">{i + 1}</span>
         <span
           className="font-mono text-sm font-bold text-paper rounded-lg px-2 py-1 shrink-0"
-          style={{ backgroundColor: s.waveUnknown ? '#9c9484' : scoreHex(s.score) }}
+          style={{ backgroundColor: s.waveUnknown ? '#746c5e' : scoreHex(s.score) }}
         >
           {s.score}
         </span>

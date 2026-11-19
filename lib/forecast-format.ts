@@ -1,17 +1,27 @@
 /** Shared colour scales + helpers for the angling forecast UI. */
 
-export const INK = '#111111'
-export const ACCENT = '#0f766e'
-export const AMBER = '#c98a1a'
+/*
+ * Estos colores se usan de fondo de insignias con texto blanco de 11 px
+ * (puntuaciones) y como color de texto («Desfavorables»), así que todos dan
+ * ≥ 4,5:1 con blanco. Medidos el 2026-11-19: el ámbar (#c98a1a, 2,94:1), el
+ * verde medio (#3f9d94, 3,25:1) y el gris (#9c9484, 3,01:1) no llegaban.
+ */
+export const INK = '#06141b'
+export const ACCENT = '#0b6f66'
+export const AMBER = '#94600f'
 export const RED = '#b23b2e'
 export const MUTED = '#c7c0b2'
+/** Verde medio de las escalas: «buena», entre la excelente y la regular. 5,24:1. */
+export const TEAL_MID = '#287870'
+/** Lo mejor de la escala, más oscuro que ACCENT para que se distinga de «buena». */
+const EXCELENTE = '#075a52'
 
 /** Fishing score 0..100 → colour (poor → excellent). */
 export function scoreHex(s: number): string {
-  if (s >= 70) return ACCENT
-  if (s >= 55) return '#3f9d94'
+  if (s >= 70) return EXCELENTE
+  if (s >= 55) return TEAL_MID
   if (s >= 40) return AMBER
-  return '#9c9484'
+  return '#746c5e'
 }
 export function scoreLabel(s: number): string {
   if (s >= 70) return 'Excelente'
@@ -32,7 +42,7 @@ export function windHex(k: number | null): string {
 export function waveHex(m: number | null): string {
   if (m == null) return MUTED
   if (m < 0.75) return ACCENT
-  if (m < 1.5) return '#3f9d94'
+  if (m < 1.5) return TEAL_MID
   if (m < 2.5) return AMBER
   return RED
 }

@@ -427,7 +427,7 @@ export default async function SpeciesPage({ params }: Params) {
             <div className="flex flex-wrap gap-2">
               {spots.map((s) => (
                 <Link key={s.slug} href={`/pesca/${sp.id}/${s.slug}`} className="px-3 py-1.5 text-sm font-semibold text-ink border border-ink/10 rounded-full hover:bg-ink hover:text-paper transition-colors">
-                  {s.name} <span className="font-mono text-[10px] uppercase tracking-widest opacity-50">{s.region}</span>
+                  {s.name} <span className="font-mono text-[10px] uppercase tracking-widest opacity-70">{s.region}</span>
                 </Link>
               ))}
               {totalZonas > spots.length && (

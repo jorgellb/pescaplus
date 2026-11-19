@@ -25,10 +25,10 @@ function charterLine(c: Charter): string {
 }
 
 function shell(title: string, body: string, cta?: { href: string; label: string }): string {
-  return `<div style="font-family:system-ui,sans-serif;max-width:520px;margin:0 auto;padding:24px;color:#0f1417">
+  return `<div style="font-family:system-ui,sans-serif;max-width:520px;margin:0 auto;padding:24px;color:#06141b">
     <h1 style="font-size:21px;margin:0 0 12px">${title}</h1>
     ${body}
-    ${cta ? `<p style="margin:26px 0"><a href="${cta.href}" style="background:#0a7d72;color:#fff;text-decoration:none;padding:12px 22px;border-radius:999px;font-weight:600;display:inline-block">${cta.label}</a></p>` : ''}
+    ${cta ? `<p style="margin:26px 0"><a href="${cta.href}" style="background:#0b6f66;color:#fff;text-decoration:none;padding:12px 22px;border-radius:999px;font-weight:600;display:inline-block">${cta.label}</a></p>` : ''}
     <p style="color:#9aa0a3;font-size:12px;margin-top:26px">${BRAND} · pescaplus.es</p>
   </div>`
 }

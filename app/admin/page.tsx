@@ -326,7 +326,7 @@ export default function AdminProductsPage() {
                     checked={allFilteredSelected}
                     onChange={toggleAll}
                     aria-label="Seleccionar todos"
-                    className="w-4 h-4 accent-[#0a7d72] cursor-pointer"
+                    className="w-4 h-4 accent-accent cursor-pointer"
                   />
                 </th>
                 <th className="px-4 py-3 font-bold">Producto</th>
@@ -345,7 +345,7 @@ export default function AdminProductsPage() {
                       checked={selected.has(p.id)}
                       onChange={() => toggleSel(p.id)}
                       aria-label={`Seleccionar ${p.title}`}
-                      className="w-4 h-4 accent-[#0a7d72] cursor-pointer"
+                      className="w-4 h-4 accent-accent cursor-pointer"
                     />
                   </td>
                   <td className="px-4 py-3">

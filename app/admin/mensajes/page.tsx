@@ -154,7 +154,7 @@ export default function AdminMessagesPage() {
             <li key={m.id} className={`border rounded-xl p-4 sm:p-5 space-y-2 ${m.handled ? 'border-ink/10 bg-paper' : 'border-accent/30 bg-accent/[0.03]'}`}>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
                 <div className="min-w-0 flex items-start gap-2">
-                  <input type="checkbox" checked={selected.has(m.id)} onChange={() => toggleSel(m.id)} aria-label={`Seleccionar mensaje de ${m.name || m.email}`} className="w-4 h-4 mt-0.5 accent-[#0a7d72] cursor-pointer shrink-0" />
+                  <input type="checkbox" checked={selected.has(m.id)} onChange={() => toggleSel(m.id)} aria-label={`Seleccionar mensaje de ${m.name || m.email}`} className="w-4 h-4 mt-0.5 accent-accent cursor-pointer shrink-0" />
                   <span>
                     <span className="font-bold text-ink">{m.name || 'Sin nombre'}</span>{' '}
                     <a href={`mailto:${m.email}`} className="text-accent underline text-sm break-all">{m.email}</a>

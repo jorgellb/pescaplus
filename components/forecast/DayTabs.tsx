@@ -16,7 +16,10 @@ export default function DayTabs({ labels, children }: { labels: React.ReactNode[
             role="tab"
             aria-selected={i === active}
             onClick={() => setActive(i)}
-            className={`flex-shrink-0 px-3.5 py-2 rounded-full text-xs font-semibold border transition-colors${
+            // Ojo al espacio tras transition-colors: sin él la clase de la
+            // pestaña activa se pegaba («transition-colorsbg-ink») y salía
+            // texto blanco sobre blanco: el «Hoy» no se veía.
+            className={`flex-shrink-0 px-3.5 py-2 rounded-full text-xs font-semibold border transition-colors ${
               i === active ? 'bg-ink text-paper border-ink' : 'bg-paper text-ink/70 border-ink/10 hover:bg-ink/5'
             }`}
           >

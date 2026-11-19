@@ -75,7 +75,7 @@ export default async function ChartersHub({ searchParams }: Params) {
         />
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-ink/80 via-ink/60 to-ink/40" />
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-14 sm:py-16">
-          <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-[color-mix(in_srgb,var(--accent)_45%,white)] mb-3"><Icon name="anchor" className="w-3.5 h-3.5 inline -mt-0.5" strokeWidth={2} /> Chárters con patrón profesional</p>
+          <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent-light mb-3"><Icon name="anchor" className="w-3.5 h-3.5 inline -mt-0.5" strokeWidth={2} /> Chárters con patrón profesional</p>
           <h1 className="font-display uppercase text-4xl sm:text-5xl md:text-6xl leading-[1.02] text-paper">Sal a pescar con un profesional</h1>
           <p className="text-paper/80 text-[15px] max-w-2xl mt-3 leading-relaxed">Reserva plaza en salidas de pesca con <strong className="text-paper">patrón profesional verificado</strong> (licencia y seguro comprobados). Con la previsión y la seguridad del día al lado.</p>
           <div className="mt-6">

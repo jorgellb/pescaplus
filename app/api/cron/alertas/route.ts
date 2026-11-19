@@ -1,3 +1,4 @@
+import { MARCA } from '@/lib/marca'
 import { NextRequest, NextResponse } from 'next/server'
 import { listAlerts, type AlertSubscription } from '@/lib/alerts-store'
 import { getSpot } from '@/lib/fishing-spots'
@@ -89,8 +90,8 @@ export async function GET(request: NextRequest) {
 <h2 style="text-transform:uppercase">🎣 ${spot.name}: ventana de pesca ${dayName}${paraEspecie}</h2>
 <p style="font-size:18px"><strong>${range}</strong> · puntuación <strong>${hit.win!.avg}/100</strong></p>
 <p>Solunar, viento, mar y mareas apuntan a un buen tramo. Revisa el detalle y el estado del mar antes de salir.</p>
-<p><a href="${planUrl}" style="background:#0a7d72;color:#fff;padding:12px 20px;text-decoration:none;border-radius:10px;display:inline-block">Generar mi plan de pesca</a></p>
-<p><a href="${url}" style="color:#0a7d72">Previsión completa de ${spot.name}</a></p>
+<p><a href="${planUrl}" style="background:${MARCA.marea};color:#fff;padding:12px 20px;text-decoration:none;border-radius:10px;display:inline-block">Generar mi plan de pesca</a></p>
+<p><a href="${url}" style="color:${MARCA.marea}">Previsión completa de ${spot.name}</a></p>
 <hr style="border:none;border-top:1px solid #ddd;margin:24px 0">
 <p style="font-size:12px;color:#777">Recibes este aviso porque activaste alertas en PescaPlus. <a href="${unsubUrl}" style="color:#777">Darse de baja</a></p>
 </div>`,

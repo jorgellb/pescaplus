@@ -28,25 +28,25 @@ export default function DayScoreMap({ spots, showNav }: { spots: SpotDayScore[];
       <div className="p-4 sm:p-6">
         <svg viewBox={`0 0 ${MAP_W} ${MAP_H}`} className="w-full h-auto" role="img" aria-label="Mapa de España coloreado por puntuación de pesca del día">
           <style>{`
-            .region-bg { fill: #0f1417; fill-opacity: 0.045; stroke: #0f1417; stroke-opacity: 0.2; stroke-width: 0.7; }
+            .region-bg { fill: #06141b; fill-opacity: 0.045; stroke: #06141b; stroke-opacity: 0.2; stroke-width: 0.7; }
             .day-spot text { display: none; paint-order: stroke; stroke: #ffffff; stroke-width: 3.5px; }
             .day-spot:hover text, .day-spot:focus-within text { display: block; }
-            .day-spot:hover .dot, .day-spot:focus-within .dot { stroke: #0f1417; stroke-width: 1.6; }
+            .day-spot:hover .dot, .day-spot:focus-within .dot { stroke: #06141b; stroke-width: 1.6; }
           `}</style>
 
           {SPAIN_REGIONS.map((r) => (
             <path key={r.name} className="region-bg" d={r.path} style={{ pointerEvents: 'none' }} />
           ))}
 
-          <rect x={CANARY_BOX.x} y={CANARY_BOX.y} width={CANARY_BOX.w} height={CANARY_BOX.h} fill="none" stroke="#0f1417" strokeOpacity={0.18} rx={10} />
-          <text x={CANARY_BOX.x + 10} y={CANARY_BOX.y + 16} fontSize={9.5} fontFamily="monospace" fill="#0f1417" fillOpacity={0.45} letterSpacing={2}>
+          <rect x={CANARY_BOX.x} y={CANARY_BOX.y} width={CANARY_BOX.w} height={CANARY_BOX.h} fill="none" stroke="#06141b" strokeOpacity={0.18} rx={10} />
+          <text x={CANARY_BOX.x + 10} y={CANARY_BOX.y + 16} fontSize={9.5} fontFamily="monospace" fill="#06141b" fillOpacity={0.45} letterSpacing={2}>
             CANARIAS
           </text>
 
           {ordered.map((s) => {
             const { x, y } = project(s)
             const labelLeft = x > MAP_W - 130
-            const fill = s.waveUnknown ? '#9c9484' : scoreHex(s.score)
+            const fill = s.waveUnknown ? '#746c5e' : scoreHex(s.score)
             const noNav = showNav && s.navegabilidad === 'no'
             const titleSuffix = s.waveUnknown ? ' · sin dato de oleaje' : noNav ? ' · no navegable' : ''
             return (
@@ -58,7 +58,7 @@ export default function DayScoreMap({ spots, showNav }: { spots: SpotDayScore[];
                 ) : (
                   <rect className="dot" x={x - 3.6} y={y - 3.6} width={7.2} height={7.2} rx={1.5} fill={fill} stroke="#ffffff" strokeWidth={1.1} />
                 )}
-                <text x={labelLeft ? x - 10 : x + 10} y={y + 4} fontSize={12.5} fontWeight={700} fill="#0f1417" textAnchor={labelLeft ? 'end' : 'start'}>
+                <text x={labelLeft ? x - 10 : x + 10} y={y + 4} fontSize={12.5} fontWeight={700} fill="#06141b" textAnchor={labelLeft ? 'end' : 'start'}>
                   {`${s.name} · ${s.score}`}
                 </text>
               </a>
@@ -80,11 +80,11 @@ export default function DayScoreMap({ spots, showNav }: { spots: SpotDayScore[];
           )}
           {hasUnknown && (
             <span className="inline-flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full inline-block border border-paper" style={{ backgroundColor: '#9c9484' }} /> Sin dato de oleaje
+              <span className="w-2.5 h-2.5 rounded-full inline-block border border-paper" style={{ backgroundColor: '#746c5e' }} /> Sin dato de oleaje
             </span>
           )}
         </div>
-        <span className="font-mono text-[9px] uppercase tracking-widest text-ink/30">Silueta: IGN</span>
+        <span className="font-mono text-[9px] uppercase tracking-widest text-ink/60">Silueta: IGN</span>
       </div>
     </div>
   )

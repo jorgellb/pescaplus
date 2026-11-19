@@ -283,7 +283,7 @@ export default function GuideEditor({ initial, onClose, onSaved }: GuideEditorPr
           </div>
 
           <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" checked={form.published} onChange={(e) => set('published', e.target.checked)} className="accent-[#0a7d72]" />
+            <input type="checkbox" checked={form.published} onChange={(e) => set('published', e.target.checked)} className="accent-accent" />
             <span className="text-sm text-ink/80">Publicada (visible en /guias)</span>
           </label>
 

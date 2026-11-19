@@ -113,7 +113,7 @@ export default function CoordinateEntry({ onGo }: { onGo: (lat: number, lon: num
             onChange={(e) => set(eje === 'lat' ? 'latG' : 'lonG')(e.target.value)}
             onPaste={alPegar}
             className={`${campo} w-14`} />
-          <span className="text-[13px] text-ink/50">°</span>
+          <span className="text-[13px] text-ink/60">°</span>
           <input
             inputMode="decimal" aria-label={eje === 'lat' ? 'Minutos de latitud' : 'Minutos de longitud'}
             placeholder="00,000"
@@ -121,7 +121,7 @@ export default function CoordinateEntry({ onGo }: { onGo: (lat: number, lon: num
             onChange={(e) => set(eje === 'lat' ? 'latM' : 'lonM')(e.target.value)}
             onPaste={alPegar}
             className={`${campo} flex-1`} />
-          <span className="text-[13px] text-ink/50">&apos;</span>
+          <span className="text-[13px] text-ink/60">&apos;</span>
           <select
             aria-label={eje === 'lat' ? 'Hemisferio de latitud' : 'Hemisferio de longitud'}
             value={eje === 'lat' ? f.latH : f.lonH}
@@ -137,7 +137,7 @@ export default function CoordinateEntry({ onGo }: { onGo: (lat: number, lon: num
       {vista && (
         <p className="text-[11.5px] text-ink/60">
           {vista.lat} · {vista.lon}
-          <span className="text-ink/40"> ({lat.toFixed(5)}, {lon.toFixed(5)})</span>
+          <span className="text-ink/60"> ({lat.toFixed(5)}, {lon.toFixed(5)})</span>
         </p>
       )}
       {error && <p className="text-[12px] text-red-700">{error}</p>}
@@ -152,7 +152,7 @@ export default function CoordinateEntry({ onGo }: { onGo: (lat: number, lon: num
             className="px-3 py-2 text-[13px] text-ink/60 hover:text-ink">Limpiar</button>
         )}
       </div>
-      <p className="text-[11px] text-ink/50">
+      <p className="text-[11px] text-ink/60">
         También puedes pegar unas coordenadas enteras en cualquier casilla.
       </p>
     </form>

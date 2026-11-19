@@ -1,17 +1,26 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import Analitica from "@/components/Analitica";
-import { Space_Grotesk, Space_Mono } from "next/font/google";
+import { Bricolage_Grotesque, IBM_Plex_Mono, Instrument_Sans } from "next/font/google";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import CapacitorBridge from "@/components/CapacitorBridge";
 import "./globals.css";
 import { safeJsonLd } from '@/lib/json-ld'
+import { MARCA } from '@/lib/marca'
 
-// One text face for body AND headings: the condensed display face (Oswald) was
-// what made every page read like a sports poster, so it's gone — one less font
-// to download, too.
-const grotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-grotesk", display: "swap" });
-const mono = Space_Mono({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-mono-custom", display: "swap" });
+/*
+ * Tres familias, servidas desde el propio dominio (next/font, sin peticiones a
+ * Google):
+ *  - Bricolage Grotesque, solo para titulares (.font-display), con el eje de
+ *    anchura para estrecharla un poco: recuerda a la rotulación náutica.
+ *  - Instrument Sans para el texto.
+ *  - IBM Plex Mono para cifras y etiquetas: profundidades, horas, precios.
+ * `display: swap` y la fuente de reserva ajustada que calcula next/font: el
+ * texto se ve desde el primer momento y el cambio de fuente no mueve nada.
+ */
+const titular = Bricolage_Grotesque({ subsets: ["latin"], axes: ["wdth"], variable: "--font-titular", display: "swap" });
+const texto = Instrument_Sans({ subsets: ["latin"], variable: "--font-body", display: "swap" });
+const datos = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-datos", display: "swap" });
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pescaplus.es";
 
@@ -43,7 +52,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0f1417",
+  themeColor: MARCA.fondo,
   colorScheme: "light",
 };
 
@@ -89,7 +98,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${grotesk.variable} ${mono.variable}`}>
+    <html lang="es" className={`${titular.variable} ${texto.variable} ${datos.variable}`}>
       <body>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(orgJsonLd) }} />
         {children}

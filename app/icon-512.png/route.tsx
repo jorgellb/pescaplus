@@ -1,28 +1,9 @@
 import { ImageResponse } from 'next/og'
+import IconoApp from '@/components/brand/IconoApp'
 
 export const dynamic = 'force-static'
 
+/** Icono del manifiesto (app/manifest.ts), también el «maskable». */
 export function GET() {
-  const size = 512
-  return new ImageResponse(
-    (
-      <div
-        style={{
-          width: '100%',
-          height: '100%',
-          background: '#0a7d72',
-          color: '#fff',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: size * 0.62,
-          fontWeight: 900,
-          fontFamily: 'sans-serif',
-        }}
-      >
-        P
-      </div>
-    ),
-    { width: size, height: size },
-  )
+  return new ImageResponse(<IconoApp lado={512} />, { width: 512, height: 512 })
 }

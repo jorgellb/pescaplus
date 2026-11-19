@@ -93,7 +93,7 @@ export default function MarksTransfer({ onImported }: { onImported?: () => void 
                 {w.depthM != null && ` · ${w.depthM} m`}
               </li>
             ))}
-            {previo.marcas.length > 5 && <li className="text-ink/50">y {previo.marcas.length - 5} más…</li>}
+            {previo.marcas.length > 5 && <li className="text-ink/60">y {previo.marcas.length - 5} más…</li>}
           </ul>
           {previo.avisos.map((a) => <p key={a} className="text-[12px] text-amber-900">{a}</p>)}
           <div className="flex gap-2">

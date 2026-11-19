@@ -3,16 +3,20 @@ interface MarqueeProps {
   className?: string
 }
 
-/** Scrolling ticker of selling points. Items are duplicated for a seamless loop. */
-export default function Marquee({ items, className = 'bg-paper text-ink/70' }: MarqueeProps) {
+/**
+ * Teletipo: una banda azul de fondo con letra de datos, como la línea de
+ * avisos de una carta. Los textos se duplican para que el bucle no tenga
+ * costura. Es decorativa (aria-hidden): lo que dice está también en la página.
+ */
+export default function Marquee({ items, className = 'bg-deep text-foam' }: MarqueeProps) {
   const loop = [...items, ...items]
   return (
-    <div className={`overflow-hidden border-y border-ink/[0.07] py-3 ${className}`} aria-hidden="true">
+    <div className={`overflow-hidden py-3.5 ${className}`} aria-hidden="true">
       <div className="flex w-max animate-marquee">
         {loop.map((text, i) => (
-          <span key={i} className="flex items-center gap-6 mx-6 text-sm font-medium whitespace-nowrap">
+          <span key={i} className="flex items-center gap-7 mx-7 font-mono text-[12px] font-medium uppercase tracking-[0.14em] whitespace-nowrap">
             {text}
-            <span className="text-accent/50 text-xs">●</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-buoy" />
           </span>
         ))}
       </div>

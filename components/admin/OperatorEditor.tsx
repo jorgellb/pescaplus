@@ -189,7 +189,7 @@ export default function OperatorEditor({ initial, onClose, onSaved }: OperatorEd
           </div>
 
           <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" checked={form.verified} onChange={(e) => set('verified', e.target.checked)} className="accent-[#0a7d72]" />
+            <input type="checkbox" checked={form.verified} onChange={(e) => set('verified', e.target.checked)} className="accent-accent" />
             <span className="text-sm text-ink/80">Verificado (puede publicar chárters de pago)</span>
           </label>
 

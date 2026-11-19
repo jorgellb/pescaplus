@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import CategoryIcon from '@/components/graphics/CategoryIcon'
 import Icon, { type IconName } from '@/components/icons/Icon'
+import Logo from '@/components/brand/Logo'
 import { openAsesor } from '@/lib/asesor-bus'
 import { getFavorites, onFavoritesChanged } from '@/lib/product-history'
 import { NAV_SECTIONS, SHOP_SHORTCUTS, type NavSection } from '@/lib/nav'
@@ -93,14 +94,11 @@ export default function Navbar() {
     s.links.some((l) => pathname === l.href || pathname.startsWith(l.href + '/')) || pathname === s.href
 
   return (
-    <header ref={navRef} className="sticky top-0 z-50 w-full bg-paper/95 backdrop-blur border-b border-ink/[0.07] print:hidden">
+    <header ref={navRef} className="sticky top-0 z-50 w-full bg-paper/90 backdrop-blur-md border-b border-ink/[0.07] print:hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between gap-4 h-16">
-          <Link href="/" className="flex items-center gap-2 shrink-0 group">
-            <Icon name="rod" className="w-6 h-6" strokeWidth={1.6} />
-            <span className="font-display text-2xl tracking-tight text-ink group-hover:text-accent transition-colors">
-              Pesca<span className="text-accent group-hover:text-ink transition-colors">Plus</span>
-            </span>
+          <Link href="/" className="logo shrink-0 rounded-lg" aria-label="PescaPlus, ir al inicio">
+            <Logo />
           </Link>
 
           {/* Desktop sections */}
@@ -111,7 +109,8 @@ export default function Navbar() {
                   onClick={() => setOpenId((v) => (v === s.id ? null : s.id))}
                   aria-expanded={openId === s.id}
                   aria-haspopup="true"
-                  className={`flex items-center gap-1 px-3 py-2 rounded-lg text-[15px] font-semibold transition-colors ${
+                  // whitespace-nowrap: a 1200 px «Cuándo pescar» se partía en dos líneas.
+                  className={`relative flex items-center gap-1 px-2.5 xl:px-3 py-2 rounded-lg text-[15px] font-semibold whitespace-nowrap transition-colors ${
                     openId === s.id || sectionActive(s) ? 'text-accent bg-accent/[0.07]' : 'text-ink/80 hover:text-ink hover:bg-ink/[0.04]'
                   }`}
                 >
@@ -132,7 +131,7 @@ export default function Navbar() {
                 name="q"
                 placeholder="Buscar aparejos…"
                 aria-label="Buscar productos"
-                className="w-40 lg:w-56 pl-9 pr-3 py-2 bg-ink/[0.04] border border-transparent rounded-full text-ink placeholder-ink/60 text-sm focus:outline-none focus:bg-paper focus:border-accent/50 transition-colors"
+                className="w-40 xl:w-56 pl-9 pr-3 py-2 bg-ink/[0.04] border border-transparent rounded-full text-ink placeholder-ink/60 text-sm focus:outline-none focus:bg-paper focus:border-accent/50 transition-colors"
               />
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/60 pointer-events-none"><Icon name="search" className="w-4 h-4" strokeWidth={2} /></span>
             </form>

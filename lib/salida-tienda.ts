@@ -138,7 +138,7 @@ export function paginaPuente(id: string, saltar = true): string {
 <style>
   body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:system-ui,sans-serif;background:#fff;color:#0f172a}
   p{margin:0 16px;text-align:center;font-size:17px}
-  a{color:#0a7d72}
+  a{color:#0b6f66}
   @media (prefers-color-scheme:dark){body{background:#0b1220;color:#e2e8f0}a{color:#5eead4}}
 </style>
 </head>

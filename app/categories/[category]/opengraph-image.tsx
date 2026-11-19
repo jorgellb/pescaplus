@@ -1,3 +1,5 @@
+import { MARCA } from '@/lib/marca'
+import Boya from '@/components/brand/Boya'
 import { ImageResponse } from 'next/og'
 import { getFishingType } from '@/lib/fishing'
 import { getTrendingRanked } from '@/lib/trending'
@@ -13,9 +15,9 @@ export const contentType = 'image/png'
  */
 export const revalidate = 86400
 
-const PAPER = '#ffffff'
-const INK = '#0f1417'
-const ACCENT = '#0a7d72'
+const PAPER = MARCA.papel
+const INK = MARCA.fondo
+const ACCENT = MARCA.marea
 
 export default async function Image({ params }: { params: Promise<{ category: string }> }) {
   const { category } = await params
@@ -44,7 +46,7 @@ export default async function Image({ params }: { params: Promise<{ category: st
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ width: 20, height: 20, background: ACCENT }} />
+          <Boya tamano={44} />
           <div style={{ fontSize: 28, letterSpacing: 3, color: INK, fontWeight: 800, textTransform: 'uppercase' }}>
             Categoría · PescaPlus
           </div>

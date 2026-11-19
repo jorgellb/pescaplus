@@ -41,7 +41,7 @@ export default function RegionAccordion() {
           <summary className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3.5 cursor-pointer select-none list-none [&::-webkit-details-marker]:hidden hover:bg-ink/[0.03] transition-colors">
             <span className="flex items-center gap-3 min-w-0">
               <span
-                className={`flex-shrink-0 ${coastal ? 'w-2.5 h-2.5 rounded-full bg-accent' : 'w-2.5 h-2.5 rounded-[3px] bg-[#c98a1a]'}`}
+                className={`flex-shrink-0 ${coastal ? 'w-2.5 h-2.5 rounded-full bg-accent' : 'w-2.5 h-2.5 rounded-[3px] bg-[#94600f]'}`}
                 aria-hidden
               />
               <span className="font-display uppercase text-lg sm:text-xl text-ink leading-none truncate">{region}</span>

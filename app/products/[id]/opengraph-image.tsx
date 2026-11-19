@@ -1,3 +1,5 @@
+import { MARCA } from '@/lib/marca'
+import Boya from '@/components/brand/Boya'
 import { ImageResponse } from 'next/og'
 import { resolveProduct } from '@/lib/product-service'
 import { getTaxonomy, categoryName } from '@/lib/taxonomy-store'
@@ -12,9 +14,9 @@ export const contentType = 'image/png'
  */
 export const revalidate = 86400
 
-const PAPER = '#ffffff'
-const INK = '#0f1417'
-const ACCENT = '#0a7d72'
+const PAPER = MARCA.papel
+const INK = MARCA.fondo
+const ACCENT = MARCA.marea
 
 export default async function Image({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -44,9 +46,9 @@ export default async function Image({ params }: { params: Promise<{ id: string }
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <div style={{ width: 20, height: 20, background: ACCENT }} />
+            <Boya tamano={44} />
             <div style={{ fontSize: 30, fontWeight: 800, color: INK, letterSpacing: -1, display: 'flex' }}>
-              PESCA<span style={{ color: ACCENT }}>PLUS</span>
+              Pesca<span style={{ color: ACCENT }}>Plus</span>
             </div>
           </div>
           <div

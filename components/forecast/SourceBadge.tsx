@@ -26,5 +26,5 @@ export default function SourceBadge({
     if (revalidateS) bits.push(`próxima ~${fmtTime(fetchedAt + revalidateS * 1000)}`)
   }
   if (extra) bits.push(extra)
-  return <p className="font-mono text-[10px] uppercase tracking-wide text-ink/35 leading-relaxed">{bits.join(' · ')}</p>
+  return <p className="font-mono text-[10px] uppercase tracking-wide text-ink/60 leading-relaxed">{bits.join(' · ')}</p>
 }

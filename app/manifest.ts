@@ -1,3 +1,4 @@
+import { MARCA } from '@/lib/marca'
 import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
@@ -9,7 +10,7 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: '/',
     display: 'standalone',
     background_color: '#ffffff',
-    theme_color: '#0f1417',
+    theme_color: MARCA.fondo,
     lang: 'es',
     categories: ['shopping', 'sports'],
     icons: [

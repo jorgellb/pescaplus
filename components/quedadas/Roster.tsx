@@ -54,7 +54,7 @@ export default function Roster({
       {p.name}{p.places > 1 ? ` +${p.places - 1}` : ''}
       {isHost && p.contact && <span className="font-mono text-[10px] text-accent">{p.contact}</span>}
       {isHost && (
-        <button onClick={() => remove(p.id)} disabled={busy === p.id} aria-label="Quitar" className="text-ink/30 hover:text-red-700 disabled:opacity-50 ml-0.5">
+        <button onClick={() => remove(p.id)} disabled={busy === p.id} aria-label="Quitar" className="text-ink/60 hover:text-red-700 disabled:opacity-50 ml-0.5">
           <Icon name="close" className="w-3 h-3" strokeWidth={2.2} />
         </button>
       )}

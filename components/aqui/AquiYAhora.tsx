@@ -320,7 +320,7 @@ export default function AquiYAhora() {
           onChange={(e) => setCoords(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') irACoordenadas() }}
           placeholder="…o pega unas coordenadas: 36.01, -5.62"
-          className="flex-1 min-w-[220px] px-4 py-2.5 bg-paper border border-ink/12 rounded-full text-ink placeholder-ink/50 text-sm focus:outline-none focus:border-accent"
+          className="flex-1 min-w-[220px] px-4 py-2.5 bg-paper border border-ink/12 rounded-full text-ink placeholder-ink/60 text-sm focus:outline-none focus:border-accent"
         />
         <button
           onClick={irACoordenadas}
@@ -338,7 +338,7 @@ export default function AquiYAhora() {
       {datos && (
         <div className="space-y-4">
           {cacheado && (
-            <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">
               Última lectura guardada · pulsa Actualizar cuando tengas cobertura
             </p>
           )}
@@ -373,7 +373,7 @@ export default function AquiYAhora() {
                 {datos.sonda?.depthM == null ? datos.sonda?.label ?? 'Sin sonda en este punto' : datos.sonda.relief?.label ?? ''}
               </p>
               {datos.sonda?.source && (
-                <p className="text-[11px] text-ink/45 mt-1">{datos.sonda.source}</p>
+                <p className="text-[11px] text-ink/60 mt-1">{datos.sonda.source}</p>
               )}
             </div>
 
@@ -445,7 +445,7 @@ export default function AquiYAhora() {
                       {e.name}
                     </Link>
                     {e.minSizeNote && (
-                      <p className="text-[12px] text-ink/55 leading-snug mt-0.5">{e.minSizeNote}</p>
+                      <p className="text-[12px] text-ink/60 leading-snug mt-0.5">{e.minSizeNote}</p>
                     )}
                   </li>
                 ))}
@@ -453,7 +453,7 @@ export default function AquiYAhora() {
             </div>
           )}
 
-          <p className="text-[11px] text-ink/45">
+          <p className="text-[11px] text-ink/60">
             Zona de referencia: {datos.spot.name} ({datos.spot.region}), a {datos.spot.km} km
             {precision != null && ` · posición con ${precision} m de precisión`}.
           </p>

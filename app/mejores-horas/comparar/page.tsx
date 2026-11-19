@@ -99,7 +99,7 @@ export default async function CompararPage({ searchParams }: SP) {
           {spots.length < 3 && (
             <div className="mt-4 max-w-xl">
               <SpotSearch />
-              <p className="font-mono text-[10px] uppercase tracking-widest text-ink/35 mt-1.5">Busca una zona y ábrela; desde su ficha podrás añadirla a la comparación.</p>
+              <p className="font-mono text-[10px] uppercase tracking-widest text-ink/60 mt-1.5">Busca una zona y ábrela; desde su ficha podrás añadirla a la comparación.</p>
             </div>
           )}
         </div>
@@ -155,7 +155,7 @@ export default async function CompararPage({ searchParams }: SP) {
                         </td>
                         {zones.map((z) => {
                           const d = z.days[di]
-                          if (!d) return <td key={z.spot.slug} className="px-4 py-3 text-ink/30">–</td>
+                          if (!d) return <td key={z.spot.slug} className="px-4 py-3 text-ink/60">–</td>
                           const score = d.win?.avg ?? d.avg
                           const isBest = best && z.spot.name === best.zone && d.dateISO === best.dateISO
                           return (
@@ -176,7 +176,7 @@ export default async function CompararPage({ searchParams }: SP) {
                 </table>
               </div>
             </div>
-            <p className="font-mono text-[10px] uppercase tracking-wide text-ink/35">Puntuación combinada de la mejor ventana de cada día (solunar + viento + presión + mar) · Open-Meteo + solunar PescaPlus.</p>
+            <p className="font-mono text-[10px] uppercase tracking-wide text-ink/60">Puntuación combinada de la mejor ventana de cada día (solunar + viento + presión + mar) · Open-Meteo + solunar PescaPlus.</p>
           </>
         )}
       </section>

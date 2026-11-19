@@ -427,7 +427,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
         paint: {
           'circle-radius': ['interpolate', ['linear'], ['zoom'], 9, 4.5, 14, 7],
           'circle-color': ['match', ['get', 'kind'],
-            'rampa', '#0a7d72', 'puerto', '#1d4ed8', 'pecio', '#7c2d12', '#0a7d72'],
+            'rampa', '#0b6f66', 'puerto', '#1d4ed8', 'pecio', '#7c2d12', '#0b6f66'],
           'circle-stroke-width': 1.6,
           'circle-stroke-color': '#ffffff',
         },
@@ -549,7 +549,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
         `<strong>${titulo}</strong>`
         + subtitulo
         + filas
-        + `<div style="font-size:11px;margin-top:6px"><a href="${p.osmUrl}" target="_blank" rel="noopener noreferrer" style="color:#0a7d72">Ver en OpenStreetMap</a></div>`,
+        + `<div style="font-size:11px;margin-top:6px"><a href="${p.osmUrl}" target="_blank" rel="noopener noreferrer" style="color:#0b6f66">Ver en OpenStreetMap</a></div>`,
       ).addTo(m)
     })
     m.on('click', 'mifondo', (e) => {
@@ -650,7 +650,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
     puntoMarker.current = null
     if (!clickedAt) return
     const el = document.createElement('div')
-    el.style.cssText = 'width:18px;height:18px;border-radius:50%;background:#0a7d72;'
+    el.style.cssText = 'width:18px;height:18px;border-radius:50%;background:#0b6f66;'
       + 'border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.45)'
     el.setAttribute('aria-label', 'Punto seleccionado')
     puntoMarker.current = new Marker({ element: el }).setLngLat([clickedAt.lon, clickedAt.lat]).addTo(m)
@@ -821,7 +821,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
                 </p>
                 <label className="block text-[12px] text-ink/70">
                   Calado del transductor
-                  <span className="block text-[11px] text-ink/50">
+                  <span className="block text-[11px] text-ink/60">
                     Cuánto baja el transductor bajo la flotación. Sin esto la sonda lleva un error fijo.
                   </span>
                   <input type="number" step="0.05" min="0" max="10" value={sounder.caladoM}
@@ -852,7 +852,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
                 </dl>
                 {/* Las frases descartadas miden la salud del cable: si suben sin
                     parar, hay ruido o el conector está sulfatado. */}
-                <p className="text-[11px] text-ink/50">
+                <p className="text-[11px] text-ink/60">
                   {sounder.state.frases.leidas} frases · {sounder.state.frases.descartadas} descartadas
                   {' · '}calado {nf(sounder.caladoM, 2)} m
                 </p>
@@ -870,7 +870,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
           <div className="flex items-start justify-between gap-2 mb-1.5">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/60">Ir a coordenadas</p>
             <button type="button" onClick={() => setShowCoords(false)} aria-label="Cerrar la entrada de coordenadas"
-              className="text-ink/40 hover:text-ink leading-none"><Icon name="close" className="w-4 h-4" strokeWidth={2} /></button>
+              className="text-ink/60 hover:text-ink leading-none"><Icon name="close" className="w-4 h-4" strokeWidth={2} /></button>
           </div>
           <CoordinateEntry onGo={irACoordenadas} />
         </div>
@@ -985,7 +985,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
           <div className="flex items-start justify-between gap-2">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/60">Sonda</p>
             <button type="button" onClick={() => { setClickedAt(null); setSounding(null) }}
-              aria-label="Cerrar la sonda" className="text-ink/40 hover:text-ink leading-none"><Icon name="close" className="w-4 h-4" strokeWidth={2} /></button>
+              aria-label="Cerrar la sonda" className="text-ink/60 hover:text-ink leading-none"><Icon name="close" className="w-4 h-4" strokeWidth={2} /></button>
           </div>
           <div className="mt-1"><SoundingReading s={sounding} onRetry={() => clickedAt && pedirSonda(clickedAt.lat, clickedAt.lon)} /></div>
           <div className="mt-2"><SeabedReading s={seabed} relief={sounding?.relief ?? null} /></div>
@@ -1031,7 +1031,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
               ))}
             </ul>
             {faltan.length > 0 && (
-              <p className="text-[11px] text-ink/50 mt-1.5">Sin {faltan.join(' ni ')}: la lista sería más ajustada con esos datos.</p>
+              <p className="text-[11px] text-ink/60 mt-1.5">Sin {faltan.join(' ni ')}: la lista sería más ajustada con esos datos.</p>
             )}
             <p className="text-[11.5px] text-amber-900 mt-1.5">
               Encajan con estas condiciones según su ficha. No significa que estén aquí.
@@ -1062,7 +1062,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
                 {/* El aviso no es letra pequeña: es lo que evita que alguien dé
                     por buena una talla que aquí no se publica. */}
                 <p className="text-[11.5px] text-amber-900">{normativa.aviso}</p>
-                <p className="text-[11px] text-ink/50">
+                <p className="text-[11px] text-ink/60">
                   Comunidad deducida por {normativa.comunidad.segun} · revisado {normativa.revisado}
                 </p>
               </div>
@@ -1070,7 +1070,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
           )}
           {(seabed?.substrate || sounding?.relief.kind !== 'desconocido') && (
             <details className="mt-1.5">
-              <summary className="text-[11px] text-ink/50 cursor-pointer">Hasta dónde llega este dato</summary>
+              <summary className="text-[11px] text-ink/60 cursor-pointer">Hasta dónde llega este dato</summary>
               <p className="text-[11px] text-ink/60 mt-1">{SEABED_RESOLUTION} Para saber si hay una piedra concreta bajo la quilla, la ecosonda de a bordo.</p>
             </details>
           )}
@@ -1157,7 +1157,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
                 <a href={`/api/rutas/${t.id}/gpx`} download aria-label={`Descargar ${t.name} en GPX`}
                   className="text-[11px] font-semibold text-accent hover:underline shrink-0">GPX</a>
                 <button onClick={() => setRutaABorrar({ id: t.id, nombre: t.name })} aria-label={`Borrar ${t.name}`}
-                  className="text-ink/40 hover:text-red-700 shrink-0"><Icon name="close" className="w-3.5 h-3.5" strokeWidth={2} /></button>
+                  className="text-ink/60 hover:text-red-700 shrink-0"><Icon name="close" className="w-3.5 h-3.5" strokeWidth={2} /></button>
               </li>
             ))}
           </ul>
@@ -1177,7 +1177,7 @@ export default function NauticalChart({ provider, attribution, initial, loggedIn
                   {WAYPOINT_TYPES.find((t) => t.id === w.type)?.emoji} {w.name}
                 </button>
                 <button onClick={() => removeMark(w.id)} aria-label={`Borrar ${w.name}`}
-                  className="text-ink/40 hover:text-red-700"><Icon name="close" className="w-3.5 h-3.5" strokeWidth={2} /></button>
+                  className="text-ink/60 hover:text-red-700"><Icon name="close" className="w-3.5 h-3.5" strokeWidth={2} /></button>
               </li>
             ))}
           </ul>

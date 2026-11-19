@@ -1,24 +1,40 @@
 @import "tailwindcss";
 
 /*
- * Design tokens — modern marketplace look.
- * `--paper` is the SURFACE colour (cards, header, sections) and is white;
- * `--surface` is the page canvas behind it, a hair cooler so white cards read
- * as raised without needing heavy borders. `--ink` is a cool near-black rather
- * than pure #111, which is what made the old look feel like newsprint.
+ * Tokens. La paleta sale de la carta náutica española, que es el mundo real
+ * de la web (batimetría, isóbatas, balizamiento, mareas):
+ *
+ *   --surface  agua somera: el lienzo de página, un azul casi blanco.
+ *   --paper    el papel de la carta: tarjetas, cabecera, secciones.
+ *   --ink      abisal: el texto. Tan oscuro que `text-ink/60`, el tono de
+ *              texto más claro permitido, da 4,80:1 sobre --surface y 4,90:1
+ *              sobre blanco (AA pide 4,5).
+ *   --deep     fondo: la portada, el pie y las bandas oscuras.
+ *   --accent   marea: botones y enlaces. 6,03:1 con blanco, en los dos sentidos.
+ *   --accent-light  marea sobre --deep (7,86:1).
+ *   --signal   el magenta con que la carta marca luces y balizas: lo que es
+ *              «de hoy», y la boya del logo. 6,55:1 con blanco.
+ *   --buoy     amarillo de boya: SOLO sobre --deep (8,78:1); sobre claro no se lee.
+ *   --foam     espuma: texto sobre --deep (11,6:1).
+ *
+ * Cualquier cambio de estos valores se MIDE antes (ver la memoria del sistema
+ * de diseño): el acento anterior pasó de 5,0 a 3,7:1 por un tono «más vivo».
  */
 :root {
   --paper: #ffffff;
-  --surface: #f4f6f6;
-  --ink: #0f1417;
-  --accent: #0a7d72;
+  --surface: #f2f6f6;
+  --ink: #06141b;
+  --deep: #0a2e3f;
+  --accent: #0b6f66;
+  --accent-light: #5fd3c4;
+  --signal: #b0186f;
+  --buoy: #f5c542;
+  --foam: #d8ecea;
   --accent-soft: color-mix(in srgb, var(--accent) 9%, white);
-  /* Font families are self-hosted via next/font (see app/layout.tsx). */
-  --font-sans: var(--font-grotesk), system-ui, sans-serif;
-  /* Headings use the grotesk too: the condensed poster face is gone. */
-  --font-display: var(--font-grotesk), system-ui, sans-serif;
-  --font-mono: var(--font-mono-custom), ui-monospace, monospace;
-  /* Hairline rule colour for dividers — much lighter than the old 14%. */
+  /* Las tres familias se sirven desde el propio dominio con next/font (app/layout.tsx). */
+  --font-sans: var(--font-body), system-ui, sans-serif;
+  --font-display: var(--font-titular), var(--font-body), system-ui, sans-serif;
+  --font-mono: var(--font-datos), ui-monospace, monospace;
   --line: color-mix(in srgb, var(--ink) 9%, var(--paper));
 }
 
@@ -28,6 +44,11 @@
   --color-ink: var(--ink);
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
+  --color-deep: var(--deep);
+  --color-accent-light: var(--accent-light);
+  --color-signal: var(--signal);
+  --color-buoy: var(--buoy);
+  --color-foam: var(--foam);
   --font-sans: var(--font-sans);
   --font-display: var(--font-display);
   --font-mono: var(--font-mono);
@@ -94,23 +115,24 @@ h1, h2, h3, h4, p, a, span, li {
 }
 
 /*
- * Display headings. The old look shouted: condensed Oswald in ALL CAPS. Now
- * they're a tight, bold grotesk in sentence case — `text-transform: none`
- * deliberately overrides the `uppercase` utility that sits on ~190 headings
- * across the site, so the whole thing de-escalates from poster to product
- * without touching every file. Small eyebrow labels (font-mono + uppercase)
- * keep their caps: at 10-11px they read as labels, not as shouting.
+ * Titulares: Bricolage Grotesque, un poco estrecha (wdth 86) y muy apretada.
+ * Recuerda a la rotulación de las cartas y los barcos sin volver al cartel en
+ * mayúsculas: `text-transform: none` anula a propósito el `uppercase` que
+ * llevan ~190 titulares del sitio. Las micro-etiquetas (font-mono +
+ * uppercase) conservan sus mayúsculas: a 10-11 px se leen como etiquetas.
  */
 .font-display {
   font-family: var(--font-display);
   text-transform: none;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.032em;
   font-weight: 700;
-  line-height: 1.1;
+  font-variation-settings: "wdth" 86;
+  line-height: 1.06;
+  text-wrap: balance;
 }
 
 ::selection {
-  background: var(--accent);
+  background: var(--signal);
   color: #fff;
 }
 
@@ -119,9 +141,9 @@ h1, h2, h3, h4, p, a, span, li {
  * are now the quiet, diffuse shadows a white-surface marketplace needs — on
  * white, the old strength read as dirt.
  */
-.shadow-hard { box-shadow: 0 1px 2px rgba(15, 20, 23, 0.04), 0 4px 12px rgba(15, 20, 23, 0.05); }
-.shadow-hard-md { box-shadow: 0 2px 4px rgba(15, 20, 23, 0.04), 0 10px 24px rgba(15, 20, 23, 0.07); }
-.shadow-hard-lg { box-shadow: 0 4px 10px rgba(15, 20, 23, 0.05), 0 20px 48px rgba(15, 20, 23, 0.10); }
+.shadow-hard { box-shadow: 0 1px 2px rgba(10, 46, 63, 0.05), 0 4px 14px rgba(10, 46, 63, 0.06); }
+.shadow-hard-md { box-shadow: 0 2px 4px rgba(10, 46, 63, 0.05), 0 12px 28px rgba(10, 46, 63, 0.09); }
+.shadow-hard-lg { box-shadow: 0 4px 10px rgba(10, 46, 63, 0.06), 0 22px 52px rgba(10, 46, 63, 0.13); }
 .shadow-hard-accent { box-shadow: 0 8px 24px color-mix(in srgb, var(--accent) 22%, transparent); }
 
 .hover-shift {
@@ -129,8 +151,92 @@ h1, h2, h3, h4, p, a, span, li {
 }
 .hover-shift:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(15, 20, 23, 0.11);
+  box-shadow: 0 10px 28px rgba(10, 46, 63, 0.13);
 }
+
+/*
+ * Movimiento. Todo es transform/opacity/trazo (nada que recoloque la página:
+ * CLS 0) y CSS puro, sin JavaScript. Con «reducir movimiento» la regla global
+ * de arriba deja cada animación en su estado final: las isóbatas, dibujadas;
+ * la boya, quieta.
+ */
+@keyframes boya {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-4px) rotate(-3deg); }
+}
+@keyframes onda {
+  0% { transform: scale(0.35); opacity: 0.6; }
+  100% { transform: scale(1.7); opacity: 0; }
+}
+@keyframes trazo {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes deriva {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-22px); }
+}
+@keyframes balanceo {
+  0%, 100% { transform: rotate(-6deg); }
+  50% { transform: rotate(6deg); }
+}
+@keyframes caida {
+  0% { transform: translateY(-9px); }
+  55% { transform: translateY(1px); }
+  75% { transform: translateY(-2px); }
+  100% { transform: translateY(0); }
+}
+@keyframes aparece {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+/*
+ * La hora buena corriendo por la curva de la marea del glifo «cuándo»
+ * (components/graphics/Glifo.tsx): son los extremos y los puntos medios de
+ * sus tres tramos Bézier. Con translate y no con offset-path, que en SVG no
+ * lo soportan todos los navegadores (sin él, el punto se iría a la esquina).
+ */
+@keyframes marea {
+  0% { transform: translate(4px, 30px); }
+  16.7% { transform: translate(10px, 24px); }
+  33.3% { transform: translate(16px, 18px); }
+  50% { transform: translate(22px, 26px); }
+  66.7% { transform: translate(28px, 34px); }
+  83.3% { transform: translate(36px, 28px); }
+  100% { transform: translate(44px, 22px); }
+}
+
+/* La boya cabecea; transform-box para que gire sobre sí misma dentro del SVG. */
+.anim-boya { animation: boya 3.8s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
+.anim-onda { animation: onda 3.8s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+.anim-deriva { animation: deriva 26s ease-in-out infinite; }
+/* Los rótulos aparecen cuando su línea ya está dibujada. */
+.anim-aparece { opacity: 0; animation: aparece 0.9s ease forwards; animation-delay: calc(var(--retraso, 0s) + 1.2s); }
+/* Un trazo que se dibuja una vez: el path lleva pathLength="1". */
+.anim-trazo {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: trazo 2.6s cubic-bezier(0.3, 0.7, 0.2, 1) forwards;
+  animation-delay: var(--retraso, 0s);
+}
+
+/*
+ * Glifos de las tarjetas: quietos hasta que se pasa por encima o se llega con
+ * el teclado. Un movimiento cuando se pide, no doce a la vez.
+ */
+.glifo-balanceo { transform-box: view-box; transform-origin: 24px 4px; }
+.glifo-boya { transform-box: fill-box; transform-origin: 50% 100%; }
+.glifo-caida { transform-box: fill-box; }
+.glifo-onda { transform-box: fill-box; transform-origin: center; opacity: 0; }
+.glifo-marea { transform: translate(16px, 18px); }
+.group:hover .glifo-balanceo, .group:focus-visible .glifo-balanceo { animation: balanceo 1.6s ease-in-out infinite; }
+.group:hover .glifo-boya, .group:focus-visible .glifo-boya { animation: boya 1.8s ease-in-out infinite; }
+.group:hover .glifo-caida, .group:focus-visible .glifo-caida { animation: caida 0.7s cubic-bezier(0.3, 0.7, 0.2, 1) 1; }
+.group:hover .glifo-onda, .group:focus-visible .glifo-onda { animation: onda 1.6s ease-out infinite; }
+.group:hover .glifo-marea, .group:focus-visible .glifo-marea { animation: marea 2.6s ease-in-out infinite alternate; }
+
+/* El logo: la boya da un cabeceo al pasar por encima. */
+.logo:hover .logo-boya, .logo:focus-visible .logo-boya { animation: boya 1.1s ease-in-out 1; }
+.logo-boya { transform-box: fill-box; transform-origin: 50% 100%; }
 
 /* Scrolling marquee ticker */
 @keyframes marquee {
@@ -151,4 +257,5 @@ h1, h2, h3, h4, p, a, span, li {
   html { scroll-behavior: auto; }
   .animate-marquee { animation: none; }
   .hover-shift:hover { transform: none; }
+  .anim-onda, .glifo-onda { display: none; }
 }

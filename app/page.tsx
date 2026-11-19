@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import Image from 'next/image'
 import type { Metadata } from 'next'
 import Layout from '@/components/Layout'
 import Marquee from '@/components/Marquee'
@@ -16,6 +15,9 @@ import { getTaxonomy, categoryName } from '@/lib/taxonomy-store'
 import { proxiedImage } from '@/lib/img-proxy'
 import { safeJsonLd } from '@/lib/json-ld'
 import Icon, { type IconName } from '@/components/icons/Icon'
+import Isobatas from '@/components/graphics/Isobatas'
+import Glifo, { type TipoGlifo } from '@/components/graphics/Glifo'
+import { FISHING_SPOTS } from '@/lib/fishing-spots'
 
 export const metadata: Metadata = {
   title: { absolute: 'PescaPlus | Tienda de pesca online en España al mejor precio' },
@@ -41,7 +43,7 @@ const FAQS = [
   },
   {
     q: '¿Hacéis envíos a toda España?',
-    a: 'Sí. Enviamos a toda España —y a nivel internacional— con seguimiento del pedido y compra protegida, de forma rápida y sencilla.',
+    a: 'Los pedidos los envía la tienda del vendedor, que es donde se completa la compra: sirve a toda España, con seguimiento. En cada ficha ves el precio orientativo antes de ir a la tienda.',
   },
   {
     q: '¿Cómo sé que compro al mejor precio?',
@@ -66,8 +68,6 @@ export default async function Home() {
     getRoundupPreviews(),
   ])
   const withImg = all.filter((p) => p.imageUrl)
-  const heroA = withImg[0]
-  const heroB = withImg[1]
   const collage = withImg.slice(2, 4)
   const bestPrice = withImg.filter((p) => p.price > 0).sort((a, b) => a.price - b.price).slice(0, 8)
   const latestGuides = guides.slice(0, 3)
@@ -87,69 +87,39 @@ export default async function Home() {
     <Layout>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(faqLd) }} />
 
-      {/* HERO
-          La foto de atardecer va de fondo. Lleva `priority` porque es el
-          elemento más grande de la primera pantalla: es lo que Google mide como
-          LCP, y cargarla perezosa penalizaría justo la métrica que importa.
-          El velo es un degradado que cierra por la izquierda —donde va el
-          texto— y se abre por la derecha, dejando respirar el sol y las barcas.
-          El contraste de cada bloque está MEDIDO sobre los píxeles del fondo. */}
-      <section className="relative isolate overflow-hidden border-b border-ink/[0.07]">
-        <Image
-          src="/imagenesHome/hero_mar_atardecer_web_pesca.jpg"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-            className="object-cover -z-20"
-        />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-ink/85 via-ink/65 to-ink/45" />
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      {/*
+        * HERO: la carta. Fondo azul de mar con las isóbatas rotuladas
+        * dibujándose y, a la derecha, un bajo con la boya encima (el caladero).
+        * Es SVG en línea, sin imágenes: el elemento más grande de la primera
+        * pantalla pasa a ser el titular, que se pinta en cuanto llega el HTML
+        * (antes era una foto de 1920 px con `priority`, que fijaba el LCP).
+        */}
+      <section className="relative isolate overflow-hidden bg-deep text-paper">
+        <Isobatas bajo className="absolute inset-0 -z-10 w-full h-full" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-16 md:pt-20 md:pb-24 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center min-h-[560px]">
           <div className="lg:col-span-7">
-            <p className="inline-flex items-center gap-2 text-[13px] font-semibold text-paper bg-paper/15 backdrop-blur-sm px-3 py-1.5 rounded-full mb-6">
-              <Icon name="rod" className="w-3.5 h-3.5" strokeWidth={2} />Todo para el pescador en España
+            {/* Lo que dice la etiqueta es cierto y se puede contar: los puntos con previsión propia. */}
+            <p className="inline-flex items-center gap-2 font-mono text-[11px] sm:text-[12px] font-medium uppercase tracking-[0.08em] sm:tracking-[0.14em] text-foam mb-6">
+              <span className="w-2 h-2 rounded-full bg-buoy" aria-hidden="true" />
+              {FISHING_SPOTS.length} puntos de la costa · previsión de hoy
             </p>
-            <h1 className="font-display text-paper text-[2rem] sm:text-[2.75rem] md:text-5xl leading-[1.08] max-w-[19ch]">
+            <h1 className="font-display text-paper text-[2.5rem] sm:text-[3.25rem] lg:text-[4.1rem] max-w-[15ch]">
               Tu tienda de pesca online{' '}
-              <span className="text-[color-mix(in_srgb,var(--accent)_45%,white)]">y todo para salir a pescar</span>
+              <span className="text-accent-light">y todo para salir a pescar</span>
             </h1>
-            <p className="mt-6 text-lg text-paper/85 max-w-xl leading-relaxed">
-              Cañas, carretes, señuelos y aparejos al mejor precio. Y además, gratis: previsión de
-              las <strong className="text-paper font-semibold">mejores horas</strong> según mareas y viento,
-              el <strong className="text-paper font-semibold">mapa de dónde pica hoy</strong> y
-              <strong className="text-paper font-semibold"> salidas de pesca</strong> con patrón o con otros pescadores.
+            <p className="mt-6 text-lg text-foam max-w-xl leading-relaxed">
+              Cañas, carretes, señuelos y aparejos, comparados ficha a ficha. Y gratis: las{' '}
+              <strong className="text-paper font-semibold">mejores horas</strong> según mareas y viento, el{' '}
+              <strong className="text-paper font-semibold">mapa de dónde pica hoy</strong> y{' '}
+              <strong className="text-paper font-semibold">salidas de pesca</strong> con patrón o con otros pescadores.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/mejores" className="bg-accent text-paper px-6 py-3.5 text-[15px] font-semibold rounded-full shadow-hard-accent hover:brightness-110 transition-all">
+            <div className="mt-9 flex flex-wrap gap-3">
+              <Link href="/mejores" className="bg-buoy text-deep px-6 py-3.5 text-[15px] font-semibold rounded-full hover:brightness-105 hover:-translate-y-0.5 transition-all">
                 Ver la tienda
               </Link>
-              <Link href="/mejores-horas" className="bg-paper/10 backdrop-blur-sm text-paper px-6 py-3.5 text-[15px] font-semibold rounded-full border border-paper/40 hover:bg-paper hover:text-ink transition-colors">
+              <Link href="/mejores-horas" className="text-paper px-6 py-3.5 text-[15px] font-semibold rounded-full border border-foam/45 hover:bg-paper/10 hover:border-foam transition-colors">
                 ¿Cuándo salgo a pescar?
               </Link>
-            </div>
-          </div>
-
-          <div className="lg:col-span-5">
-            {/* La ficha de producto se acota a 320 px y se pega a la derecha.
-                A todo lo ancho tapaba media foto y parecía un recorte de
-                catálogo pegado encima del atardecer; pequeña, sigue diciendo
-                "esto es una tienda" y deja respirar el fondo. */}
-            <div className="relative w-full max-w-[320px] mx-auto lg:ml-auto lg:mr-0">
-              {heroA && (
-                <div className="relative aspect-square border border-paper/20 rounded-2xl shadow-hard-lg overflow-hidden bg-ink/[0.05]">
-                  <ProductImage src={proxiedImage(heroA.imageUrl, heroA.title)} alt={heroA.title} priority sizes="(max-width: 1024px) 90vw, 40vw" className="absolute inset-0 w-full h-full object-cover" />
-                  <Link href={`/products/${heroA.id}`} className="absolute inset-0" aria-label={heroA.title} />
-                </div>
-              )}
-              {heroB && (
-                <div className="hidden sm:block absolute -bottom-6 -left-6 w-28 aspect-square border border-paper/20 rounded-xl shadow-hard bg-ink/[0.05] overflow-hidden">
-                  <ProductImage src={proxiedImage(heroB.imageUrl, heroB.title)} alt={heroB.title} sizes="200px" className="absolute inset-0 w-full h-full object-cover" />
-                </div>
-              )}
-              <span className="absolute -top-4 -right-3 bg-paper text-ink font-semibold text-sm px-4 py-2 rounded-full shadow-hard-md">
-                {all.length} productos
-              </span>
             </div>
           </div>
         </div>
@@ -166,15 +136,15 @@ export default async function Home() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { href: '/mejores', icon: 'cart' as IconName, title: 'Comprar aparejos', text: 'Cañas, carretes, señuelos y más de 11 categorías, filtrados por valoraciones reales.', cta: 'Ir a la tienda' },
-            { href: '/mejores-horas', icon: 'clock' as IconName, title: 'Saber cuándo pescar', text: 'Mejores horas por zona según mareas, viento y actividad solunar. Actualizado a diario.', cta: 'Ver previsión' },
-            { href: '/donde-pescar', icon: 'map' as IconName, title: 'Saber dónde pescar', text: 'El mapa del día con las zonas donde mejor pica, y fichas de cada especie.', cta: 'Abrir el mapa' },
-            { href: '/charters', icon: 'boat' as IconName, title: 'Salir a pescar', text: 'Chárters con patrón verificado y quedadas para compartir barco con otros pescadores.', cta: 'Ver salidas' },
+            { href: '/mejores', glifo: 'tienda' as TipoGlifo, title: 'Comprar aparejos', text: 'Cañas, carretes, señuelos y 11 categorías, con cada ficha comparada con las de su tipo.', cta: 'Ir a la tienda' },
+            { href: '/mejores-horas', glifo: 'cuando' as TipoGlifo, title: 'Saber cuándo pescar', text: 'Mejores horas por zona según mareas, viento y actividad solunar. Actualizado a diario.', cta: 'Ver previsión' },
+            { href: '/donde-pescar', glifo: 'donde' as TipoGlifo, title: 'Saber dónde pescar', text: 'El mapa del día con las zonas donde mejor pica, y fichas de cada especie.', cta: 'Abrir el mapa' },
+            { href: '/charters', glifo: 'salir' as TipoGlifo, title: 'Salir a pescar', text: 'Chárters con patrón verificado y quedadas para compartir barco con otros pescadores.', cta: 'Ver salidas' },
           ].map((s) => (
             <Link key={s.href} href={s.href}
               className="group flex flex-col bg-paper rounded-2xl p-6 border border-ink/[0.07] shadow-hard hover-shift">
-              <span className="w-12 h-12 rounded-xl bg-accent/[0.09] text-accent flex items-center justify-center">
-                <Icon name={s.icon} className="w-6 h-6" strokeWidth={1.7} />
+              <span className="w-16 h-16 rounded-2xl bg-accent-soft text-accent flex items-center justify-center">
+                <Glifo tipo={s.glifo} className="w-12 h-12" />
               </span>
               <h3 className="font-display text-xl text-ink mt-4 group-hover:text-accent transition-colors">{s.title}</h3>
               <p className="text-[14px] text-ink/60 leading-relaxed mt-2 flex-1">{s.text}</p>
@@ -184,13 +154,14 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* Solo cosas que hace la web: el envío y el precio final son de la tienda del vendedor. */}
       <Marquee
         items={[
-          'Envío a toda España',
-          'Los mejores precios',
-          'Previsión de mareas y viento',
+          `${FISHING_SPOTS.length} puntos con previsión propia`,
+          'Mareas, viento y actividad solunar',
+          'Cada ficha comparada con las de su tipo',
           'Chárters con patrón verificado',
-          'Quedadas de pesca',
+          'Quedadas para compartir barco',
         ]}
       />
 
@@ -226,11 +197,11 @@ export default async function Home() {
 
       {/* FEATURED */}
       {featured.length > 0 && (
-        <section className="bg-ink text-paper border-y border-ink/[0.07] py-16">
+        <section className="bg-deep text-paper py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-end justify-between mb-8 gap-4 border-b border-paper/15 pb-4">
               <h2 className="font-display text-3xl md:text-4xl">Lo más buscado</h2>
-              <Link href="/mejores" className="text-xs font-semibold text-accent hover:underline whitespace-nowrap">Guías de compra →</Link>
+              <Link href="/mejores" className="text-xs font-semibold text-accent-light hover:underline whitespace-nowrap">Guías de compra →</Link>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
               {featured.map((p) => (
@@ -253,7 +224,7 @@ export default async function Home() {
               <p>
                 En <strong>PescaPlus</strong> somos una <strong>tienda de pesca online</strong> pensada para el
                 pescador de España. Reunimos cañas, carretes, señuelos, líneas, plomos y todos los aparejos que
-                necesitas, <strong>al mejor precio</strong> y con envío rápido a toda la península.
+                necesitas, <strong>al mejor precio</strong>, de tiendas que envían a toda España.
               </p>
               <p>
                 Queremos que comprar <strong>material de pesca barato</strong> sea fácil y fiable: filtramos miles de
@@ -281,7 +252,7 @@ export default async function Home() {
 
       {/* BEST PRICE / OFFERS */}
       {bestPrice.length > 0 && (
-        <section className="border-y border-ink/[0.07] bg-[#eae6db]/60">
+        <section className="border-y border-ink/[0.07] bg-accent-soft">
           <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
             <div className="flex items-end justify-between mb-8 gap-4 border-b border-ink/10 pb-4">
               <div>
@@ -322,19 +293,24 @@ export default async function Home() {
         </section>
       )}
 
-      {/* VALUE PROPS */}
+      {/*
+        * Lo que hace la web, contado sin adornos. Antes eran «01 · 02 · 03 · 04»
+        * (no es una secuencia) y prometían envío con seguimiento, pago protegido
+        * y «selección experta», que son de la tienda del vendedor o no los firma
+        * nadie.
+        */}
       <section className="max-w-7xl mx-auto px-4 pb-16 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-0 border border-ink/10 rounded-xl shadow-hard-md overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-0 border border-ink/10 rounded-2xl bg-paper shadow-hard-md overflow-hidden">
           {[
-            { n: '01', t: 'Mejores precios', d: 'Material de pesca barato y ofertas reales: comparamos para que compres siempre al mejor precio.' },
-            { n: '02', t: 'Envío a España', d: 'Enviamos a toda España con seguimiento del pedido. Pago protegido de principio a fin.' },
-            { n: '03', t: 'Selección experta', d: 'Filtramos por ventas y valoraciones reales. Solo lo que de verdad merece la pena.' },
-            { n: '04', t: 'Asesor de pesca', d: 'Resolvemos tus dudas de aparejos, técnicas y montajes por modalidad, gratis.' },
+            { icono: 'scale' as IconName, t: 'Cada ficha, comparada', d: 'Precio, precio por unidad, nota y ventas frente a los demás de su tipo, en una tabla.' },
+            { icono: 'clock' as IconName, t: 'Previsión para salir', d: `Mejores horas según mareas, viento y luna en ${FISHING_SPOTS.length} puntos de la costa.` },
+            { icono: 'link' as IconName, t: 'Compras en la tienda', d: 'El pago y el envío los gestiona la tienda del vendedor. El enlace de afiliado no te cobra más.' },
+            { icono: 'message' as IconName, t: 'Asesor de pesca', d: 'Resolvemos tus dudas de aparejos, técnicas y montajes por modalidad, gratis.' },
           ].map((f, i) => (
-            <div key={f.n} className={`p-7 border-ink/[0.07] ${i < 3 ? 'border-b md:border-b-0 md:border-r' : ''}`}>
-              <span className="font-display text-5xl text-accent leading-none">{f.n}</span>
-              <h3 className="font-display uppercase text-xl mt-4 leading-none">{f.t}</h3>
-              <p className="text-sm text-ink/70 mt-3 leading-relaxed">{f.d}</p>
+            <div key={f.t} className={`p-7 border-ink/[0.07] ${i < 3 ? 'border-b md:border-b-0 md:border-r' : ''}`}>
+              <Icon name={f.icono} className="w-8 h-8 text-accent" strokeWidth={1.6} />
+              <h3 className="font-display text-xl mt-4">{f.t}</h3>
+              <p className="text-sm text-ink/70 mt-2 leading-relaxed">{f.d}</p>
             </div>
           ))}
         </div>
@@ -342,11 +318,11 @@ export default async function Home() {
 
       {/* BLOG */}
       {latestGuides.length > 0 && (
-        <section className="border-t border-ink/[0.07] bg-ink text-paper py-16">
+        <section className="bg-deep text-paper py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-end justify-between mb-8 gap-4 border-b border-paper/15 pb-4">
               <h2 className="font-display text-3xl md:text-4xl">Consejos y guías de pesca</h2>
-              <Link href="/guias" className="text-xs font-semibold text-accent hover:underline whitespace-nowrap">Ver blog →</Link>
+              <Link href="/guias" className="text-xs font-semibold text-accent-light hover:underline whitespace-nowrap">Ver blog →</Link>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {latestGuides.map((g) => (

@@ -111,7 +111,7 @@ export default function RioPage() {
                      * dejar la tarjeta sin imagen: así la rejilla mantiene su
                      * altura y se ve de un vistazo cuáles faltan por ilustrar.
                      */
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-ink/40">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-ink/60">
                       <span className="text-3xl" aria-hidden>{sp.emoji}</span>
                       <span className="font-mono text-[10px] uppercase tracking-widest">Foto pendiente</span>
                     </div>

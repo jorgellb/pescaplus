@@ -22,7 +22,7 @@ export default function AccuracyTrend({ history }: { history: AccuracyPoint[] })
   const x = (i: number) => padL + (innerW / history.length) * (i + 0.5)
   const y0 = padT + innerH / 2
   const y = (v: number) => y0 - (v / maxAbs) * (innerH / 2)
-  const colorFor = (e: number) => (Math.abs(e) <= 5 ? '#0a7d72' : Math.abs(e) <= 10 ? '#b45309' : '#b91c1c')
+  const colorFor = (e: number) => (Math.abs(e) <= 5 ? '#0b6f66' : Math.abs(e) <= 10 ? '#b45309' : '#b91c1c')
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto max-w-[220px]" role="img" aria-label={`Error de previsión de viento en los últimos ${history.length} días verificados`}>

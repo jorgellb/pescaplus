@@ -108,7 +108,7 @@ export default function AdminAuditPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-ink/70">{ENTITY_LABEL[e.entity] || e.entity}</td>
-                  <td className="px-4 py-3 text-ink/80 max-w-[360px] truncate">{e.summary || <span className="text-ink/40">—</span>}</td>
+                  <td className="px-4 py-3 text-ink/80 max-w-[360px] truncate">{e.summary || <span className="text-ink/60">—</span>}</td>
                   <td className="px-4 py-3 text-ink/60 font-mono text-xs">{e.ip || '—'}</td>
                 </tr>
               ))}

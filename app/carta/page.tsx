@@ -78,7 +78,7 @@ export default async function CartaPage({ searchParams }: Params) {
             ))}
           </div>
 
-          <p className="text-[11px] text-ink/50 mt-3 max-w-3xl">
+          <p className="text-[11px] text-ink/60 mt-3 max-w-3xl">
             Datos de referencia para preparar la pesca. <strong className="text-ink/70">No sustituye a la
             cartografía oficial para navegar</strong> ni a la sonda del barco.
           </p>
@@ -91,7 +91,7 @@ export default async function CartaPage({ searchParams }: Params) {
                 className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-accent hover:underline">
                 <Icon name="clock" className="w-3.5 h-3.5" strokeWidth={2} />Mejores horas en {spot.name}
               </Link>
-              <span className="text-ink/25">·</span>
+              <span className="text-ink/60">·</span>
               <Link href={`/diario?zona=${spot.slug}`}
                 className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-accent hover:underline">
                 <Icon name="rod" className="w-3.5 h-3.5" strokeWidth={2} />Apuntar una captura aquí

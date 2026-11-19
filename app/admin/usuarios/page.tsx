@@ -153,7 +153,7 @@ export default function AdminUsersPage() {
             <thead>
               <tr className="text-left text-[11px] uppercase tracking-widest text-ink/60 border-b border-ink/10">
                 <th className="pl-4 pr-1 py-3 w-8">
-                  <input type="checkbox" checked={allVisibleSelected} onChange={toggleAll} aria-label="Seleccionar todos" className="w-4 h-4 accent-[#0a7d72] cursor-pointer" />
+                  <input type="checkbox" checked={allVisibleSelected} onChange={toggleAll} aria-label="Seleccionar todos" className="w-4 h-4 accent-accent cursor-pointer" />
                 </th>
                 <th className="px-4 py-3 font-bold">Usuario</th>
                 <th className="px-4 py-3 font-bold">Contacto</th>
@@ -166,7 +166,7 @@ export default function AdminUsersPage() {
               {visible.map((u) => (
                 <tr key={u.id} className={`border-b border-ink/10 last:border-0 hover:bg-ink/[0.02] ${selected.has(u.id) ? 'bg-accent/5' : ''}`}>
                   <td className="pl-4 pr-1 py-3">
-                    <input type="checkbox" checked={selected.has(u.id)} onChange={() => toggleSel(u.id)} aria-label={`Seleccionar ${u.name || u.email}`} className="w-4 h-4 accent-[#0a7d72] cursor-pointer" />
+                    <input type="checkbox" checked={selected.has(u.id)} onChange={() => toggleSel(u.id)} aria-label={`Seleccionar ${u.name || u.email}`} className="w-4 h-4 accent-accent cursor-pointer" />
                   </td>
                   <td className="px-4 py-3">
                     <p className="font-semibold text-ink">{u.avatar} {u.name || 'Sin nombre'}</p>

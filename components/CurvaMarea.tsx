@@ -168,7 +168,7 @@ export default function CurvaMarea({
                         esAhora ? 'bg-ink text-paper rounded' : ''
                       }`}
                     >
-                      <div className={`font-mono text-[10px] ${esAhora ? 'text-paper/70' : 'text-ink/50'}`}>
+                      <div className={`font-mono text-[10px] ${esAhora ? 'text-paper/70' : 'text-ink/60'}`}>
                         {String(h).padStart(2, '0')}h
                       </div>
                       <div className={`font-mono text-[12px] font-bold ${esAhora ? 'text-paper' : 'text-ink'}`}>

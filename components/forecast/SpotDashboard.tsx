@@ -107,7 +107,7 @@ async function StationPanel({
             {obs.tempC != null && <span>Temp: {Math.round(obs.tempC)}°C</span>}
             {obs.pressureHpa != null && <span>Presión: {Math.round(obs.pressureHpa)} hPa</span>}
           </div>
-          <p className="font-mono text-[9px] uppercase tracking-wide text-ink/35">
+          <p className="font-mono text-[9px] uppercase tracking-wide text-ink/60">
             Dato OBSERVADO (red oficial de estaciones de AEMET) — no es una previsión.
             {!obsFresh && ' La estación no ha reportado en la última hora; no lo comparamos con el modelo.'}
           </p>
@@ -125,7 +125,7 @@ async function StationPanel({
           {history.length >= 3 && (
             <div className="pl-5">
               <AccuracyTrend history={history} />
-              <p className="font-mono text-[9px] uppercase tracking-wide text-ink/35 mt-0.5">Error por día (verde ≤5 km/h · ámbar ≤10 · rojo más) · encima de la línea = predijimos de más</p>
+              <p className="font-mono text-[9px] uppercase tracking-wide text-ink/60 mt-0.5">Error por día (verde ≤5 km/h · ámbar ≤10 · rojo más) · encima de la línea = predijimos de más</p>
             </div>
           )}
         </div>
@@ -137,7 +137,7 @@ async function StationPanel({
 function StationSkeleton({ km }: { km: number }) {
   return (
     <div className="border border-ink/[0.07] rounded-xl bg-ink/[0.02] p-3.5 space-y-2 animate-pulse" aria-hidden>
-      <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/30 inline-flex items-center gap-1.5"><Icon name="radio" className="w-3.5 h-3.5" strokeWidth={2} />Consultando estación oficial (a {km} km)…</p>
+      <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60 inline-flex items-center gap-1.5"><Icon name="radio" className="w-3.5 h-3.5" strokeWidth={2} />Consultando estación oficial (a {km} km)…</p>
       <div className="h-3 w-2/3 rounded bg-ink/10" />
     </div>
   )
@@ -198,7 +198,7 @@ function DailyBriefingSkeleton() {
 }
 
 function WindArrow({ deg }: { deg: number | null }) {
-  if (deg == null) return <span className="text-ink/30">–</span>
+  if (deg == null) return <span className="text-ink/60">–</span>
   return (
     <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{ transform: `rotate(${deg + 180}deg)` }} className="inline-block">
       <path d="M12 2l5 10h-3.2v10h-3.6V12H7z" />
@@ -701,7 +701,7 @@ export default async function SpotDashboard({
                       {nowActivityFactors.length === 0 && <p className="text-ink/60">Sin factores destacados a esta hora.</p>}
                       {nowActivityFactors.map((f) => (
                         <p key={f.label} className="flex justify-between gap-2 py-0.5">
-                          <span className="text-ink/70">{f.label} <span className="text-ink/35">({f.kind === 'propio' ? 'cálculo PescaPlus' : 'dato físico'})</span></span>
+                          <span className="text-ink/70">{f.label} <span className="text-ink/60">({f.kind === 'propio' ? 'cálculo PescaPlus' : 'dato físico'})</span></span>
                           <span className={`font-bold tabular-nums ${f.pts >= 0 ? 'text-accent' : 'text-red-800'}`}>{f.pts >= 0 ? '+' : ''}{f.pts}</span>
                         </p>
                       ))}
@@ -711,13 +711,13 @@ export default async function SpotDashboard({
                       {nowConditionsFactors.length === 0 && <p className="text-ink/60">Sin penalizaciones: condiciones limpias.</p>}
                       {nowConditionsFactors.map((f) => (
                         <p key={f.label} className="flex justify-between gap-2 py-0.5">
-                          <span className="text-ink/70">{f.label} <span className="text-ink/35">(dato físico)</span></span>
+                          <span className="text-ink/70">{f.label} <span className="text-ink/60">(dato físico)</span></span>
                           <span className={`font-bold tabular-nums ${f.pts >= 0 ? 'text-accent' : 'text-red-800'}`}>{f.pts >= 0 ? '+' : ''}{f.pts}</span>
                         </p>
                       ))}
                     </div>
                   </div>
-                  <p className="mt-3 font-mono text-[10px] uppercase tracking-wide text-ink/35">Datos físicos: Open-Meteo (modelo) · Solunar y ponderación: modelo propio de PescaPlus.</p>
+                  <p className="mt-3 font-mono text-[10px] uppercase tracking-wide text-ink/60">Datos físicos: Open-Meteo (modelo) · Solunar y ponderación: modelo propio de PescaPlus.</p>
                 </details>
               )}
               {bestToday.length > 0 && (
@@ -735,7 +735,7 @@ export default async function SpotDashboard({
               )}
               {monthClimate && (
                 <div className="border border-ink/[0.07] rounded-xl bg-paper px-3.5 py-2.5 flex items-start gap-2.5">
-                  <Icon name="chartBar" className="w-4 h-4 shrink-0 mt-0.5 text-ink/50" strokeWidth={1.7} />
+                  <Icon name="chartBar" className="w-4 h-4 shrink-0 mt-0.5 text-ink/60" strokeWidth={1.7} />
                   <p className="text-[12.5px] text-ink/70 leading-relaxed">
                     <strong className="text-ink">Comparado con {MONTH_NAMES[currentMonth - 1]}</strong> (histórico {CLIMATE_YEARS}): media de viento {Math.round(monthClimate.w)} km/h ·{' '}
                     {monthClimate.ok}% de días pescables.
@@ -764,7 +764,7 @@ export default async function SpotDashboard({
             <Icon name="wind" className="w-5 h-5" strokeWidth={1.7} /> Mapa en vivo
           </h2>
           <LiveWeatherMap lat={s.lat} lon={s.lon} spotName={s.name} isSea={s.type === 'mar'} />
-          <p className="font-mono text-[10px] uppercase tracking-wide text-ink/35">Mapa en vivo de un proveedor externo (Windy.com), independiente de nuestra puntuación · orientativo, no sustituye la previsión de arriba.</p>
+          <p className="font-mono text-[10px] uppercase tracking-wide text-ink/60">Mapa en vivo de un proveedor externo (Windy.com), independiente de nuestra puntuación · orientativo, no sustituye la previsión de arriba.</p>
         </div>
 
         {/* Qué buscar hoy — species intelligence from season + live conditions */}
@@ -801,7 +801,7 @@ export default async function SpotDashboard({
                 </div>
               ))}
             </div>
-            <p className="font-mono text-[10px] uppercase tracking-wide text-ink/35">Basado en temporada, Tª del agua medida, estado del mar y solunar de hoy · orientativo.</p>
+            <p className="font-mono text-[10px] uppercase tracking-wide text-ink/60">Basado en temporada, Tª del agua medida, estado del mar y solunar de hoy · orientativo.</p>
           </div>
         )}
 
@@ -1037,7 +1037,7 @@ export default async function SpotDashboard({
               </li>
             ))}
           </ul>
-          <p className="font-mono text-[10px] uppercase tracking-wide text-ink/35">Lista orientativa, no sustituye tu propio juicio ni la normativa de navegación vigente.</p>
+          <p className="font-mono text-[10px] uppercase tracking-wide text-ink/60">Lista orientativa, no sustituye tu propio juicio ni la normativa de navegación vigente.</p>
         </div>
 
         {/* Tus propias capturas compartidas en esta zona — no confundir con
@@ -1099,7 +1099,7 @@ export default async function SpotDashboard({
                 <span><strong>Reservas marinas y zonas protegidas</strong> tienen restricciones propias o prohibición total.</span>
               </li>
             </ul>
-            <p className="font-mono text-[10px] uppercase tracking-wide text-ink/35">
+            <p className="font-mono text-[10px] uppercase tracking-wide text-ink/60">
               Revisado: {REGULATIONS_REVIEWED} · Esta tarjeta es orientativa y no sustituye a la normativa oficial — confirma siempre en los enlaces.
             </p>
           </div>
@@ -1170,7 +1170,7 @@ export default async function SpotDashboard({
                     ))}
                   </div>
                   {coef != null && (
-                    <p className="font-mono text-[10px] text-ink/50">Coef. {coef} · {coefficientLabel(coef)}</p>
+                    <p className="font-mono text-[10px] text-ink/60">Coef. {coef} · {coefficientLabel(coef)}</p>
                   )}
                   {isBest && <p className="font-mono text-[9px] uppercase tracking-widest text-accent">Mejor día</p>}
                 </div>
@@ -1215,7 +1215,7 @@ export default async function SpotDashboard({
           <div id="guia" className="border-t-2 border-ink pt-8 space-y-6 scroll-mt-28 print:hidden">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <h2 className="font-display uppercase text-3xl md:text-4xl leading-none text-ink">Pescar en {s.name}: la guía local</h2>
-              <span className="font-mono text-[10px] uppercase tracking-widest text-ink/35">Guía orientativa · revisada {new Date(guide.generatedAt).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}</span>
+              <span className="font-mono text-[10px] uppercase tracking-widest text-ink/60">Guía orientativa · revisada {new Date(guide.generatedAt).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}</span>
             </div>
             <p className="text-[16px] text-ink/85 leading-relaxed max-w-3xl first-letter:font-display first-letter:text-5xl first-letter:float-left first-letter:mr-2 first-letter:leading-[0.85]">{guide.intro}</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1285,7 +1285,7 @@ export default async function SpotDashboard({
           <div className="flex flex-wrap gap-2">
             {nearby.map((o) => (
               <Link key={o.slug} href={`/mejores-horas/${o.slug}`} className="px-3 py-1.5 text-sm font-semibold text-ink border border-ink/10 rounded-full hover:bg-ink hover:text-paper transition-colors">
-                {o.name} <span className="font-mono text-[10px] uppercase tracking-widest opacity-50">{o.region}</span>
+                {o.name} <span className="font-mono text-[10px] uppercase tracking-widest opacity-70">{o.region}</span>
               </Link>
             ))}
             <Link href="/mejores-horas" className="px-3 py-1.5 text-sm font-semibold text-accent border border-accent/30 rounded-full hover:bg-accent hover:text-paper transition-colors">

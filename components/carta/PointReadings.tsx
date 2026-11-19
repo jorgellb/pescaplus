@@ -84,7 +84,7 @@ export function Marea({ m }: { m: NonNullable<PointConditions['marea']> }) {
           {m.rangoPequeno && (
             <p className="text-[11.5px] text-ink/60">Rango pequeño: aquí la marea apenas mueve el agua.</p>
           )}
-          {m.estacion && <p className="text-[11px] text-ink/50">Estación: {m.estacion}</p>}
+          {m.estacion && <p className="text-[11px] text-ink/60">Estación: {m.estacion}</p>}
         </>
       )}
     </div>
