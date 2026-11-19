@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import type { Product } from '@/types'
 import Layout from '@/components/Layout'
@@ -44,6 +45,7 @@ import {
   vecinosDe,
   zonasParaEnlazar,
 } from '@/lib/enlazado'
+import { compararProducto, MINIMO_GRUPO, precioUnitarioEnTexto, resumenComparativa } from '@/lib/comparativa-producto'
 import Icon, { type IconName } from '@/components/icons/Icon'
 import Stars from '@/components/Stars'
 
@@ -58,9 +60,9 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { id } = await params
   const [product, todos] = await Promise.all([resolveProduct(id), listProducts().catch((): Product[] => [])])
-  // Sin producto la página responde 200 con «Aparejo no encontrado»: que Google
-  // no la indexe como una ficha viva y vacía.
-  if (!product) return { title: 'Aparejo no encontrado', robots: { index: false, follow: false } }
+  // Un 404 de verdad (app/not-found.tsx). Antes era una página «Aparejo no
+  // encontrado» con estado 200 y noindex: para Google, un soft 404.
+  if (!product) notFound()
   const title = tituloSeo(product, titulosRepetidos(todos))
   const description = descripcionSeo(product)
   /*
@@ -70,11 +72,14 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
    * con el texto de la tienda. Si la lista no se pudo leer, no se juzga.
    */
   const fueraDelCatalogo = todos.length > 0 && !todos.some((p) => p.id === product.id)
+  // Agotada: no se puede comprar, así que no se ofrece en Google mientras dure.
+  // Sigue enlazando (follow) y vuelve al índice sola cuando haya existencias.
+  const sinExistencias = !product.inStock
   return {
     title: { absolute: title },
     description,
     alternates: { canonical: `/products/${product.id}` },
-    ...(fueraDelCatalogo ? { robots: { index: false, follow: true } } : {}),
+    ...(fueraDelCatalogo || sinExistencias ? { robots: { index: false, follow: true } } : {}),
     openGraph: {
       title,
       description,
@@ -93,21 +98,7 @@ const etiqueta = 'font-mono text-[11px] font-bold uppercase tracking-widest text
 export default async function ProductPage({ params }: Params) {
   const { id } = await params
   const product = await resolveProduct(id)
-
-  if (!product) {
-    return (
-      <Layout>
-        <div className="max-w-7xl mx-auto px-4 py-24 text-center space-y-6">
-          <Icon name="hook" className="w-14 h-14 mx-auto text-ink/40" strokeWidth={1.4} />
-          <h1 className="font-display uppercase text-4xl text-ink">Aparejo no encontrado</h1>
-          <p className="text-ink/60 text-sm max-w-sm mx-auto">El producto no existe o ha sido retirado del catálogo.</p>
-          <Link href="/" className="inline-block bg-ink text-paper px-6 py-3 text-sm font-semibold border border-ink/10 rounded-full shadow-hard hover-shift">
-            Volver al inicio
-          </Link>
-        </div>
-      </Layout>
-    )
-  }
+  if (!product) notFound()
 
   const [todos, taxonomy, ranking, guias] = await Promise.all([
     listProducts(),
@@ -138,6 +129,20 @@ export default async function ProductPage({ params }: Params) {
   const enSub = sub ? enCategoria.filter((p) => p.subcategories?.includes(sub.id)) : []
   const alternativas = sub && enSub.length ? enSub : enCategoria
   const desde = alternativas.filter((p) => p.price > 0).reduce((m, p) => Math.min(m, p.price), Infinity)
+
+  /*
+   * Cómo queda frente a los de su tipo (lib/comparativa-producto.ts): el único
+   * contenido de la ficha que no está en la tienda de origen. Se compara con su
+   * subcategoría si da para ello; si no, con la categoría entera.
+   */
+  const porSub = sub !== null && enSub.length + 1 >= MINIMO_GRUPO
+  const comparativa = compararProducto(product, porSub ? enSub : enCategoria, porSub ? ruta : modalityLabel)
+  const resumen = comparativa ? resumenComparativa(comparativa) : []
+  const conUnidad = comparativa?.filas.some((f) => f.porUnidad !== null) ?? false
+  const hrefGrupo = porSub && sub ? `/categories/${categoria}/${sub.id}` : `/categories/${categoria}`
+  const actualizada = product.updatedAt
+    ? new Date(product.updatedAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Madrid' })
+    : null
 
   // Para la primera especie de mar que nombra la ficha: dónde se pesca.
   const especieConZonas = especies.find((e) => e.motivo === 'menciona' && !isFreshwater(e.especie.id))?.especie ?? null
@@ -183,6 +188,12 @@ export default async function ProductPage({ params }: Params) {
       donde: sub && enSub.length ? `${modalityLabel} › ${sub.name}` : modalityLabel,
       ranking: nombreRanking,
     },
+    comparativa: comparativa && {
+      frases: resumen.filter((f) => !f.startsWith('Su valoración')),
+      masBarato: comparativa.masBarato
+        ? { nombre: recortarPorPalabras(comparativa.masBarato.title, 60), precio: precioEnTexto(comparativa.masBarato.price, comparativa.masBarato.currency) }
+        : null,
+    },
   })
 
   const faqLd = {
@@ -195,11 +206,18 @@ export default async function ProductPage({ params }: Params) {
     })),
   }
 
+  /*
+   * Solo lo que se puede comprobar en esta página. Antes decía «Compra 100 %
+   * segura», «Envío con seguimiento» y «Seleccionado por expertos»: la compra y
+   * el envío son de otra tienda, y la selección no la firma nadie. Promesas sin
+   * respaldo en una página de afiliado son justo lo que Google y sus
+   * evaluadores leen como página hecha para vender y no para ayudar.
+   */
   const trustBadges: { icon: IconName; label: string }[] = [
-    { icon: 'lock', label: 'Compra 100% segura' },
-    { icon: 'package', label: 'Envío con seguimiento' },
-    { icon: 'rod', label: 'Seleccionado por expertos' },
+    ...(comparativa ? [{ icon: 'scale' as const, label: `Comparado con ${comparativa.total - 1} de su tipo` }] : []),
+    ...(actualizada ? [{ icon: 'calendar' as const, label: `Ficha actualizada el ${actualizada}` }] : []),
     { icon: 'message', label: 'Asesor de pesca gratis' },
+    { icon: 'link', label: 'Enlace de afiliado: pagas lo mismo' },
   ]
 
   const breadcrumbLd = breadcrumbJsonLd([
@@ -356,12 +374,70 @@ export default async function ProductPage({ params }: Params) {
               >
                 Ver todo en {sub ? sub.name : modalityLabel} →
               </Link>
-              <p className="text-[12px] text-ink/60 text-center">Compra 100% segura · Envío con seguimiento</p>
+              <p className="text-[12px] text-ink/60 text-center">El pago y el envío los gestiona la tienda del vendedor</p>
             </div>
           </div>
         </div>
 
-        {/* Trust badges */}
+        {comparativa && (
+          <section className="mb-16 space-y-5" aria-labelledby="comparativa">
+            <div className="flex flex-col gap-2 border-b border-ink/[0.07] pb-3">
+              <h2 id="comparativa" className={tituloSeccion}>Frente a los de su tipo</h2>
+              <p className="text-[15px] text-ink/75 leading-relaxed max-w-3xl">{resumen.join(' ')}</p>
+            </div>
+            <div className="overflow-x-auto border border-ink/[0.07] rounded-xl">
+              <table className="w-full text-sm">
+                <caption className="sr-only">Precio, valoración y ventas frente a otros de {comparativa.grupo}</caption>
+                <thead className="bg-ink/[0.03] text-left">
+                  <tr>
+                    <th scope="col" className={`${etiqueta} px-4 py-3`}>Producto</th>
+                    <th scope="col" className={`${etiqueta} px-4 py-3 text-right`}>Precio</th>
+                    {conUnidad && <th scope="col" className={`${etiqueta} px-4 py-3 text-right whitespace-nowrap`}>Por unidad</th>}
+                    {/* En el móvil, nota y ventas van bajo el nombre: así la tabla cabe sin desplazarla. */}
+                    <th scope="col" className={`${etiqueta} px-4 py-3 text-right hidden sm:table-cell`}>Nota</th>
+                    <th scope="col" className={`${etiqueta} px-4 py-3 text-right hidden sm:table-cell`}>Vendidos</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-ink/10">
+                  {comparativa.filas.map((f) => (
+                    <tr key={f.id} className={f.esEste ? 'bg-accent/[0.07]' : 'bg-paper'}>
+                      <th scope="row" className="px-4 py-3 text-left font-normal min-w-[10rem] sm:min-w-[13rem]">
+                        <span className="block font-mono text-[10px] font-bold uppercase tracking-widest text-accent">{f.motivo}</span>
+                        {f.esEste ? (
+                          <span className="block font-semibold text-ink leading-snug line-clamp-2">{f.title}</span>
+                        ) : (
+                          <Link href={`/products/${f.id}`} className="block font-semibold text-ink hover:text-accent leading-snug line-clamp-2">
+                            {f.title}
+                          </Link>
+                        )}
+                        <span className="sm:hidden block mt-0.5 font-mono text-[11px] text-ink/60">
+                          {f.rating > 0 ? `${f.rating.toFixed(1).replace('.', ',')} · ` : ''}
+                          {f.reviews.toLocaleString('es-ES')} vendidos
+                        </span>
+                      </th>
+                      <td className="px-4 py-3 text-right font-mono whitespace-nowrap">{precioEnTexto(f.price, f.currency)}</td>
+                      {conUnidad && (
+                        <td className="px-4 py-3 text-right font-mono whitespace-nowrap text-ink/75">
+                          {f.porUnidad !== null ? `${precioUnitarioEnTexto(f.porUnidad, f.currency)}/${f.unidad === 'par' ? 'par' : 'ud'}` : '—'}
+                        </td>
+                      )}
+                      <td className="px-4 py-3 text-right font-mono whitespace-nowrap hidden sm:table-cell">{f.rating > 0 ? f.rating.toFixed(1).replace('.', ',') : '—'}</td>
+                      <td className="px-4 py-3 text-right font-mono whitespace-nowrap hidden sm:table-cell">{f.reviews.toLocaleString('es-ES')}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="text-[12px] text-ink/60">
+              Precio, nota y ventas son los de la tienda del vendedor según nuestro catálogo, y pueden cambiar.{' '}
+              <Link href={hrefGrupo} className="font-semibold text-accent hover:underline">
+                Ver los {comparativa.total} de {comparativa.grupo} →
+              </Link>
+            </p>
+          </section>
+        )}
+
+        {/* Lo que se puede comprobar: ver trustBadges. */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-16">
           {trustBadges.map((b) => (
             <div key={b.label} className="flex items-center gap-3 border border-ink/[0.07] rounded-xl bg-paper px-4 py-3">

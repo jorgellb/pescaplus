@@ -1,5 +1,16 @@
 import Layout from '@/components/Layout'
 
+/**
+ * El esqueleto de «Cargando…», solo para la cuenta.
+ *
+ * Antes estaba en app/loading.tsx y envolvía TODAS las páginas en un Suspense:
+ * el HTML de cada ficha salía como este esqueleto visible y el contenido real
+ * en un `<div hidden>`, que solo aparecía al ejecutar JavaScript. Los
+ * rastreadores que no ejecutan JavaScript (los de las IA, y Google antes de
+ * renderizar) veían «Cargando…» igual en las 2.000 páginas. Además, con
+ * streaming la respuesta ya ha salido con 200 y `notFound()` no puede dar 404.
+ * En las páginas públicas no hay esqueleto; aquí, que nunca se indexa, sí.
+ */
 export default function Loading() {
   return (
     <Layout>

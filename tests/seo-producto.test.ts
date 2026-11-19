@@ -155,7 +155,28 @@ describe('preguntasDeProducto', () => {
     expect(texto).toContain('Nudo palomar')
     expect(texto).toContain('9,90 €')
     expect(texto).toContain('12 modelos más, desde 3,50 €')
-    expect(faqs.at(-1)?.a).toContain('afiliados')
+  })
+
+  it('con comparativa, el precio se juzga con las cifras de su grupo y nombra la alternativa más barata', () => {
+    const faqs = preguntasDeProducto({
+      ...base,
+      alternativas: { cuantas: 12, desde: '3,50 €', donde: 'Señuelos › Duros', ranking: null },
+      comparativa: {
+        frases: ['De los 13 artículos de duros que comparamos, es el 4.º más barato.', 'La mitad cuesta 11,20 € o menos.'],
+        masBarato: { nombre: 'Minnow Shad 90', precio: '3,50 €' },
+      },
+    })
+    const precio = faqs.find((f) => f.q === '¿Está bien de precio Señuelo Minnow 110?')
+    expect(precio?.a).toBe('De los 13 artículos de duros que comparamos, es el 4.º más barato. La mitad cuesta 11,20 € o menos.')
+    expect(faqs.find((f) => f.q === '¿Hay algo parecido más barato que Señuelo Minnow 110?')?.a).toContain('Minnow Shad 90, a 3,50 €')
+    // La comparativa sustituye a la respuesta genérica de alternativas.
+    expect(faqs.some((f) => f.q === '¿Qué alternativas hay?')).toBe(false)
+  })
+
+  it('ninguna pregunta se repite palabra por palabra en todas las fichas', () => {
+    // «¿Cómo se realiza la compra?» salía igual en las 626: texto de plantilla.
+    const faqs = preguntasDeProducto(base)
+    expect(faqs.some((f) => /realiza la compra/.test(f.q))).toBe(false)
   })
 
   it('concuerda el verbo con el nombre del producto', () => {
@@ -173,7 +194,6 @@ describe('preguntasDeProducto', () => {
     expect(faqs.map((f) => f.q)).toEqual([
       '¿Para qué tipo de pesca es Señuelo Minnow 110?',
       '¿Cuánto cuesta Señuelo Minnow 110?',
-      '¿Cómo se realiza la compra?',
     ])
   })
 })

@@ -275,6 +275,8 @@ function toProduct(row: any): Product {
     seoTitle: decodeEntities(row.seoTitle ?? ''),
     seoDescription: decodeEntities(row.seoDescription || row.description?.slice(0, 160) || ''),
     aiOptimized: row.aiOptimized ?? false,
+    // A string, not a Date: the list goes through unstable_cache, which stores JSON.
+    ...(row.updatedAt ? { updatedAt: new Date(row.updatedAt).toISOString() } : {}),
   })
 }
 

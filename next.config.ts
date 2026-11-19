@@ -92,9 +92,9 @@ const nextConfig: NextConfig = {
   /**
    * Fichas fusionadas: el duplicado que se borra lleva a la ficha que se queda.
    *
-   * Va aquí y no en la página porque aquí sale un 308 de verdad: la ficha se
-   * pinta en streaming (hay un loading.tsx global), y una redirección lanzada
-   * desde la página puede acabar como una etiqueta meta con estado 200. Así
+   * Va aquí y no en la página porque aquí sale un 308 de verdad, antes de
+   * pintar nada: una redirección lanzada desde una página que se pinta en
+   * streaming acaba como una etiqueta meta con estado 200. Así
    * Google pasa lo indexado a la ficha buena y los favoritos guardados siguen
    * funcionando. La salida a la tienda (/go/) es temporal: no se cachea.
    */

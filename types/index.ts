@@ -2,8 +2,9 @@ import type { FishingTypeId } from '@/lib/fishing'
 
 /**
  * Canonical product shape used across the UI and API responses. It intentionally
- * omits DB-only bookkeeping (createdAt/updatedAt) so the same type describes both
- * static catalog entries and rows fetched from Postgres.
+ * omits DB-only bookkeeping (createdAt) so the same type describes both static
+ * catalog entries and rows fetched from Postgres; `updatedAt` is optional for
+ * the same reason.
  */
 export interface Product {
   id: string
@@ -38,6 +39,13 @@ export interface Product {
   seoDescription: string
   /** Whether the copy was rewritten for SEO by the agent (not AliExpress text). */
   aiOptimized: boolean
+  /**
+   * When the row last changed (price, link, copy), ISO 8601. Only products read
+   * from the database have it; the static seed catalog does not, and nothing
+   * invents one for it. Feeds the sitemap's `lastmod` and the visible
+   * «Actualizada el…» on the product page.
+   */
+  updatedAt?: string
 }
 
 export interface Guide {

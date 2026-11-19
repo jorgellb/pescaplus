@@ -290,6 +290,11 @@ export interface DatosPreguntas {
   nudos: { name: string; para: string; resistencia: string }[]
   precio: string
   alternativas: { cuantas: number; desde: string | null; donde: string; ranking: string | null }
+  /**
+   * Cómo queda frente a los de su tipo (lib/comparativa-producto.ts), ya en
+   * frases. Si está, sustituye a la respuesta genérica de alternativas.
+   */
+  comparativa?: { frases: string[]; masBarato: { nombre: string; precio: string } | null } | null
 }
 
 /**
@@ -335,17 +340,28 @@ export function preguntasDeProducto(d: DatosPreguntas): { q: string; a: string }
   })
 
   const { cuantas, desde, donde, ranking } = d.alternativas
-  if (cuantas > 0) {
+  if (d.comparativa?.frases.length) {
+    faqs.push({ q: `¿${pl ? 'Están' : 'Está'} bien de precio ${d.nombre}?`, a: d.comparativa.frases.join(' ') })
+    const barato = d.comparativa.masBarato
+    if (barato) {
+      faqs.push({
+        q: `¿Hay algo parecido más barato que ${d.nombre}?`,
+        a: `Sí: ${barato.nombre}, a ${barato.precio}, es el más barato de su tipo. Tienes los dos en la tabla comparativa de esta página${ranking ? `, y en «${ranking}» los más elegidos` : ''}.`,
+      })
+    }
+  } else if (cuantas > 0) {
     faqs.push({
       q: '¿Qué alternativas hay?',
       a: `En ${donde} hay ${cuantas} ${cuantas === 1 ? 'modelo más' : 'modelos más'}${desde ? `, desde ${desde}` : ''}. Más abajo tienes los más parecidos a este${ranking ? `, y en «${ranking}» los más elegidos` : ''}.`,
     })
   }
 
-  faqs.push({
-    q: '¿Cómo se realiza la compra?',
-    a: 'Al pulsar «Comprar ahora» te llevamos a la tienda del vendedor, donde finalizas el pedido con su proceso de pago y envío. Algunos enlaces son de afiliados.',
-  })
+  /*
+   * Antes cerraba «¿Cómo se realiza la compra?», con la misma respuesta en las
+   * 626 fichas. Es texto de plantilla: no ayuda a nadie a decidir y le dice a
+   * Google que la página es un molde. Cómo se compra ya lo dice la ficha junto
+   * al botón.
+   */
   return faqs
 }
 

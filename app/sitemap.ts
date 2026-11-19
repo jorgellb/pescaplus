@@ -29,9 +29,8 @@ const base = process.env.NEXT_PUBLIC_APP_URL || 'https://pescaplus.es'
  *  3. No se sabe → NO se pone. `lastModified` es opcional; omitirlo es una
  *     respuesta honrada, y Google se apaña con el resto de señales.
  *
- * El caso 3 cubre fichas de producto y categorías: la base de datos tiene
- * `updatedAt`, pero `listProducts()` no lo expone, y prefiero omitir el dato a
- * fabricarlo. Si algún día se expone, entra en el caso 1.
+ * El caso 3 cubre las categorías. Las fichas de producto ya están en el caso 1
+ * (la fecha real de su fila), en su propio sitemap: lib/sitemap-productos.ts.
  */
 function fechaDeGuia(iso: string | undefined): Date | undefined {
   if (!iso) return undefined
@@ -129,15 +128,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     /* store unavailable — ship the rest */
   }
 
-  let productRoutes: MetadataRoute.Sitemap = []
+  // Las fichas van en su propio sitemap, /products/sitemap.xml (ver
+  // lib/sitemap-productos.ts). Aquí solo se usan para saber qué subcategorías
+  // tienen productos.
   let subcategoryRoutes: MetadataRoute.Sitemap = []
   try {
     const products = await listProducts()
-    productRoutes = products.map((p) => ({
-      url: `${base}/products/${p.id}`,
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    }))
     const seen = new Set<string>()
     for (const p of products) {
       for (const cat of p.categories) {
@@ -171,5 +167,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     /* guides store unavailable */
   }
 
-  return [...staticRoutes, ...categoryRoutes, ...speciesRoutes, ...nudoRoutes, ...spotRoutes, ...speciesZoneRoutes, ...subcategoryRoutes, ...roundupRoutes, ...productRoutes, ...guideRoutes]
+  return [...staticRoutes, ...categoryRoutes, ...speciesRoutes, ...nudoRoutes, ...spotRoutes, ...speciesZoneRoutes, ...subcategoryRoutes, ...roundupRoutes, ...guideRoutes]
 }

@@ -9,6 +9,8 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/admin', '/api/', '/go/'],
     },
-    sitemap: `${base}/sitemap.xml`,
+    // Las fichas van en un sitemap aparte para que Search Console las cuente
+    // por separado (lib/sitemap-productos.ts).
+    sitemap: [`${base}/sitemap.xml`, `${base}/products/sitemap.xml`],
   }
 }
