@@ -11,7 +11,6 @@ const hourMadrid = (ms: number) =>
 describe('solunar', () => {
   it('computes plausible sun/moon times for Madrid on 2026-07-14', () => {
     const s = solunarDay(40.4168, -3.7038, '2026-07-14')
-    // eslint-disable-next-line no-console
     console.log('Madrid 2026-07-14 →', {
       sunrise: hm(s.sunrise),
       sunset: hm(s.sunset),
@@ -39,7 +38,6 @@ describe('solunar', () => {
   it('detects a near-full moon around 2026-07-29', () => {
     // Full moon is ~2026-07-29; illumination should be high.
     const s = solunarDay(40.4168, -3.7038, '2026-07-29')
-    // eslint-disable-next-line no-console
     console.log('Madrid 2026-07-29 →', { phase: s.moonPhaseName, illum: `${Math.round(s.moonIllumination * 100)}%` })
     expect(s.moonIllumination).toBeGreaterThan(0.85)
   })

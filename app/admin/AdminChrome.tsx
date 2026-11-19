@@ -32,6 +32,9 @@ export default function AdminChrome({
 
   const logout = async () => {
     await fetch('/api/admin/logout', { method: 'POST' })
+    // Recarga completa a propósito: tira las páginas del panel que el router
+    // guarda en memoria, para que tras cerrar sesión no quede ninguna a mano.
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
     window.location.href = '/admin'
   }
 

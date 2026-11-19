@@ -53,6 +53,28 @@ const nextConfig: NextConfig = {
    * a mano en el Dockerfile o el sitio arranca sin estilos ni imágenes.
    */
   output: "standalone",
+  /**
+   * Lo que el servidor NUNCA lee, fuera de .next/standalone.
+   *
+   * lib/photos.ts toca en tiempo de ejecución la carpeta de fotos de los
+   * usuarios (un volumen), y con una ruta que no se conoce al compilar el
+   * rastreo de ficheros mete el proyecto entero en el paquete del servidor:
+   * 300 MB en local, con android/, las copias de seguridad de copias/ y las
+   * pruebas. En producción copias/ y android/ no llegan (.gitignore y
+   * .dockerignore), pero el resto sí. public/ lo copia el Dockerfile aparte.
+   */
+  outputFileTracingExcludes: {
+    "/*": [
+      "./android/**/*",
+      "./ios/**/*",
+      "./resources/**/*",
+      "./copias/**/*",
+      "./.datos/**/*",
+      "./tests/**/*",
+      "./scripts/**/*",
+      "./public/**/*",
+    ],
+  },
   // Pin the workspace root to this app so the extra lockfile in the parent
   // directory doesn't confuse Turbopack's root inference during build.
   turbopack: {

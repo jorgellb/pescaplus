@@ -41,7 +41,11 @@ export const PHOTOS_URL_PREFIX = '/fotos'
  * en .datos/fotos, dentro del proyecto y fuera de git.
  */
 export function photosDir(): string {
-  return resolve(process.env.PHOTOS_DIR || join(process.cwd(), '.datos', 'fotos'))
+  // turbopackIgnore: es la carpeta de las fotos que suben los usuarios, que se
+  // decide al arrancar (PHOTOS_DIR, un volumen de Coolify). Sin la marca,
+  // Turbopack no sabe qué ficheros alcanza y mete el proyecto ENTERO en
+  // .next/standalone (300 MB en local: android/, copias/, tests/…).
+  return resolve(/*turbopackIgnore: true*/ process.env.PHOTOS_DIR || join(process.cwd(), '.datos', 'fotos'))
 }
 
 export type PhotosStorageState = 'ok' | 'efimero' | 'no-escribible'
@@ -124,7 +128,7 @@ export async function uploadPhoto(file: File, operatorId: string): Promise<Uploa
     const { mkdir, writeFile } = await import('node:fs/promises')
     const ext = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg'
     const nombre = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
-    const destino = join(photosDir(), carpeta)
+    const destino = join(/*turbopackIgnore: true*/ photosDir(), carpeta)
     await mkdir(destino, { recursive: true })
     await writeFile(join(destino, nombre), Buffer.from(await file.arrayBuffer()))
     return { ok: true, url: `${PHOTOS_URL_PREFIX}/${carpeta}/${nombre}` }
@@ -140,7 +144,7 @@ export async function deletePhoto(url: string): Promise<void> {
   if (!rel) return
   try {
     const { unlink } = await import('node:fs/promises')
-    await unlink(join(photosDir(), rel))
+    await unlink(join(/*turbopackIgnore: true*/ photosDir(), rel))
   } catch (error) {
     console.warn('Photo delete failed:', error)
   }
